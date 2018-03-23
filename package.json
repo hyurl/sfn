@@ -46,6 +46,7 @@
         "highlightjs": "^9.10.0",
         "lodash": "^4.17.4",
         "marked": "^0.3.7",
+        "modelar": "^3.0.0",
         "multer": "^1.3.0",
         "next-filename": "^0.1.2",
         "pluralize": "^7.0.0",
