@@ -128,7 +128,7 @@ Now restart the server, you will see `Hello, World!` when you visit
 
 **sfn** provides a very easy-to-use and efficient API, you'can just write few 
 lines of code, and the frame work will handle other stuffs for you. One of the
-principles in **sfn** is: "**If the framework can do the work, then the user** 
+principles in **sfn** is: **If the framework can do the work, then the user** 
 **shouldn't do it.**
 
 For such a goal, **sfn** provides many features, etc. **shared session**, 
