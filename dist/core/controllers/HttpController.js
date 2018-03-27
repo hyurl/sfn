@@ -27,11 +27,14 @@ class HttpController extends Controller_1.Controller {
         this.csrfProtection = false;
         this.cors = false;
         this.uploadConfig = exports.UploadOptions;
-        this.lang = req.query.lang || req.cookies.lang || req.lang || init_1.config.lang;
         this.authorized = req.user !== null;
         this.req = req;
         this.res = res;
         this.isAsync = next instanceof Function;
+        this.lang = (req.query && req.query.lang)
+            || (req.cookies && req.cookies.lang)
+            || req.lang
+            || init_1.config.lang;
     }
     _realFilename(filename) {
         if (!path.isAbsolute(filename))

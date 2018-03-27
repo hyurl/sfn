@@ -6,10 +6,12 @@ class WebSocketController extends Controller_1.Controller {
     constructor(socket, next = null) {
         super();
         this.Class = this.constructor;
-        this.lang = socket.cookies.lang || socket.lang || init_1.config.lang;
         this.authorized = socket.user !== null;
         this.socket = socket;
         this.isAsync = next instanceof Function;
+        this.lang = (socket.cookies && socket.cookies.lang)
+            || socket.lang
+            || init_1.config.lang;
     }
     get db() {
         return this.socket.db;

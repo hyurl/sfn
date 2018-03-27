@@ -43,10 +43,12 @@ export class WebSocketController extends Controller {
      */
     constructor(socket: WebSocket, next: WebSocketNextHandler = null) {
         super();
-        this.lang = socket.cookies.lang || socket.lang || config.lang;
         this.authorized = socket.user !== null;
         this.socket = socket;
         this.isAsync = next instanceof Function;
+        this.lang = (socket.cookies && socket.cookies.lang)
+            || socket.lang
+            || config.lang;
     }
 
     /** Gets/Sets the DB instance. */

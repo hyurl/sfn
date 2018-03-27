@@ -153,12 +153,14 @@ export class HttpController extends Controller {
      */
     constructor(req: Request, res: Response, next: HttpNextHandler = null) {
         super();
-
-        this.lang = req.query.lang || req.cookies.lang || req.lang || config.lang;
         this.authorized = req.user !== null;
         this.req = req;
         this.res = res;
         this.isAsync = next instanceof Function;
+        this.lang = (req.query && req.query.lang)
+            || (req.cookies && req.cookies.lang)
+            || req.lang
+            || config.lang;
     }
 
     /** @private */
