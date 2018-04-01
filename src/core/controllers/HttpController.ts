@@ -179,7 +179,7 @@ export class HttpController extends Controller {
      *  missing, then the `defaultView` will be used.
      * @param vars Local variables passed to the template.
      */
-    view(filename: string, vars?: { [name: string]: any }): Promise<string> {
+    view(filename: string, vars: { [name: string]: any } = {}): Promise<string> {
         let ext = path.extname(filename);
         if (ext != this.viewExtname) {
             ext = this.viewExtname;

@@ -41,7 +41,7 @@ class HttpController extends Controller_1.Controller {
             filename = `${this.viewPath}/${filename}`;
         return filename;
     }
-    view(filename, vars) {
+    view(filename, vars = {}) {
         let ext = path.extname(filename);
         if (ext != this.viewExtname) {
             ext = this.viewExtname;
