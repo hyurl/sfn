@@ -1,4 +1,4 @@
-import { config } from "../../init";
+import { config, isDevMode } from "../../init";
 
 type Locals = { [name: string]: any };
 
@@ -26,11 +26,11 @@ export abstract class TemplateEngine {
      */
     constructor(options?: TemplateOptions) {
         this.options = Object.assign({
-            cache: config.env != "dev",
+            cache: !isDevMode,
             encoding: "utf8"
         }, options);
 
-        if(!(this.renderFile instanceof Function)) {
+        if (!(this.renderFile instanceof Function)) {
             throw new ReferenceError(this.constructor.name
                 + ".renderFile() is not implemented.");
         }

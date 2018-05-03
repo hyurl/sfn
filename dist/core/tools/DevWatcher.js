@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const date = require("sfn-date");
 const Worker = require("sfn-worker");
+const chalk_1 = require("chalk");
 const init_1 = require("../../init");
 class DevWatcher {
     constructor(dirname, extnames = [".js", ".json", ".node"]) {
@@ -16,7 +17,7 @@ class DevWatcher {
             let ext = path.extname(filename);
             if (event === "change" && extnames.includes(ext)) {
                 Worker.getWorkers(workers => {
-                    let dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan;
+                    let dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`);
                     console.log(`${dateTime} HTTP Server restarting...`);
                     if (workers.length) {
                         for (let worker of workers) {
@@ -25,7 +26,7 @@ class DevWatcher {
                     }
                     else {
                         for (let id of init_1.config.workers) {
-                            new Worker(id, init_1.config.env !== "dev");
+                            new Worker(id, !init_1.isDevMode);
                         }
                     }
                 });

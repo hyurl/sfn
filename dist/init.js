@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-require("colors");
 require("source-map-support/register");
 const path = require("path");
 const fs = require("fs");
@@ -36,4 +35,5 @@ if (fs.existsSync(tscfgfile)) {
     catch (e) { }
 }
 exports.SRC_PATH = src_root;
+exports.isDevMode = exports.config.env == "dev" || exports.config.env == "development";
 //# sourceMappingURL=init.js.map

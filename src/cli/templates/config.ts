@@ -5,24 +5,28 @@ import * as FileStore from "session-file-store";
 const Store = <any>FileStore(Session);
 
 export var config: SFNConfig = {
-    env: "dev",
+    env: process.env.NODE_ENV || "dev",
+    workers: ["A"],
     bluebird: false,
     lang: "en-US",
     enableDocRoute: false,
-    workers: ["A"],
-    staticPath: process.cwd() + "/src/assets",
+    awaitGenerator: false,
+    statics: [process.cwd() + "/src/assets"],
     server: {
-        host: "localhost",
-        port: 80,
+        hostname: "localhost",
         timeout: 120000,
         autoStart: true,
+        http: {
+            enabled: true,
+            port: 80
+        },
         https: {
             enabled: false,
             port: 443,
             forceRedirect: true,
             credentials: null
         },
-        socket: {
+        websocket: {
             enabled: true,
             options: {
                 pingTimeout: 5000,

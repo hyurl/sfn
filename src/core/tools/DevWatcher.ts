@@ -2,7 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as date from "sfn-date";
 import Worker = require("sfn-worker");
-import { config } from "../../init";
+import chalk from "chalk";
+import { config, isDevMode } from "../../init";
 
 /**
  * Development mode file watcher, if a directory is watched, when the files in
@@ -22,7 +23,7 @@ export class DevWatcher {
             let ext = path.extname(filename);
             if (event === "change" && extnames.includes(ext)) {
                 Worker.getWorkers(workers => {
-                    let dateTime: string = `[${date("Y-m-d H:i:s.ms")}]`.cyan;
+                    let dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`);
                     console.log(`${dateTime} HTTP Server restarting...`);
 
                     if (workers.length) {
@@ -31,7 +32,7 @@ export class DevWatcher {
                         }
                     } else {
                         for (let id of config.workers) {
-                            new Worker(id, config.env !== "dev");
+                            new Worker(id, !isDevMode);
                         }
                     }
                 });

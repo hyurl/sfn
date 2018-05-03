@@ -1,10 +1,11 @@
 import * as path from "path";
 import * as date from "sfn-date";
+import chalk from "chalk";
 import { Server } from "socket.io";
-import { config } from "../../init";
+import { config, isDevMode } from "../../init";
 import { SocketError } from "../tools/SocketError";
 import { WebSocket } from "../tools/interfaces";
-import { callsiteLog } from "../tools/functions-inner";
+import { callsiteLog, callMethod } from "../tools/functions-inner";
 import { realDB } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { EventMap } from "../tools/EventMap";
@@ -29,24 +30,24 @@ function finish(ctrl: WebSocketController, info: SocketEventInfo) {
     ctrl.emit("finish", socket);
 
     // If it is dev mode, log runtime information.
-    if (config.env === "dev") {
+    if (isDevMode) {
         let cost: number | string = Date.now() - info.time,
-            dateTime: string = `[${date("Y-m-d H:i:s.ms")}]`.cyan,
-            type: string = <any>socket.protocol.toUpperCase().bold,
-            event: string = info.event.yellow,
+            dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
+            type: string = chalk.bold(socket.protocol.toUpperCase()),
+            event: string = chalk.yellow(info.event),
             code: number = info.code,
             codeStr: string = code.toString();
 
-        cost = `${cost}ms`.cyan;
+        cost = chalk.yellow(`${cost}ms`);
 
         if (code < 200) {
-            codeStr = codeStr.cyan;
+            codeStr = chalk.cyan(codeStr);
         } else if (code >= 200 && code < 300) {
-            codeStr = codeStr.green;
+            codeStr = chalk.green(codeStr);
         } else if (code >= 300 && code < 400) {
-            codeStr = codeStr.yellow;
+            codeStr = chalk.yellow(codeStr);
         } else {
-            codeStr = codeStr.red;
+            codeStr = chalk.red(codeStr);
         }
 
         console.log(`${dateTime} ${type} ${event} ${codeStr} ${cost}`);
@@ -79,7 +80,7 @@ function handleError(err: any, ctrl: WebSocketController, info: SocketEventInfo)
 
     finish(ctrl, info);
 
-    if (config.env == "dev" && !(_err instanceof SocketError)) {
+    if (isDevMode && !(_err instanceof SocketError)) {
         callsiteLog(_err);
     }
 }
@@ -95,10 +96,11 @@ function getNextHandler(
 
         // Handle authentication.
         let Class = <typeof WebSocketController>ctrl.constructor;
+
         if (Class.RequireAuth.includes(method) && !ctrl.authorized)
             throw new SocketError(401);
 
-        resolve(ctrl[method](...data, ctrl.socket));
+        resolve(callMethod(ctrl, ctrl[method], ...data, ctrl.socket));
     }
 }
 

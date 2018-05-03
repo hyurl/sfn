@@ -1,31 +1,32 @@
 import SSE = require("sfn-sse");
 import * as date from "sfn-date";
+import chalk from "chalk";
 import { App } from "webium";
-import { config, version } from "../../init";
+import { config, version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { realDB } from '../Tools/symbols';
 
 function getDevLogger(req: Request, res: Response) {
     return () => {
-        if (config.env === "dev") {
+        if (isDevMode) {
             // dev mode log out request info.
             var cost: number | string = Date.now() - req.time,
-                dateTime: string = `[${date("Y-m-d H:i:s.ms")}]`.cyan,
-                type: string = <any>(req.isEventSource ? "SSE" : req.method).bold,
-                url: string = req.shortUrl.yellow,
+                dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
+                type: string = chalk.bold(req.isEventSource ? "SSE" : req.method),
+                url: string = chalk.yellow(req.shortUrl),
                 code: number = res.statusCode,
                 codeStr: string = res.statusCode.toString();
 
-            cost = `${cost}ms`.cyan;
+            cost = chalk.cyan(`${cost}ms`);
 
             if (code < 200) {
-                codeStr = codeStr.cyan;
+                codeStr = chalk.cyan(codeStr);
             } else if (code >= 200 && code < 300) {
-                codeStr = codeStr.green;
+                codeStr = chalk.green(codeStr);
             } else if (code >= 300 && code < 400) {
-                codeStr = codeStr.yellow;
+                codeStr = chalk.yellow(codeStr);
             } else {
-                codeStr = codeStr.red;
+                codeStr = chalk.red(codeStr);
             }
 
             console.log(`${dateTime} ${type} ${url} ${codeStr} ${cost}`);

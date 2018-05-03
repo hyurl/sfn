@@ -22,6 +22,7 @@ const https_1 = require("https");
 const fs = require("fs");
 const date = require("sfn-date");
 exports.date = date;
+const chalk_1 = require("chalk");
 const init_1 = require("../../init");
 const DevWatcher_1 = require("../tools/DevWatcher");
 exports.DevWatcher = DevWatcher_1.DevWatcher;
@@ -38,24 +39,33 @@ tslib_1.__exportStar(require("../controllers/WebSocketController"), exports);
 exports.isMaster = Worker.isMaster;
 exports.isWorker = Worker.isWorker;
 var worker = null;
+var hostnames = init_1.config.server.hostname || init_1.config.server.host;
+var hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames;
+var enableHttp = init_1.config.server.http ? init_1.config.server.http.enabled : true;
+var httpPort = init_1.config.server.http ? init_1.config.server.http.port : init_1.config.server.port;
 var enableHttps = init_1.config.server.https.enabled;
 var httpsPort = init_1.config.server.https.port;
-var enableWs = init_1.config.server.socket.enabled && (!enableHttps || !init_1.config.server.https.forceRedirect);
-var enableWss = init_1.config.server.socket.enabled && enableHttps;
+var WS = init_1.config.server.websocket || init_1.config.server.socket;
+var enableWs = WS.enabled && (!enableHttps || !init_1.config.server.https.forceRedirect);
+var enableWss = WS.enabled && enableHttps;
 exports.app = null;
 exports.http = null;
 exports.https = null;
 exports.ws = null;
 exports.wss = null;
 if (Worker.isWorker) {
-    exports.app = new webium_1.App({ cookieSecret: init_1.config.session.secret });
-    exports.http = new http_1.Server(exports.app.listener);
+    exports.app = new webium_1.App({
+        cookieSecret: init_1.config.session.secret,
+        domain: hostnames
+    });
+    if (enableHttp)
+        exports.http = new http_1.Server(exports.app.listener);
     if (enableHttps)
         exports.https = https_1.createServer(init_1.config.server.https.credentials, exports.app.listener);
     if (enableWs)
-        exports.ws = SocketIO(exports.http, init_1.config.server.socket.options);
+        exports.ws = SocketIO(exports.http, WS.options);
     if (enableWss)
-        exports.wss = SocketIO(exports.https, init_1.config.server.socket.options);
+        exports.wss = SocketIO(exports.https, WS.options);
 }
 function startServer() {
     if (Worker.isMaster) {
@@ -94,20 +104,19 @@ function startServer() {
     if (fs.existsSync(file))
         require(file);
     handleHttpRoute(exports.app);
-    let hostname = Array.isArray(init_1.config.server.host)
-        ? init_1.config.server.host[0]
-        : init_1.config.server.host;
-    exports.http.setTimeout(init_1.config.server.timeout);
-    exports.http.listen(init_1.config.server.port, (err) => {
-        if (err) {
-            console.log(err);
-            process.exit(1);
-        }
-        let port = exports.http.address().port, host = `${hostname}` + (port != 80 ? `:${port}` : "");
-        worker.emit("start-http-server", host);
-    });
+    if (enableHttp) {
+        exports.http.setTimeout(init_1.config.server.timeout);
+        exports.http.listen(init_1.config.server.port, (err) => {
+            if (err) {
+                console.log(err);
+                process.exit(1);
+            }
+            let port = exports.http.address().port, host = `${hostname}` + (port != 80 ? `:${port}` : "");
+            worker.emit("start-http-server", host);
+        });
+    }
     if (enableHttps) {
-        exports.https.setTimeout(init_1.config.server.timeout || 120000);
+        exports.https.setTimeout(init_1.config.server.timeout);
         exports.https.listen(httpsPort, (err) => {
             if (err) {
                 console.log(err);
@@ -136,31 +145,31 @@ if (Worker.isMaster) {
     }
     let httpCount = 0, httpsCount = 0;
     Worker.on("online", worker => {
-        var dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan;
-        console.log(`${dateTime} Worker <` + worker.id.yellow + "> online!");
+        var dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`);
+        console.log(`${dateTime} Worker <` + chalk_1.default.yellow(worker.id) + "> online!");
         worker.on("error", (err) => {
             console.log(err.message);
         }).on("start-http-server", (host) => {
             httpCount += 1;
             if (httpCount === init_1.config.workers.length) {
                 httpCount = 0;
-                let dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan, link = `http://${host}`.yellow;
+                let dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), link = chalk_1.default.yellow(`http://${host}`);
                 console.log(`${dateTime} HTTP Server running at ${link}.`);
             }
         }).on("start-https-server", (host) => {
             httpsCount += 1;
             if (httpsCount === init_1.config.workers.length) {
                 httpsCount = 0;
-                let dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan, link = `http://${host}`.yellow;
+                let dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), link = chalk_1.default.yellow(`http://${host}`);
                 console.log(`${dateTime} HTTP Server running at ${link}.`);
             }
         });
     });
     for (let name of init_1.config.workers) {
-        new Worker(name, init_1.config.env !== "dev");
+        new Worker(name, !init_1.isDevMode);
     }
     let WatchFolders = ["bootstrap", "controllers", "locales", "models"];
-    if (init_1.config.env === "dev") {
+    if (init_1.isDevMode) {
         new DevWatcher_1.DevWatcher(init_1.APP_PATH + "/config.js");
         new DevWatcher_1.DevWatcher(init_1.APP_PATH + "/index.js");
         for (let folder of WatchFolders) {

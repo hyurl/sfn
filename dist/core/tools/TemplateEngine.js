@@ -4,7 +4,7 @@ const init_1 = require("../../init");
 class TemplateEngine {
     constructor(options) {
         this.options = Object.assign({
-            cache: init_1.config.env != "dev",
+            cache: !init_1.isDevMode,
             encoding: "utf8"
         }, options);
         if (!(this.renderFile instanceof Function)) {

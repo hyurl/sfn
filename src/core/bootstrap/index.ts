@@ -11,7 +11,8 @@ import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
 import * as fs from "fs";
 import * as date from "sfn-date";
-import { APP_PATH, config } from "../../init";
+import chalk from "chalk";
+import { APP_PATH, config, isDevMode } from "../../init";
 import { DevWatcher } from "../tools/DevWatcher";
 
 export * from "sfn-scheduler";
@@ -26,15 +27,23 @@ export * from "../tools/MarkdownParser";
 export * from "../controllers/HttpController";
 export * from "../controllers/WebSocketController";
 
+/** Whether the current process is the master process. */
 export const isMaster: boolean = Worker.isMaster;
+/** Whether the current process is a worker process. */
 export const isWorker: boolean = Worker.isWorker;
 
 var worker: Worker = null;
+var hostnames = config.server.hostname || config.server.host;
+var hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames;
+var enableHttp = config.server.http ? config.server.http.enabled : true;
+var httpPort = config.server.http ? config.server.http.port : config.server.port;
 var enableHttps = config.server.https.enabled;
 var httpsPort = config.server.https.port;
-var enableWs = config.server.socket.enabled && (!enableHttps || !config.server.https.forceRedirect);
-var enableWss = config.server.socket.enabled && enableHttps;
+var WS = config.server.websocket || config.server.socket;
+var enableWs = WS.enabled && (!enableHttps || !config.server.https.forceRedirect);
+var enableWss = WS.enabled && enableHttps;
 
+/** (worker only) The App instance created by **webium** framework. */
 export var app: App = null;
 /** (worker only) The HTTP server. */
 export var http: HttpServer = null;
@@ -46,17 +55,22 @@ export var ws: SocketIO.Server = null;
 export var wss: SocketIO.Server = null;
 
 if (Worker.isWorker) {
-    app = new App({ cookieSecret: config.session.secret });
-    http = new HttpServer(app.listener);
+    app = new App({
+        cookieSecret: config.session.secret,
+        domain: hostnames
+    });
+
+    if (enableHttp)
+        http = new HttpServer(app.listener);
 
     if (enableHttps)
         https = createServer(config.server.https.credentials, app.listener);
 
     if (enableWs)
-        ws = SocketIO(http, config.server.socket.options);
+        ws = SocketIO(http, WS.options);
 
     if (enableWss)
-        wss = SocketIO(https, config.server.socket.options);
+        wss = SocketIO(https, WS.options);
 }
 
 export {
@@ -118,26 +132,25 @@ export function startServer() {
 
     handleHttpRoute(app);
 
-    let hostname: string = Array.isArray(config.server.host)
-        ? config.server.host[0]
-        : config.server.host;
-
     // Start HTTP server.
-    http.setTimeout(config.server.timeout);
-    http.listen(<number>config.server.port, (err) => {
-        if (err) {
-            console.log(err);
-            process.exit(1);
-        }
+    if (enableHttp) {
+        http.setTimeout(config.server.timeout);
+        http.listen(<number>config.server.port, (err) => {
+            if (err) {
+                console.log(err);
+                process.exit(1);
+            }
 
-        let port: number = http.address().port,
-            host: string = `${hostname}` + (port != 80 ? `:${port}` : "");
-        worker.emit("start-http-server", host);
-    });
+            let port: number = http.address().port,
+                host: string = `${hostname}` + (port != 80 ? `:${port}` : "");
+
+            worker.emit("start-http-server", host);
+        });
+    }
 
     // Start HTTPS server.
     if (enableHttps) {
-        https.setTimeout(config.server.timeout || 120000);
+        https.setTimeout(config.server.timeout);
         https.listen(httpsPort, (err) => {
             if (err) {
                 console.log(err);
@@ -146,6 +159,7 @@ export function startServer() {
 
             let port = https.address().port,
                 host = `${hostname}` + (port != 443 ? `:${port}` : "");
+
             worker.emit("start-https-server", host);
         });
     }
@@ -177,10 +191,12 @@ if (Worker.isMaster) {
     let httpCount = 0,
         httpsCount = 0;
 
+    // Listen worker processes, when their servers is started, notify the
+    // master and print a message.
     Worker.on("online", worker => {
-        var dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan;
+        var dateTime = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`);
 
-        console.log(`${dateTime} Worker <` + worker.id.yellow + "> online!");
+        console.log(`${dateTime} Worker <` + chalk.yellow(worker.id) + "> online!");
 
         worker.on("error", (err: Error) => {
             console.log(err.message);
@@ -190,8 +206,8 @@ if (Worker.isMaster) {
             if (httpCount === config.workers.length) {
                 httpCount = 0;
 
-                let dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan,
-                    link = `http://${host}`.yellow;
+                let dateTime = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
+                    link = chalk.yellow(`http://${host}`);
 
                 console.log(`${dateTime} HTTP Server running at ${link}.`);
             }
@@ -201,8 +217,8 @@ if (Worker.isMaster) {
             if (httpsCount === config.workers.length) {
                 httpsCount = 0;
 
-                let dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan,
-                    link = `http://${host}`.yellow;
+                let dateTime = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
+                    link = chalk.yellow(`http://${host}`);
 
                 console.log(`${dateTime} HTTP Server running at ${link}.`);
             }
@@ -211,17 +227,19 @@ if (Worker.isMaster) {
 
     // folk workers.
     for (let name of config.workers) {
-        new Worker(name, config.env !== "dev");
+        new Worker(name, !isDevMode);
     }
 
     let WatchFolders = ["bootstrap", "controllers", "locales", "models"];
 
-    if (config.env === "dev") {
+    // Watch for file changes, when a file is modified, reboot the workers.
+    if (isDevMode) {
         new DevWatcher(APP_PATH + "/config.js");
         new DevWatcher(APP_PATH + "/index.js");
 
         for (let folder of WatchFolders) {
             let dir = APP_PATH + "/" + folder;
+
             fs.exists(dir, exists => {
                 if (exists) {
                     new DevWatcher(dir);
@@ -230,6 +248,8 @@ if (Worker.isMaster) {
         }
     }
 } else {
+    // When the worker is folked and auto-start enabled, start the server 
+    // immediately.
     Worker.on("online", _worker => {
         worker = _worker;
         if (config.server.autoStart) {

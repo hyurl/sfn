@@ -8,11 +8,11 @@ import * as trimmer from "string-trimmer";
 import * as date from "sfn-date";
 import nextFilename = require("next-filename");
 import { App } from "webium";
-import { config } from "../../init";
+import { config, isDevMode } from "../../init";
 import { HttpController, UploadingFile } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
-import { callsiteLog } from "../tools/functions-inner";
+import { callsiteLog, callMethod } from "../tools/functions-inner";
 import { Request, Response, HttpRequestMethod } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { RouteMap } from "../tools/RouteMap";
@@ -39,7 +39,7 @@ function handleFinish(ctrl: HttpController, err: Error): void {
     handleLog(ctrl, err);
     finish(ctrl);
 
-    if (config.env == "dev" && !(err instanceof HttpError)) {
+    if (isDevMode && !(err instanceof HttpError)) {
         callsiteLog(err);
     }
 }
@@ -164,6 +164,7 @@ function handleUpload(
     let Class = <typeof HttpController>ctrl.constructor;
     let uploadFields = Class.UploadFields[method];
     let { req, res } = ctrl;
+    let result: any;
 
     if (req.method == "POST" && uploadFields && uploadFields.length) {
         // Configure fields.
@@ -179,10 +180,14 @@ function handleUpload(
         let handle = uploader.fields(fields);
 
         handle(<any>req, <any>res, (err) => {
-            err ? reject(err) : resolve(ctrl[method](req, res));
+            if (err) {
+                reject(err);
+            } else {
+                resolve(callMethod(ctrl, ctrl[method], req, res));
+            }
         });
     } else {
-        resolve(ctrl[method](req, res));
+        resolve(callMethod(ctrl, ctrl[method], req, res));
     }
 }
 

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const date = require("sfn-date");
+const chalk_1 = require("chalk");
 const init_1 = require("../../init");
 const SocketError_1 = require("../tools/SocketError");
 const functions_inner_1 = require("../tools/functions-inner");
@@ -12,20 +13,20 @@ function finish(ctrl, info) {
     if (socket[symbols_1.realDB])
         socket[symbols_1.realDB].release();
     ctrl.emit("finish", socket);
-    if (init_1.config.env === "dev") {
-        let cost = Date.now() - info.time, dateTime = `[${date("Y-m-d H:i:s.ms")}]`.cyan, type = socket.protocol.toUpperCase().bold, event = info.event.yellow, code = info.code, codeStr = code.toString();
-        cost = `${cost}ms`.cyan;
+    if (init_1.isDevMode) {
+        let cost = Date.now() - info.time, dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), type = chalk_1.default.bold(socket.protocol.toUpperCase()), event = chalk_1.default.yellow(info.event), code = info.code, codeStr = code.toString();
+        cost = chalk_1.default.yellow(`${cost}ms`);
         if (code < 200) {
-            codeStr = codeStr.cyan;
+            codeStr = chalk_1.default.cyan(codeStr);
         }
         else if (code >= 200 && code < 300) {
-            codeStr = codeStr.green;
+            codeStr = chalk_1.default.green(codeStr);
         }
         else if (code >= 300 && code < 400) {
-            codeStr = codeStr.yellow;
+            codeStr = chalk_1.default.yellow(codeStr);
         }
         else {
-            codeStr = codeStr.red;
+            codeStr = chalk_1.default.red(codeStr);
         }
         console.log(`${dateTime} ${type} ${event} ${codeStr} ${cost}`);
     }
@@ -49,7 +50,7 @@ function handleError(err, ctrl, info) {
         ctrl.logger.error(_err.message);
     }
     finish(ctrl, info);
-    if (init_1.config.env == "dev" && !(_err instanceof SocketError_1.SocketError)) {
+    if (init_1.isDevMode && !(_err instanceof SocketError_1.SocketError)) {
         functions_inner_1.callsiteLog(_err);
     }
 }
@@ -59,7 +60,7 @@ function getNextHandler(method, action, data, resolve) {
         let Class = ctrl.constructor;
         if (Class.RequireAuth.includes(method) && !ctrl.authorized)
             throw new SocketError_1.SocketError(401);
-        resolve(ctrl[method](...data, ctrl.socket));
+        resolve(functions_inner_1.callMethod(ctrl, ctrl[method], ...data, ctrl.socket));
     };
 }
 function handleEvent(socket, event, ...data) {

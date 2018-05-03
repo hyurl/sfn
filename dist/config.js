@@ -2,26 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Session = require("express-session");
 const FileStore = require("session-file-store");
-let Store = FileStore(Session);
+;
+var Store = FileStore(Session);
 exports.SFNConfig = {
-    env: "dev",
+    env: process.env.NODE_ENV || "dev",
+    workers: ["A"],
     bluebird: false,
     lang: "en-US",
     enableDocRoute: false,
-    workers: ["A"],
-    staticPath: process.cwd() + "/src/assets",
+    awaitGenerator: false,
+    statics: [process.cwd() + "/src/assets"],
     server: {
-        host: "localhost",
-        port: 80,
+        hostname: "localhost",
         timeout: 120000,
         autoStart: false,
+        http: {
+            enabled: true,
+            port: 80
+        },
         https: {
             enabled: false,
             port: 443,
             forceRedirect: true,
             credentials: null
         },
-        socket: {
+        websocket: {
             enabled: true,
             options: {
                 pingTimeout: 5000,

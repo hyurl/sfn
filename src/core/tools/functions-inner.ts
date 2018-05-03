@@ -5,6 +5,8 @@ import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
+import { config } from "../../init";
+import { __awaiter } from 'tslib';
 
 export function loadLanguagePack(filename: string): Locale {
     let ext = extname(filename),
@@ -90,7 +92,7 @@ export function getDocMeta(Class: Function): MethodDocMeta {
                     event = match2[1].trim();
                 if (match3)
                     upload = match3[1].trim().split(/\s*,\s*/);
-                if(match4)
+                if (match4)
                     requireAuth = true;
 
                 if (route || event)
@@ -145,4 +147,16 @@ export function callsiteLog(err: Error) {
             console.log();
         });
     }
+}
+
+export function callMethod(thisArg: any, fn: Function, ...args: any[]): any {
+    let res: any;
+
+    if (fn.constructor.name == "GeneratorFunction" && config.awaitGenerator) {
+        res = __awaiter(thisArg, args, null, fn);
+    } else {
+        res = fn.apply(thisArg, args);
+    }
+
+    return res;
 }

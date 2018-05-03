@@ -31,7 +31,7 @@ function handleLog(ctrl, err) {
 function handleFinish(ctrl, err) {
     handleLog(ctrl, err);
     finish(ctrl);
-    if (init_1.config.env == "dev" && !(err instanceof HttpError_1.HttpError)) {
+    if (init_1.isDevMode && !(err instanceof HttpError_1.HttpError)) {
         functions_inner_1.callsiteLog(err);
     }
 }
@@ -134,6 +134,7 @@ function handleUpload(ctrl, method, resolve, reject) {
     let Class = ctrl.constructor;
     let uploadFields = Class.UploadFields[method];
     let { req, res } = ctrl;
+    let result;
     if (req.method == "POST" && uploadFields && uploadFields.length) {
         let fields = [];
         for (let field of uploadFields) {
@@ -145,11 +146,16 @@ function handleUpload(ctrl, method, resolve, reject) {
         let uploader = getUploader(ctrl, resolve, reject);
         let handle = uploader.fields(fields);
         handle(req, res, (err) => {
-            err ? reject(err) : resolve(ctrl[method](req, res));
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(functions_inner_1.callMethod(ctrl, ctrl[method], req, res));
+            }
         });
     }
     else {
-        resolve(ctrl[method](req, res));
+        resolve(functions_inner_1.callMethod(ctrl, ctrl[method], req, res));
     }
 }
 function handleError(err, ctrl) {
