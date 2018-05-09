@@ -1,4 +1,3 @@
-const { SFNConfig } = require("sfn");
 const Session = require("express-session");
 const FileStore = require("session-file-store");
 
