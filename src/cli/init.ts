@@ -50,6 +50,3 @@ if (!fs.existsSync(`${cwd}/src/config.${ext}`))
 
 if (!fs.existsSync(`${cwd}/src/index.${ext}`))
     fs.copySync(`${sfnd}/src/cli/templates/index.${ext}`, `${cwd}/src/index.${ext}`);
-
-if (isTs && !fs.existsSync(`${cwd}/tsconfig.json`))
-    fs.copySync(`${sfnd}/src/cli/templates/tsconfig.json`, `${cwd}/tsconfig.json`);

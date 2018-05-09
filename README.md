@@ -19,7 +19,7 @@ to initiate your project, assume you have some knowledge of **npm** and have
 
 ### Install TypeScript
 
-**SFN** is written in **TypeScript**, which your own files should as well, 
+**SFN** is written in **TypeScript**, which your own code should as well, 
 but it's not necessary, we will talk about that later.
 
 ```sh
@@ -32,8 +32,7 @@ if you're not going to using it, this procedure is optional.
 ### Turn On TypeScript Support
 
 To turn on TypeScript support of your project, just add a new file named 
-`tsconfig.json` in your project directory, it's contents should be like the 
-following:
+`tsconfig.json` in your project directory, it's contents should be like these:
 
 ```json
 {
@@ -76,21 +75,21 @@ is missing, the framework will run in pure JavaScript mode.
 
 ### Install Framework
 
-After you have initiate your project, you can now install **SFN** by using 
-this command.
+After you have initiated your project, you can now install **SFN** by using 
+this command:
 
 ```sh
 npm i sfn
 ```
 
 After all files downloaded, the **SFN** framework will perform initiating 
-procedure, creating needed files and directories for you.
+procedure, creating needed files and directories for you automatically.
 
 ### Start Demo Server
 
 **SFN** provides a demo, so you can now start server and see what will happen.
-firstly, compile the source code with the command: `tsc`, then type the 
-command:
+firstly, compile the source code with the command: `tsc` (only with 
+TypeScript), then type the command:
 
 ```sh
 node dist/index
@@ -98,10 +97,10 @@ node dist/index
 
 Or `node src/index` in JavaScript.
 
-and the server should be started in no seconds.
+And the server should be started in no seconds.
 
 You can add the command `start` to the `scripts` field of your `package.json` 
-file, so that whenever you want to start the server ,just run `npm start`.
+file, so that whenever you want to start the server, just run `npm start`.
 
 ### Write Your First Controller
 
@@ -109,7 +108,7 @@ You can see that there is a folder named **src/controllers** generated in your
 project, it's where you're going put you controller files in.
 
 You may open and edit the demo files in it, but here I'm going to show you how
-to create a new one.
+to create a new one (with TypeScript).
 
 Create a file in **src/controllers**, named `Demo.ts`:
 
@@ -136,7 +135,7 @@ principles in **SFN** is: **If the framework can do the work, then the user**
 
 For such a goal, **SFN** provides many features, etc. **shared session**, 
 **simple file uploading**, **error handling**, **multi-processing**, etc. You 
-don't need to worry how the framework does these jobs, just focus on your own 
+don't need to worry how the framework does those jobs, just focus on your own 
 design.
 
 ## License

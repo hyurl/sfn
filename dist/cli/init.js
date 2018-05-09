@@ -35,6 +35,4 @@ if (!fs.existsSync(`${exports.cwd}/src/config.${exports.ext}`))
     fs.copySync(`${exports.sfnd}/src/cli/templates/config.${exports.ext}`, `${exports.cwd}/src/config.${exports.ext}`);
 if (!fs.existsSync(`${exports.cwd}/src/index.${exports.ext}`))
     fs.copySync(`${exports.sfnd}/src/cli/templates/index.${exports.ext}`, `${exports.cwd}/src/index.${exports.ext}`);
-if (exports.isTs && !fs.existsSync(`${exports.cwd}/tsconfig.json`))
-    fs.copySync(`${exports.sfnd}/src/cli/templates/tsconfig.json`, `${exports.cwd}/tsconfig.json`);
 //# sourceMappingURL=init.js.map
