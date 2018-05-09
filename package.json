@@ -7,7 +7,7 @@
     "bin": "dist/cli/sfn.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "install": "node dist/cli/init.js"
+        "install": "cd ../../ && node node_modules/sfn/dist/cli/init"
     },
     "keywords": [
         "sfn",

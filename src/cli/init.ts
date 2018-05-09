@@ -4,11 +4,13 @@ import * as fs from "fs-extra";
 
 export var sfnd = path.normalize(__dirname + "/../../");
 export var cwd = process.cwd();
-var ts = fs.existsSync(cwd + "/tsconfig.json");
-export var ext = ts ? "ts" : "js";
-let src = ts ? "src" : "dist";
 
-global["APP_PATH"] = cwd + (ts ? "/dist" : "/src");
+/** Whether the project should write code with TypeScript. */
+export var isTs = fs.existsSync(cwd + "/tsconfig.json");
+
+export var ext = isTs ? "ts" : "js";
+
+global["APP_PATH"] = cwd + (isTs ? "/dist" : "/src");
 
 if (!fs.existsSync(`${cwd}/src`))
     fs.ensureDirSync(`${cwd}/src`);
@@ -19,12 +21,12 @@ if (!fs.existsSync(`${cwd}/src/assets`))
 let bootstrap = `${cwd}/src/bootstrap`;
 if (!fs.existsSync(bootstrap)) {
     fs.ensureDirSync(bootstrap);
-    fs.writeFileSync(bootstrap + "/http." + (ts ? "ts" : "js"), "");
-    fs.writeFileSync(bootstrap + "/websocket." + (ts ? "ts" : "js"), "");
+    fs.writeFileSync(bootstrap + "/http." + (isTs ? "ts" : "js"), "");
+    fs.writeFileSync(bootstrap + "/websocket." + (isTs ? "ts" : "js"), "");
 }
 
 if (!fs.existsSync(`${cwd}/src/controllers`)) {
-    let dir = sfnd + "/src/" + (ts ? "controllers" : "cli/templates/controllers");
+    let dir = sfnd + "/src/" + (isTs ? "controllers" : "cli/templates/controllers");
     fs.copySync(dir, `${cwd}/src/controllers`);
 }
 
@@ -49,5 +51,5 @@ if (!fs.existsSync(`${cwd}/src/config.${ext}`))
 if (!fs.existsSync(`${cwd}/src/index.${ext}`))
     fs.copySync(`${sfnd}/src/cli/templates/index.${ext}`, `${cwd}/src/index.${ext}`);
 
-if (ts && !fs.existsSync(`${cwd}/tsconfig.json`))
+if (isTs && !fs.existsSync(`${cwd}/tsconfig.json`))
     fs.copySync(`${sfnd}/src/cli/templates/tsconfig.json`, `${cwd}/tsconfig.json`);
