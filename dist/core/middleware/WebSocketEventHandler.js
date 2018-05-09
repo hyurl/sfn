@@ -14,10 +14,10 @@ function finish(ctrl, info) {
         socket[symbols_1.realDB].release();
     ctrl.emit("finish", socket);
     if (init_1.isDevMode) {
-        let cost = Date.now() - info.time, dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), type = chalk_1.default.bold(socket.protocol.toUpperCase()), event = chalk_1.default.yellow(info.event), code = info.code, codeStr = code.toString();
-        cost = chalk_1.default.yellow(`${cost}ms`);
+        let cost = Date.now() - info.time, dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), type = chalk_1.default.bold(socket.protocol.toUpperCase()), code = info.code, codeStr = code.toString();
+        cost = chalk_1.default.cyan(`${cost}ms`);
         if (code < 200) {
-            codeStr = chalk_1.default.cyan(codeStr);
+            codeStr = chalk_1.default.blue(codeStr);
         }
         else if (code >= 200 && code < 300) {
             codeStr = chalk_1.default.green(codeStr);
@@ -28,7 +28,7 @@ function finish(ctrl, info) {
         else {
             codeStr = chalk_1.default.red(codeStr);
         }
-        console.log(`${dateTime} ${type} ${event} ${codeStr} ${cost}`);
+        console.log(`${dateTime} ${type} ${info.event} ${codeStr} ${cost}`);
     }
 }
 function handleError(err, ctrl, info) {

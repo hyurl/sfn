@@ -34,14 +34,13 @@ function finish(ctrl: WebSocketController, info: SocketEventInfo) {
         let cost: number | string = Date.now() - info.time,
             dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
             type: string = chalk.bold(socket.protocol.toUpperCase()),
-            event: string = chalk.yellow(info.event),
             code: number = info.code,
             codeStr: string = code.toString();
 
-        cost = chalk.yellow(`${cost}ms`);
+        cost = chalk.cyan(`${cost}ms`);
 
         if (code < 200) {
-            codeStr = chalk.cyan(codeStr);
+            codeStr = chalk.blue(codeStr);
         } else if (code >= 200 && code < 300) {
             codeStr = chalk.green(codeStr);
         } else if (code >= 300 && code < 400) {
@@ -50,7 +49,7 @@ function finish(ctrl: WebSocketController, info: SocketEventInfo) {
             codeStr = chalk.red(codeStr);
         }
 
-        console.log(`${dateTime} ${type} ${event} ${codeStr} ${cost}`);
+        console.log(`${dateTime} ${type} ${info.event} ${codeStr} ${cost}`);
     }
 }
 

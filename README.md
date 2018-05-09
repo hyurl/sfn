@@ -2,7 +2,7 @@
 
 **A Service Framework for Node.js.**
 
-For documentation, please [visit here](http://hyurl.github.io/sfn).
+For documentation, please [visit here](http://hyurl.github.io/SFN).
 
 ## How To Use?
 
@@ -19,7 +19,7 @@ to initiate your project, assume you have some knowledge of **npm** and have
 
 ### Install TypeScript
 
-**sfn** is written in **TypeScript**, which your own files should as well, 
+**SFN** is written in **TypeScript**, which your own files should as well, 
 but it's not necessary, we will talk about that later.
 
 ```sh
@@ -29,7 +29,7 @@ npm i -g typescript
 If you're not familiar with TypeScript, you may need to learn it first, but 
 if you're not going to using it, this procedure is optional.
 
-### Trun On TypeScript Support
+### Turn On TypeScript Support
 
 To turn on TypeScript support of your project, just add a new file named 
 `tsconfig.json` in your project directory, it's contents should be like the 
@@ -76,19 +76,19 @@ is missing, the framework will run in pure JavaScript mode.
 
 ### Install Framework
 
-After you have initiate your project, you can now install **sfn** by using 
+After you have initiate your project, you can now install **SFN** by using 
 this command.
 
 ```sh
-npm i sfn
+npm i SFN
 ```
 
-After all files downloaded, the **sfn** framework will perform initiating 
+After all files downloaded, the **SFN** framework will perform initiating 
 procedure, creating needed files and directories for you.
 
 ### Start Demo Server
 
-**sfn** provides a demo, so you can now start server and see what will happen.
+**SFN** provides a demo, so you can now start server and see what will happen.
 firstly, compile the source code with the command: `tsc`, then type the 
 command:
 
@@ -99,6 +99,9 @@ node dist/index
 Or `node src/index` in JavaScript.
 
 and the server should be started in no seconds.
+
+You can add the command `start` to the `scripts` field of your `package.json` 
+file, so that whenever you want to start the server ,just run `npm start`.
 
 ### Write Your First Controller
 
@@ -111,7 +114,7 @@ to create a new one.
 Create a file in **src/controllers**, named `Demo.ts`:
 
 ```typescript
-import { HttpController, route } from "sfn";
+import { HttpController, route } from "SFN";
 
 export default class extends HttpController {
     @route.get("/demo")
@@ -124,18 +127,18 @@ export default class extends HttpController {
 Now restart the server, you will see `Hello, World!` when you visit 
 `http://localhost/demo`.
 
-## Why Using **sfn**?
+## Why Using **SFN**?
 
-**sfn** provides a very easy-to-use and efficient API, you'can just write few 
+**SFN** provides a very easy-to-use and efficient API, you'can just write few 
 lines of code, and the frame work will handle other stuffs for you. One of the
-principles in **sfn** is: **If the framework can do the work, then the user** 
+principles in **SFN** is: **If the framework can do the work, then the user** 
 **shouldn't do it.**
 
-For such a goal, **sfn** provides many features, etc. **shared session**, 
+For such a goal, **SFN** provides many features, etc. **shared session**, 
 **simple file uploading**, **error handling**, **multi-processing**, etc. You 
 don't need to worry how the framework does these jobs, just focus on your own 
-designing.
+design.
 
 ## License
 
-**sfn** is licensed under **MIT**, you're free to use.
+**SFN** is licensed under **MIT**, you're free to use.

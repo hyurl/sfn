@@ -26,9 +26,8 @@ function handleWebSocketProps(io) {
         let urlObj = url.parse(socket.protocol + "://" + socket.host);
         socket.hostname = urlObj.hostname;
         socket.port = urlObj.port && parseInt(urlObj.port);
-        let domains = !Array.isArray(init_1.config.server.host)
-            ? [init_1.config.server.host]
-            : init_1.config.server.host;
+        let hostname = init_1.config.server.hostname || init_1.config.server.host;
+        let domains = (Array.isArray(hostname) ? hostname : [hostname]);
         for (let domain of domains) {
             if (socket.hostname.length > domain.length
                 && endsWith(socket.hostname, domain)) {

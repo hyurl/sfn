@@ -3,6 +3,11 @@ import * as FileStore from "session-file-store";
 import { ServerResponse } from "http";
 import { Stats } from "fs";
 import serveStatic = require("serve-static");
+import * as Mail from "sfn-mail";
+import { DBConfig } from "modelar";
+import { ClientOpts } from "redis";
+import { ServerOptions } from "socket.io";
+import * as tls from "tls";
 
 /**
  * @see https://www.npmjs.com/package/serve-static
@@ -67,13 +72,11 @@ export interface SFNConfig {
             forceRedirect?: boolean;
             /**
              * @see https://nodejs.org/dist/latest-v8.x/docs/api/https.html#https_https_createserver_options_requestlistener
+             * @see https://nodejs.org/dist/latest-v8.x/docs/api/tls.html#tls_tls_createsecurecontext_options
              */
-            credentials?: {
-                key?: string;
-                cert?: string;
-                pfx?: string;
-                passphrase?: string;
-            }
+            options?: tls.TlsOptions;
+            /** **deprecated** use `options` instead. */
+            credentials?: SFNConfig["server"]["https"]["options"]
         };
         /** **deprecated**, use `websocket` instead. */
         socket?: SFNConfig["server"]["websocket"];
@@ -84,11 +87,7 @@ export interface SFNConfig {
              * Options for SocketIO.
              * @see https://socket.io
              */
-            options?: {
-                [option: string]: any;
-                pingTimeout?: number,
-                pingInterval?: number,
-            };
+            options?: ServerOptions;
         },
         /** Configurations when HTTP requests or socket events throw errors. */
         error?: {
@@ -102,55 +101,22 @@ export interface SFNConfig {
      * Configurations for Modelar ORM.
      * @see https://github.com/hyurl/modelar
      */
-    database?: {
-        [option: string]: any;
-        type?: string;
-        host?: string;
-        port?: number;
-        database: string;
-        user?: string;
-        password?: string;
-    };
+    database?: DBConfig;
     /**
      * Configurations for Express-Session.
      * @see https://www.npmjs.com/package/express-session
      */
-    session?: {
-        [option: string]: any;
-        secret: string,
-        name?: string,
-        resave?: boolean,
-        saveUninitialized?: boolean,
-        secure?: boolean,
-        unset?: string,
-        store?: any;
-    };
+    session?: Session.SessionOptions;
     /**
      * Configurations for sfn-mail.
      * @see https://github.com/Hyurl/sfn-mail
      */
-    mail?: {
-        [option: string]: any;
-        pool?: boolean;
-        host: string;
-        port?: number;
-        secure?: boolean;
-        from: string;
-        subject?: string;
-        auth: {
-            username: string;
-            password: string;
-        }
-    };
+    mail?: Mail.Options & Mail.Message;
     /**
      * Configurations for Redis.
      * @see https://www.npmjs.com/package/redis
      */
-    redis?: {
-        [option: string]: any;
-        host: string,
-        port?: number,
-    };
+    redis?: ClientOpts;
 }
 
 var Store = <any>FileStore(Session);
@@ -178,7 +144,7 @@ export const SFNConfig: SFNConfig = {
             enabled: false,
             port: 443,
             forceRedirect: true,
-            credentials: null
+            options: null
         },
         websocket: {
             enabled: true,
@@ -205,9 +171,11 @@ export const SFNConfig: SFNConfig = {
         name: "sfn-sid",
         resave: true,
         saveUninitialized: true,
-        secure: true,
         unset: "destroy",
-        store: new Store()
+        store: new Store(),
+        cookie: {
+            secure: true
+        }
     },
     mail: {
         pool: false,

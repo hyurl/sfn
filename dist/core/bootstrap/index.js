@@ -40,12 +40,15 @@ exports.isWorker = Worker.isWorker;
 var worker = null;
 var hostnames = init_1.config.server.hostname || init_1.config.server.host;
 var hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames;
-var enableHttp = init_1.config.server.http ? init_1.config.server.http.enabled : true;
-var httpPort = init_1.config.server.http ? init_1.config.server.http.port : init_1.config.server.port;
-var enableHttps = init_1.config.server.https.enabled;
-var httpsPort = init_1.config.server.https.port;
+var httpServer = init_1.config.server.http;
+var enableHttp = httpServer ? httpServer.enabled : true;
+var httpPort = httpServer ? httpServer.port : init_1.config.server.port;
+var httpsServer = init_1.config.server.https;
+var enableHttps = httpsServer.enabled;
+var httpsPort = httpsServer.port;
+var httpsOptions = httpsServer.options || httpsServer.credentials;
 var WS = init_1.config.server.websocket || init_1.config.server.socket;
-var enableWs = WS.enabled && (!enableHttps || !init_1.config.server.https.forceRedirect);
+var enableWs = WS.enabled && (!enableHttps || !httpsServer.forceRedirect);
 var enableWss = WS.enabled && enableHttps;
 exports.app = null;
 exports.http = null;
@@ -60,7 +63,7 @@ if (Worker.isWorker) {
     if (enableHttp)
         exports.http = new http_1.Server(exports.app.listener);
     if (enableHttps)
-        exports.https = https_1.createServer(init_1.config.server.https.credentials, exports.app.listener);
+        exports.https = https_1.createServer(httpsOptions, exports.app.listener);
     if (enableWs)
         exports.ws = SocketIO(exports.http, WS.options);
     if (enableWss)
@@ -105,12 +108,12 @@ function startServer() {
     handleHttpRoute(exports.app);
     if (enableHttp) {
         exports.http.setTimeout(init_1.config.server.timeout);
-        exports.http.listen(init_1.config.server.port, (err) => {
+        exports.http.listen(httpPort, (err) => {
             if (err) {
                 console.log(err);
                 process.exit(1);
             }
-            let port = exports.http.address()["port"] || init_1.config.server.port, host = `${hostname}` + (port != 80 ? `:${port}` : "");
+            let port = exports.http.address()["port"] || httpPort, host = `${hostname}` + (port != 80 ? `:${port}` : "");
             worker.emit("start-http-server", host);
         });
     }
@@ -121,7 +124,7 @@ function startServer() {
                 console.log(err);
                 process.exit(1);
             }
-            let port = exports.https.address()["port"] || init_1.config.server.port, host = `${hostname}` + (port != 443 ? `:${port}` : "");
+            let port = exports.https.address()["port"] || httpsPort, host = `${hostname}` + (port != 443 ? `:${port}` : "");
             worker.emit("start-https-server", host);
         });
     }

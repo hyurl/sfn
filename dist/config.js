@@ -24,7 +24,7 @@ exports.SFNConfig = {
             enabled: false,
             port: 443,
             forceRedirect: true,
-            credentials: null
+            options: null
         },
         websocket: {
             enabled: true,
@@ -51,9 +51,11 @@ exports.SFNConfig = {
         name: "sfn-sid",
         resave: true,
         saveUninitialized: true,
-        secure: true,
         unset: "destroy",
-        store: new Store()
+        store: new Store(),
+        cookie: {
+            secure: true
+        }
     },
     mail: {
         pool: false,

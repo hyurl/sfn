@@ -13,6 +13,7 @@ export function handleStatic(app: App): void {
             }
         }
     } else if (config.staticPath && fs.existsSync(config.staticPath)) {
+        // staticPath is deprecated though.
         app.use(<any>serveStatic(config.staticPath));
     }
 }

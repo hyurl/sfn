@@ -8,10 +8,10 @@ const init_1 = require("../../init");
 function getDevLogger(req, res) {
     return () => {
         if (init_1.isDevMode) {
-            var cost = Date.now() - req.time, dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), type = chalk_1.default.bold(req.isEventSource ? "SSE" : req.method), url = chalk_1.default.yellow(req.shortUrl), code = res.statusCode, codeStr = res.statusCode.toString();
+            var cost = Date.now() - req.time, dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), type = chalk_1.default.bold(req.isEventSource ? "SSE" : req.method), code = res.statusCode, codeStr = res.statusCode.toString();
             cost = chalk_1.default.cyan(`${cost}ms`);
             if (code < 200) {
-                codeStr = chalk_1.default.cyan(codeStr);
+                codeStr = chalk_1.default.blue(codeStr);
             }
             else if (code >= 200 && code < 300) {
                 codeStr = chalk_1.default.green(codeStr);
@@ -22,7 +22,7 @@ function getDevLogger(req, res) {
             else {
                 codeStr = chalk_1.default.red(codeStr);
             }
-            console.log(`${dateTime} ${type} ${url} ${codeStr} ${cost}`);
+            console.log(`${dateTime} ${type} ${req.shortUrl} ${codeStr} ${cost}`);
         }
     };
 }

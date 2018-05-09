@@ -9,7 +9,7 @@ var config = {
     workers: ["A"],
     bluebird: false,
     lang: "en-US",
-    enableDocRoute: false,
+    enableDocRoute: true,
     awaitGenerator: false,
     statics: [process.cwd() + "/src/assets"],
     server: {
@@ -24,7 +24,7 @@ var config = {
             enabled: false,
             port: 443,
             forceRedirect: true,
-            credentials: null
+            options: null
         },
         websocket: {
             enabled: true,
@@ -51,9 +51,11 @@ var config = {
         name: "sfn-sid",
         resave: true,
         saveUninitialized: true,
-        secure: true,
         unset: "destroy",
-        store: new Store()
+        store: new Store(),
+        cookie: {
+            secure: true
+        }
     },
     mail: {
         pool: false,

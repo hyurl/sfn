@@ -2,7 +2,7 @@ import SSE = require("sfn-sse");
 import * as date from "sfn-date";
 import chalk from "chalk";
 import { App } from "webium";
-import { config, version, isDevMode } from "../../init";
+import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { realDB } from '../Tools/symbols';
 
@@ -13,14 +13,13 @@ function getDevLogger(req: Request, res: Response) {
             var cost: number | string = Date.now() - req.time,
                 dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
                 type: string = chalk.bold(req.isEventSource ? "SSE" : req.method),
-                url: string = chalk.yellow(req.shortUrl),
                 code: number = res.statusCode,
                 codeStr: string = res.statusCode.toString();
 
             cost = chalk.cyan(`${cost}ms`);
 
             if (code < 200) {
-                codeStr = chalk.cyan(codeStr);
+                codeStr = chalk.blue(codeStr);
             } else if (code >= 200 && code < 300) {
                 codeStr = chalk.green(codeStr);
             } else if (code >= 300 && code < 400) {
@@ -29,7 +28,7 @@ function getDevLogger(req: Request, res: Response) {
                 codeStr = chalk.red(codeStr);
             }
 
-            console.log(`${dateTime} ${type} ${url} ${codeStr} ${cost}`);
+            console.log(`${dateTime} ${type} ${req.shortUrl} ${codeStr} ${cost}`);
         }
     };
 };

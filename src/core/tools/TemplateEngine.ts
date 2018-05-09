@@ -1,6 +1,4 @@
-import { config, isDevMode } from "../../init";
-
-type Locals = { [name: string]: any };
+import { isDevMode } from "../../init";
 
 export interface TemplateOptions {
     [option: string]: any;
@@ -40,5 +38,5 @@ export abstract class TemplateEngine {
      * Render a view file.
      * @param vars Local variables passed to the view file.
      */
-    abstract renderFile(filename: string, vars?: Locals): Promise<string>;
+    abstract renderFile(filename: string, vars?: { [name: string]: any }): Promise<string>;
 }

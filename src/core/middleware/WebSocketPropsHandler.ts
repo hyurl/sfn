@@ -33,9 +33,8 @@ export function handleWebSocketProps(io: Server): void {
         socket.hostname = urlObj.hostname;
         socket.port = urlObj.port && parseInt(urlObj.port);
 
-        let domains = !Array.isArray(config.server.host)
-            ? [config.server.host]
-            : config.server.host;
+        let hostname = config.server.hostname || config.server.host;
+        let domains = <string[]>(Array.isArray(hostname) ? hostname : [hostname]);
 
         for (let domain of domains) {
             if (socket.hostname.length > domain.length
