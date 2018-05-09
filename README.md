@@ -2,7 +2,7 @@
 
 **A Service Framework for Node.js.**
 
-For documentation, please [visit here](http://hyurl.github.io/SFN).
+For documentation, please [visit here](http://hyurl.github.io/sfn).
 
 ## How To Use?
 
@@ -129,7 +129,7 @@ Now restart the server, you will see `Hello, World!` when you visit
 
 ## Why Using **SFN**?
 
-**SFN** provides a very easy-to-use and efficient API, you'can just write few 
+**SFN** provides a very easy-to-use and efficient API, you can just write few 
 lines of code, and the frame work will handle other stuffs for you. One of the
 principles in **SFN** is: **If the framework can do the work, then the user** 
 **shouldn't do it.**
