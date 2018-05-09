@@ -3,6 +3,7 @@ import * as fs from "fs-extra";
 import { DB, User } from "modelar";
 import { EjsEngine } from "sfn-ejs-engine";
 import SSE = require("sfn-sse");
+import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH, config } from "../../init";
 import { Controller } from "./Controller";
 import { TemplateEngine } from "../tools/TemplateEngine";
@@ -16,18 +17,11 @@ import {
 import { HttpError } from "../tools/HttpError";
 import { realSSE } from "../tools/symbols";
 
+export { CorsOptions };
+
 const Engine = new EjsEngine();
 
 export type HttpNextHandler = (controller: HttpController) => void;
-
-export type CorsOptions = {
-    origins: string | string[];
-    methods?: string | string[];
-    headers?: string | string[];
-    credentials?: boolean;
-    maxAge?: number;
-    exposeHeaders?: string | string[];
-};
 
 export type UploadOptions = {
     /** Maximum number of files that each form field can carry. */
@@ -131,7 +125,9 @@ export class HttpController extends Controller {
      */
     cors: string | string[] | CorsOptions | false = false;
     /** Configurations for uploading files. */
-    uploadConfig: UploadOptions = UploadOptions;
+    uploadOptions: UploadOptions = Object.assign({}, UploadOptions);
+    /** `deprecated`, use `uploadOptions` instead. */
+    uploadConfig: UploadOptions = this.uploadOptions;
     /** Reference to the corresponding request context. */
     readonly req: Request;
     /** Reference to the corresponding response context. */

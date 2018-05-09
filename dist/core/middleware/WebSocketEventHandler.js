@@ -44,7 +44,7 @@ function handleError(err, ctrl, info) {
         ctrl.socket.emit(info.event, ctrl.error(err.message, info.code));
     }
     else {
-        ctrl.logConfig.action = info.event = "unknown";
+        ctrl.logOptions.action = info.event = "unknown";
     }
     if (init_1.config.server.error.log) {
         ctrl.logger.error(_err.message);
@@ -56,7 +56,7 @@ function handleError(err, ctrl, info) {
 }
 function getNextHandler(method, action, data, resolve) {
     return (ctrl) => {
-        ctrl.logConfig.action = action;
+        ctrl.logOptions.action = action;
         let Class = ctrl.constructor;
         if (Class.RequireAuth.includes(method) && !ctrl.authorized)
             throw new SocketError_1.SocketError(401);
@@ -93,7 +93,7 @@ function handleEvent(socket, event, ...data) {
         finish(ctrl, info);
     }).catch((err) => {
         ctrl = ctrl || new WebSocketController_1.WebSocketController(socket);
-        ctrl.logConfig.action = action;
+        ctrl.logOptions.action = action;
         handleError(err, ctrl, info);
     });
 }

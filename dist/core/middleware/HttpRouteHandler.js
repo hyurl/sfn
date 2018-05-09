@@ -6,7 +6,7 @@ const zlib = require("zlib");
 const multer = require("multer");
 const cors = require("sfn-cors");
 const date = require("sfn-date");
-const nextFilename = require("next-filename");
+const ideal_filename_1 = require("ideal-filename");
 const init_1 = require("../../init");
 const HttpController_1 = require("../controllers/HttpController");
 const HttpError_1 = require("../tools/HttpError");
@@ -88,17 +88,17 @@ function getDestination(ctrl, savePath, reject) {
 function getFilename(ctrl, savePath, reject) {
     return (req, file, cb) => {
         try {
-            if (ctrl.uploadConfig.filename instanceof Function) {
-                let filename = ctrl.uploadConfig.filename(file);
+            if (ctrl.uploadOptions.filename instanceof Function) {
+                let filename = ctrl.uploadOptions.filename(file);
                 cb(null, filename);
             }
-            else if (ctrl.uploadConfig.filename === "random") {
+            else if (ctrl.uploadOptions.filename === "random") {
                 let extname = path.extname(file.originalname), filename = functions_1.randStr(32) + extname;
                 cb(null, filename);
             }
             else {
                 let filename = `${savePath}/${file.originalname}`;
-                nextFilename(filename).then(filename => {
+                ideal_filename_1.idealFilename(filename).then(filename => {
                     cb(null, path.basename(filename));
                 }).catch(err => {
                     reject(err);
@@ -111,7 +111,7 @@ function getFilename(ctrl, savePath, reject) {
     };
 }
 function getStorage(ctrl, resolve, reject) {
-    let savePath = `${ctrl.uploadConfig.savePath}/` + date("Y-m-d");
+    let savePath = `${ctrl.uploadOptions.savePath}/` + date("Y-m-d");
     return multer.diskStorage({
         destination: getDestination(ctrl, savePath, reject),
         filename: getFilename(ctrl, savePath, reject)
@@ -122,7 +122,7 @@ function getUploader(ctrl, resolve, reject) {
         storage: getStorage(ctrl, resolve, reject),
         fileFilter: (req, file, cb) => {
             try {
-                cb(null, ctrl.uploadConfig.filter(file));
+                cb(null, ctrl.uploadOptions.filter(file));
             }
             catch (err) {
                 reject(err);
@@ -140,7 +140,7 @@ function handleUpload(ctrl, method, resolve, reject) {
         for (let field of uploadFields) {
             fields.push({
                 name: field,
-                maxCount: ctrl.uploadConfig.maxCount
+                maxCount: ctrl.uploadOptions.maxCount
             });
         }
         let uploader = getUploader(ctrl, resolve, reject);
@@ -188,7 +188,7 @@ function handleError(err, ctrl) {
 }
 function getNextHandler(method, action, resolve, reject) {
     return (ctrl) => {
-        ctrl.logConfig.action = action;
+        ctrl.logOptions.action = action;
         let { req, res } = ctrl;
         if (!cors(ctrl.cors, req, res)) {
             throw new HttpError_1.HttpError(410);
@@ -284,7 +284,7 @@ function getRouteHandler(Class, method) {
             return handleResponse(ctrl, data);
         }).catch((err) => {
             ctrl = ctrl || new HttpController_1.HttpController(req, res);
-            ctrl.logConfig.action = action;
+            ctrl.logOptions.action = action;
             handleError(err, ctrl);
         });
     };
@@ -297,7 +297,7 @@ function handleHttpRoute(app) {
     app.onerror = function onerror(err, req, res) {
         res.keepAlive = false;
         let ctrl = new HttpController_1.HttpController(req, res);
-        ctrl.logConfig.action = req.method + " " + req.url;
+        ctrl.logOptions.action = req.method + " " + req.url;
         if (res.statusCode === 404)
             err = new HttpError_1.HttpError(404);
         else if (res.statusCode === 405)

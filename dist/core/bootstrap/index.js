@@ -3,8 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const webium_1 = require("webium");
 const SocketIO = require("socket.io");
-const trimmer = require("string-trimmer");
-exports.trimmer = trimmer;
 const Mail = require("sfn-mail");
 exports.Mail = Mail;
 const OutputBuffer = require("sfn-output-buffer");
@@ -27,6 +25,7 @@ const init_1 = require("../../init");
 const DevWatcher_1 = require("../tools/DevWatcher");
 exports.DevWatcher = DevWatcher_1.DevWatcher;
 tslib_1.__exportStar(require("sfn-scheduler"), exports);
+tslib_1.__exportStar(require("sfn-cookie"), exports);
 tslib_1.__exportStar(require("../../init"), exports);
 tslib_1.__exportStar(require("../tools/functions"), exports);
 tslib_1.__exportStar(require("../tools/HttpError"), exports);
@@ -111,7 +110,7 @@ function startServer() {
                 console.log(err);
                 process.exit(1);
             }
-            let port = exports.http.address().port, host = `${hostname}` + (port != 80 ? `:${port}` : "");
+            let port = exports.http.address()["port"] || init_1.config.server.port, host = `${hostname}` + (port != 80 ? `:${port}` : "");
             worker.emit("start-http-server", host);
         });
     }
@@ -122,7 +121,7 @@ function startServer() {
                 console.log(err);
                 process.exit(1);
             }
-            let port = exports.https.address().port, host = `${hostname}` + (port != 443 ? `:${port}` : "");
+            let port = exports.https.address()["port"] || init_1.config.server.port, host = `${hostname}` + (port != 443 ? `:${port}` : "");
             worker.emit("start-https-server", host);
         });
     }

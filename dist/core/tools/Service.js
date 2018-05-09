@@ -10,21 +10,21 @@ const HideProtectedProperties = require("hide-protected-properties");
 const init_1 = require("../../init");
 const LocaleMap_1 = require("./LocaleMap");
 const symbols_1 = require("./symbols");
-exports.LogOptions = {
+;
+exports.LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
-    size: 0,
     filename: process.cwd() + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
-    mail: null,
     action: "default"
-};
+});
 let Service = Service_1 = class Service extends events_1.EventEmitter {
     constructor() {
         super(...arguments);
         this.lang = init_1.config.lang;
-        this.logConfig = Object.assign(exports.LogOptions, {
+        this.logOptions = Object.assign({}, exports.LogOptions, {
             action: this.constructor.name
         });
+        this.logConfig = this.logOptions;
     }
     i18n(text, ...replacements) {
         var locale = LocaleMap_1.LocaleMap, lang = this.lang.toLowerCase(), _lang = init_1.config.lang.toLowerCase();
@@ -37,11 +37,11 @@ let Service = Service_1 = class Service extends events_1.EventEmitter {
         return util.format(text, ...replacements);
     }
     get logger() {
-        let filename = this.logConfig.filename;
+        let filename = this.logOptions.filename;
         if (!Service_1.Loggers[filename]) {
-            Service_1.Loggers[filename] = new Logger(this.logConfig);
+            Service_1.Loggers[filename] = new Logger(this.logOptions);
         }
-        Service_1.Loggers[filename].action = this.logConfig.action;
+        Service_1.Loggers[filename].action = this.logOptions.action;
         return Service_1.Loggers[filename];
     }
     get cache() {

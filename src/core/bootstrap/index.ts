@@ -1,9 +1,8 @@
 import { App } from "webium";
 import * as SocketIO from "socket.io";
-import * as trimmer from "string-trimmer";
-import Mail = require("sfn-mail");
-import OutputBuffer = require("sfn-output-buffer");
-import Logger = require("sfn-logger");
+import * as Mail from "sfn-mail";
+import * as OutputBuffer from "sfn-output-buffer";
+import * as Logger from "sfn-logger";
 import Worker = require("sfn-worker");
 import Validator = require("sfn-validator");
 import Cache = require("sfn-cache");
@@ -16,6 +15,7 @@ import { APP_PATH, config, isDevMode } from "../../init";
 import { DevWatcher } from "../tools/DevWatcher";
 
 export * from "sfn-scheduler";
+export * from "sfn-cookie";
 export * from "../../init";
 export * from "../tools/interfaces";
 export * from "../tools/functions";
@@ -75,7 +75,6 @@ if (Worker.isWorker) {
 
 export {
     date,
-    trimmer,
     Mail,
     OutputBuffer,
     Logger,
@@ -141,7 +140,7 @@ export function startServer() {
                 process.exit(1);
             }
 
-            let port: number = http.address().port,
+            let port: number = http.address()["port"] || config.server.port,
                 host: string = `${hostname}` + (port != 80 ? `:${port}` : "");
 
             worker.emit("start-http-server", host);
@@ -157,7 +156,7 @@ export function startServer() {
                 process.exit(1);
             }
 
-            let port = https.address().port,
+            let port = https.address()["port"] || config.server.port,
                 host = `${hostname}` + (port != 443 ? `:${port}` : "");
 
             worker.emit("start-https-server", host);

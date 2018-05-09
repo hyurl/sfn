@@ -26,7 +26,8 @@ class HttpController extends Controller_1.Controller {
         this.jsonp = false;
         this.csrfProtection = false;
         this.cors = false;
-        this.uploadConfig = exports.UploadOptions;
+        this.uploadOptions = Object.assign({}, exports.UploadOptions);
+        this.uploadConfig = this.uploadOptions;
         this.authorized = req.user !== null;
         this.req = req;
         this.res = res;

@@ -3,7 +3,6 @@ import { WebSocketController } from "../controllers/WebSocketController";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
 
-export * from "capitalization";
 export * from "sfn-xss";
 
 /** 

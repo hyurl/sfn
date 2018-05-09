@@ -6,7 +6,7 @@ import * as multer from "multer";
 import * as cors from "sfn-cors";
 import * as trimmer from "string-trimmer";
 import * as date from "sfn-date";
-import nextFilename = require("next-filename");
+import { idealFilename } from "ideal-filename";
 import { App } from "webium";
 import { config, isDevMode } from "../../init";
 import { HttpController, UploadingFile } from "../controllers/HttpController";
@@ -110,11 +110,11 @@ function getDestination(ctrl: HttpController, savePath: string, reject: Function
 function getFilename(ctrl: HttpController, savePath: string, reject: Function) {
     return (req, file: UploadingFile, cb: Function) => {
         try {
-            if (ctrl.uploadConfig.filename instanceof Function) {
+            if (ctrl.uploadOptions.filename instanceof Function) {
                 // The filename is customized by the user.
-                let filename = ctrl.uploadConfig.filename(file);
+                let filename = ctrl.uploadOptions.filename(file);
                 cb(null, filename);
-            } else if (ctrl.uploadConfig.filename === "random") {
+            } else if (ctrl.uploadOptions.filename === "random") {
                 // The filename will be a random string.
                 let extname = path.extname(file.originalname),
                     filename = randStr(32) + extname;
@@ -122,7 +122,7 @@ function getFilename(ctrl: HttpController, savePath: string, reject: Function) {
             } else {
                 // auto-increment
                 let filename = `${savePath}/${file.originalname}`;
-                nextFilename(filename).then(filename => {
+                idealFilename(filename).then(filename => {
                     cb(null, path.basename(filename));
                 }).catch(err => {
                     reject(err);
@@ -135,7 +135,7 @@ function getFilename(ctrl: HttpController, savePath: string, reject: Function) {
 }
 
 function getStorage(ctrl: HttpController, resolve: Function, reject: Function) {
-    let savePath = `${ctrl.uploadConfig.savePath}/` + date("Y-m-d");
+    let savePath = `${ctrl.uploadOptions.savePath}/` + date("Y-m-d");
     return multer.diskStorage({
         destination: getDestination(ctrl, savePath, reject),
         filename: getFilename(ctrl, savePath, reject)
@@ -147,7 +147,7 @@ function getUploader(ctrl: HttpController, resolve: Function, reject: Function) 
         storage: getStorage(ctrl, resolve, reject),
         fileFilter: (req, file: UploadingFile, cb) => {
             try {
-                cb(null, ctrl.uploadConfig.filter(file));
+                cb(null, ctrl.uploadOptions.filter(file));
             } catch (err) {
                 reject(err);
             }
@@ -172,7 +172,7 @@ function handleUpload(
         for (let field of uploadFields) {
             fields.push({
                 name: field,
-                maxCount: ctrl.uploadConfig.maxCount
+                maxCount: ctrl.uploadOptions.maxCount
             });
         }
 
@@ -235,12 +235,12 @@ function getNextHandler(
     reject: Function
 ) {
     return (ctrl: HttpController) => {
-        ctrl.logConfig.action = action;
+        ctrl.logOptions.action = action;
 
         let { req, res } = ctrl;
 
         // Handle CORS.
-        if (!cors(ctrl.cors, req, res)) {
+        if (!cors(<any>ctrl.cors, req, res)) {
             throw new HttpError(410);
         } else if (req.method === "OPTIONS") {
             res.end();
@@ -351,7 +351,7 @@ function getRouteHandler(Class: typeof HttpController, method: string) {
             return handleResponse(ctrl, data);
         }).catch((err: Error) => {
             ctrl = ctrl || new HttpController(req, res);
-            ctrl.logConfig.action = action;
+            ctrl.logOptions.action = action;
 
             handleError(err, ctrl);
         });
@@ -371,7 +371,7 @@ export function handleHttpRoute(app: App): void {
     app.onerror = function onerror(err: any, req: Request, res: Response) {
         res.keepAlive = false;
         let ctrl = new HttpController(req, res)
-        ctrl.logConfig.action = req.method + " " + req.url;
+        ctrl.logOptions.action = req.method + " " + req.url;
 
         if (res.statusCode === 404)
             err = new HttpError(404);

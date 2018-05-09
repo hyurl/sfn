@@ -70,7 +70,7 @@ function handleError(err: any, ctrl: WebSocketController, info: SocketEventInfo)
     if (info.event) {
         ctrl.socket.emit(info.event, ctrl.error(err.message, info.code));
     } else {
-        ctrl.logConfig.action = info.event = "unknown";
+        ctrl.logOptions.action = info.event = "unknown";
     }
 
     if (config.server.error.log) {
@@ -92,7 +92,7 @@ function getNextHandler(
     resolve: Function
 ) {
     return (ctrl: WebSocketController) => {
-        ctrl.logConfig.action = action;
+        ctrl.logOptions.action = action;
 
         // Handle authentication.
         let Class = <typeof WebSocketController>ctrl.constructor;
@@ -138,7 +138,7 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
         finish(ctrl, info);
     }).catch((err: Error) => {
         ctrl = ctrl || new WebSocketController(socket);
-        ctrl.logConfig.action = action;
+        ctrl.logOptions.action = action;
 
         handleError(err, ctrl, info);
     });

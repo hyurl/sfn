@@ -1,39 +1,25 @@
 import * as util from "util";
 import { EventEmitter } from "events";
 import Cache  = require("sfn-cache");
-import Logger = require("sfn-logger");
-import Mail = require("sfn-mail");
+import * as Logger from "sfn-logger";
+import * as Mail from "sfn-mail";
 import { DB } from "modelar";
 import HideProtectedProperties = require("hide-protected-properties");
 import { config } from "../../init";
 import { LocaleMap } from "./LocaleMap";
 import { realCache, realDB } from "./symbols";
 
-export type LogOptions = {
-    ttl?: number;
-    /** The size of output buffer. */
-    size?: number;
-    /** The file for storing output logs. */
-    filename?: string;
-    /** The size of the log file. */
-    fileSize?: number;
-    /** 
-     * If set, when the file size is up limit, instead of compressing it, send
-     * it to the mail box.
-     */
-    mail?: Mail | object;
+export interface LogOptions extends Logger.Options {
     /** The action will be set by the framework automatically. */
     action?: string;
 };
 
-export const LogOptions: LogOptions = {
+export const LogOptions: LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
-    size: 0,
     filename: process.cwd() + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
-    mail: null,
     action: "default"
-}
+});
 
 /**
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
@@ -45,9 +31,11 @@ export class Service extends EventEmitter {
     /** The language of the current service. */
     lang: string = config.lang;
     /** Configurations for the logger in this instance. */
-    logConfig: LogOptions = Object.assign(LogOptions, {
+    logOptions: LogOptions = Object.assign({}, LogOptions, {
         action: this.constructor.name
     });
+    /** `deprecated`, use `logOptions` instead. */
+    logConfig = this.logOptions;
 
     static readonly Loggers: { [filename: string]: Logger } = {};
 
@@ -79,11 +67,11 @@ export class Service extends EventEmitter {
 
     /** Gets a logger instance. */
     get logger(): Logger {
-        let filename = this.logConfig.filename;
+        let filename = this.logOptions.filename;
         if (!Service.Loggers[filename]) {
-            Service.Loggers[filename] = new Logger(this.logConfig);
+            Service.Loggers[filename] = new Logger(this.logOptions);
         }
-        Service.Loggers[filename].action = this.logConfig.action;
+        Service.Loggers[filename].action = this.logOptions.action;
         return Service.Loggers[filename];
     }
 

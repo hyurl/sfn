@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
-tslib_1.__exportStar(require("capitalization"), exports);
 tslib_1.__exportStar(require("sfn-xss"), exports);
 function rand(min, max) {
     min = Math.ceil(min);
