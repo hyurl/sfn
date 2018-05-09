@@ -10,16 +10,15 @@ tslib_1.__exportStar(require("./config"), exports);
 exports.version = require("../package.json").version;
 var _root = path_1.dirname(process.mainModule.filename);
 exports.APP_PATH = (global["APP_PATH"] || _root).replace(/\\/g, "/");
-exports.config = null;
+exports.config = Object.assign({}, config_1.SFNConfig);
 if (fs.existsSync(exports.APP_PATH + "/config.js")) {
     let m = require(exports.APP_PATH + "/config.js");
     if (typeof m.config === "object") {
-        exports.config = m.config;
+        exports.config = Object.assign(exports.config, m.config);
     }
-    else if (typeof m.dev === "string") {
-        exports.config = m;
+    else if (typeof m.env === "string") {
+        exports.config = Object.assign(exports.config, m);
     }
-    exports.config = Object.assign(config_1.SFNConfig, exports.config);
 }
 var tscfgfile = exports.APP_PATH + "/../tsconfig.json";
 var tscfg;

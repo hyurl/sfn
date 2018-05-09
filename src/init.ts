@@ -14,16 +14,17 @@ var _root = dirname(process.mainModule.filename);
 export const APP_PATH: string = (global["APP_PATH"] || _root).replace(/\\/g, "/");
 
 /** The configuration of the program. */
-export var config: SFNConfig = null;
+export var config: SFNConfig = Object.assign({}, SFNConfig);
+
 if (fs.existsSync(APP_PATH + "/config.js")) {
     // Load user-defined configurations.
     let m = require(APP_PATH + "/config.js");
+    
     if (typeof m.config === "object") {
-        config = m.config;
-    } else if (typeof m.dev === "string") {
-        config = m;
+        config = Object.assign(config, m.config);
+    } else if (typeof m.env === "string") {
+        config = Object.assign(config, m);
     }
-    config = Object.assign(SFNConfig, config);
 }
 
 var tscfgfile = APP_PATH + "/../tsconfig.json";
