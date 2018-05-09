@@ -80,7 +80,7 @@ After you have initiate your project, you can now install **SFN** by using
 this command.
 
 ```sh
-npm i SFN
+npm i sfn
 ```
 
 After all files downloaded, the **SFN** framework will perform initiating 
@@ -114,7 +114,7 @@ to create a new one.
 Create a file in **src/controllers**, named `Demo.ts`:
 
 ```typescript
-import { HttpController, route } from "SFN";
+import { HttpController, route } from "sfn";
 
 export default class extends HttpController {
     @route.get("/demo")
