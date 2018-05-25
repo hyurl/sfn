@@ -2,7 +2,6 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as cmd from "commander";
-import * as trimmer from "string-trimmer";
 import pluralize = require("pluralize");
 import { sfnd, cwd, ext } from "./init";
 import { version, config, APP_PATH, SRC_PATH } from "../init";

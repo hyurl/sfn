@@ -4,7 +4,6 @@ import * as zlib from "zlib";
 import * as url from "url";
 import * as multer from "multer";
 import * as cors from "sfn-cors";
-import * as trimmer from "string-trimmer";
 import * as date from "sfn-date";
 import { idealFilename } from "ideal-filename";
 import { App } from "webium";
