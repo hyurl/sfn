@@ -8,6 +8,7 @@ import Validator = require("sfn-validator");
 import Cache = require("sfn-cache");
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
+import { Http2SecureServer } from "http2";
 import * as fs from "fs";
 import * as date from "sfn-date";
 import chalk from "chalk";
@@ -52,6 +53,11 @@ export var app: App = null;
 export var http: HttpServer = null;
 /** (worker only) The HTTPS server. */
 export var https: HttpsServer = null;
+/**
+ * (worker only) When `config.server.https.http2` is `true`, this object 
+ * contains the working http2 server.
+ */
+export var http2: Http2SecureServer = null;
 /** (worker only) The WebSocket created by SocketIO, listens `ws` protocol. */
 export var ws: SocketIO.Server = null;
 /** (worker only) The WebSocket created by SocketIO, listens `wss` protocol. */
@@ -66,8 +72,13 @@ if (Worker.isWorker) {
     if (enableHttp)
         http = new HttpServer(app.listener);
 
-    if (enableHttps)
-        https = createServer(httpsOptions, app.listener);
+    if (enableHttps) {
+        if (httpsServer.http2) {
+            http2 = require("http2").createSecureServer(httpsOptions, app.listener);
+        } else {
+            https = createServer(httpsOptions, app.listener);
+        }
+    }
 
     if (enableWs)
         ws = SocketIO(http, WS.options);
@@ -152,8 +163,13 @@ export function startServer() {
 
     // Start HTTPS server.
     if (enableHttps) {
-        https.setTimeout(config.server.timeout);
-        https.listen(httpsPort, (err) => {
+        let server = httpsServer.http2 ? http2 : https;
+
+        if (!httpsServer.http2) {
+            https.setTimeout(config.server.timeout);
+        }
+
+        server.listen(httpsPort, (err) => {
             if (err) {
                 console.log(err);
                 process.exit(1);

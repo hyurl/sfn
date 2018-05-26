@@ -63,7 +63,7 @@ export interface SFNConfig {
         http?: {
             enabled: boolean;
             port?: number;
-        },
+        };
         /** Configurations of HTTPS server. */
         https?: {
             enabled: boolean;
@@ -76,7 +76,9 @@ export interface SFNConfig {
              */
             options?: tls.TlsOptions;
             /** **deprecated** use `options` instead. */
-            credentials?: SFNConfig["server"]["https"]["options"]
+            credentials?: SFNConfig["server"]["https"]["options"],
+            /** Upgrade to HTTP/2. */
+            http2: boolean;
         };
         /** **deprecated**, use `websocket` instead. */
         socket?: SFNConfig["server"]["websocket"];
@@ -144,7 +146,8 @@ export const SFNConfig: SFNConfig = {
             enabled: false,
             port: 443,
             forceRedirect: true,
-            options: null
+            options: null,
+            http2: false
         },
         websocket: {
             enabled: true,

@@ -24,7 +24,8 @@ exports.SFNConfig = {
             enabled: false,
             port: 443,
             forceRedirect: true,
-            options: null
+            options: null,
+            http2: false
         },
         websocket: {
             enabled: true,

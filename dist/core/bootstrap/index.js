@@ -53,6 +53,7 @@ var enableWss = WS.enabled && enableHttps;
 exports.app = null;
 exports.http = null;
 exports.https = null;
+exports.http2 = null;
 exports.ws = null;
 exports.wss = null;
 if (Worker.isWorker) {
@@ -62,8 +63,14 @@ if (Worker.isWorker) {
     });
     if (enableHttp)
         exports.http = new http_1.Server(exports.app.listener);
-    if (enableHttps)
-        exports.https = https_1.createServer(httpsOptions, exports.app.listener);
+    if (enableHttps) {
+        if (httpsServer.http2) {
+            exports.http2 = require("http2").createSecureServer(httpsOptions, exports.app.listener);
+        }
+        else {
+            exports.https = https_1.createServer(httpsOptions, exports.app.listener);
+        }
+    }
     if (enableWs)
         exports.ws = SocketIO(exports.http, WS.options);
     if (enableWss)
@@ -118,8 +125,11 @@ function startServer() {
         });
     }
     if (enableHttps) {
-        exports.https.setTimeout(init_1.config.server.timeout);
-        exports.https.listen(httpsPort, (err) => {
+        let server = httpsServer.http2 ? exports.http2 : exports.https;
+        if (!httpsServer.http2) {
+            exports.https.setTimeout(init_1.config.server.timeout);
+        }
+        server.listen(httpsPort, (err) => {
             if (err) {
                 console.log(err);
                 process.exit(1);
