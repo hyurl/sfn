@@ -1,7 +1,6 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import * as zlib from "zlib";
-import * as url from "url";
 import * as multer from "multer";
 import * as cors from "sfn-cors";
 import * as date from "sfn-date";
@@ -163,7 +162,6 @@ function handleUpload(
     let Class = <typeof HttpController>ctrl.constructor;
     let uploadFields = Class.UploadFields[method];
     let { req, res } = ctrl;
-    let result: any;
 
     if (req.method == "POST" && uploadFields && uploadFields.length) {
         // Configure fields.
@@ -362,7 +360,7 @@ export function handleHttpRoute(app: App): void {
         let Class = RouteMap[route].Class,
             _route = route.split(/\s+/),
             method = _route[0] === "SSE" ? "GET" : _route[0],
-            path = _route[1];
+            path = (Class.baseURI || "") + _route[1];
 
         app.method(method, path, getRouteHandler(Class, RouteMap[route].method));
     }

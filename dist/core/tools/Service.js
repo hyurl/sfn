@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+var Service_1;
 const util = require("util");
 const events_1 = require("events");
 const Cache = require("sfn-cache");
@@ -68,5 +69,4 @@ Service = Service_1 = tslib_1.__decorate([
     HideProtectedProperties
 ], Service);
 exports.Service = Service;
-var Service_1;
 //# sourceMappingURL=Service.js.map

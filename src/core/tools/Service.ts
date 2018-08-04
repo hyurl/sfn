@@ -2,7 +2,6 @@ import * as util from "util";
 import { EventEmitter } from "events";
 import Cache  = require("sfn-cache");
 import * as Logger from "sfn-logger";
-import * as Mail from "sfn-mail";
 import { DB } from "modelar";
 import HideProtectedProperties = require("hide-protected-properties");
 import { config } from "../../init";

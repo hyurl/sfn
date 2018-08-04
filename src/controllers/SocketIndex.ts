@@ -1,4 +1,4 @@
-import { WebSocketController, WebSocket, event } from "sfn";
+import { WebSocketController, event } from "sfn";
 
 export default class extends WebSocketController {
 

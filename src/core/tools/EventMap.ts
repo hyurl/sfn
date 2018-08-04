@@ -1,5 +1,4 @@
 import { WebSocketController } from "../controllers/WebSocketController";
-import { WebSocket } from "./interfaces";
 
 export interface EventMap {
     [event: string]: {

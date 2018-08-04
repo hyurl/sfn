@@ -7,8 +7,6 @@ import {
     applyHttpControllerDoc,
     applyWebSocketControllerDoc
 } from "../tools/functions-inner";
-import { RouteMap } from "../tools/RouteMap";
-import { EventMap } from "../tools/EventMap";
 
 function isController(m): boolean {
     return m && (m.prototype instanceof HttpController

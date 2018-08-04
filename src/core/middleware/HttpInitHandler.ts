@@ -4,7 +4,6 @@ import chalk from "chalk";
 import { App } from "webium";
 import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
-import { realDB } from '../Tools/symbols';
 
 function getDevLogger(req: Request, res: Response) {
     return () => {

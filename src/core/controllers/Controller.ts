@@ -1,6 +1,4 @@
-import * as path from "path";
 import { Service } from "../tools/Service";
-import { MarkdownParser } from "../tools/MarkdownParser";
 
 /**
  * The Controller give you a common API to return data to the underlying 

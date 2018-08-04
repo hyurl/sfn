@@ -5,7 +5,7 @@ import * as cmd from "commander";
 import pluralize = require("pluralize");
 import { sfnd, cwd, ext } from "./init";
 import { version, config, APP_PATH, SRC_PATH } from "../init";
-import { capitalize, hyphenate } from "capitalization";
+import { hyphenate } from "capitalization";
 import { loadLanguagePack } from "../core/tools/functions-inner";
 
 cmd.version(version)
@@ -77,10 +77,10 @@ if (cmd.controller) { // create controller.
 } else if (cmd.language) {
     let output: string = `${SRC_PATH}/locales/${cmd.language}.json`;
     let contents: string;
-    let lang: any;
     let file1 = `${APP_PATH}/locales/${config.lang}.js`;
     let file2 = `${SRC_PATH}/locales/${config.lang}.json`;
     let file3 = `${SRC_PATH}/locales/${config.lang}.js`;
+    let lang: any;
 
     if (fs.existsSync(file1)) {
         lang = loadLanguagePack(file1);
@@ -92,7 +92,7 @@ if (cmd.controller) { // create controller.
         lang = {};
     }
 
-    contents = JSON.stringify({}, null, "  ");
+    contents = JSON.stringify(lang, null, "  ");
     outputFile(output, contents, "Language pack");
 } else {
     throw new TypeError("No valid argument was specified.");

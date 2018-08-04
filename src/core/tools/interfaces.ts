@@ -1,7 +1,7 @@
 import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import { DB, User } from "modelar";
-import { UploadingFile, UploadedFile } from "../controllers/HttpController";
+import { UploadedFile } from "../controllers/HttpController";
 
 export type HttpRequestMethod = string;
 

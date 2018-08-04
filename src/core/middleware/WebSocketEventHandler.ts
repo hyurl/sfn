@@ -1,4 +1,3 @@
-import * as path from "path";
 import * as date from "sfn-date";
 import chalk from "chalk";
 import { Server } from "socket.io";

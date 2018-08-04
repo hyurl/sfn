@@ -8,12 +8,7 @@ import { SRC_PATH, config } from "../../init";
 import { Controller } from "./Controller";
 import { TemplateEngine } from "../tools/TemplateEngine";
 import { MarkdownParser } from "../tools/MarkdownParser";
-import {
-    Request,
-    Response,
-    HttpRequestMethod,
-    Session
-} from "../tools/interfaces";
+import { Request, Response, Session } from "../tools/interfaces";
 import { HttpError } from "../tools/HttpError";
 import { realSSE } from "../tools/symbols";
 
@@ -97,6 +92,8 @@ export class HttpController extends Controller {
     static viewPath: string = SRC_PATH + "/views";
     static viewExtname: string = ".html";
     static engine: TemplateEngine = Engine;
+    /** Set a specified base URI for route paths. */
+    static baseURI: string;
 
     viewPath = this.Class.viewPath;
     viewExtname = this.Class.viewExtname;

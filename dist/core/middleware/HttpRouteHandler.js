@@ -134,7 +134,6 @@ function handleUpload(ctrl, method, resolve, reject) {
     let Class = ctrl.constructor;
     let uploadFields = Class.UploadFields[method];
     let { req, res } = ctrl;
-    let result;
     if (req.method == "POST" && uploadFields && uploadFields.length) {
         let fields = [];
         for (let field of uploadFields) {
@@ -291,7 +290,7 @@ function getRouteHandler(Class, method) {
 }
 function handleHttpRoute(app) {
     for (let route in RouteMap_1.RouteMap) {
-        let Class = RouteMap_1.RouteMap[route].Class, _route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : _route[0], path = _route[1];
+        let Class = RouteMap_1.RouteMap[route].Class, _route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : _route[0], path = (Class.baseURI || "") + _route[1];
         app.method(method, path, getRouteHandler(Class, RouteMap_1.RouteMap[route].method));
     }
     app.onerror = function onerror(err, req, res) {
