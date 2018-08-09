@@ -12,6 +12,7 @@ exports.SFNConfig = {
     enableDocRoute: false,
     awaitGenerator: false,
     statics: [process.cwd() + "/src/assets"],
+    watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     server: {
         hostname: "localhost",
         timeout: 120000,

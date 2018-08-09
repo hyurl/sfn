@@ -180,16 +180,20 @@ if (Worker.isMaster) {
     for (let name of init_1.config.workers) {
         new Worker(name, !init_1.isDevMode);
     }
-    let WatchFolders = ["bootstrap", "controllers", "locales", "models"];
+    let watches = init_1.config.watches || [
+        "index.ts",
+        "config.ts",
+        "bootstrap",
+        "controllers",
+        "locales",
+        "models"
+    ];
     if (init_1.isDevMode) {
-        new DevWatcher_1.DevWatcher(init_1.APP_PATH + "/config.js");
-        new DevWatcher_1.DevWatcher(init_1.APP_PATH + "/index.js");
-        for (let folder of WatchFolders) {
-            let dir = init_1.APP_PATH + "/" + folder;
-            fs.exists(dir, exists => {
-                if (exists) {
-                    new DevWatcher_1.DevWatcher(dir);
-                }
+        for (let filename of watches) {
+            filename = init_1.APP_PATH + "/" + filename;
+            fs.exists(filename, exists => {
+                if (exists)
+                    new DevWatcher_1.DevWatcher(filename);
             });
         }
     }

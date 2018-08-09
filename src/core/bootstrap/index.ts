@@ -248,25 +248,27 @@ if (Worker.isMaster) {
         new Worker(name, !isDevMode);
     }
 
-    let WatchFolders = ["bootstrap", "controllers", "locales", "models"];
+    let watches = config.watches || [
+        "index.ts",
+        "config.ts",
+        "bootstrap",
+        "controllers",
+        "locales",
+        "models"
+    ];
 
     // Watch for file changes, when a file is modified, reboot the workers.
     if (isDevMode) {
-        new DevWatcher(APP_PATH + "/config.js");
-        new DevWatcher(APP_PATH + "/index.js");
+        for (let filename of watches) {
+            filename = APP_PATH + "/" + filename;
 
-        for (let folder of WatchFolders) {
-            let dir = APP_PATH + "/" + folder;
-
-            fs.exists(dir, exists => {
-                if (exists) {
-                    new DevWatcher(dir);
-                }
+            fs.exists(filename, exists => {
+                if (exists) new DevWatcher(filename);
             });
         }
     }
 } else {
-    // When the worker is folked and auto-start enabled, start the server 
+    // When the worker is forked and auto-start enabled, start the server 
     // immediately.
     Worker.on("online", _worker => {
         worker = _worker;

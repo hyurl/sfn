@@ -11,6 +11,7 @@ var config = {
     enableDocRoute: true,
     awaitGenerator: false,
     statics: [process.cwd() + "/src/assets"],
+    watches: ["index.js", "config.js", "bootstrap", "controllers", "locales", "models"],
     server: {
         hostname: "localhost",
         timeout: 120000,

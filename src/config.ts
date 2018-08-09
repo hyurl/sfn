@@ -46,6 +46,11 @@ export interface SFNConfig {
      * @see https://www.npmjs.com/package/serve-static
      */
     statics?: string[] | { [path: string]: StaticOptions },
+    /** 
+     * Watch file changes of the given file/folder names in APP_PATH, when 
+     * watching a folder, watching `.js/.ts` and `.json` files in it.
+     */
+    watches?: string[],
     server: {
         /** **deprecated**, use `hostname` instead. */
         host?: string | string[];
@@ -134,6 +139,7 @@ export const SFNConfig: SFNConfig = {
     awaitGenerator: false,
     // staticPath: process.cwd() + "/src/assets",
     statics: [process.cwd() + "/src/assets"],
+    watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     server: {
         hostname: "localhost",
         timeout: 120000, // 2 min.
