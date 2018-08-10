@@ -1,6 +1,6 @@
 import { DB, User } from "modelar";
 import { Controller } from "./Controller";
-import { WebSocket, Session } from "../Tools/interfaces";
+import { WebSocket, Session } from "../tools/interfaces";
 import { config } from "../../init";
 
 export type WebSocketNextHandler = (controller: WebSocketController) => void;
