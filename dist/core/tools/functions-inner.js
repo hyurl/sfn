@@ -4,7 +4,7 @@ const path_1 = require("path");
 const CallSiteRecord = require("callsite-record");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
-const init_1 = require("../../init");
+const index_1 = require("../../index");
 const tslib_1 = require("tslib");
 function loadLanguagePack(filename) {
     let ext = path_1.extname(filename), name = path_1.basename(filename, ext).replace(/\-/g, ""), _module = require(filename), lang;
@@ -125,7 +125,7 @@ function callsiteLog(err) {
 exports.callsiteLog = callsiteLog;
 function callMethod(thisArg, fn, ...args) {
     let res;
-    if (fn.constructor.name == "GeneratorFunction" && init_1.config.awaitGenerator) {
+    if (fn.constructor.name == "GeneratorFunction" && index_1.config.awaitGenerator) {
         res = tslib_1.__awaiter(thisArg, args, null, fn);
     }
     else {

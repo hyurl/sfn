@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Controller_1 = require("./Controller");
-const init_1 = require("../../init");
+const index_1 = require("../../index");
 class WebSocketController extends Controller_1.Controller {
     constructor(socket, next = null) {
         super();
@@ -11,7 +11,7 @@ class WebSocketController extends Controller_1.Controller {
         this.isAsync = next instanceof Function;
         this.lang = (socket.cookies && socket.cookies.lang)
             || socket.lang
-            || init_1.config.lang;
+            || index_1.config.lang;
     }
     get db() {
         return this.socket.db;

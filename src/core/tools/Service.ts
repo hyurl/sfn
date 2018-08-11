@@ -4,7 +4,7 @@ import Cache  = require("sfn-cache");
 import * as Logger from "sfn-logger";
 import { DB } from "modelar";
 import HideProtectedProperties = require("hide-protected-properties");
-import { config } from "../../init";
+import { config } from "../../index";
 import { LocaleMap } from "./LocaleMap";
 import { realCache, realDB } from "./symbols";
 

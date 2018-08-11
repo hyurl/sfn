@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const init_1 = require("../../init");
+const index_1 = require("../../index");
 class TemplateEngine {
     constructor(options) {
         this.options = Object.assign({
-            cache: !init_1.isDevMode,
+            cache: !index_1.isDevMode,
             encoding: "utf8"
         }, options);
         if (!(this.renderFile instanceof Function)) {

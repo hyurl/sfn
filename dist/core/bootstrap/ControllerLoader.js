@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const path = require("path");
 const init_1 = require("../../init");
+const index_1 = require("../../index");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const functions_inner_1 = require("../tools/functions-inner");
@@ -31,24 +32,21 @@ function loadControllers(controllerPath) {
             }
             if (init_1.SRC_PATH !== init_1.APP_PATH) {
                 let _filename = filename.substring(init_1.APP_PATH.length, filename.length - 3);
-                _filename = init_1.SRC_PATH + _filename + ".ts";
+                _filename = path.normalize(init_1.SRC_PATH + _filename + ".ts");
                 if (fs.existsSync(_filename)) {
                     filename = _filename;
                 }
             }
-            if (process.platform === "win32") {
-                filename = filename.replace(/\//g, "\\");
-            }
             if (Class.prototype instanceof HttpController_1.HttpController) {
                 let _class = Class;
                 _class.filename = filename;
-                if (init_1.config.enableDocRoute)
+                if (index_1.config.enableDocRoute)
                     functions_inner_1.applyHttpControllerDoc(_class);
             }
             else if (Class.prototype instanceof WebSocketController_1.WebSocketController) {
                 let _class = Class;
                 _class.filename = filename;
-                if (init_1.config.enableDocRoute)
+                if (index_1.config.enableDocRoute)
                     functions_inner_1.applyWebSocketControllerDoc(_class);
             }
         }

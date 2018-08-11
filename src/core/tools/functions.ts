@@ -1,9 +1,8 @@
+import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
-
-export * from "sfn-xss";
 
 /** 
  * Generates a random number.
@@ -49,16 +48,33 @@ export function injectCsrfToken(html: string, token: string): string {
     return html;
 }
 
-interface HttpDecorator extends Function {
+export interface ControllerDecorator extends Function {
+    (proto: Controller, prop: string): void;
+}
+
+/** Requires authentication when calling the method. */
+export var requireAuth: ControllerDecorator = (proto: Controller, prop: string) => {
+    let Class = <typeof Controller>proto.constructor;
+
+    if (!Class.hasOwnProperty("RequireAuth"))
+        Class.RequireAuth = [];
+
+    if (!Class.RequireAuth.includes(prop))
+        Class.RequireAuth.push(prop);
+}
+
+export interface HttpDecorator extends Function {
     (proto: HttpController, prop: string): void;
 }
 
-interface WebSocketDecorator extends Function {
+export interface WebSocketDecorator extends Function {
     (proto: WebSocketController, prop: string): void;
 }
 
+interface WebSocketEventDecorator extends WebSocketDecorator {}
+
 /** Binds the method to a specified socket event. */
-export function event(name: string): WebSocketDecorator;
+export function event(name: string): WebSocketEventDecorator;
 export function event(name: string, Controller: typeof WebSocketController, method: string): void;
 export function event(...args) {
     if (args.length === 1) {
@@ -88,17 +104,6 @@ export function upload(...fields: string[]): HttpDecorator {
     }
 }
 
-/** Requires authentication when calling the method. */
-export var requireAuth: HttpDecorator = (proto: HttpController, prop: string) => {
-    let Class = <typeof HttpController>proto.constructor;
-
-    if (!Class.hasOwnProperty("UploadFields"))
-        Class.RequireAuth = [];
-
-    if (!Class.RequireAuth.includes(prop))
-        Class.RequireAuth.push(prop);
-}
-
 function _route(...args) {
     let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
 
@@ -117,27 +122,29 @@ function _route(...args) {
     }
 }
 
-interface RouteFunction extends Function {
+interface HttpRouteDecorator extends HttpDecorator {}
+
+interface HttpRoute extends Function {
     /** Binds the method to a specified URL route. */
-    (route: string): HttpDecorator;
-    (reqMethod: string, path: string): HttpDecorator;
+    (route: string): HttpRouteDecorator;
+    (reqMethod: string, path: string): HttpRouteDecorator;
     (route: string, Class: typeof HttpController, method: string): void
     (reqMethod: string, path: string, Class: typeof HttpController, method: string): void;
-    delete(path: string): HttpDecorator;
+    delete(path: string): HttpRouteDecorator;
     delete(path: string, Class: typeof HttpController, method: string): void;
-    get(path: string): HttpDecorator;
+    get(path: string): HttpRouteDecorator;
     get(path: string, Class: typeof HttpController, method: string): void;
-    head(path: string): HttpDecorator;
+    head(path: string): HttpRouteDecorator;
     head(path: string, Class: typeof HttpController, method: string): void;
-    post(path: string): HttpDecorator;
-    patch(path: string): HttpDecorator;
-    patch(path: string, Class: typeof HttpController, method: string): void;
+    post(path: string): HttpRouteDecorator;
     post(path: string, Class: typeof HttpController, method: string): void;
-    put(path: string);
+    patch(path: string): HttpRouteDecorator;
+    patch(path: string, Class: typeof HttpController, method: string): void;
+    put(path: string): HttpRouteDecorator;
     put(path: string, Class: typeof HttpController, method: string): void;
 }
 
-export var route: RouteFunction = <any>_route;
+export var route: HttpRoute = <any>_route;
 
 route.delete = function (...args) {
     return _route("DELETE", ...args);

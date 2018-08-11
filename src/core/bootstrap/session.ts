@@ -1,5 +1,5 @@
 import * as Session from "express-session";
-import { config } from "../../init";
+import { config } from "../../index";
 
 type SessionHanlder = (req: any, res: any, next: Function) => void;
 

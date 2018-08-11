@@ -8,6 +8,7 @@ import { DBConfig } from "modelar";
 import { ClientOpts } from "redis";
 import { ServerOptions } from "socket.io";
 import * as tls from "tls";
+import { SRC_PATH } from "./init";
 
 /**
  * @see https://www.npmjs.com/package/serve-static
@@ -47,7 +48,7 @@ export interface SFNConfig {
      */
     statics?: string[] | { [path: string]: StaticOptions },
     /** 
-     * Watch file changes of the given file/folder names in APP_PATH, when 
+     * Watch file changes of the given file/folder names in `APP_PATH`, when 
      * watching a folder, watching `.js/.ts` and `.json` files in it.
      */
     watches?: string[],
@@ -138,7 +139,7 @@ export const SFNConfig: SFNConfig = {
     enableDocRoute: false,
     awaitGenerator: false,
     // staticPath: process.cwd() + "/src/assets",
-    statics: [process.cwd() + "/src/assets"],
+    statics: [SRC_PATH + "/assets"],
     watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     server: {
         hostname: "localhost",

@@ -1,38 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
-require("source-map-support/register");
 const path = require("path");
 const fs = require("fs");
-const config_1 = require("./config");
-const path_1 = require("path");
-tslib_1.__exportStar(require("./config"), exports);
+require("source-map-support/register");
+const dotenv_1 = require("dotenv");
 exports.version = require("../package.json").version;
-var _root = path_1.dirname(process.mainModule.filename);
-exports.APP_PATH = (global["APP_PATH"] || _root).replace(/\\/g, "/");
-exports.config = Object.assign({}, config_1.SFNConfig);
-if (fs.existsSync(exports.APP_PATH + "/config.js")) {
-    let m = require(exports.APP_PATH + "/config.js");
-    if (typeof m.config === "object") {
-        exports.config = Object.assign(exports.config, m.config);
-    }
-    else if (typeof m.env === "string") {
-        exports.config = Object.assign(exports.config, m);
-    }
-}
-var tscfgfile = exports.APP_PATH + "/../tsconfig.json";
-var tscfg;
-var src_root = exports.APP_PATH;
-if (fs.existsSync(tscfgfile)) {
+var appPath = path.dirname(process.mainModule.filename);
+exports.ROOT_PATH = path.normalize(appPath + "/..");
+exports.APP_PATH = appPath;
+var tsCfgFile = exports.APP_PATH + "/../tsconfig.json";
+var tsCfg;
+var srcRoot = exports.APP_PATH;
+if (fs.existsSync(tsCfgFile)) {
     try {
-        tscfg = require(tscfgfile);
-        if (tscfg.compilerOptions && tscfg.compilerOptions.rootDir) {
-            src_root = path.normalize(exports.APP_PATH + "/../" + tscfg.compilerOptions.rootDir);
-            src_root = src_root.replace(/\\/g, "/");
+        tsCfg = require(tsCfgFile);
+        if (tsCfg.compilerOptions && tsCfg.compilerOptions.rootDir) {
+            srcRoot = path.normalize(exports.APP_PATH + "/../" + tsCfg.compilerOptions.rootDir);
         }
     }
     catch (e) { }
 }
-exports.SRC_PATH = src_root;
-exports.isDevMode = exports.config.env == "dev" || exports.config.env == "development";
+exports.SRC_PATH = srcRoot;
+dotenv_1.config({
+    path: exports.ROOT_PATH + "/.env"
+});
 //# sourceMappingURL=init.js.map

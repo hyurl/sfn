@@ -9,6 +9,7 @@ const init_1 = require("./init");
 const init_2 = require("../init");
 const capitalization_1 = require("capitalization");
 const functions_inner_1 = require("../core/tools/functions-inner");
+const ConfigLoader_1 = require("../core/bootstrap/ConfigLoader");
 cmd.version(init_2.version)
     .description("create a new controller, model. etc.")
     .option("-c, --controller <name>", "create a new controller with a specified name.")
@@ -63,9 +64,9 @@ else if (cmd.model) {
 else if (cmd.language) {
     let output = `${init_2.SRC_PATH}/locales/${cmd.language}.json`;
     let contents;
-    let file1 = `${init_2.APP_PATH}/locales/${init_2.config.lang}.js`;
-    let file2 = `${init_2.SRC_PATH}/locales/${init_2.config.lang}.json`;
-    let file3 = `${init_2.SRC_PATH}/locales/${init_2.config.lang}.js`;
+    let file1 = `${init_2.APP_PATH}/locales/${ConfigLoader_1.config.lang}.js`;
+    let file2 = `${init_2.SRC_PATH}/locales/${ConfigLoader_1.config.lang}.json`;
+    let file3 = `${init_2.SRC_PATH}/locales/${ConfigLoader_1.config.lang}.js`;
     let lang;
     if (fs.existsSync(file1)) {
         lang = functions_inner_1.loadLanguagePack(file1);

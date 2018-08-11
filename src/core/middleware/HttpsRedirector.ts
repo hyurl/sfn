@@ -1,5 +1,5 @@
 import { App } from "webium";
-import { config } from "../../init";
+import { config } from "../../index";
 import { Request, Response } from "../tools/interfaces";
 
 export function redirectHttps(app: App): void {

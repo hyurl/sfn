@@ -2,7 +2,8 @@ import SSE = require("sfn-sse");
 import * as date from "sfn-date";
 import chalk from "chalk";
 import { App } from "webium";
-import { version, isDevMode } from "../../init";
+import { version } from "../../init";
+import { isDevMode } from "../../index";
 import { Request, Response } from "../tools/interfaces";
 
 function getDevLogger(req: Request, res: Response) {

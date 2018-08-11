@@ -4,9 +4,10 @@ import * as path from "path";
 import * as cmd from "commander";
 import pluralize = require("pluralize");
 import { sfnd, cwd, ext } from "./init";
-import { version, config, APP_PATH, SRC_PATH } from "../init";
+import { version, APP_PATH, SRC_PATH } from "../init";
 import { hyphenate } from "capitalization";
 import { loadLanguagePack } from "../core/tools/functions-inner";
+import { config } from "../core/bootstrap/ConfigLoader";
 
 cmd.version(version)
     .description("create a new controller, model. etc.")

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Session = require("express-session");
 const FileStore = require("session-file-store");
+const init_1 = require("./init");
 ;
 var Store = FileStore(Session);
 exports.SFNConfig = {
@@ -11,7 +12,7 @@ exports.SFNConfig = {
     lang: "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    statics: [process.cwd() + "/src/assets"],
+    statics: [init_1.SRC_PATH + "/assets"],
     watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     server: {
         hostname: "localhost",

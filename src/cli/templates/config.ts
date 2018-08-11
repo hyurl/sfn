@@ -1,4 +1,4 @@
-import { SFNConfig } from "sfn";
+import { SFNConfig, SRC_PATH } from "sfn";
 import * as Session from "express-session";
 import * as FileStore from "session-file-store";
 
@@ -11,7 +11,7 @@ export var config: SFNConfig = {
     lang: "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    statics: [process.cwd() + "/src/assets"],
+    statics: [SRC_PATH + "/assets"],
     watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     server: {
         hostname: "localhost",

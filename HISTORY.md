@@ -1,3 +1,16 @@
+# 0.1.11
+
+## Fixes
+- Fix the bug of `@requireAuth` not working with `WebSocketController`s.
+
+## New Features
+
+- Expose/load entities more reasonably, many variables, constants and 
+    functions are now available in `config.ts`. 
+- `DevWatcher` will delay restarting the server when more than one file are 
+    changed at once.
+- Support `.env` file (in `ROOT_PATH`).
+
 # 0.1.3
 
 ## Changes

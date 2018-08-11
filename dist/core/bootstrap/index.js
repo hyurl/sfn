@@ -1,53 +1,30 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
-const webium_1 = require("webium");
-const SocketIO = require("socket.io");
-const Mail = require("sfn-mail");
-exports.Mail = Mail;
-const OutputBuffer = require("sfn-output-buffer");
-exports.OutputBuffer = OutputBuffer;
-const Logger = require("sfn-logger");
-exports.Logger = Logger;
-const Worker = require("sfn-worker");
-exports.Worker = Worker;
-const Validator = require("sfn-validator");
-exports.Validator = Validator;
-const Cache = require("sfn-cache");
-exports.Cache = Cache;
+const fs = require("fs");
+const path_1 = require("path");
 const http_1 = require("http");
 const https_1 = require("https");
-const fs = require("fs");
-const date = require("sfn-date");
-exports.date = date;
 const chalk_1 = require("chalk");
+const webium_1 = require("webium");
+const SocketIO = require("socket.io");
+const date = require("sfn-date");
+const Worker = require("sfn-worker");
 const init_1 = require("../../init");
+const index_1 = require("../../index");
 const DevWatcher_1 = require("../tools/DevWatcher");
-exports.DevWatcher = DevWatcher_1.DevWatcher;
-tslib_1.__exportStar(require("sfn-scheduler"), exports);
-tslib_1.__exportStar(require("sfn-cookie"), exports);
-tslib_1.__exportStar(require("../../init"), exports);
-tslib_1.__exportStar(require("../tools/functions"), exports);
-tslib_1.__exportStar(require("../tools/HttpError"), exports);
-tslib_1.__exportStar(require("../tools/SocketError"), exports);
-tslib_1.__exportStar(require("../tools/Service"), exports);
-tslib_1.__exportStar(require("../tools/TemplateEngine"), exports);
-tslib_1.__exportStar(require("../tools/MarkdownParser"), exports);
-tslib_1.__exportStar(require("../controllers/HttpController"), exports);
-tslib_1.__exportStar(require("../controllers/WebSocketController"), exports);
 exports.isMaster = Worker.isMaster;
 exports.isWorker = Worker.isWorker;
 var worker = null;
-var hostnames = init_1.config.server.hostname || init_1.config.server.host;
+var hostnames = index_1.config.server.hostname || index_1.config.server.host;
 var hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames;
-var httpServer = init_1.config.server.http;
+var httpServer = index_1.config.server.http;
 var enableHttp = httpServer ? httpServer.enabled : true;
-var httpPort = httpServer ? httpServer.port : init_1.config.server.port;
-var httpsServer = init_1.config.server.https;
+var httpPort = httpServer ? httpServer.port : index_1.config.server.port;
+var httpsServer = index_1.config.server.https;
 var enableHttps = httpsServer.enabled;
 var httpsPort = httpsServer.port;
 var httpsOptions = httpsServer.options || httpsServer.credentials;
-var WS = init_1.config.server.websocket || init_1.config.server.socket;
+var WS = index_1.config.server.websocket || index_1.config.server.socket;
 var enableWs = WS.enabled && (!enableHttps || !httpsServer.forceRedirect);
 var enableWss = WS.enabled && enableHttps;
 exports.app = null;
@@ -58,7 +35,7 @@ exports.ws = null;
 exports.wss = null;
 if (Worker.isWorker) {
     exports.app = new webium_1.App({
-        cookieSecret: init_1.config.session.secret,
+        cookieSecret: index_1.config.session.secret,
         domain: hostnames
     });
     if (enableHttp)
@@ -80,7 +57,7 @@ function startServer() {
     if (Worker.isMaster) {
         throw new Error("The server can only be run in a worker process.");
     }
-    require("../bootstrap/ControllerLoader");
+    require("./ControllerLoader");
     const { handleHttpAuth } = require("../middleware/HttpAuthHandler");
     const { handleHttpDB } = require("../middleware/HttpDBHandler");
     const { handleHttpInit } = require("../middleware/HttpInitHandler");
@@ -114,7 +91,7 @@ function startServer() {
         require(file);
     handleHttpRoute(exports.app);
     if (enableHttp) {
-        exports.http.setTimeout(init_1.config.server.timeout);
+        exports.http.setTimeout(index_1.config.server.timeout);
         exports.http.listen(httpPort, (err) => {
             if (err) {
                 console.log(err);
@@ -127,7 +104,7 @@ function startServer() {
     if (enableHttps) {
         let server = httpsServer.http2 ? exports.http2 : exports.https;
         if (!httpsServer.http2) {
-            exports.https.setTimeout(init_1.config.server.timeout);
+            exports.https.setTimeout(index_1.config.server.timeout);
         }
         server.listen(httpsPort, (err) => {
             if (err) {
@@ -152,7 +129,7 @@ function startServer() {
 }
 exports.startServer = startServer;
 if (Worker.isMaster) {
-    if (!init_1.config.workers || init_1.config.workers.length === 0) {
+    if (!index_1.config.workers || index_1.config.workers.length === 0) {
         throw new Error("There should be at least one worker configured.");
     }
     let httpCount = 0, httpsCount = 0;
@@ -163,24 +140,24 @@ if (Worker.isMaster) {
             console.log(err.message);
         }).on("start-http-server", (host) => {
             httpCount += 1;
-            if (httpCount === init_1.config.workers.length) {
+            if (httpCount === index_1.config.workers.length) {
                 httpCount = 0;
                 let dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), link = chalk_1.default.yellow(`http://${host}`);
                 console.log(`${dateTime} HTTP Server running at ${link}.`);
             }
         }).on("start-https-server", (host) => {
             httpsCount += 1;
-            if (httpsCount === init_1.config.workers.length) {
+            if (httpsCount === index_1.config.workers.length) {
                 httpsCount = 0;
                 let dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), link = chalk_1.default.yellow(`http://${host}`);
                 console.log(`${dateTime} HTTP Server running at ${link}.`);
             }
         });
     });
-    for (let name of init_1.config.workers) {
-        new Worker(name, !init_1.isDevMode);
+    for (let name of index_1.config.workers) {
+        new Worker(name, !index_1.isDevMode);
     }
-    let watches = init_1.config.watches || [
+    let watches = index_1.config.watches || [
         "index.ts",
         "config.ts",
         "bootstrap",
@@ -188,8 +165,10 @@ if (Worker.isMaster) {
         "locales",
         "models"
     ];
-    if (init_1.isDevMode) {
+    if (index_1.isDevMode) {
         for (let filename of watches) {
+            if (path_1.extname(filename) == ".ts")
+                filename = filename.slice(0, -3) + ".js";
             filename = init_1.APP_PATH + "/" + filename;
             fs.exists(filename, exists => {
                 if (exists)
@@ -201,7 +180,7 @@ if (Worker.isMaster) {
 else {
     Worker.on("online", _worker => {
         worker = _worker;
-        if (init_1.config.server.autoStart) {
+        if (index_1.config.server.autoStart) {
             startServer();
         }
     });

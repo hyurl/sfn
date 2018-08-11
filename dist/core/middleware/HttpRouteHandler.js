@@ -7,7 +7,7 @@ const multer = require("multer");
 const cors = require("sfn-cors");
 const date = require("sfn-date");
 const ideal_filename_1 = require("ideal-filename");
-const init_1 = require("../../init");
+const index_1 = require("../../index");
 const HttpController_1 = require("../controllers/HttpController");
 const HttpError_1 = require("../tools/HttpError");
 const functions_1 = require("../tools/functions");
@@ -24,14 +24,14 @@ function finish(ctrl) {
     ctrl.emit("finish", ctrl.req, ctrl.res);
 }
 function handleLog(ctrl, err) {
-    if (init_1.config.server.error.log) {
+    if (index_1.config.server.error.log) {
         ctrl.logger.error(err.message);
     }
 }
 function handleFinish(ctrl, err) {
     handleLog(ctrl, err);
     finish(ctrl);
-    if (init_1.isDevMode && !(err instanceof HttpError_1.HttpError)) {
+    if (index_1.isDevMode && !(err instanceof HttpError_1.HttpError)) {
         functions_inner_1.callsiteLog(err);
     }
 }
@@ -163,7 +163,7 @@ function handleError(err, ctrl) {
         err = new HttpError_1.HttpError(204);
     let _err = err;
     if (!(err instanceof HttpError_1.HttpError)) {
-        if (err instanceof Error && init_1.config.server.error.show)
+        if (err instanceof Error && index_1.config.server.error.show)
             err = new HttpError_1.HttpError(500, err.message);
         else
             err = new HttpError_1.HttpError(500);

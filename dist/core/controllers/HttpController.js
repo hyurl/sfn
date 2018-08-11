@@ -5,6 +5,7 @@ const fs = require("fs-extra");
 const sfn_ejs_engine_1 = require("sfn-ejs-engine");
 const SSE = require("sfn-sse");
 const init_1 = require("../../init");
+const index_1 = require("../../index");
 const Controller_1 = require("./Controller");
 const MarkdownParser_1 = require("../tools/MarkdownParser");
 const symbols_1 = require("../tools/symbols");
@@ -35,7 +36,7 @@ class HttpController extends Controller_1.Controller {
         this.lang = (req.query && req.query.lang)
             || (req.cookies && req.cookies.lang)
             || req.lang
-            || init_1.config.lang;
+            || index_1.config.lang;
     }
     _realFilename(filename) {
         if (!path.isAbsolute(filename))

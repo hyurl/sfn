@@ -1,7 +1,7 @@
 import * as date from "sfn-date";
 import chalk from "chalk";
 import { Server } from "socket.io";
-import { config, isDevMode } from "../../init";
+import { config, isDevMode } from "../../index";
 import { SocketError } from "../tools/SocketError";
 import { WebSocket } from "../tools/interfaces";
 import { callsiteLog, callMethod } from "../tools/functions-inner";

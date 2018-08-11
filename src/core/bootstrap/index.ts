@@ -1,32 +1,16 @@
-import { App } from "webium";
-import * as SocketIO from "socket.io";
-import * as Mail from "sfn-mail";
-import * as OutputBuffer from "sfn-output-buffer";
-import * as Logger from "sfn-logger";
-import Worker = require("sfn-worker");
-import Validator = require("sfn-validator");
-import Cache = require("sfn-cache");
+import * as fs from "fs";
+import { extname } from 'path';
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
-import * as fs from "fs";
-import * as date from "sfn-date";
 import chalk from "chalk";
-import { APP_PATH, config, isDevMode } from "../../init";
+import { App } from "webium";
+import * as SocketIO from "socket.io";
+import * as date from "sfn-date";
+import * as Worker from "sfn-worker";
+import { APP_PATH } from "../../init";
+import { config, isDevMode } from "../../index";
 import { DevWatcher } from "../tools/DevWatcher";
-
-export * from "sfn-scheduler";
-export * from "sfn-cookie";
-export * from "../../init";
-export * from "../tools/interfaces";
-export * from "../tools/functions";
-export * from "../tools/HttpError";
-export * from "../tools/SocketError";
-export * from "../tools/Service";
-export * from "../tools/TemplateEngine";
-export * from "../tools/MarkdownParser";
-export * from "../controllers/HttpController";
-export * from "../controllers/WebSocketController";
 
 /** Whether the current process is the master process. */
 export const isMaster: boolean = Worker.isMaster;
@@ -87,17 +71,6 @@ if (Worker.isWorker) {
         wss = SocketIO(https, WS.options);
 }
 
-export {
-    date,
-    Mail,
-    OutputBuffer,
-    Logger,
-    Worker,
-    Validator,
-    Cache,
-    DevWatcher
-}
-
 /**
  * (worker only) Starts HTTP server and socket server (if enabled).
  */
@@ -106,7 +79,7 @@ export function startServer() {
         throw new Error("The server can only be run in a worker process.");
     }
 
-    require("../bootstrap/ControllerLoader");
+    require("./ControllerLoader");
     const { handleHttpAuth } = require("../middleware/HttpAuthHandler");
     const { handleHttpDB } = require("../middleware/HttpDBHandler");
     const { handleHttpInit } = require("../middleware/HttpInitHandler");
@@ -260,6 +233,9 @@ if (Worker.isMaster) {
     // Watch for file changes, when a file is modified, reboot the workers.
     if (isDevMode) {
         for (let filename of watches) {
+            if (extname(filename) == ".ts")
+                filename = filename.slice(0, -3) + ".js";
+
             filename = APP_PATH + "/" + filename;
 
             fs.exists(filename, exists => {

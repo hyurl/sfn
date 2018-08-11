@@ -1,3 +1,4 @@
+const { SRC_PATH } = require("sfn");
 const Session = require("express-session");
 const FileStore = require("session-file-store");
 
@@ -10,7 +11,7 @@ var config = {
     lang: "en-US",
     enableDocRoute: true,
     awaitGenerator: false,
-    statics: [process.cwd() + "/src/assets"],
+    statics: [SRC_PATH + "/assets"],
     watches: ["index.js", "config.js", "bootstrap", "controllers", "locales", "models"],
     server: {
         hostname: "localhost",

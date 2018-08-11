@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import { APP_PATH, config, SRC_PATH } from "../../init";
+import { APP_PATH, SRC_PATH } from "../../init";
+import { config } from "../../index";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import {
@@ -41,14 +42,11 @@ function loadControllers(controllerPath: string) {
 
             if (SRC_PATH !== APP_PATH) {
                 let _filename = filename.substring(APP_PATH.length, filename.length - 3);
-                _filename = SRC_PATH + _filename + ".ts";
+                _filename = path.normalize(SRC_PATH + _filename + ".ts");
+                
                 if (fs.existsSync(_filename)) {
                     filename = _filename;
                 }
-            }
-
-            if (process.platform === "win32") {
-                filename = filename.replace(/\//g, "\\");
             }
 
             if (Class.prototype instanceof HttpController) {

@@ -1,4 +1,4 @@
-import { isDevMode } from "../../init";
+import { isDevMode } from "../../index";
 
 export interface TemplateOptions {
     [option: string]: any;

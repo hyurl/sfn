@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
-tslib_1.__exportStar(require("sfn-xss"), exports);
 function rand(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -29,6 +27,13 @@ function injectCsrfToken(html, token) {
     return html;
 }
 exports.injectCsrfToken = injectCsrfToken;
+exports.requireAuth = (proto, prop) => {
+    let Class = proto.constructor;
+    if (!Class.hasOwnProperty("RequireAuth"))
+        Class.RequireAuth = [];
+    if (!Class.RequireAuth.includes(prop))
+        Class.RequireAuth.push(prop);
+};
 function event(...args) {
     if (args.length === 1) {
         return (proto, prop) => {
@@ -55,13 +60,6 @@ function upload(...fields) {
     };
 }
 exports.upload = upload;
-exports.requireAuth = (proto, prop) => {
-    let Class = proto.constructor;
-    if (!Class.hasOwnProperty("UploadFields"))
-        Class.RequireAuth = [];
-    if (!Class.RequireAuth.includes(prop))
-        Class.RequireAuth.push(prop);
-};
 function _route(...args) {
     let route = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
     if (args.length === 1 || args.length === 2) {

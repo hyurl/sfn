@@ -6,7 +6,7 @@ import * as cors from "sfn-cors";
 import * as date from "sfn-date";
 import { idealFilename } from "ideal-filename";
 import { App } from "webium";
-import { config, isDevMode } from "../../init";
+import { config, isDevMode } from "../../index";
 import { HttpController, UploadingFile } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
