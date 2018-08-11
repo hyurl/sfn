@@ -9,7 +9,7 @@ import * as SocketIO from "socket.io";
 import * as date from "sfn-date";
 import * as Worker from "sfn-worker";
 import { APP_PATH } from "../../init";
-import { config, isDevMode } from "../../index";
+import { config, isDevMode } from "./ConfigLoader";
 import { DevWatcher } from "../tools/DevWatcher";
 
 /** Whether the current process is the master process. */

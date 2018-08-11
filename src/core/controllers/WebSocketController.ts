@@ -1,7 +1,7 @@
 import { DB, User } from "modelar";
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
-import { config } from "../../index";
+import { config } from "../bootstrap/ConfigLoader";
 
 export type WebSocketNextHandler = (controller: WebSocketController) => void;
 

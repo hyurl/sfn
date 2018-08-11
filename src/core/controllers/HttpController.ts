@@ -4,8 +4,8 @@ import { DB, User } from "modelar";
 import { EjsEngine } from "sfn-ejs-engine";
 import SSE = require("sfn-sse");
 import { CorsOption as CorsOptions } from "sfn-cors";
-import { SRC_PATH } from "../../init";
-import { config } from "../../index";
+import { SRC_PATH, ROOT_PATH } from "../../init";
+import { config } from "../bootstrap/ConfigLoader";
 import { Controller } from "./Controller";
 import { TemplateEngine } from "../tools/TemplateEngine";
 import { MarkdownParser } from "../tools/MarkdownParser";
@@ -32,7 +32,7 @@ export type UploadOptions = {
 
 export const UploadOptions: UploadOptions = {
     maxCount: 1,
-    savePath: process.cwd() + "/uploads",
+    savePath: ROOT_PATH + "/uploads",
     filter: (file) => file && file.size !== undefined,
     filename: "auto-increment"
 };

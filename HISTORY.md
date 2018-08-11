@@ -1,3 +1,9 @@
+# 0.1.12
+
+## Fixes
+
+- Fix a bug in command-line execution.
+
 # 0.1.11
 
 ## Fixes

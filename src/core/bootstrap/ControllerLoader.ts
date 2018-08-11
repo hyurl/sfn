@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { APP_PATH, SRC_PATH } from "../../init";
-import { config } from "../../index";
+import { config } from "./ConfigLoader";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import {

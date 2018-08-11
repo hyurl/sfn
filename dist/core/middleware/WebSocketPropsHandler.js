@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const url = require("url");
 const endsWith = require("lodash/endsWith");
 const parse_accepts_1 = require("parse-accepts");
-const index_1 = require("../../index");
+const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 function handleWebSocketProps(io) {
     io.use((socket, next) => {
         var req = socket.request;
@@ -26,7 +26,7 @@ function handleWebSocketProps(io) {
         let urlObj = url.parse(socket.protocol + "://" + socket.host);
         socket.hostname = urlObj.hostname;
         socket.port = urlObj.port && parseInt(urlObj.port);
-        let hostname = index_1.config.server.hostname || index_1.config.server.host;
+        let hostname = ConfigLoader_1.config.server.hostname || ConfigLoader_1.config.server.host;
         let domains = (Array.isArray(hostname) ? hostname : [hostname]);
         for (let domain of domains) {
             if (socket.hostname.length > domain.length

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const date = require("sfn-date");
 const chalk_1 = require("chalk");
-const index_1 = require("../../index");
+const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const SocketError_1 = require("../tools/SocketError");
 const functions_inner_1 = require("../tools/functions-inner");
 const symbols_1 = require("../tools/symbols");
@@ -13,7 +13,7 @@ function finish(ctrl, info) {
     if (socket[symbols_1.realDB])
         socket[symbols_1.realDB].release();
     ctrl.emit("finish", socket);
-    if (index_1.isDevMode) {
+    if (ConfigLoader_1.isDevMode) {
         let cost = Date.now() - info.time, dateTime = chalk_1.default.cyan(`[${date("Y-m-d H:i:s.ms")}]`), type = chalk_1.default.bold(socket.protocol.toUpperCase()), code = info.code, codeStr = code.toString();
         cost = chalk_1.default.cyan(`${cost}ms`);
         if (code < 200) {
@@ -34,7 +34,7 @@ function finish(ctrl, info) {
 function handleError(err, ctrl, info) {
     let _err = err;
     if (!(err instanceof SocketError_1.SocketError)) {
-        if (err instanceof Error && index_1.config.server.error.show)
+        if (err instanceof Error && ConfigLoader_1.config.server.error.show)
             err = new SocketError_1.SocketError(500, err.message);
         else
             err = new SocketError_1.SocketError(500);
@@ -46,11 +46,11 @@ function handleError(err, ctrl, info) {
     else {
         ctrl.logOptions.action = info.event = "unknown";
     }
-    if (index_1.config.server.error.log) {
+    if (ConfigLoader_1.config.server.error.log) {
         ctrl.logger.error(_err.message);
     }
     finish(ctrl, info);
-    if (index_1.isDevMode && !(_err instanceof SocketError_1.SocketError)) {
+    if (ConfigLoader_1.isDevMode && !(_err instanceof SocketError_1.SocketError)) {
         functions_inner_1.callsiteLog(_err);
     }
 }

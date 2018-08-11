@@ -1,6 +1,6 @@
 import { App } from "webium";
 import { DB } from "modelar";
-import { config } from "../../index";
+import { config } from "../bootstrap/ConfigLoader";
 import { Request, Response } from "../tools/interfaces";
 import { realDB } from "../tools/symbols";
 

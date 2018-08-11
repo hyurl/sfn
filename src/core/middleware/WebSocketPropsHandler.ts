@@ -3,7 +3,7 @@ import * as url from "url";
 import endsWith = require("lodash/endsWith");
 import { parseValue as parseAccepts } from "parse-accepts";
 import { Server } from "socket.io";
-import { config } from "../../index";
+import { config } from "../bootstrap/ConfigLoader";
 import { WebSocket } from "../tools/interfaces";
 
 export function handleWebSocketProps(io: Server): void {

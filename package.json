@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "description": "A Service Framework for Node.js.",
     "main": "dist/index.js",
     "types": "src/index.ts",

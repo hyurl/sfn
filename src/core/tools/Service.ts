@@ -4,7 +4,8 @@ import Cache  = require("sfn-cache");
 import * as Logger from "sfn-logger";
 import { DB } from "modelar";
 import HideProtectedProperties = require("hide-protected-properties");
-import { config } from "../../index";
+import { ROOT_PATH } from "../../init";
+import { config } from "../bootstrap/ConfigLoader";
 import { LocaleMap } from "./LocaleMap";
 import { realCache, realDB } from "./symbols";
 
@@ -15,7 +16,7 @@ export interface LogOptions extends Logger.Options {
 
 export const LogOptions: LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
-    filename: process.cwd() + "/logs/sfn.log",
+    filename: ROOT_PATH + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
     action: "default"
 });

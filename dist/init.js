@@ -2,24 +2,29 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const fs = require("fs");
-require("source-map-support/register");
 const dotenv_1 = require("dotenv");
 exports.version = require("../package.json").version;
 var appPath = path.dirname(process.mainModule.filename);
+if (appPath == __dirname + path.sep + "cli") {
+    appPath = process.cwd() + path.sep + "dist";
+}
 exports.ROOT_PATH = path.normalize(appPath + "/..");
-exports.APP_PATH = appPath;
-var tsCfgFile = exports.APP_PATH + "/../tsconfig.json";
+var tsCfgFile = exports.ROOT_PATH + "/tsconfig.json";
 var tsCfg;
-var srcRoot = exports.APP_PATH;
+var srcRoot = appPath;
 if (fs.existsSync(tsCfgFile)) {
     try {
         tsCfg = require(tsCfgFile);
         if (tsCfg.compilerOptions && tsCfg.compilerOptions.rootDir) {
-            srcRoot = path.normalize(exports.APP_PATH + "/../" + tsCfg.compilerOptions.rootDir);
+            srcRoot = path.normalize(exports.ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
         }
     }
     catch (e) { }
 }
+else {
+    appPath = exports.ROOT_PATH + path.sep + "src";
+}
+exports.APP_PATH = appPath;
 exports.SRC_PATH = srcRoot;
 dotenv_1.config({
     path: exports.ROOT_PATH + "/.env"

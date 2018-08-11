@@ -5,14 +5,14 @@ const fs = require("fs-extra");
 const sfn_ejs_engine_1 = require("sfn-ejs-engine");
 const SSE = require("sfn-sse");
 const init_1 = require("../../init");
-const index_1 = require("../../index");
+const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const Controller_1 = require("./Controller");
 const MarkdownParser_1 = require("../tools/MarkdownParser");
 const symbols_1 = require("../tools/symbols");
 const Engine = new sfn_ejs_engine_1.EjsEngine();
 exports.UploadOptions = {
     maxCount: 1,
-    savePath: process.cwd() + "/uploads",
+    savePath: init_1.ROOT_PATH + "/uploads",
     filter: (file) => file && file.size !== undefined,
     filename: "auto-increment"
 };
@@ -36,7 +36,7 @@ class HttpController extends Controller_1.Controller {
         this.lang = (req.query && req.query.lang)
             || (req.cookies && req.cookies.lang)
             || req.lang
-            || index_1.config.lang;
+            || ConfigLoader_1.config.lang;
     }
     _realFilename(filename) {
         if (!path.isAbsolute(filename))

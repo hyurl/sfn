@@ -138,7 +138,6 @@ export const SFNConfig: SFNConfig = {
     lang: "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    // staticPath: process.cwd() + "/src/assets",
     statics: [SRC_PATH + "/assets"],
     watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     server: {

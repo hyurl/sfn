@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const cookieParser = require("cookie-parser");
-const index_1 = require("../../index");
-const parser = cookieParser(index_1.config.session.secret);
+const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const parser = cookieParser(ConfigLoader_1.config.session.secret);
 function handleWebSocketCookie(io) {
     io.use((socket, next) => {
         parser(socket.handshake, {}, next);

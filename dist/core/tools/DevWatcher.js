@@ -5,7 +5,7 @@ const path = require("path");
 const date = require("sfn-date");
 const Worker = require("sfn-worker");
 const chalk_1 = require("chalk");
-const index_1 = require("../../index");
+const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 var timer = null;
 function timerCallback(event, filename, extnames) {
     let ext = path.extname(filename);
@@ -19,8 +19,8 @@ function timerCallback(event, filename, extnames) {
                 }
             }
             else {
-                for (let id of index_1.config.workers) {
-                    new Worker(id, !index_1.isDevMode);
+                for (let id of ConfigLoader_1.config.workers) {
+                    new Worker(id, !ConfigLoader_1.isDevMode);
                 }
             }
         });

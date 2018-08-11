@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const path = require("path");
 const init_1 = require("../../init");
-const index_1 = require("../../index");
+const ConfigLoader_1 = require("./ConfigLoader");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const functions_inner_1 = require("../tools/functions-inner");
@@ -40,13 +40,13 @@ function loadControllers(controllerPath) {
             if (Class.prototype instanceof HttpController_1.HttpController) {
                 let _class = Class;
                 _class.filename = filename;
-                if (index_1.config.enableDocRoute)
+                if (ConfigLoader_1.config.enableDocRoute)
                     functions_inner_1.applyHttpControllerDoc(_class);
             }
             else if (Class.prototype instanceof WebSocketController_1.WebSocketController) {
                 let _class = Class;
                 _class.filename = filename;
-                if (index_1.config.enableDocRoute)
+                if (ConfigLoader_1.config.enableDocRoute)
                     functions_inner_1.applyWebSocketControllerDoc(_class);
             }
         }

@@ -5,7 +5,7 @@ import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
-import { config } from "../../index";
+import { config } from "../bootstrap/ConfigLoader";
 import { __awaiter } from 'tslib';
 
 export function loadLanguagePack(filename: string): Locale {

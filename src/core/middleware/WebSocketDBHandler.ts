@@ -1,6 +1,6 @@
 import { DB } from "modelar";
 import { Server } from "socket.io";
-import { config } from "../../index";
+import { config } from "../bootstrap/ConfigLoader";
 import { WebSocket } from "../tools/interfaces";
 import { realDB } from "../tools/symbols";
 

@@ -1,7 +1,7 @@
 import serveStatic = require("serve-static");
 import * as fs from "fs";
 import { App } from "webium";
-import { config } from "../../index";
+import { config } from "../bootstrap/ConfigLoader";
 
 export function handleStatic(app: App): void {
     if (config.statics) {

@@ -3,7 +3,7 @@ import * as path from "path";
 import * as date from "sfn-date";
 import Worker = require("sfn-worker");
 import chalk from "chalk";
-import { config, isDevMode } from "../../index";
+import { config, isDevMode } from "../bootstrap/ConfigLoader";
 
 var timer: NodeJS.Timer = null;
 

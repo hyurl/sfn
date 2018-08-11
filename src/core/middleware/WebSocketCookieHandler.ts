@@ -1,6 +1,6 @@
 import cookieParser = require("cookie-parser");
 import { Server } from "socket.io";
-import { config } from "../../index";
+import { config } from "../bootstrap/ConfigLoader";
 import { WebSocket } from "../tools/interfaces";
 
 const parser = cookieParser(config.session.secret);

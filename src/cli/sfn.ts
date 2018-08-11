@@ -3,24 +3,24 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as cmd from "commander";
 import pluralize = require("pluralize");
-import { sfnd, cwd, ext } from "./init";
+import { sfnd, ext } from "./init";
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { hyphenate } from "capitalization";
 import { loadLanguagePack } from "../core/tools/functions-inner";
 import { config } from "../core/bootstrap/ConfigLoader";
 
-cmd.version(version)
-    .description("create a new controller, model. etc.")
-    .option("-c, --controller <name>", "create a new controller with a specified name.")
-    .option("-m, --model <name>", "create a new model with a specified name.")
-    .option("-l, --language <name>", "create a new language pack with a specified name.")
-    .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller.")
+cmd.description("create a new controller, model. etc.")
+    .version(version, "-v, --version")
+    .option("-c, --controller <name>", "create a new controller with a specified name")
+    .option("-m, --model <name>", "create a new model with a specified name")
+    .option("-l, --language <name>", "create a new language pack with a specified name")
+    .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
     .on("--help", () => {
-        console.log("\n\n  Examples:\n");
-        console.log("    sfn -c Article                   create an http controller named 'Article'.");
-        console.log("    sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'.")
+        console.log("  Examples:\n");
+        console.log("    sfn -c Article                   create an http controller named 'Article'");
+        console.log("    sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'")
         console.log("    sfn -m Article                   create a model named 'Article'");
-        console.log("    sfn -l zh-CN                     create a language pack named 'zh-CN'.");
+        console.log("    sfn -l zh-CN                     create a language pack named 'zh-CN'");
         console.log("");
     }).parse(process.argv);
 
@@ -54,7 +54,7 @@ if (cmd.controller) { // create controller.
         : cmd.controller;
     let type = cmd.type == "websocket" ? "WebSocket" : "Http",
         input = `${sfnd}/src/cli/templates/${type}Controller.${ext}`,
-        output = `${cwd}/src/controllers/${filename}.${ext}`;
+        output = `${SRC_PATH}/controllers/${filename}.${ext}`;
 
     checkSource(input);
 
@@ -64,7 +64,7 @@ if (cmd.controller) { // create controller.
     outputFile(output, contents, "controller");
 } else if (cmd.model) { // create model.
     var input = `${sfnd}/src/cli/templates/Model.${ext}`,
-        output = `${cwd}/src/models/${cmd.model}.${ext}`,
+        output = `${SRC_PATH}/models/${cmd.model}.${ext}`,
         ModelName = path.basename(cmd.model),
         table = pluralize(hyphenate(ModelName, true));
 
@@ -96,5 +96,6 @@ if (cmd.controller) { // create controller.
     contents = JSON.stringify(lang, null, "  ");
     outputFile(output, contents, "Language pack");
 } else {
-    throw new TypeError("No valid argument was specified.");
+    cmd.help();
+    // throw new TypeError("No valid argument was specified.");
 }

@@ -1,4 +1,4 @@
-import { isDevMode } from "../../index";
+import { isDevMode } from "../bootstrap/ConfigLoader";
 
 export interface TemplateOptions {
     [option: string]: any;
