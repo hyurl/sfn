@@ -2,7 +2,7 @@
 
 **A Service Framework for Node.js.**
 
-For documentation, please [visit here](http://hyurl.github.io/sfn).
+For documentation, please visit [sfnjs.com](https://sfnjs.com).
 
 ## How To Use?
 
