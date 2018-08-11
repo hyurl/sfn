@@ -1,5 +1,5 @@
 import * as Session from "express-session";
-import * as FileStore from "session-file-store";
+import * as sessionFileStore from "session-file-store";
 import { ServerResponse } from "http";
 import { Stats } from "fs";
 import serveStatic = require("serve-static");
@@ -8,7 +8,7 @@ import { DBConfig } from "modelar";
 import { ClientOpts } from "redis";
 import { ServerOptions } from "socket.io";
 import * as tls from "tls";
-import { SRC_PATH } from "./init";
+import { SRC_PATH, ROOT_PATH } from "./init";
 
 /**
  * @see https://www.npmjs.com/package/serve-static
@@ -127,7 +127,7 @@ export interface SFNConfig {
     redis?: ClientOpts;
 }
 
-var Store = <any>FileStore(Session);
+const FileStore = sessionFileStore(Session);
 
 // Some of these settings are for their dependencies, you may check out all 
 // supported options on their official websites.
@@ -182,7 +182,10 @@ export const SFNConfig: SFNConfig = {
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new Store(),
+        store: new FileStore({
+            path: ROOT_PATH + "/sessions",
+            ttl: 3600 * 24 // 24 hours
+        }),
         cookie: {
             secure: true
         }

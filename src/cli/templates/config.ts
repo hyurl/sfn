@@ -1,8 +1,8 @@
-import { SFNConfig, SRC_PATH } from "sfn";
+import { SFNConfig, SRC_PATH, ROOT_PATH } from "sfn";
 import * as Session from "express-session";
-import * as FileStore from "session-file-store";
+import * as sessionFileStore from "session-file-store";
 
-const Store = <any>FileStore(Session);
+const FileStore = sessionFileStore(Session);
 
 export var config: SFNConfig = {
     env: process.env.NODE_ENV || "dev",
@@ -54,7 +54,10 @@ export var config: SFNConfig = {
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new Store(),
+        store: new FileStore({
+            path: ROOT_PATH + "/sessions",
+            ttl: 3600 * 24 // 24 hours
+        }),
         cookie: {
             secure: true
         }

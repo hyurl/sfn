@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Session = require("express-session");
-const FileStore = require("session-file-store");
+const sessionFileStore = require("session-file-store");
 const init_1 = require("./init");
 ;
-var Store = FileStore(Session);
+const FileStore = sessionFileStore(Session);
 exports.SFNConfig = {
     env: process.env.NODE_ENV || "dev",
     workers: ["A"],
@@ -55,7 +55,10 @@ exports.SFNConfig = {
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new Store(),
+        store: new FileStore({
+            path: init_1.ROOT_PATH + "/sessions",
+            ttl: 3600 * 24
+        }),
         cookie: {
             secure: true
         }

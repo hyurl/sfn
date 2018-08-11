@@ -1,8 +1,8 @@
-const { SRC_PATH } = require("sfn");
+const { SRC_PATH, ROOT_PATH } = require("sfn");
 const Session = require("express-session");
-const FileStore = require("session-file-store");
+const sessionFileStore = require("session-file-store");
 
-const Store = FileStore(Session);
+const FileStore = sessionFileStore(Session);
 
 var config = {
     env: process.env.NODE_ENV || "dev",
@@ -54,7 +54,10 @@ var config = {
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new Store(),
+        store: new FileStore({
+            path: ROOT_PATH + "/sessions",
+            ttl: 3600 * 24 // 24 hours
+        }),
         cookie: {
             secure: true
         }
