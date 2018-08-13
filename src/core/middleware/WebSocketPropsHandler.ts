@@ -14,18 +14,23 @@ export function handleWebSocketProps(io: Server): void {
         socket.host = req.headers.host;
         socket.secure = socket.handshake.secure;
 
-        let forIp = <string>req.headers["x-forwarded-for"],
-            proxy = {
-                protocol: <string>req.headers["x-forwarded-proto"] || null,
-                host: <string>req.headers["x-forwarded-host"] || null,
-                ips: forIp && forIp.split(/\s*,\s*/) || [],
-                ip: ""
-            };
-        proxy.ip = proxy.ips[0];
+        if (req.headers["x-forwarded-for"] || req.headers["x-forwarded-proto"]
+            || req.headers["x-forwarded-host"]) {
+            let forIp = <string>req.headers["x-forwarded-for"],
+                proxy = {
+                    protocol: <string>req.headers["x-forwarded-proto"] || null,
+                    host: <string>req.headers["x-forwarded-host"] || null,
+                    ips: forIp && forIp.split(/\s*,\s*/) || [],
+                    ip: ""
+                };
+            proxy.ip = proxy.ips[0];
+            socket.proxy = proxy;
+        } else {
+            socket.proxy = null;
+        }
 
-        socket.proxy = proxy;
         socket.host = req.headers.host;
-        socket.ips = proxy.ips;
+        socket.ips = socket.proxy ? socket.proxy.ips : [socket.ip];
         socket.langs = parseAccepts(<string>req.headers["accept-language"]);
         socket.lang = socket.langs[0];
 

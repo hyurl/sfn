@@ -14,10 +14,16 @@ class default_1 extends sfn_1.WebSocketController {
     }
 }
 tslib_1.__decorate([
-    sfn_1.event("/index")
+    sfn_1.event("/index"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", []),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "index", null);
 tslib_1.__decorate([
-    sfn_1.event("/repeat-what-I-said")
+    sfn_1.event("/repeat-what-I-said"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "repeatWhatISaid", null);
 exports.default = default_1;
 //# sourceMappingURL=SocketIndex.js.map

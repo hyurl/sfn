@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = require("path");
+const tslib_1 = require("tslib");
 const CallSiteRecord = require("callsite-record");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
-const tslib_1 = require("tslib");
 function loadLanguagePack(filename) {
     let ext = path_1.extname(filename), name = path_1.basename(filename, ext).replace(/\-/g, ""), _module = require(filename), lang;
     if (typeof _module[name] === "object") {
@@ -123,15 +123,22 @@ function callsiteLog(err) {
     }
 }
 exports.callsiteLog = callsiteLog;
-function callMethod(thisArg, fn, ...args) {
+function callMethod(ctrl, fn, ...args) {
     let res;
     if (fn.constructor.name == "GeneratorFunction" && ConfigLoader_1.config.awaitGenerator) {
-        res = tslib_1.__awaiter(thisArg, args, null, fn);
+        res = tslib_1.__awaiter(ctrl, args, null, fn);
     }
     else {
-        res = fn.apply(thisArg, args);
+        res = fn.apply(ctrl, args);
     }
     return res;
 }
 exports.callMethod = callMethod;
+function getFuncParams(fn) {
+    let fnStr = fn.toString(), start = fnStr.indexOf("("), end = fnStr.indexOf(")"), paramStr = fnStr.slice(start + 1, end).trim(), params = paramStr.split(",").map(param => {
+        return param.replace(/\s/g, "").split("=")[0];
+    });
+    return params;
+}
+exports.getFuncParams = getFuncParams;
 //# sourceMappingURL=functions-inner.js.map

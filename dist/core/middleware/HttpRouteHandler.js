@@ -6,6 +6,7 @@ const zlib = require("zlib");
 const multer = require("multer");
 const cors = require("sfn-cors");
 const date = require("sfn-date");
+const values = require("lodash/values");
 const ideal_filename_1 = require("ideal-filename");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const HttpController_1 = require("../controllers/HttpController");
@@ -14,6 +15,7 @@ const functions_1 = require("../tools/functions");
 const functions_inner_1 = require("../tools/functions-inner");
 const symbols_1 = require("../tools/symbols");
 const RouteMap_1 = require("../tools/RouteMap");
+const init_1 = require("../../init");
 const EFFECT_METHODS = [
     "DELETE",
     "PATCH",
@@ -78,7 +80,7 @@ function handleCsrfToken(ctrl) {
         }
     }
 }
-function getDestination(ctrl, savePath, reject) {
+function getDestination(savePath, reject) {
     return (req, file, cb) => {
         fs.ensureDir(savePath, err => {
             err ? reject(err) : cb(null, savePath);
@@ -110,16 +112,16 @@ function getFilename(ctrl, savePath, reject) {
         }
     };
 }
-function getStorage(ctrl, resolve, reject) {
+function getStorage(ctrl, reject) {
     let savePath = `${ctrl.uploadOptions.savePath}/` + date("Y-m-d");
     return multer.diskStorage({
-        destination: getDestination(ctrl, savePath, reject),
+        destination: getDestination(savePath, reject),
         filename: getFilename(ctrl, savePath, reject)
     });
 }
-function getUploader(ctrl, resolve, reject) {
+function getUploader(ctrl, reject) {
     return multer({
-        storage: getStorage(ctrl, resolve, reject),
+        storage: getStorage(ctrl, reject),
         fileFilter: (req, file, cb) => {
             try {
                 cb(null, ctrl.uploadOptions.filter(file));
@@ -131,9 +133,43 @@ function getUploader(ctrl, resolve, reject) {
     });
 }
 function handleUpload(ctrl, method, resolve, reject) {
-    let Class = ctrl.constructor;
-    let uploadFields = Class.UploadFields[method];
-    let { req, res } = ctrl;
+    let { req, res } = ctrl, uploadFields = ctrl.Class.UploadFields[method], getResult = () => {
+        let data = values(req.params), params = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), reqProps = ["request", "req"], resProps = ["response", "res"];
+        if (init_1.isTypeScript) {
+            let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
+            for (let i in meta) {
+                if (meta[i] == Number) {
+                    params[i] = parseInt(data.shift());
+                }
+                else if (meta[i] == Boolean) {
+                    let val = data.shift();
+                    params[i] = val == "false" || val == "0" ? false : true;
+                }
+                else if (meta[i] == Object) {
+                    if (reqProps.includes(fnParams[i]))
+                        params[i] = req;
+                    else if (resProps.includes(fnParams[i]))
+                        params[i] = res;
+                    else
+                        params[i] = data.shift();
+                }
+                else {
+                    params[i] = data.shift();
+                }
+            }
+        }
+        else {
+            for (let i in fnParams) {
+                if (reqProps.includes(fnParams[i]))
+                    params[i] = req;
+                else if (resProps.includes(fnParams[i]))
+                    params[i] = res;
+                else
+                    params[i] = data.shift();
+            }
+        }
+        return functions_inner_1.callMethod(ctrl, ctrl[method], ...params);
+    };
     if (req.method == "POST" && uploadFields && uploadFields.length) {
         let fields = [];
         for (let field of uploadFields) {
@@ -142,19 +178,19 @@ function handleUpload(ctrl, method, resolve, reject) {
                 maxCount: ctrl.uploadOptions.maxCount
             });
         }
-        let uploader = getUploader(ctrl, resolve, reject);
+        let uploader = getUploader(ctrl, reject);
         let handle = uploader.fields(fields);
         handle(req, res, (err) => {
             if (err) {
                 reject(err);
             }
             else {
-                resolve(functions_inner_1.callMethod(ctrl, ctrl[method], req, res));
+                resolve(getResult());
             }
         });
     }
     else {
-        resolve(functions_inner_1.callMethod(ctrl, ctrl[method], req, res));
+        resolve(getResult());
     }
 }
 function handleError(err, ctrl) {
@@ -189,29 +225,35 @@ function getNextHandler(method, action, resolve, reject) {
     return (ctrl) => {
         ctrl.logOptions.action = action;
         let { req, res } = ctrl;
-        if (!cors(ctrl.cors, req, res)) {
-            throw new HttpError_1.HttpError(410);
-        }
-        else if (req.method === "OPTIONS") {
-            res.end();
-            return;
-        }
-        let Class = ctrl.constructor;
-        if (Class.RequireAuth.includes(method) && !ctrl.authorized) {
-            if (ctrl.fallbackTo) {
-                return res.redirect(ctrl.fallbackTo, 302);
+        Promise.resolve(ctrl.before()).then(() => {
+            if (res.finished) {
+                return resolve(null);
             }
-            else {
-                throw new HttpError_1.HttpError(401);
+            if (!cors(ctrl.cors, req, res)) {
+                throw new HttpError_1.HttpError(410);
             }
-        }
-        handleCsrfToken(ctrl);
-        res.gzip = req.encoding == "gzip" && ctrl.gzip;
-        if (req.method == "GET" && ctrl.jsonp
-            && req.query[ctrl.jsonp]) {
-            res.jsonp = req.query[ctrl.jsonp];
-        }
-        handleUpload(ctrl, method, resolve, reject);
+            else if (req.method === "OPTIONS") {
+                res.end();
+                return;
+            }
+            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized) {
+                if (ctrl.fallbackTo) {
+                    return res.redirect(ctrl.fallbackTo, 302);
+                }
+                else {
+                    throw new HttpError_1.HttpError(401);
+                }
+            }
+            handleCsrfToken(ctrl);
+            res.gzip = req.encoding == "gzip" && ctrl.gzip;
+            if (req.method == "GET" && ctrl.jsonp
+                && req.query[ctrl.jsonp]) {
+                res.jsonp = req.query[ctrl.jsonp];
+            }
+            handleUpload(ctrl, method, resolve, reject);
+        }).catch(err => {
+            reject(err);
+        });
     };
 }
 function handleGzip(res, data) {
@@ -228,31 +270,32 @@ function handleGzip(res, data) {
 }
 function handleResponse(ctrl, data) {
     let { req, res } = ctrl;
-    if (req.isEventSource) {
-        if (data !== null && data !== undefined && !res.finished)
-            ctrl.sse.send(data);
-        return finish(ctrl);
-    }
-    if (req.method === "HEAD") {
-        return res.end();
-    }
-    else if (data !== undefined) {
-        let xml = /(text|application)\/xml\b/;
-        let type = res.getHeader("Content-Type");
-        if (data === null) {
-            res.end("");
+    if (!res.finished) {
+        if (req.isEventSource) {
+            if (data !== null && data !== undefined)
+                ctrl.sse.send(data);
         }
-        else if (typeof data === "object" && type && xml.test(type)) {
-            res.xml(data);
+        else if (req.method === "HEAD") {
+            return res.end();
         }
-        else if (data instanceof Buffer) {
-            res.send(data);
-        }
-        else if (typeof data === "string" && res.gzip) {
-            return handleGzip(res, data);
-        }
-        else {
-            res.send(data);
+        else if (data !== undefined) {
+            let xml = /(text|application)\/xml\b/;
+            let type = res.getHeader("Content-Type");
+            if (data === null) {
+                res.end("");
+            }
+            else if (typeof data === "object" && type && xml.test(type)) {
+                res.xml(data);
+            }
+            else if (data instanceof Buffer) {
+                res.send(data);
+            }
+            else if (typeof data === "string" && res.gzip) {
+                return handleGzip(res, data);
+            }
+            else {
+                res.send(data);
+            }
         }
     }
     return finish(ctrl);
@@ -262,6 +305,9 @@ function getRouteHandler(Class, method) {
         let ctrl = null;
         let className = Class.name === "default_1" ? "default" : Class.name;
         let action = `${className}.${method} (${Class.filename})`;
+        res.on("error", (err) => {
+            handleLog(ctrl, err);
+        });
         new Promise((resolve, reject) => {
             try {
                 let handleNext = getNextHandler(method, action, resolve, reject);
@@ -272,15 +318,14 @@ function getRouteHandler(Class, method) {
                     ctrl = new Class(req, res);
                     handleNext(ctrl);
                 }
-                res.on("error", (err) => {
-                    handleLog(ctrl, err);
-                });
             }
             catch (err) {
                 reject(err);
             }
         }).then((data) => {
             return handleResponse(ctrl, data);
+        }).then(() => {
+            return ctrl.after();
         }).catch((err) => {
             ctrl = ctrl || new HttpController_1.HttpController(req, res);
             ctrl.logOptions.action = action;

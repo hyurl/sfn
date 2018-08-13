@@ -19,7 +19,6 @@ exports.UploadOptions = {
 class HttpController extends Controller_1.Controller {
     constructor(req, res, next = null) {
         super();
-        this.Class = this.constructor;
         this.viewPath = this.Class.viewPath;
         this.viewExtname = this.Class.viewExtname;
         this.engine = this.Class.engine;
@@ -72,6 +71,9 @@ class HttpController extends Controller_1.Controller {
     }
     send(data) {
         return this.res.send(data);
+    }
+    get Class() {
+        return this.constructor;
     }
     get db() {
         return this.req.db;

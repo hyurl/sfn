@@ -62,39 +62,44 @@ export interface UploadedFile extends UploadingFile {
 /**
  * HttpController manages requests come from a HTTP client.
  * 
- * All methods in a HttpController accept two parameters: 
+ * When a request fires, the controller will be automatically instantiated and
+ * calling the binding method according to the route.
  * 
- * - `req: Request` the underlying request.
- * - `res: Response` the underlying response.
+ * The parameters of the URL route will be stored in `req.params`, and they 
+ * will be auto-injected into the method (as method parameters) accordingly. 
+ * Apart from them, you can set `req: Request` and `res: Response` as 
+ * parameters as well, they will be auto-injected too, and the sequence and 
+ * position of them is arbitrary. Or you can call them from `this`:
  * 
- * If you're programing with pure JavaScript, I suggest you call `req` and 
- * `res` from the `this` object in the controller instead, it should give you
- * proper IDE hints of this two objects.
+ * `let { req, res } = this;`
  * 
- * You may `return` some data inside the method, when the method is called by 
- * a HTTP request, they will be automatically sent to the client. Actions will
- * be handled in a Promise constructor, you can do what ever you want in the 
- * method. I recommend you use `async` methods when you are doing some 
- * asynchronous operations.
+ * You may `return` some data inside a method that bound to a certain route, 
+ * when the method is called by a HTTP request, they will be automatically 
+ * sent to the client. Actions will be handled in a Promise constructor, so 
+ * you can do what ever you want inside the method. Using `async` methods to 
+ * do asynchronous operations is recommended.
  * 
- * If you want to send a response manually, you can call the `res` that passed
- * into the method, no more data will be sent after sending one.
+ * If you want to send a response manually, you can just call the `res.send()`
+ * or `res.end()` to do so, no more data will be sent after sending one.
  * 
- * The decorator function `@route()` is used to set routes. but when you're 
- * using pure JavaScript, there is not decorators, but the framework support 
+ * The decorator function `@route()` is used to set routes. But when you're 
+ * coding in JavaScript, there is not decorators, the framework support 
  * another compatible way to allow you doing such things by using the 
  * **jsdoc** block with a `@route` tag, but you need to set 
  * `config.enableDocRoute` to `true`.
  */
 export class HttpController extends Controller {
-    /** A reference to the class object. */
-    Class: typeof HttpController = <any>this.constructor;
-
     static viewPath: string = SRC_PATH + "/views";
     static viewExtname: string = ".html";
     static engine: TemplateEngine = Engine;
     /** Set a specified base URI for route paths. */
     static baseURI: string;
+    /**
+     * The key represents the method name, and the value sets form fields.
+     */
+    static UploadFields: {
+        [method: string]: string[]
+    } = {};
 
     viewPath = this.Class.viewPath;
     viewExtname = this.Class.viewExtname;
@@ -132,13 +137,6 @@ export class HttpController extends Controller {
     readonly res: Response;
     /** Whether the controller is initiated asynchronously. */
     readonly isAsync: boolean;
-
-    /**
-     * The key represents the method name, and the value sets form fields.
-     */
-    static UploadFields: {
-        [method: string]: string[]
-    } = {};
 
     /**
      * You can define a fourth parameter `next` to the constructor, if it is 
@@ -233,6 +231,11 @@ export class HttpController extends Controller {
         return this.res.send(data);
     }
 
+    /** A reference to the class object. */
+    get Class(): typeof HttpController {
+        return <any>this.constructor;
+    }
+
     /** Gets/Sets the DB instance. */
     get db(): DB {
         return this.req.db;
@@ -278,6 +281,12 @@ export class HttpController extends Controller {
         return this.req.csrfToken;
     }
 
+    /**
+     * By default, the framework will send a view file according to the error 
+     * code, and only pass the `err` object to the template, it may not be 
+     * suitable for complicated needs. For such a reason, the framework allows
+     * you to customize the error view handler by rewriting this method.
+     */
     static httpErrorView(err: HttpError, instance: HttpController): Promise<string> {
         return instance.view(instance.res.code.toString(), { err });
     }

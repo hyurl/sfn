@@ -4,16 +4,18 @@ import * as zlib from "zlib";
 import * as multer from "multer";
 import * as cors from "sfn-cors";
 import * as date from "sfn-date";
+import values = require("lodash/values");
 import { idealFilename } from "ideal-filename";
 import { App } from "webium";
 import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { HttpController, UploadingFile } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
-import { callsiteLog, callMethod } from "../tools/functions-inner";
+import { callsiteLog, callMethod, getFuncParams } from "../tools/functions-inner";
 import { Request, Response, HttpRequestMethod } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { RouteMap } from "../tools/RouteMap";
+import { isTypeScript } from '../../init';
 
 const EFFECT_METHODS: HttpRequestMethod[] = [
     "DELETE",
@@ -97,7 +99,7 @@ function handleCsrfToken(ctrl: HttpController): void {
     }
 }
 
-function getDestination(ctrl: HttpController, savePath: string, reject: Function) {
+function getDestination(savePath: string, reject: Function) {
     return (req, file: UploadingFile, cb) => {
         fs.ensureDir(savePath, err => {
             err ? reject(err) : cb(null, savePath);
@@ -132,17 +134,17 @@ function getFilename(ctrl: HttpController, savePath: string, reject: Function) {
     }
 }
 
-function getStorage(ctrl: HttpController, resolve: Function, reject: Function) {
+function getStorage(ctrl: HttpController, reject: Function) {
     let savePath = `${ctrl.uploadOptions.savePath}/` + date("Y-m-d");
     return multer.diskStorage({
-        destination: getDestination(ctrl, savePath, reject),
+        destination: getDestination(savePath, reject),
         filename: getFilename(ctrl, savePath, reject)
     });
 }
 
-function getUploader(ctrl: HttpController, resolve: Function, reject: Function) {
+function getUploader(ctrl: HttpController, reject: Function) {
     return multer({
-        storage: getStorage(ctrl, resolve, reject),
+        storage: getStorage(ctrl, reject),
         fileFilter: (req, file: UploadingFile, cb) => {
             try {
                 cb(null, ctrl.uploadOptions.filter(file));
@@ -159,9 +161,50 @@ function handleUpload(
     resolve: Function,
     reject: Function
 ) {
-    let Class = <typeof HttpController>ctrl.constructor;
-    let uploadFields = Class.UploadFields[method];
-    let { req, res } = ctrl;
+    let { req, res } = ctrl,
+        uploadFields = ctrl.Class.UploadFields[method],
+        getResult = () => {
+            let data: string[] = values(req.params),
+                params: any[] = [],
+                fnParams = getFuncParams(ctrl[method]),
+                reqProps = ["request", "req"],
+                resProps = ["response", "res"];
+
+            if (isTypeScript) {
+                // try to convert parameters to proper types according to 
+                // the definition of the method.
+                let meta: Function[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+
+                for (let i in meta) {
+                    if (meta[i] == Number) {
+                        params[i] = parseInt(data.shift());
+                    } else if (meta[i] == Boolean) {
+                        let val = data.shift();
+                        params[i] = val == "false" || val == "0" ? false : true;
+                    } else if (meta[i] == Object) {
+                        if (reqProps.includes(fnParams[i]))
+                            params[i] = req;
+                        else if (resProps.includes(fnParams[i]))
+                            params[i] = res;
+                        else
+                            params[i] = data.shift();
+                    } else {
+                        params[i] = data.shift();
+                    }
+                }
+            } else {
+                for (let i in fnParams) {
+                    if (reqProps.includes(fnParams[i]))
+                        params[i] = req;
+                    else if (resProps.includes(fnParams[i]))
+                        params[i] = res;
+                    else
+                        params[i] = data.shift();
+                }
+            }
+
+            return callMethod(ctrl, ctrl[method], ...params);
+        };
 
     if (req.method == "POST" && uploadFields && uploadFields.length) {
         // Configure fields.
@@ -173,18 +216,18 @@ function handleUpload(
             });
         }
 
-        let uploader = getUploader(ctrl, resolve, reject);
+        let uploader = getUploader(ctrl, reject);
         let handle = uploader.fields(fields);
 
         handle(<any>req, <any>res, (err) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(callMethod(ctrl, ctrl[method], req, res));
+                resolve(getResult());
             }
         });
     } else {
-        resolve(callMethod(ctrl, ctrl[method], req, res));
+        resolve(getResult());
     }
 }
 
@@ -212,7 +255,6 @@ function handleError(err: Error, ctrl: HttpController) {
 
         // Try to load the error page, if not present, then show the 
         // error message.
-        // let Class = <typeof HttpController>ctrl.constructor;
         ctrl.Class.httpErrorView(<HttpError>err, ctrl).then(content => {
             res.type = "text/html";
             res.send(content);
@@ -236,38 +278,49 @@ function getNextHandler(
 
         let { req, res } = ctrl;
 
-        // Handle CORS.
-        if (!cors(<any>ctrl.cors, req, res)) {
-            throw new HttpError(410);
-        } else if (req.method === "OPTIONS") {
-            res.end();
-            return;
-        }
-
-        // Handle authentication.
-        let Class = <typeof HttpController>ctrl.constructor;
-        if (Class.RequireAuth.includes(method) && !ctrl.authorized) {
-            if (ctrl.fallbackTo) {
-                return res.redirect(ctrl.fallbackTo, 302);
-            } else {
-                throw new HttpError(401);
+        Promise.resolve(ctrl.before()).then(() => {
+            if (res.finished) {
+                // if the response has been sent before calling the actual method,
+                // resolve the Promise immediately without running any checking 
+                // procedure, and don't call the method.
+                return resolve(null);
             }
-        }
 
-        // Handle CSRF token.
-        handleCsrfToken(ctrl);
+            // Handle CORS.
+            if (!cors(<any>ctrl.cors, req, res)) {
+                throw new HttpError(410);
+            } else if (req.method === "OPTIONS") {
+                // cors will set proper headers for OPTIONS
+                res.end();
+                return;
+            }
 
-        // Handle GZip.
-        res.gzip = req.encoding == "gzip" && ctrl.gzip;
+            // Handle authentication.
+            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized) {
+                if (ctrl.fallbackTo) {
+                    return res.redirect(ctrl.fallbackTo, 302);
+                } else {
+                    throw new HttpError(401);
+                }
+            }
 
-        // Handle jsonp.
-        if (req.method == "GET" && ctrl.jsonp
-            && req.query[ctrl.jsonp]) {
-            res.jsonp = req.query[ctrl.jsonp];
-        }
+            // Handle CSRF token.
+            handleCsrfToken(ctrl);
 
-        // Handle file uploading.
-        handleUpload(ctrl, method, resolve, reject);
+            // Handle GZip.
+            res.gzip = req.encoding == "gzip" && ctrl.gzip;
+
+            // Handle jsonp.
+            if (req.method == "GET" && ctrl.jsonp
+                && req.query[ctrl.jsonp]) {
+                res.jsonp = req.query[ctrl.jsonp];
+            }
+
+            // Handle file uploading.
+            handleUpload(ctrl, method, resolve, reject);
+        }).catch(err => {
+            reject(err);
+        });
     }
 }
 
@@ -289,31 +342,28 @@ function handleGzip(res: Response, data: any): Promise<any> {
 function handleResponse(ctrl: HttpController, data: any) {
     let { req, res } = ctrl;
 
-    if (req.isEventSource) {
-        if (data !== null && data !== undefined && !res.finished)
-            ctrl.sse.send(data);
+    if (!res.finished) {
+        if (req.isEventSource) {
+            if (data !== null && data !== undefined)
+                ctrl.sse.send(data);
+        } else if (req.method === "HEAD") {
+            return res.end();
+        } else if (data !== undefined) {
+            // Send data to the client.
+            let xml = /(text|application)\/xml\b/;
+            let type = <string>res.getHeader("Content-Type");
 
-        return finish(ctrl);
-    }
-
-
-    if (req.method === "HEAD") {
-        return res.end();
-    } else if (data !== undefined) {
-        // Send data to the client.
-        let xml = /(text|application)\/xml\b/;
-        let type = <string>res.getHeader("Content-Type");
-
-        if (data === null) {
-            res.end("");
-        } else if (typeof data === "object" && type && xml.test(type)) {
-            res.xml(data);
-        } else if (data instanceof Buffer) {
-            res.send(data);
-        } else if (typeof data === "string" && res.gzip) {
-            return handleGzip(res, data);
-        } else {
-            res.send(data);
+            if (data === null) {
+                res.end("");
+            } else if (typeof data === "object" && type && xml.test(type)) {
+                res.xml(data);
+            } else if (data instanceof Buffer) {
+                res.send(data);
+            } else if (typeof data === "string" && res.gzip) {
+                return handleGzip(res, data);
+            } else {
+                res.send(data);
+            }
         }
     }
 
@@ -326,6 +376,10 @@ function getRouteHandler(Class: typeof HttpController, method: string) {
         let className = Class.name === "default_1" ? "default" : Class.name;
         let action = `${className}.${method} (${Class.filename})`;
 
+        res.on("error", (err) => {
+            handleLog(ctrl, err);
+        });
+
         // Handle the procedure in a Promise context.
         new Promise((resolve, reject) => {
             try {
@@ -337,15 +391,13 @@ function getRouteHandler(Class: typeof HttpController, method: string) {
                     ctrl = new Class(req, res);
                     handleNext(ctrl);
                 }
-
-                res.on("error", (err) => {
-                    handleLog(ctrl, err);
-                });
             } catch (err) {
                 reject(err);
             }
         }).then((data: any) => {
             return handleResponse(ctrl, data);
+        }).then(() => {
+            return ctrl.after();
         }).catch((err: Error) => {
             ctrl = ctrl || new HttpController(req, res);
             ctrl.logOptions.action = action;

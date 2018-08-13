@@ -6,20 +6,17 @@ import { Service } from "../tools/Service";
  * framework.
  */
 export class Controller extends Service {
-    /** Sets what methods require authentication. */
-    static RequireAuth: string[] = [];
-    /** Indicates whether the operation is authorized. */
-    authorized: boolean;
     /**
      * The file that defines the current class, this property will be set
      * automatically by the framework when the controller is imported.
      */
     static filename: string;
 
-    constructor() {
-        super();
-        this.authorized = false;
-    }
+    /** Sets what methods require authentication. */
+    static RequireAuth: string[] = [];
+    
+    /** Indicates whether the operation is authorized. */
+    authorized: boolean = false;
 
     /** Sends successful action results to the response context. */
     success(data: any, code: number = 200) {
@@ -39,4 +36,10 @@ export class Controller extends Service {
             error: msg
         };
     }
+
+    /** This method will be auto-called before calling the actual method. */
+    before(): any { }
+
+    /** This method will be auto-called after calling the actual method. */
+    after(): any { }
 }

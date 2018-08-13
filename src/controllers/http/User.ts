@@ -16,12 +16,12 @@ export default class extends HttpController {
      * @example GET /user/1
      */
     @route("GET", "/user/:id")
-    async get(req: Request) {
-        if (!req.params.id) {
+    async get(req: Request, id: number) {
+        if (!id || isNaN(id)) {
             throw new HttpError(400);
         }
+
         try {
-            let id = parseInt(req.params.id);
             return await User.use(req.db).get(id);
         } catch (error) {
             throw new HttpError(404, error.message);
@@ -32,9 +32,9 @@ export default class extends HttpController {
      * @example PATCH /user/1/update
      */
     @route("PATCH", "/user/:id/update")
-    async update(req: Request) {
+    async update(req: Request, id: number) {
         try {
-            var user = <User>await this.get(req);
+            var user = <User>await this.get(req, id);
             return await user.update(req.body);
         } catch (error) {
             if (!(error instanceof HttpError)) {
@@ -49,8 +49,8 @@ export default class extends HttpController {
      * @example DELETE /user/1
      */
     @route("DELETE", "/user/:id")
-    delete(req: Request) {
-        return this.get(req).then(user => {
+    delete(req: Request, id: number) {
+        return this.get(req, id).then(user => {
             return user.delete();
         });
     }

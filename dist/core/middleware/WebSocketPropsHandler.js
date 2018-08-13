@@ -11,16 +11,22 @@ function handleWebSocketProps(io) {
         socket.ip = socket.handshake.address;
         socket.host = req.headers.host;
         socket.secure = socket.handshake.secure;
-        let forIp = req.headers["x-forwarded-for"], proxy = {
-            protocol: req.headers["x-forwarded-proto"] || null,
-            host: req.headers["x-forwarded-host"] || null,
-            ips: forIp && forIp.split(/\s*,\s*/) || [],
-            ip: ""
-        };
-        proxy.ip = proxy.ips[0];
-        socket.proxy = proxy;
+        if (req.headers["x-forwarded-for"] || req.headers["x-forwarded-proto"]
+            || req.headers["x-forwarded-host"]) {
+            let forIp = req.headers["x-forwarded-for"], proxy = {
+                protocol: req.headers["x-forwarded-proto"] || null,
+                host: req.headers["x-forwarded-host"] || null,
+                ips: forIp && forIp.split(/\s*,\s*/) || [],
+                ip: ""
+            };
+            proxy.ip = proxy.ips[0];
+            socket.proxy = proxy;
+        }
+        else {
+            socket.proxy = null;
+        }
         socket.host = req.headers.host;
-        socket.ips = proxy.ips;
+        socket.ips = socket.proxy ? socket.proxy.ips : [socket.ip];
         socket.langs = parse_accepts_1.parseValue(req.headers["accept-language"]);
         socket.lang = socket.langs[0];
         let urlObj = url.parse(socket.protocol + "://" + socket.host);

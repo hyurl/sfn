@@ -14,6 +14,11 @@ function handleWebSocketSession(io) {
             has: (session, key) => key in session,
             deleteProperty: (session, key) => delete session[key]
         });
+        let hash = session_1.getHash(socket.session);
+        socket.on("disconnected", () => {
+            if (hash !== session_1.getHash(socket.session))
+                socket.session.save(() => { });
+        });
         next();
     });
 }

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("source-map-support/register");
+require("reflect-metadata");
 const date = require("sfn-date");
 exports.date = date;
 const Mail = require("sfn-mail");

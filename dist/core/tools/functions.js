@@ -38,7 +38,7 @@ function event(...args) {
     if (args.length === 1) {
         return (proto, prop) => {
             EventMap_1.EventMap[args[0]] = {
-                Class: proto.constructor,
+                Class: proto.Class,
                 method: prop
             };
         };
@@ -53,10 +53,9 @@ function event(...args) {
 exports.event = event;
 function upload(...fields) {
     return (proto, prop) => {
-        let Class = proto.constructor;
-        if (!Class.hasOwnProperty("UploadFields"))
-            Class.UploadFields = {};
-        Class.UploadFields[prop] = fields;
+        if (!proto.Class.hasOwnProperty("UploadFields"))
+            proto.Class.UploadFields = {};
+        proto.Class.UploadFields[prop] = fields;
     };
 }
 exports.upload = upload;
@@ -65,7 +64,7 @@ function _route(...args) {
     if (args.length === 1 || args.length === 2) {
         return (proto, prop) => {
             RouteMap_1.RouteMap[route] = {
-                Class: proto.constructor,
+                Class: proto.Class,
                 method: prop
             };
         };

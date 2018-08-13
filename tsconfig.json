@@ -12,6 +12,7 @@
         "pretty": true,
         "removeComments": true,
         "noUnusedLocals": true,
+        "emitDecoratorMetadata": true,
         "lib": [
             "es2015",
             "es2016.array.include"

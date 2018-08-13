@@ -1,4 +1,5 @@
 import "source-map-support/register";
+import "reflect-metadata";
 import * as date from "sfn-date";
 import * as Mail from "sfn-mail";
 import * as OutputBuffer from "sfn-output-buffer";

@@ -14,13 +14,12 @@ class default_1 extends sfn_1.HttpController {
             }
         });
     }
-    get(req) {
+    get(req, id) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (!req.params.id) {
+            if (!id || isNaN(id)) {
                 throw new sfn_1.HttpError(400);
             }
             try {
-                let id = parseInt(req.params.id);
                 return yield modelar_1.User.use(req.db).get(id);
             }
             catch (error) {
@@ -28,10 +27,10 @@ class default_1 extends sfn_1.HttpController {
             }
         });
     }
-    update(req) {
+    update(req, id) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                var user = yield this.get(req);
+                var user = yield this.get(req, id);
                 return yield user.update(req.body);
             }
             catch (error) {
@@ -44,8 +43,8 @@ class default_1 extends sfn_1.HttpController {
             }
         });
     }
-    delete(req) {
-        return this.get(req).then(user => {
+    delete(req, id) {
+        return this.get(req, id).then(user => {
             return user.delete();
         });
     }
@@ -65,22 +64,40 @@ class default_1 extends sfn_1.HttpController {
     }
 }
 tslib_1.__decorate([
-    sfn_1.route("POST", "/user/create")
+    sfn_1.route("POST", "/user/create"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], default_1.prototype, "create", null);
 tslib_1.__decorate([
-    sfn_1.route("GET", "/user/:id")
+    sfn_1.route("GET", "/user/:id"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Number]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], default_1.prototype, "get", null);
 tslib_1.__decorate([
-    sfn_1.route("PATCH", "/user/:id/update")
+    sfn_1.route("PATCH", "/user/:id/update"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Number]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], default_1.prototype, "update", null);
 tslib_1.__decorate([
-    sfn_1.route("DELETE", "/user/:id")
+    sfn_1.route("DELETE", "/user/:id"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Number]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "delete", null);
 tslib_1.__decorate([
-    sfn_1.route("POST", "/user/login")
+    sfn_1.route("POST", "/user/login"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "login", null);
 tslib_1.__decorate([
-    sfn_1.route("POST", "/user/logout")
+    sfn_1.route("POST", "/user/logout"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "logout", null);
 exports.default = default_1;
 //# sourceMappingURL=User.js.map

@@ -71,7 +71,7 @@ export interface WebSocketDecorator extends Function {
     (proto: WebSocketController, prop: string): void;
 }
 
-interface WebSocketEventDecorator extends WebSocketDecorator {}
+interface WebSocketEventDecorator extends WebSocketDecorator { }
 
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketEventDecorator;
@@ -80,7 +80,7 @@ export function event(...args) {
     if (args.length === 1) {
         return (proto: WebSocketController, prop: string) => {
             EventMap[args[0]] = {
-                Class: <typeof WebSocketController>proto.constructor,
+                Class: proto.Class,
                 method: prop
             };
         }
@@ -95,12 +95,10 @@ export function event(...args) {
 /** Allows the method accept file uploading with specified fields. */
 export function upload(...fields: string[]): HttpDecorator {
     return (proto: HttpController, prop: string) => {
-        let Class = <typeof HttpController>proto.constructor;
+        if (!proto.Class.hasOwnProperty("UploadFields"))
+            proto.Class.UploadFields = {};
 
-        if (!Class.hasOwnProperty("UploadFields"))
-            Class.UploadFields = {};
-
-        Class.UploadFields[prop] = fields;
+        proto.Class.UploadFields[prop] = fields;
     }
 }
 
@@ -110,7 +108,7 @@ function _route(...args) {
     if (args.length === 1 || args.length === 2) {
         return (proto: HttpController, prop: string) => {
             RouteMap[route] = {
-                Class: <typeof HttpController>proto.constructor,
+                Class: proto.Class,
                 method: prop
             }
         }
@@ -122,7 +120,7 @@ function _route(...args) {
     }
 }
 
-interface HttpRouteDecorator extends HttpDecorator {}
+interface HttpRouteDecorator extends HttpDecorator { }
 
 interface HttpRoute extends Function {
     /** Binds the method to a specified URL route. */

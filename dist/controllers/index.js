@@ -23,10 +23,16 @@ class default_1 extends sfn_1.HttpController {
     }
 }
 tslib_1.__decorate([
-    sfn_1.route("GET /")
+    sfn_1.route("GET /"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "index", null);
 tslib_1.__decorate([
-    sfn_1.route("SSE /sse-test")
+    sfn_1.route("SSE /sse-test"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", []),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "sseTest", null);
 exports.default = default_1;
 //# sourceMappingURL=index.js.map

@@ -1,13 +1,10 @@
 /** Initiate the project after SFN is installed. */
 import * as path from "path";
 import * as fs from "fs-extra";
-import { ROOT_PATH, SRC_PATH } from "../init";
-
-/** Whether the project should write code with TypeScript. */
-var isTs = fs.existsSync(ROOT_PATH + "/tsconfig.json");
+import { SRC_PATH, isTypeScript } from "../init";
 
 export var sfnd = path.normalize(__dirname + "/../../");
-export var ext = isTs ? "ts" : "js";
+export var ext = isTypeScript ? "ts" : "js";
 
 if (!fs.existsSync(SRC_PATH))
     fs.ensureDirSync(SRC_PATH);
@@ -23,7 +20,7 @@ if (!fs.existsSync(bootstrap)) {
 }
 
 if (!fs.existsSync(`${SRC_PATH}/controllers`)) {
-    let dir = sfnd + "/src/" + (isTs ? "controllers" : "cli/templates/controllers");
+    let dir = sfnd + "/src/" + (isTypeScript ? "controllers" : "cli/templates/controllers");
     fs.copySync(dir, `${SRC_PATH}/controllers`);
 }
 

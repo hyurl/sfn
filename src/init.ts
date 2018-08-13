@@ -38,6 +38,9 @@ export const APP_PATH: string = appPath;
 /** The source code path. */
 export const SRC_PATH: string = srcRoot;
 
+/** Whether the project is written in TypeScript. */
+export const isTypeScript = SRC_PATH != APP_PATH;
+
 // support .env configuration file
 configEnv({
     path: ROOT_PATH + "/.env"

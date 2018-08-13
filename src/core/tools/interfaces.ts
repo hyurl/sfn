@@ -43,11 +43,11 @@ export interface Request extends webium.Request {
     /** Gets a DB instance for `modelar`. */
     db: DB;
     /** The logged-in user of the request. */
-    user: User;
+    user?: User;
     /** Whether the request comes from an EventSource.  */
     isEventSource: boolean;
     /** Gets the CSRF token if available. */
-    csrfToken: string;
+    csrfToken?: string;
     /** In a sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** 
@@ -60,7 +60,7 @@ export interface Request extends webium.Request {
      * when in the method bound to the route, the files are uploaded and 
      * stored in disk.
      */
-    files: { [field: string]: UploadedFile[] };
+    files?: { [field: string]: UploadedFile[] };
 }
 
 export interface Response extends webium.Response {
@@ -72,19 +72,19 @@ export interface Response extends webium.Response {
 
 export interface WebSocket extends SocketIO.Socket {
     /** The domain name of the handshake. */
-    domainName: string;
+    domainName?: string;
     /** The subdomain name of the handshake. */
-    subdomain: string;
+    subdomain?: string;
     /** Gets a DB instance for `modelar`. */
     db: DB;
     /** The logged-in user of the socket. */
-    user: User;
+    user?: User;
     /** In a sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** * The cookies of handshake. */
     cookies: { [name: string]: any };
     /** The proxy information of handshake. */
-    proxy: {
+    proxy?: {
         protocol: string,
         host: string,
         ips: string[],
@@ -94,7 +94,7 @@ export interface WebSocket extends SocketIO.Socket {
     protocol: string;
     host: string;
     hostname: string;
-    port: number;
+    port?: number;
     /** The remote IP of the socket. */
     ip: string;
     ips: string[];

@@ -1,12 +1,13 @@
 import { extname, basename } from "path";
+import { __awaiter } from 'tslib';
 import * as CallSiteRecord from "callsite-record";
 import { Locale } from "./interfaces";
+import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
 import { config } from "../bootstrap/ConfigLoader";
-import { __awaiter } from 'tslib';
 
 export function loadLanguagePack(filename: string): Locale {
     let ext = extname(filename),
@@ -149,14 +150,26 @@ export function callsiteLog(err: Error) {
     }
 }
 
-export function callMethod(thisArg: any, fn: Function, ...args: any[]): any {
+export function callMethod(ctrl: Controller, fn: Function, ...args: any[]): any {
     let res: any;
 
     if (fn.constructor.name == "GeneratorFunction" && config.awaitGenerator) {
-        res = __awaiter(thisArg, args, null, fn);
+        res = __awaiter(ctrl, args, null, fn);
     } else {
-        res = fn.apply(thisArg, args);
+        res = fn.apply(ctrl, args);
     }
 
     return res;
+}
+
+export function getFuncParams(fn: Function) {
+    let fnStr = fn.toString(),
+        start = fnStr.indexOf("("),
+        end = fnStr.indexOf(")"),
+        paramStr = fnStr.slice(start + 1, end).trim(),
+        params = paramStr.split(",").map(param => {
+            return param.replace(/\s/g, "").split("=")[0];
+        });
+
+    return params;
 }

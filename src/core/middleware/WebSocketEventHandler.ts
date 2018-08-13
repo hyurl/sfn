@@ -4,10 +4,11 @@ import { Server } from "socket.io";
 import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { SocketError } from "../tools/SocketError";
 import { WebSocket } from "../tools/interfaces";
-import { callsiteLog, callMethod } from "../tools/functions-inner";
+import { callsiteLog, callMethod, getFuncParams } from "../tools/functions-inner";
 import { realDB } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { EventMap } from "../tools/EventMap";
+import { isTypeScript } from '../../init';
 
 type SocketEventInfo = {
     time: number;
@@ -17,10 +18,6 @@ type SocketEventInfo = {
 
 function finish(ctrl: WebSocketController, info: SocketEventInfo) {
     let socket = ctrl.socket;
-
-    // If has session, save.
-    // if (socket.session)
-    //     socket.session.save(() => void 0);
 
     // If has db connection bound to the socket, release.
     if (socket[realDB])
@@ -87,27 +84,60 @@ function getNextHandler(
     method: string,
     action: string,
     data: any[],
-    resolve: Function
+    resolve: Function,
+    reject: Function
 ) {
     return (ctrl: WebSocketController) => {
         ctrl.logOptions.action = action;
 
-        // Handle authentication.
-        let Class = <typeof WebSocketController>ctrl.constructor;
+        Promise.resolve(ctrl.before()).then(() => {
+            if (ctrl.socket.disconnected) {
+                // if the socket has been closed before calling the actual method,
+                // resolve the Promise immediately without running any checking 
+                // procedure, and don't call the method.
+                return resolve(null);
+            }
 
-        if (Class.RequireAuth.includes(method) && !ctrl.authorized)
-            throw new SocketError(401);
+            // Handle authentication.
+            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized)
+                throw new SocketError(401);
 
-        resolve(callMethod(ctrl, ctrl[method], ...data, ctrl.socket));
+            let params: any[] = [],
+                fnParams = getFuncParams(ctrl[method]),
+                socketProps = ["websocket", "socket", "sock", "webSocket"];
+
+            if (isTypeScript) {
+                // try to convert parameters to proper types according to 
+                // the definition of the method.
+                let meta: Function[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+
+                for (let i in meta) {
+                    if (meta[i] == Object && socketProps.includes(fnParams[i]))
+                        params[i] = ctrl.socket;
+                    else
+                        params[i] = data.shift();
+                }
+            } else {
+                for (let i in fnParams) {
+                    if (socketProps.includes(fnParams[i]))
+                        params[i] = ctrl.socket;
+                    else
+                        params[i] = data.shift();
+                }
+            }
+
+            resolve(callMethod(ctrl, ctrl[method], ...params));
+        }).catch(err => {
+            reject(err);
+        });
     }
 }
 
 function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
-    let { Class, method } = EventMap[event];
-    let className = Class.name === "default_1" ? "default" : Class.name;
-    let action = `${className}.${method} (${Class.filename})`;
-
-    let ctrl: WebSocketController = null,
+    let { Class, method } = EventMap[event],
+        className = Class.name === "default_1" ? "default" : Class.name,
+        action = `${className}.${method} (${Class.filename})`,
+        ctrl: WebSocketController = null,
         info: SocketEventInfo = {
             time: Date.now(),
             event,
@@ -117,7 +147,7 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
     // Handle the procedure in a Promise context.
     new Promise((resolve, reject) => {
         try {
-            let handleNext = getNextHandler(method, action, data, resolve);
+            let handleNext = getNextHandler(method, action, data, resolve, reject);
 
             if (Class.prototype.constructor.length === 2) {
                 ctrl = new Class(socket, handleNext);
@@ -134,6 +164,8 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
             socket.emit(event, _data);
         }
         finish(ctrl, info);
+    }).then(() => {
+        ctrl.after();
     }).catch((err: Error) => {
         ctrl = ctrl || new WebSocketController(socket);
         ctrl.logOptions.action = action;

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Service_1 = require("../tools/Service");
 class Controller extends Service_1.Service {
     constructor() {
-        super();
+        super(...arguments);
         this.authorized = false;
     }
     success(data, code = 200) {
@@ -21,6 +21,8 @@ class Controller extends Service_1.Service {
             error: msg
         };
     }
+    before() { }
+    after() { }
 }
 Controller.RequireAuth = [];
 exports.Controller = Controller;

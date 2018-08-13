@@ -26,6 +26,7 @@ else {
 }
 exports.APP_PATH = appPath;
 exports.SRC_PATH = srcRoot;
+exports.isTypeScript = exports.SRC_PATH != exports.APP_PATH;
 dotenv_1.config({
     path: exports.ROOT_PATH + "/.env"
 });

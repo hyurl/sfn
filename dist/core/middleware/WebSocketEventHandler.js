@@ -8,6 +8,7 @@ const functions_inner_1 = require("../tools/functions-inner");
 const symbols_1 = require("../tools/symbols");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const EventMap_1 = require("../tools/EventMap");
+const init_1 = require("../../init");
 function finish(ctrl, info) {
     let socket = ctrl.socket;
     if (socket[symbols_1.realDB])
@@ -54,27 +55,48 @@ function handleError(err, ctrl, info) {
         functions_inner_1.callsiteLog(_err);
     }
 }
-function getNextHandler(method, action, data, resolve) {
+function getNextHandler(method, action, data, resolve, reject) {
     return (ctrl) => {
         ctrl.logOptions.action = action;
-        let Class = ctrl.constructor;
-        if (Class.RequireAuth.includes(method) && !ctrl.authorized)
-            throw new SocketError_1.SocketError(401);
-        resolve(functions_inner_1.callMethod(ctrl, ctrl[method], ...data, ctrl.socket));
+        Promise.resolve(ctrl.before()).then(() => {
+            if (ctrl.socket.disconnected) {
+                return resolve(null);
+            }
+            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized)
+                throw new SocketError_1.SocketError(401);
+            let params = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), socketProps = ["websocket", "socket", "sock", "webSocket"];
+            if (init_1.isTypeScript) {
+                let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
+                for (let i in meta) {
+                    if (meta[i] == Object && socketProps.includes(fnParams[i]))
+                        params[i] = ctrl.socket;
+                    else
+                        params[i] = data.shift();
+                }
+            }
+            else {
+                for (let i in fnParams) {
+                    if (socketProps.includes(fnParams[i]))
+                        params[i] = ctrl.socket;
+                    else
+                        params[i] = data.shift();
+                }
+            }
+            resolve(functions_inner_1.callMethod(ctrl, ctrl[method], ...params));
+        }).catch(err => {
+            reject(err);
+        });
     };
 }
 function handleEvent(socket, event, ...data) {
-    let { Class, method } = EventMap_1.EventMap[event];
-    let className = Class.name === "default_1" ? "default" : Class.name;
-    let action = `${className}.${method} (${Class.filename})`;
-    let ctrl = null, info = {
+    let { Class, method } = EventMap_1.EventMap[event], className = Class.name === "default_1" ? "default" : Class.name, action = `${className}.${method} (${Class.filename})`, ctrl = null, info = {
         time: Date.now(),
         event,
         code: 200
     };
     new Promise((resolve, reject) => {
         try {
-            let handleNext = getNextHandler(method, action, data, resolve);
+            let handleNext = getNextHandler(method, action, data, resolve, reject);
             if (Class.prototype.constructor.length === 2) {
                 ctrl = new Class(socket, handleNext);
             }
@@ -91,6 +113,8 @@ function handleEvent(socket, event, ...data) {
             socket.emit(event, _data);
         }
         finish(ctrl, info);
+    }).then(() => {
+        ctrl.after();
     }).catch((err) => {
         ctrl = ctrl || new WebSocketController_1.WebSocketController(socket);
         ctrl.logOptions.action = action;

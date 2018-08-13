@@ -3,9 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const fs = require("fs-extra");
 const init_1 = require("../init");
-var isTs = fs.existsSync(init_1.ROOT_PATH + "/tsconfig.json");
 exports.sfnd = path.normalize(__dirname + "/../../");
-exports.ext = isTs ? "ts" : "js";
+exports.ext = init_1.isTypeScript ? "ts" : "js";
 if (!fs.existsSync(init_1.SRC_PATH))
     fs.ensureDirSync(init_1.SRC_PATH);
 if (!fs.existsSync(`${init_1.SRC_PATH}/assets`))
@@ -17,7 +16,7 @@ if (!fs.existsSync(bootstrap)) {
     fs.writeFileSync(`${bootstrap}/websocket.${exports.ext}`, "");
 }
 if (!fs.existsSync(`${init_1.SRC_PATH}/controllers`)) {
-    let dir = exports.sfnd + "/src/" + (isTs ? "controllers" : "cli/templates/controllers");
+    let dir = exports.sfnd + "/src/" + (init_1.isTypeScript ? "controllers" : "cli/templates/controllers");
     fs.copySync(dir, `${init_1.SRC_PATH}/controllers`);
 }
 if (!fs.existsSync(`${init_1.SRC_PATH}/locales`))

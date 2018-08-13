@@ -46,22 +46,40 @@ class default_1 extends sfn_1.WebSocketController {
     }
 }
 tslib_1.__decorate([
-    sfn_1.event("/user/create")
+    sfn_1.event("/user/create"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "create", null);
 tslib_1.__decorate([
-    sfn_1.event("/user/get")
+    sfn_1.event("/user/get"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], default_1.prototype, "get", null);
 tslib_1.__decorate([
-    sfn_1.event("/user/update")
+    sfn_1.event("/user/update"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "update", null);
 tslib_1.__decorate([
-    sfn_1.event("/user/delate")
+    sfn_1.event("/user/delate"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "delete", null);
 tslib_1.__decorate([
-    sfn_1.event("/user/login")
+    sfn_1.event("/user/login"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "login", null);
 tslib_1.__decorate([
-    sfn_1.event("/user/logout")
+    sfn_1.event("/user/logout"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "logout", null);
 exports.default = default_1;
 //# sourceMappingURL=User.js.map
