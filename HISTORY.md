@@ -1,3 +1,9 @@
+## 0.1.14
+
+## Fixes
+
+- Fix a bug in `MarkdownParser` (and `HttpController.viewMarkdown()`).
+
 # 0.1.13
 
 ## Fixes

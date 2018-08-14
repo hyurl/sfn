@@ -19,7 +19,7 @@ renderer.heading = function (text, level) {
     return `<h${level} id="${id}"><a class="heading-anchor" href="#${id}">${pin}</a>${text}</h${level}>\n`;
 };
 renderer.code = function (code, lang) {
-    return `<pre><code class="lang-${lang} hljs">${hljs.highlightAuto(code).value}</code></pre>\n`;
+    return `<pre><code class="lang-${lang} hljs">${hljs.highlight(lang, code, true).value}</code></pre>\n`;
 };
 var MarkdownParser;
 (function (MarkdownParser) {
