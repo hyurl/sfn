@@ -194,9 +194,18 @@ export class HttpController extends Controller {
         return this.engine.renderFile(filename, vars);
     }
 
-
-    /** Loads contents of a view file from disk or from cache. */
-    protected loadFile(filename: string, cache = false): Promise<string> {
+    /**
+     * Sends a view file with raw contents to the response context.
+     * 
+     * @param filename The view filename. Template files are stored in 
+     *  `Views/`. If this argument is missing, then the `defaultView` will
+     *  be used.
+     * @param cache Stores the file content in cache.
+     */
+    viewRaw(filename: string, cache = !isDevMode): Promise<string> {
+        filename = this.getAbsFilename(filename);
+        this.res.type = path.extname(filename);
+        
         if (cache && this.Class.LoadedViews[filename] !== undefined) {
             return Promise.resolve(this.Class.LoadedViews[filename]);
         } else {
@@ -226,23 +235,7 @@ export class HttpController extends Controller {
         if (path.extname(filename) != ".md")
             filename += ".md";
 
-        filename = this.getAbsFilename(filename);
-        this.res.type = ".md";
-        return this.loadFile(filename, cache).then(MarkdownParser.parse);
-    }
-
-    /**
-     * Sends a view file with raw contents to the response context.
-     * 
-     * @param filename The view filename. Template files are stored in 
-     *  `Views/`. If this argument is missing, then the `defaultView` will
-     *  be used.
-     * @param cache Stores the file content in cache.
-     */
-    viewRaw(filename: string, cache = !isDevMode): Promise<string> {
-        filename = this.getAbsFilename(filename);
-        this.res.type = path.extname(filename);
-        return this.loadFile(filename, cache);
+        return this.viewRaw(filename, cache).then(MarkdownParser.parse);
     }
 
     /** Alias of `res.send()`. */
