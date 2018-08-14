@@ -37,7 +37,7 @@ class HttpController extends Controller_1.Controller {
             || req.lang
             || ConfigLoader_1.config.lang;
     }
-    _realFilename(filename) {
+    getAbsFilename(filename) {
         if (!path.isAbsolute(filename))
             filename = `${this.viewPath}/${filename}`;
         return filename;
@@ -48,7 +48,7 @@ class HttpController extends Controller_1.Controller {
             ext = this.viewExtname;
             filename += ext;
         }
-        filename = this._realFilename(filename);
+        filename = this.getAbsFilename(filename);
         this.res.type = ext;
         if (!("i18n" in vars)) {
             vars.i18n = function i18n(text, ...replacements) {
@@ -57,17 +57,29 @@ class HttpController extends Controller_1.Controller {
         }
         return this.engine.renderFile(filename, vars);
     }
-    viewMarkdown(filename) {
+    loadFile(filename, cache = false) {
+        if (cache && this.Class.LoadedViews[filename] !== undefined) {
+            return Promise.resolve(this.Class.LoadedViews[filename]);
+        }
+        else {
+            return fs.readFile(filename, "utf8").then(content => {
+                if (cache)
+                    this.Class.LoadedViews[filename] = content;
+                return content;
+            });
+        }
+    }
+    viewMarkdown(filename, cache = !ConfigLoader_1.isDevMode) {
         if (path.extname(filename) != ".md")
             filename += ".md";
-        filename = this._realFilename(filename);
+        filename = this.getAbsFilename(filename);
         this.res.type = ".md";
-        return MarkdownParser_1.MarkdownParser.parseFile(filename);
+        return this.loadFile(filename, cache).then(MarkdownParser_1.MarkdownParser.parse);
     }
-    viewRaw(filename) {
-        filename = this._realFilename(filename);
+    viewRaw(filename, cache = !ConfigLoader_1.isDevMode) {
+        filename = this.getAbsFilename(filename);
         this.res.type = path.extname(filename);
-        return fs.readFile(filename, "utf8");
+        return this.loadFile(filename, cache);
     }
     send(data) {
         return this.res.send(data);
@@ -110,5 +122,6 @@ HttpController.viewPath = init_1.SRC_PATH + "/views";
 HttpController.viewExtname = ".html";
 HttpController.engine = Engine;
 HttpController.UploadFields = {};
+HttpController.LoadedViews = {};
 exports.HttpController = HttpController;
 //# sourceMappingURL=HttpController.js.map

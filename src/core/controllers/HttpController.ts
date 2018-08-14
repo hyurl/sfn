@@ -5,7 +5,7 @@ import { EjsEngine } from "sfn-ejs-engine";
 import * as SSE from "sfn-sse";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH, ROOT_PATH } from "../../init";
-import { config } from "../bootstrap/ConfigLoader";
+import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { Controller } from "./Controller";
 import { TemplateEngine } from "../tools/TemplateEngine";
 import { MarkdownParser } from "../tools/MarkdownParser";
@@ -101,6 +101,8 @@ export class HttpController extends Controller {
         [method: string]: string[]
     } = {};
 
+    private static LoadedViews: { [filename: string]: string } = {};
+
     viewPath = this.Class.viewPath;
     viewExtname = this.Class.viewExtname;
     /** Sets a specified template engine for the controller. */
@@ -155,8 +157,8 @@ export class HttpController extends Controller {
             || config.lang;
     }
 
-    /** @private */
-    private _realFilename(filename: string): string {
+    /** Gets the absolute view filename if the given one is relative. */
+    protected getAbsFilename(filename: string): string {
         if (!path.isAbsolute(filename))
             filename = `${this.viewPath}/${filename}`;
         return filename;
@@ -177,7 +179,7 @@ export class HttpController extends Controller {
             ext = this.viewExtname;
             filename += ext;
         }
-        filename = this._realFilename(filename);
+        filename = this.getAbsFilename(filename);
 
         // Set response type.
         this.res.type = ext;
@@ -192,6 +194,21 @@ export class HttpController extends Controller {
         return this.engine.renderFile(filename, vars);
     }
 
+
+    /** Loads contents of a view file from disk or from cache. */
+    protected loadFile(filename: string, cache = false): Promise<string> {
+        if (cache && this.Class.LoadedViews[filename] !== undefined) {
+            return Promise.resolve(this.Class.LoadedViews[filename]);
+        } else {
+            return fs.readFile(filename, "utf8").then(content => {
+                if (cache)
+                    this.Class.LoadedViews[filename] = content;
+
+                return content;
+            });
+        }
+    }
+
     /**
      * Sends a view file to the response context, and parse it as a markdown 
      * file.
@@ -203,14 +220,15 @@ export class HttpController extends Controller {
      *  `Views/`, if the filename ends with a `.md` as its extension name,
      *  you can pass this argument without one. If this argument is missing, 
      *  then the `defaultView` will be used.
+     * @param cache Stores the file content in cache.
      */
-    viewMarkdown(filename: string): Promise<string> {
+    viewMarkdown(filename: string, cache = !isDevMode): Promise<string> {
         if (path.extname(filename) != ".md")
             filename += ".md";
 
-        filename = this._realFilename(filename);
+        filename = this.getAbsFilename(filename);
         this.res.type = ".md";
-        return MarkdownParser.parseFile(filename);
+        return this.loadFile(filename, cache).then(MarkdownParser.parse);
     }
 
     /**
@@ -219,11 +237,12 @@ export class HttpController extends Controller {
      * @param filename The view filename. Template files are stored in 
      *  `Views/`. If this argument is missing, then the `defaultView` will
      *  be used.
+     * @param cache Stores the file content in cache.
      */
-    viewRaw(filename: string): Promise<string> {
-        filename = this._realFilename(filename);
+    viewRaw(filename: string, cache = !isDevMode): Promise<string> {
+        filename = this.getAbsFilename(filename);
         this.res.type = path.extname(filename);
-        return fs.readFile(filename, "utf8");
+        return this.loadFile(filename, cache);
     }
 
     /** Alias of `res.send()`. */
