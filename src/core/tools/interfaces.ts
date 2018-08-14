@@ -102,6 +102,6 @@ export interface WebSocket extends SocketIO.Socket {
     lang: string;
     /** All languages that the client accepts. */
     langs: string[];
-    /** `true` if the protocol is ws, `false` otherwise. */
+    /** `true` if the protocol is `wss`, `false` otherwise. */
     secure: boolean;
 }

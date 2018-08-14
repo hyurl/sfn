@@ -3,12 +3,12 @@ import { isDevMode } from "../bootstrap/ConfigLoader";
 export interface TemplateOptions {
     [option: string]: any;
     /**
-     * Wether the compiler shuld be cached in memory, in `dev` mode, it's 
+     * Whether the compiler should be cached in memory, in `dev` mode, it's 
      * `true` by default, while in `pro` mode, it's `false`.
      */
     cache?: boolean;
     /**
-     * Use a specified encoding to load a template file (default: `utf8`).
+     * Sets a specified encoding to load a template file (default: `utf8`).
      */
     encoding?: string;
 }
@@ -35,7 +35,7 @@ export abstract class TemplateEngine {
     }
 
     /**
-     * Render a view file.
+     * Renders a view file.
      * @param vars Local variables passed to the view file.
      */
     abstract renderFile(filename: string, vars?: { [name: string]: any }): Promise<string>;

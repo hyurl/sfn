@@ -75,7 +75,7 @@ export class Service extends EventEmitter {
         return Service.Loggers[filename];
     }
 
-    /** Get/Set a cache instance. */
+    /** Gets/Sets a cache instance. */
     get cache(): Cache {
         if (!this[realCache]) {
             this[realCache] = new Cache(config.redis);
@@ -87,7 +87,7 @@ export class Service extends EventEmitter {
         this[realCache] = v;
     }
 
-    /** Get/Set a DB instance. */
+    /** Gets/Sets a DB instance. */
     get db(): DB {
         if (!this[realDB]) {
             this[realDB] = new DB(config.database);

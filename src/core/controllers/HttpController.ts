@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import { DB, User } from "modelar";
 import { EjsEngine } from "sfn-ejs-engine";
-import SSE = require("sfn-sse");
+import * as SSE from "sfn-sse";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH, ROOT_PATH } from "../../init";
 import { config } from "../bootstrap/ConfigLoader";
@@ -92,7 +92,7 @@ export class HttpController extends Controller {
     static viewPath: string = SRC_PATH + "/views";
     static viewExtname: string = ".html";
     static engine: TemplateEngine = Engine;
-    /** Set a specified base URI for route paths. */
+    /** Sets a specified base URI for route paths. */
     static baseURI: string;
     /**
      * The key represents the method name, and the value sets form fields.
@@ -103,7 +103,7 @@ export class HttpController extends Controller {
 
     viewPath = this.Class.viewPath;
     viewExtname = this.Class.viewExtname;
-    /** Set a specified template engine for the controller. */
+    /** Sets a specified template engine for the controller. */
     engine = this.Class.engine;
 
     /** If set, when unauthorized, fallback to the given URL. */
@@ -111,7 +111,7 @@ export class HttpController extends Controller {
     /** Whether the response data should be compressed to GZip. */
     gzip: boolean = true;
     /**
-     * Set a query name for jsonp callback, `false` (by default) to disabled.
+     * Sets a query name for jsonp callback, `false` (by default) to disable.
      */
     jsonp: string | false = false;
     /**
@@ -123,7 +123,7 @@ export class HttpController extends Controller {
      */
     csrfProtection: boolean = false;
     /**
-     * Enable Cross-Origin Resource Sharing, set an array to accept multiple 
+     * Enables Cross-Origin Resource Sharing, set an array to accept multiple 
      * origins, an `*` to accept all, or an object for more complicated needs.
      */
     cors: string | string[] | CorsOptions | false = false;

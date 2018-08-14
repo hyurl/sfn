@@ -142,6 +142,7 @@ interface HttpRoute extends Function {
     put(path: string, Class: typeof HttpController, method: string): void;
 }
 
+/** Sets HTTP routes. */
 export var route: HttpRoute = <any>_route;
 
 route.delete = function (...args) {

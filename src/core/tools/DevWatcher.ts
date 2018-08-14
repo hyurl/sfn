@@ -34,7 +34,7 @@ function timerCallback(event, filename, extnames) {
  * it is modified, the workers will be restarted.
  */
 export class DevWatcher {
-    watcher: fs.FSWatcher;
+    readonly watcher: fs.FSWatcher;
 
     constructor(dirname: string, extnames = [".js", ".json"]) {
         if (Worker.isWorker) {
