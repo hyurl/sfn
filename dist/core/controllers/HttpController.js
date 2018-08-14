@@ -57,7 +57,9 @@ class HttpController extends Controller_1.Controller {
         }
         return this.engine.renderFile(filename, vars);
     }
-    loadFile(filename, cache = false) {
+    viewRaw(filename, cache = !ConfigLoader_1.isDevMode) {
+        filename = this.getAbsFilename(filename);
+        this.res.type = path.extname(filename);
         if (cache && this.Class.LoadedViews[filename] !== undefined) {
             return Promise.resolve(this.Class.LoadedViews[filename]);
         }
@@ -72,14 +74,7 @@ class HttpController extends Controller_1.Controller {
     viewMarkdown(filename, cache = !ConfigLoader_1.isDevMode) {
         if (path.extname(filename) != ".md")
             filename += ".md";
-        filename = this.getAbsFilename(filename);
-        this.res.type = ".md";
-        return this.loadFile(filename, cache).then(MarkdownParser_1.MarkdownParser.parse);
-    }
-    viewRaw(filename, cache = !ConfigLoader_1.isDevMode) {
-        filename = this.getAbsFilename(filename);
-        this.res.type = path.extname(filename);
-        return this.loadFile(filename, cache);
+        return this.viewRaw(filename, cache).then(MarkdownParser_1.MarkdownParser.parse);
     }
     send(data) {
         return this.res.send(data);
