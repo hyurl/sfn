@@ -167,10 +167,9 @@ export class HttpController extends Controller {
     /**
      * Sends view contents to the response context.
      * 
-     * @param filename The template name. Template files are stored in 
-     *  `Views/`, if the filename ends with a `.html` as its extension 
-     *  name, you can pass this argument without one. If this argument is 
-     *  missing, then the `defaultView` will be used.
+     * @param filename The template filename, if no extension presented, the 
+     *  `this.viewExtname` will be used. Template files are by default stored 
+     *  in `views/`.
      * @param vars Local variables passed to the template.
      */
     view(filename: string, vars: { [name: string]: any } = {}): Promise<string> {
@@ -197,9 +196,7 @@ export class HttpController extends Controller {
     /**
      * Sends a view file with raw contents to the response context.
      * 
-     * @param filename The view filename. Template files are stored in 
-     *  `Views/`. If this argument is missing, then the `defaultView` will
-     *  be used.
+     * @param filename The template file, stored in `views/` by default.
      * @param cache Stores the file content in cache.
      */
     viewRaw(filename: string, cache = !isDevMode): Promise<string> {
@@ -225,10 +222,8 @@ export class HttpController extends Controller {
      * This method relies on the module `highlightjs`, so when displaying code 
      * snippets, you need to include CSS files to the HTML page manually.
      * 
-     * @param filename The markdown filename. Template files are stored in 
-     *  `Views/`, if the filename ends with a `.md` as its extension name,
-     *  you can pass this argument without one. If this argument is missing, 
-     *  then the `defaultView` will be used.
+     * @param filename The template filename, if no extension presented, then 
+     *  `.md` will be used. Template files are by default stored in `views/`.
      * @param cache Stores the file content in cache.
      */
     viewMarkdown(filename: string, cache = !isDevMode): Promise<string> {
