@@ -6,9 +6,10 @@ import * as OutputBuffer from "sfn-output-buffer";
 import * as Logger from "sfn-logger";
 import * as Worker from "sfn-worker";
 import * as Validator from "sfn-validator";
+import * as SSE from "sfn-sse";
 import Cache = require("sfn-cache");
 
-export { date, Mail, OutputBuffer, Logger, Worker, Validator, Cache };
+export { date, Mail, OutputBuffer, Logger, Worker, Validator, SSE, Cache };
 export * from "sfn-scheduler";
 export * from "sfn-cookie";
 export * from "sfn-xss";

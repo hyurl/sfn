@@ -1,11 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
 const path = require("path");
 const fs = require("fs-extra");
 const zlib = require("zlib");
 const multer = require("multer");
 const cors = require("sfn-cors");
 const date = require("sfn-date");
+const modelar_1 = require("modelar");
 const values = require("lodash/values");
 const ideal_filename_1 = require("ideal-filename");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
@@ -133,7 +135,7 @@ function getUploader(ctrl, reject) {
     });
 }
 function handleUpload(ctrl, method, resolve, reject) {
-    let { req, res } = ctrl, uploadFields = ctrl.Class.UploadFields[method], getResult = () => {
+    let { req, res } = ctrl, uploadFields = ctrl.Class.UploadFields[method], getResult = () => tslib_1.__awaiter(this, void 0, void 0, function* () {
         let data = values(req.params), params = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), reqProps = ["request", "req"], resProps = ["response", "res"];
         if (init_1.isTypeScript) {
             let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
@@ -153,6 +155,23 @@ function handleUpload(ctrl, method, resolve, reject) {
                     else
                         params[i] = data.shift();
                 }
+                else if (meta[i].prototype instanceof modelar_1.Model) {
+                    if (req.method == "POST" && req.params.id === undefined) {
+                        params[i] = (new meta[i]).use(req.db);
+                    }
+                    else {
+                        try {
+                            let id = parseInt(req.params.id);
+                            if (!id || isNaN(id))
+                                throw new HttpError_1.HttpError(400);
+                            params[i] = yield meta[i].use(req.db).get(id);
+                        }
+                        catch (e) {
+                            params[i] = null;
+                            throw e;
+                        }
+                    }
+                }
                 else {
                     params[i] = data.shift();
                 }
@@ -168,8 +187,8 @@ function handleUpload(ctrl, method, resolve, reject) {
                     params[i] = data.shift();
             }
         }
-        return functions_inner_1.callMethod(ctrl, ctrl[method], ...params);
-    };
+        return yield functions_inner_1.callMethod(ctrl, ctrl[method], ...params);
+    });
     if (req.method == "POST" && uploadFields && uploadFields.length) {
         let fields = [];
         for (let field of uploadFields) {

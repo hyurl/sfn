@@ -4,33 +4,28 @@ const tslib_1 = require("tslib");
 const sfn_1 = require("sfn");
 const modelar_1 = require("modelar");
 class default_1 extends sfn_1.HttpController {
-    create(req) {
+    create(req, user) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                return yield modelar_1.User.use(req.db).insert(req.body);
+                return yield user.insert(req.body);
             }
             catch (error) {
                 throw new sfn_1.HttpError(500, error.message);
             }
         });
     }
-    get(req, id) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (!id || isNaN(id)) {
-                throw new sfn_1.HttpError(400);
-            }
-            try {
-                return yield modelar_1.User.use(req.db).get(id);
-            }
-            catch (error) {
-                throw new sfn_1.HttpError(404, error.message);
-            }
-        });
+    get(req, user) {
+        if (user) {
+            return user;
+        }
+        else {
+            throw new sfn_1.HttpError(404, "User Not Found!");
+        }
     }
-    update(req, id) {
+    update(req, user) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                var user = yield this.get(req, id);
+                user = this.get(req, user);
                 return yield user.update(req.body);
             }
             catch (error) {
@@ -43,10 +38,9 @@ class default_1 extends sfn_1.HttpController {
             }
         });
     }
-    delete(req, id) {
-        return this.get(req, id).then(user => {
-            return user.delete();
-        });
+    delete(req, user) {
+        user = this.get(req, user);
+        return user.delete();
     }
     login(req) {
         let options = {
@@ -66,25 +60,25 @@ class default_1 extends sfn_1.HttpController {
 tslib_1.__decorate([
     sfn_1.route("POST", "/user/create"),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [Object, modelar_1.User]),
     tslib_1.__metadata("design:returntype", Promise)
 ], default_1.prototype, "create", null);
 tslib_1.__decorate([
     sfn_1.route("GET", "/user/:id"),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Number]),
-    tslib_1.__metadata("design:returntype", Promise)
+    tslib_1.__metadata("design:paramtypes", [Object, modelar_1.User]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "get", null);
 tslib_1.__decorate([
     sfn_1.route("PATCH", "/user/:id/update"),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Number]),
+    tslib_1.__metadata("design:paramtypes", [Object, modelar_1.User]),
     tslib_1.__metadata("design:returntype", Promise)
 ], default_1.prototype, "update", null);
 tslib_1.__decorate([
     sfn_1.route("DELETE", "/user/:id"),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Number]),
+    tslib_1.__metadata("design:paramtypes", [Object, modelar_1.User]),
     tslib_1.__metadata("design:returntype", void 0)
 ], default_1.prototype, "delete", null);
 tslib_1.__decorate([

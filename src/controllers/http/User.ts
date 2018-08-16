@@ -4,9 +4,9 @@ import { User } from "modelar";
 export default class extends HttpController {
 
     @route("POST", "/user/create")
-    async create(req: Request) {
+    async create(req: Request, user: User) {
         try {
-            return await User.use(req.db).insert(req.body);
+            return await user.insert(req.body);
         } catch (error) {
             throw new HttpError(500, error.message);
         }
@@ -16,15 +16,11 @@ export default class extends HttpController {
      * @example GET /user/1
      */
     @route("GET", "/user/:id")
-    async get(req: Request, id: number) {
-        if (!id || isNaN(id)) {
-            throw new HttpError(400);
-        }
-
-        try {
-            return await User.use(req.db).get(id);
-        } catch (error) {
-            throw new HttpError(404, error.message);
+    get(req: Request, user: User) {
+        if (user) {
+            return user;
+        } else {
+            throw new HttpError(404, "User Not Found!");
         }
     }
 
@@ -32,9 +28,9 @@ export default class extends HttpController {
      * @example PATCH /user/1/update
      */
     @route("PATCH", "/user/:id/update")
-    async update(req: Request, id: number) {
+    async update(req: Request, user: User) {
         try {
-            var user = <User>await this.get(req, id);
+            user = this.get(req, user);
             return await user.update(req.body);
         } catch (error) {
             if (!(error instanceof HttpError)) {
@@ -49,10 +45,9 @@ export default class extends HttpController {
      * @example DELETE /user/1
      */
     @route("DELETE", "/user/:id")
-    delete(req: Request, id: number) {
-        return this.get(req, id).then(user => {
-            return user.delete();
-        });
+    delete(req: Request, user: User) {
+        user = this.get(req, user);
+        return user.delete();
     }
 
     @route("POST", "/user/login")

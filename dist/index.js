@@ -15,6 +15,8 @@ const Worker = require("sfn-worker");
 exports.Worker = Worker;
 const Validator = require("sfn-validator");
 exports.Validator = Validator;
+const SSE = require("sfn-sse");
+exports.SSE = SSE;
 const Cache = require("sfn-cache");
 exports.Cache = Cache;
 tslib_1.__exportStar(require("sfn-scheduler"), exports);

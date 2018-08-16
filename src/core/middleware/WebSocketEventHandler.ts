@@ -106,6 +106,7 @@ function getNextHandler(
                 fnParams = getFuncParams(ctrl[method]),
                 socketProps = ["websocket", "socket", "sock", "webSocket"];
 
+            // Dependency Injection
             if (isTypeScript) {
                 // try to convert parameters to proper types according to 
                 // the definition of the method.

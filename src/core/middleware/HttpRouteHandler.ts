@@ -4,6 +4,7 @@ import * as zlib from "zlib";
 import * as multer from "multer";
 import * as cors from "sfn-cors";
 import * as date from "sfn-date";
+import { Model } from 'modelar';
 import values = require("lodash/values");
 import { idealFilename } from "ideal-filename";
 import { App } from "webium";
@@ -163,31 +164,55 @@ function handleUpload(
 ) {
     let { req, res } = ctrl,
         uploadFields = ctrl.Class.UploadFields[method],
-        getResult = () => {
+        getResult = async () => {
             let data: string[] = values(req.params),
                 params: any[] = [],
                 fnParams = getFuncParams(ctrl[method]),
                 reqProps = ["request", "req"],
                 resProps = ["response", "res"];
 
+            // Dependency Injection
             if (isTypeScript) {
                 // try to convert parameters to proper types according to 
                 // the definition of the method.
                 let meta: Function[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
                 for (let i in meta) {
-                    if (meta[i] == Number) {
+                    if (meta[i] == Number) { // inject number
                         params[i] = parseInt(data.shift());
-                    } else if (meta[i] == Boolean) {
+                    } else if (meta[i] == Boolean) { // inject boolean
                         let val = data.shift();
                         params[i] = val == "false" || val == "0" ? false : true;
                     } else if (meta[i] == Object) {
-                        if (reqProps.includes(fnParams[i]))
+                        if (reqProps.includes(fnParams[i])) // Inject Request
                             params[i] = req;
-                        else if (resProps.includes(fnParams[i]))
+                        else if (resProps.includes(fnParams[i])) // Inject Response
                             params[i] = res;
                         else
                             params[i] = data.shift();
+                    } else if (meta[i].prototype instanceof Model) { // inject user-defined Model
+                        if (req.method == "POST" && req.params.id === undefined) {
+                            // POST request means creating a new model.
+                            // If a POST request with an ID, which means the 
+                            // request isn't a RESTful request, DO NOT 
+                            // create new model.
+                            params[i] = (new (<typeof Model>meta[i])).use(req.db);
+                        } else {
+                            // Other type of requests, such as GET, DELETE, 
+                            // PATCH, PUT, all need to retrieve an existing 
+                            // model.
+                            try {
+                                let id = parseInt(req.params.id);
+
+                                if (!id || isNaN(id))
+                                    throw new HttpError(400);
+
+                                params[i] = await (<typeof Model>meta[i]).use(req.db).get(id);
+                            } catch (e) {
+                                params[i] = null;
+                                throw e;
+                            }
+                        }
                     } else {
                         params[i] = data.shift();
                     }
@@ -203,7 +228,7 @@ function handleUpload(
                 }
             }
 
-            return callMethod(ctrl, ctrl[method], ...params);
+            return await callMethod(ctrl, ctrl[method], ...params);
         };
 
     if (req.method == "POST" && uploadFields && uploadFields.length) {
