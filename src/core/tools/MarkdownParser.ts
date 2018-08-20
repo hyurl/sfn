@@ -49,10 +49,16 @@ export namespace MarkdownParser {
 
     /** Gets the title of a markdown document. */
     export function getTitle(content: string): string {
+        let re = /^\s*<!--\s*title:(.*)-->/i,
+            matches = content.match(re);
+
+        if (matches)
+            return trim(matches[1]);
+
         let start = content.indexOf("#"),
-            end = content.indexOf("\n", start),
-            title = content.slice(start, end);
-        return trim(title, "# \r\n");
+            end = content.indexOf("\n", start);
+
+        return trim(content.slice(start, end), "# \r\n");
     }
 
     /** Gets the title of a markdown document. */

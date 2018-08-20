@@ -7,11 +7,13 @@ const events_1 = require("events");
 const Cache = require("sfn-cache");
 const Logger = require("sfn-logger");
 const modelar_1 = require("modelar");
+const injectable_ts_1 = require("injectable-ts");
 const HideProtectedProperties = require("hide-protected-properties");
 const init_1 = require("../../init");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const LocaleMap_1 = require("./LocaleMap");
-const symbols_1 = require("./symbols");
+injectable_ts_1.injectable(Cache);
+injectable_ts_1.injectable(modelar_1.DB);
 ;
 exports.LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
@@ -46,27 +48,18 @@ let Service = Service_1 = class Service extends events_1.EventEmitter {
         Service_1.Loggers[filename].action = this.logOptions.action;
         return Service_1.Loggers[filename];
     }
-    get cache() {
-        if (!this[symbols_1.realCache]) {
-            this[symbols_1.realCache] = new Cache(ConfigLoader_1.config.redis);
-        }
-        return this[symbols_1.realCache];
-    }
-    set cache(v) {
-        this[symbols_1.realCache] = v;
-    }
-    get db() {
-        if (!this[symbols_1.realDB]) {
-            this[symbols_1.realDB] = new modelar_1.DB(ConfigLoader_1.config.database);
-        }
-        return this[symbols_1.realDB];
-    }
-    set db(v) {
-        this[symbols_1.realDB] = v;
-    }
 };
 Service.Loggers = {};
+tslib_1.__decorate([
+    injectable_ts_1.injected([ConfigLoader_1.config.redis]),
+    tslib_1.__metadata("design:type", Cache)
+], Service.prototype, "cache", void 0);
+tslib_1.__decorate([
+    injectable_ts_1.injected([ConfigLoader_1.config.database]),
+    tslib_1.__metadata("design:type", modelar_1.DB)
+], Service.prototype, "db", void 0);
 Service = Service_1 = tslib_1.__decorate([
+    injectable_ts_1.injectable,
     HideProtectedProperties
 ], Service);
 exports.Service = Service;

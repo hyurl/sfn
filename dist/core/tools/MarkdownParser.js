@@ -39,8 +39,11 @@ var MarkdownParser;
     }
     MarkdownParser.parseFile = parseFile;
     function getTitle(content) {
-        let start = content.indexOf("#"), end = content.indexOf("\n", start), title = content.slice(start, end);
-        return trim(title, "# \r\n");
+        let re = /^\s*<!--\s*title:(.*)-->/i, matches = content.match(re);
+        if (matches)
+            return trim(matches[1]);
+        let start = content.indexOf("#"), end = content.indexOf("\n", start);
+        return trim(content.slice(start, end), "# \r\n");
     }
     MarkdownParser.getTitle = getTitle;
     function getFileTitle(filename, encoding = "utf8") {

@@ -3,11 +3,15 @@ import { EventEmitter } from "events";
 import Cache  = require("sfn-cache");
 import * as Logger from "sfn-logger";
 import { DB } from "modelar";
+import { injectable, injected } from "injectable-ts";
 import HideProtectedProperties = require("hide-protected-properties");
 import { ROOT_PATH } from "../../init";
 import { config } from "../bootstrap/ConfigLoader";
 import { LocaleMap } from "./LocaleMap";
-import { realCache, realDB } from "./symbols";
+
+// make Cache and DB injectable
+injectable(Cache);
+injectable(DB);
 
 export interface LogOptions extends Logger.Options {
     /** The action will be set by the framework automatically. */
@@ -26,6 +30,7 @@ export const LogOptions: LogOptions = Object.assign({}, Logger.Options, {
  * `cache` that you can use to do real jobs, and since it is inherited from 
  * EventEmitter, you can bind customized events if needed.
  */
+@injectable
 @HideProtectedProperties
 export class Service extends EventEmitter {
     /** The language of the current service. */
@@ -76,26 +81,10 @@ export class Service extends EventEmitter {
     }
 
     /** Gets/Sets a cache instance. */
-    get cache(): Cache {
-        if (!this[realCache]) {
-            this[realCache] = new Cache(config.redis);
-        }
-        return this[realCache];
-    }
-
-    set cache(v: Cache) {
-        this[realCache] = v;
-    }
+    @injected([config.redis])
+    cache: Cache;
 
     /** Gets/Sets a DB instance. */
-    get db(): DB {
-        if (!this[realDB]) {
-            this[realDB] = new DB(config.database);
-        }
-        return this[realDB];
-    }
-
-    set db(v: DB) {
-        this[realDB] = v;
-    }
+    @injected([config.database])
+    db: DB;
 }
