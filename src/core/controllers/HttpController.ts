@@ -202,7 +202,7 @@ export class HttpController extends Controller {
     viewRaw(filename: string, cache = !isDevMode): Promise<string> {
         filename = this.getAbsFilename(filename);
         this.res.type = path.extname(filename);
-        
+
         if (cache && this.Class.LoadedViews[filename] !== undefined) {
             return Promise.resolve(this.Class.LoadedViews[filename]);
         } else {

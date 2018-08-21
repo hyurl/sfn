@@ -27,7 +27,10 @@ renderer.heading = function (text: string, level: number): string {
 
 // Render markdown codes to be highlighted.
 renderer.code = function (code, lang) {
-    return `<pre><code class="lang-${lang} hljs">${hljs.highlight(lang, code, true).value}</code></pre>\n`;
+    try {
+        code = hljs.highlight(lang, code, true).value;
+    } catch { }
+    return `<pre><code class="lang-${lang} hljs">${code}</code></pre>\n`;
 };
 
 export namespace MarkdownParser {
