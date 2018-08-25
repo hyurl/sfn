@@ -214,6 +214,8 @@ function handleUpload(ctrl, method, resolve, reject) {
 }
 function handleError(err, ctrl) {
     let { req, res } = ctrl;
+    if (res.finished)
+        return handleFinish(ctrl, err);
     if (err instanceof HttpError_1.HttpError && err.code == 405 && req.isEventSource)
         err = new HttpError_1.HttpError(204);
     let _err = err;
@@ -243,9 +245,14 @@ function handleError(err, ctrl) {
 function getNextHandler(method, action, resolve, reject) {
     return (ctrl) => {
         ctrl.logOptions.action = action;
-        let { req, res } = ctrl;
-        Promise.resolve(ctrl.before()).then(() => {
-            if (res.finished) {
+        let { req, res } = ctrl, { BeforeFilters, RequireAuth } = ctrl.Class;
+        Promise.resolve(ctrl.before()).then(result => {
+            if (result === false || res.finished)
+                return result;
+            else
+                return functions_inner_1.callFilterChain(BeforeFilters[method], ctrl, true);
+        }).then(result => {
+            if (result === false || res.finished) {
                 return resolve(null);
             }
             if (!cors(ctrl.cors, req, res)) {
@@ -255,7 +262,7 @@ function getNextHandler(method, action, resolve, reject) {
                 res.end();
                 return;
             }
-            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized) {
+            if (RequireAuth.includes(method) && !ctrl.authorized) {
                 if (ctrl.fallbackTo) {
                     return res.redirect(ctrl.fallbackTo, 302);
                 }
@@ -321,16 +328,14 @@ function handleResponse(ctrl, data) {
 }
 function getRouteHandler(Class, method) {
     return (req, res) => {
-        let ctrl = null;
-        let className = Class.name === "default_1" ? "default" : Class.name;
-        let action = `${className}.${method} (${Class.filename})`;
+        let ctrl = null, className = Class.name === "default_1" ? "default" : Class.name, action = `${className}.${method} (${Class.filename})`;
         res.on("error", (err) => {
             handleLog(ctrl, err);
         });
         new Promise((resolve, reject) => {
             try {
                 let handleNext = getNextHandler(method, action, resolve, reject);
-                if (Class.prototype.constructor.length === 3) {
+                if (Class.length === 3) {
                     ctrl = new Class(req, res, handleNext);
                 }
                 else {
@@ -345,6 +350,10 @@ function getRouteHandler(Class, method) {
             return handleResponse(ctrl, data);
         }).then(() => {
             return ctrl.after();
+        }).then(result => {
+            return result === false
+                ? result
+                : functions_inner_1.callFilterChain(Class.AfterFilters[method], ctrl);
         }).catch((err) => {
             ctrl = ctrl || new HttpController_1.HttpController(req, res);
             ctrl.logOptions.action = action;

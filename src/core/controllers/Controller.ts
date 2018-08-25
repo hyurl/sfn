@@ -1,4 +1,5 @@
 import { Service } from "../tools/Service";
+import { ControllerFilter } from '../tools/functions';
 
 /**
  * The Controller give you a common API to return data to the underlying 
@@ -14,7 +15,15 @@ export class Controller extends Service {
 
     /** Sets what methods that require authentication. */
     static RequireAuth: string[] = [];
-    
+
+    static BeforeFilters: {
+        [method: string]: Array<ControllerFilter>
+    } = {};
+
+    static AfterFilters: {
+        [method: string]: Array<ControllerFilter>
+    } = {};
+
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
 
@@ -38,8 +47,8 @@ export class Controller extends Service {
     }
 
     /** This method will be auto-called before calling the actual method. */
-    before(): any { }
+    before(): void | boolean | Promise<void | boolean> { }
 
     /** This method will be auto-called after calling the actual method. */
-    after(): any { }
+    after(): void | boolean | Promise<void | boolean> { }
 }

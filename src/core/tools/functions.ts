@@ -168,3 +168,42 @@ route.post = function (...args) {
 route.put = function (...args) {
     return _route("PUT", ...args);
 };
+
+export type ControllerFilter<T extends Controller = Controller> = (this: T, ctrl: T) => boolean | void | Promise<boolean | void>;
+
+/**
+ * Adds a filter function to run before the actual method is called.
+ * @param filter The filter function accepts an only argument which is the 
+ *  controller instance, returning `false` in the function will break the 
+ *  calling chain. Apart from that, in `HttpController`, calling response 
+ *  methods like `res.send()`, `res.redirect()`, and in `WebSocketController` 
+ *  disconnecting the socket will also break the chain. Once the chain is broke,
+ *  the actual method will not be called as well.
+ */
+export function before<T extends Controller = Controller>(filter: ControllerFilter<T>): ControllerDecorator {
+    return (proto: Controller, prop: string) => {
+        let Class = <typeof Controller>proto.constructor;
+
+        if (Class.BeforeFilters[prop] === undefined)
+            Class.BeforeFilters[prop] = [];
+
+        Class.BeforeFilters[prop].push(filter);
+    }
+}
+
+/**
+ * Adds a filter function to run after the actual method is called.
+ * @param filter The filter function accepts an only argument which is the 
+ *  controller instance, returning `false` in the function will break the 
+ *  calling chain. You should not send any response in these filters.
+ */
+export function after<T extends Controller = Controller>(filter: ControllerFilter<T>): ControllerDecorator {
+    return (proto: Controller, prop: string) => {
+        let Class = <typeof Controller>proto.constructor;
+        
+        if (Class.AfterFilters[prop] === undefined)
+            Class.AfterFilters[prop] = [];
+
+        Class.AfterFilters[prop].push(filter);
+    }
+}

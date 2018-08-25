@@ -95,4 +95,22 @@ exports.route.post = function (...args) {
 exports.route.put = function (...args) {
     return _route("PUT", ...args);
 };
+function before(filter) {
+    return (proto, prop) => {
+        let Class = proto.constructor;
+        if (Class.BeforeFilters[prop] === undefined)
+            Class.BeforeFilters[prop] = [];
+        Class.BeforeFilters[prop].push(filter);
+    };
+}
+exports.before = before;
+function after(filter) {
+    return (proto, prop) => {
+        let Class = proto.constructor;
+        if (Class.AfterFilters[prop] === undefined)
+            Class.AfterFilters[prop] = [];
+        Class.AfterFilters[prop].push(filter);
+    };
+}
+exports.after = after;
 //# sourceMappingURL=functions.js.map

@@ -58,11 +58,17 @@ function handleError(err, ctrl, info) {
 function getNextHandler(method, action, data, resolve, reject) {
     return (ctrl) => {
         ctrl.logOptions.action = action;
-        Promise.resolve(ctrl.before()).then(() => {
-            if (ctrl.socket.disconnected) {
+        let { BeforeFilters, RequireAuth } = ctrl.Class;
+        Promise.resolve(ctrl.before()).then(result => {
+            if (result === false || ctrl.socket.disconnected)
+                return result;
+            else
+                return functions_inner_1.callFilterChain(BeforeFilters[method], ctrl, true);
+        }).then(result => {
+            if (result === false || ctrl.socket.disconnected) {
                 return resolve(null);
             }
-            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized)
+            if (RequireAuth.includes(method) && !ctrl.authorized)
                 throw new SocketError_1.SocketError(401);
             let params = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), socketProps = ["websocket", "socket", "sock", "webSocket"];
             if (init_1.isTypeScript) {
@@ -97,7 +103,7 @@ function handleEvent(socket, event, ...data) {
     new Promise((resolve, reject) => {
         try {
             let handleNext = getNextHandler(method, action, data, resolve, reject);
-            if (Class.prototype.constructor.length === 2) {
+            if (Class.length === 2) {
                 ctrl = new Class(socket, handleNext);
             }
             else {
@@ -114,7 +120,11 @@ function handleEvent(socket, event, ...data) {
         }
         finish(ctrl, info);
     }).then(() => {
-        ctrl.after();
+        return ctrl.after();
+    }).then(result => {
+        return result === false || ctrl.socket.disconnect
+            ? result
+            : functions_inner_1.callFilterChain(Class.AfterFilters[method], ctrl);
     }).catch((err) => {
         ctrl = ctrl || new WebSocketController_1.WebSocketController(socket);
         ctrl.logOptions.action = action;

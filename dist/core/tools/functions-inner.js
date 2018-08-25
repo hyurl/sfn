@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
 const tslib_1 = require("tslib");
+const path_1 = require("path");
+const tslib_2 = require("tslib");
 const CallSiteRecord = require("callsite-record");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
@@ -126,7 +127,7 @@ exports.callsiteLog = callsiteLog;
 function callMethod(ctrl, fn, ...args) {
     let res;
     if (fn.constructor.name == "GeneratorFunction" && ConfigLoader_1.config.awaitGenerator) {
-        res = tslib_1.__awaiter(ctrl, args, null, fn);
+        res = tslib_2.__awaiter(ctrl, args, null, fn);
     }
     else {
         res = fn.apply(ctrl, args);
@@ -141,4 +142,22 @@ function getFuncParams(fn) {
     return params;
 }
 exports.getFuncParams = getFuncParams;
+function callFilterChain(filters, ctrl, skipFinish = false) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        if (!filters)
+            return;
+        let result;
+        for (let filter of filters) {
+            result = yield filter.call(ctrl, ctrl);
+            console.log(result);
+            if (result === false
+                || (ctrl["res"] && ctrl["res"].finished && skipFinish)
+                || (ctrl["socket"] && ctrl["socket"].disconnected && skipFinish)) {
+                break;
+            }
+        }
+        return result;
+    });
+}
+exports.callFilterChain = callFilterChain;
 //# sourceMappingURL=functions-inner.js.map

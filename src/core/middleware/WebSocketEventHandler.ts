@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { SocketError } from "../tools/SocketError";
 import { WebSocket } from "../tools/interfaces";
-import { callsiteLog, callMethod, getFuncParams } from "../tools/functions-inner";
+import { callsiteLog, callMethod, getFuncParams, callFilterChain } from "../tools/functions-inner";
 import { realDB } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { EventMap } from "../tools/EventMap";
@@ -90,8 +90,15 @@ function getNextHandler(
     return (ctrl: WebSocketController) => {
         ctrl.logOptions.action = action;
 
-        Promise.resolve(ctrl.before()).then(() => {
-            if (ctrl.socket.disconnected) {
+        let { BeforeFilters, RequireAuth } = ctrl.Class;
+
+        Promise.resolve(ctrl.before()).then(result => {
+            if (result === false || ctrl.socket.disconnected)
+                return result;
+            else
+                return callFilterChain(BeforeFilters[method], ctrl, true);
+        }).then(result => {
+            if (result === false || ctrl.socket.disconnected) {
                 // if the socket has been closed before calling the actual method,
                 // resolve the Promise immediately without running any checking 
                 // procedure, and don't call the method.
@@ -99,7 +106,7 @@ function getNextHandler(
             }
 
             // Handle authentication.
-            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized)
+            if (RequireAuth.includes(method) && !ctrl.authorized)
                 throw new SocketError(401);
 
             let params: any[] = [],
@@ -150,7 +157,7 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
         try {
             let handleNext = getNextHandler(method, action, data, resolve, reject);
 
-            if (Class.prototype.constructor.length === 2) {
+            if (Class.length === 2) {
                 ctrl = new Class(socket, handleNext);
             } else {
                 ctrl = new Class(socket);
@@ -166,7 +173,11 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
         }
         finish(ctrl, info);
     }).then(() => {
-        ctrl.after();
+        return ctrl.after();
+    }).then(result => {
+        return result === false || ctrl.socket.disconnect
+            ? result
+            : callFilterChain(Class.AfterFilters[method], ctrl);
     }).catch((err: Error) => {
         ctrl = ctrl || new WebSocketController(socket);
         ctrl.logOptions.action = action;

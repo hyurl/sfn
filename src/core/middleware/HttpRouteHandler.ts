@@ -12,7 +12,7 @@ import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { HttpController, UploadingFile } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
-import { callsiteLog, callMethod, getFuncParams } from "../tools/functions-inner";
+import { callsiteLog, callMethod, getFuncParams, callFilterChain } from "../tools/functions-inner";
 import { Request, Response, HttpRequestMethod } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { RouteMap } from "../tools/RouteMap";
@@ -259,6 +259,13 @@ function handleUpload(
 function handleError(err: Error, ctrl: HttpController) {
     let { req, res } = ctrl;
 
+    // If the response is has already been sent, handle finish immediately.
+    if (res.finished)
+        return handleFinish(ctrl, err);
+
+    // If the response hasn't been sent, try to response the error in a proper 
+    // form to the client.
+
     // Be friendly to EventSource.
     if (err instanceof HttpError && err.code == 405 && req.isEventSource)
         err = new HttpError(204);
@@ -273,6 +280,7 @@ function handleError(err: Error, ctrl: HttpController) {
     }
 
     if (req.accept == "application/json" || res.jsonp) {
+        // Send JSON response.
         res.send(ctrl.error(err.message, (<HttpError>err).code));
         handleFinish(ctrl, _err);
     } else {
@@ -301,10 +309,17 @@ function getNextHandler(
     return (ctrl: HttpController) => {
         ctrl.logOptions.action = action;
 
-        let { req, res } = ctrl;
+        let { req, res } = ctrl,
+            { BeforeFilters, RequireAuth } = ctrl.Class;
 
-        Promise.resolve(ctrl.before()).then(() => {
-            if (res.finished) {
+        // Run before filters.
+        Promise.resolve(ctrl.before()).then(result => {
+            if (result === false || res.finished)
+                return result;
+            else
+                return callFilterChain(BeforeFilters[method], ctrl, true);
+        }).then(result => {
+            if (result === false || res.finished) {
                 // if the response has been sent before calling the actual method,
                 // resolve the Promise immediately without running any checking 
                 // procedure, and don't call the method.
@@ -321,7 +336,7 @@ function getNextHandler(
             }
 
             // Handle authentication.
-            if (ctrl.Class.RequireAuth.includes(method) && !ctrl.authorized) {
+            if (RequireAuth.includes(method) && !ctrl.authorized) {
                 if (ctrl.fallbackTo) {
                     return res.redirect(ctrl.fallbackTo, 302);
                 } else {
@@ -397,9 +412,9 @@ function handleResponse(ctrl: HttpController, data: any) {
 
 function getRouteHandler(Class: typeof HttpController, method: string) {
     return (req: Request, res: Response) => {
-        let ctrl: HttpController = null;
-        let className = Class.name === "default_1" ? "default" : Class.name;
-        let action = `${className}.${method} (${Class.filename})`;
+        let ctrl: HttpController = null,
+            className = Class.name === "default_1" ? "default" : Class.name,
+            action = `${className}.${method} (${Class.filename})`;
 
         res.on("error", (err) => {
             handleLog(ctrl, err);
@@ -410,7 +425,7 @@ function getRouteHandler(Class: typeof HttpController, method: string) {
             try {
                 let handleNext = getNextHandler(method, action, resolve, reject);
 
-                if (Class.prototype.constructor.length === 3) {
+                if (Class.length === 3) {
                     ctrl = new Class(req, res, handleNext);
                 } else {
                     ctrl = new Class(req, res);
@@ -423,6 +438,10 @@ function getRouteHandler(Class: typeof HttpController, method: string) {
             return handleResponse(ctrl, data);
         }).then(() => {
             return ctrl.after();
+        }).then(result => {
+            return result === false
+                ? result
+                : callFilterChain(Class.AfterFilters[method], ctrl);
         }).catch((err: Error) => {
             ctrl = ctrl || new HttpController(req, res);
             ctrl.logOptions.action = action;
