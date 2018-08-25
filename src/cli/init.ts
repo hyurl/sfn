@@ -1,7 +1,7 @@
 /** Initiate the project after SFN is installed. */
 import * as path from "path";
 import * as fs from "fs-extra";
-import { SRC_PATH, isTypeScript } from "../init";
+import { SRC_PATH, isTypeScript, ROOT_PATH } from "../init";
 
 export var sfnd = path.normalize(__dirname + "/../../");
 export var ext = isTypeScript ? "ts" : "js";
@@ -44,3 +44,22 @@ if (!fs.existsSync(`${SRC_PATH}/config.${ext}`))
 
 if (!fs.existsSync(`${SRC_PATH}/index.${ext}`))
     fs.copySync(`${sfnd}/src/cli/templates/index.${ext}`, `${SRC_PATH}/index.${ext}`);
+
+// expose vscode debug configurations
+let dir = `${ROOT_PATH}/.vscode/`,
+    file = `${dir}/launch.json`;
+if (fs.existsSync(dir) && !fs.existsSync(file)) {
+    fs.writeJsonSync(file, {
+        version: "0.2.0",
+        configurations: [
+            {
+                type: "node",
+                request: "launch",
+                protocol: "auto",
+                name: "Start Server",
+                program: "${workspaceFolder}/" + (isTypeScript ? "dist" : "src") + "/index",
+                autoAttachChildProcesses: true
+            }
+        ]
+    }, { spaces: 4 });
+}

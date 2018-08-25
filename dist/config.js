@@ -17,7 +17,7 @@ exports.SFNConfig = {
     server: {
         hostname: "localhost",
         timeout: 120000,
-        autoStart: false,
+        autoStart: true,
         http: {
             enabled: true,
             port: 80

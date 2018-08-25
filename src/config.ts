@@ -143,7 +143,7 @@ export const SFNConfig: SFNConfig = {
     server: {
         hostname: "localhost",
         timeout: 120000, // 2 min.
-        autoStart: false,
+        autoStart: true,
         http: {
             enabled: true,
             port: 80

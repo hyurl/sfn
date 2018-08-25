@@ -33,4 +33,20 @@ if (!fs.existsSync(`${init_1.SRC_PATH}/config.${exports.ext}`))
     fs.copySync(`${exports.sfnd}/src/cli/templates/config.${exports.ext}`, `${init_1.SRC_PATH}/config.${exports.ext}`);
 if (!fs.existsSync(`${init_1.SRC_PATH}/index.${exports.ext}`))
     fs.copySync(`${exports.sfnd}/src/cli/templates/index.${exports.ext}`, `${init_1.SRC_PATH}/index.${exports.ext}`);
+let dir = `${init_1.ROOT_PATH}/.vscode/`, file = `${dir}/launch.json`;
+if (fs.existsSync(dir) && !fs.existsSync(file)) {
+    fs.writeJsonSync(file, {
+        version: "0.2.0",
+        configurations: [
+            {
+                type: "node",
+                request: "launch",
+                protocol: "auto",
+                name: "Start Server",
+                program: "${workspaceFolder}/" + (init_1.isTypeScript ? "dist" : "src") + "/index",
+                autoAttachChildProcesses: true
+            }
+        ]
+    }, { spaces: 4 });
+}
 //# sourceMappingURL=init.js.map
