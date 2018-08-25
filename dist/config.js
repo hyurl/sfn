@@ -6,7 +6,7 @@ const init_1 = require("./init");
 ;
 const FileStore = sessionFileStore(Session);
 exports.SFNConfig = {
-    env: process.env.NODE_ENV || "dev",
+    env: process.env.NODE_ENV || "pro",
     workers: ["A"],
     bluebird: false,
     lang: "en-US",

@@ -132,7 +132,7 @@ const FileStore = sessionFileStore(Session);
 // Some of these settings are for their dependencies, you may check out all 
 // supported options on their official websites.
 export const SFNConfig: SFNConfig = {
-    env: process.env.NODE_ENV || "dev",
+    env: process.env.NODE_ENV || "pro",
     workers: ["A"],
     bluebird: false,
     lang: "en-US",

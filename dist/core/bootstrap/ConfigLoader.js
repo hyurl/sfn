@@ -16,7 +16,8 @@ if (fs.existsSync(init_1.APP_PATH + "/config.js")) {
         exports.config = Object.assign(exports.config, m);
     }
 }
-exports.isDevMode = exports.config.env == "dev" || exports.config.env == "development";
+exports.isDevMode = exports.config.env == "dev" || exports.config.env == "development"
+    || init_1.isDebugMode;
 if (exports.config.bluebird) {
     global.Promise = require("bluebird");
 }

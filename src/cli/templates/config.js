@@ -5,7 +5,7 @@ const sessionFileStore = require("session-file-store");
 const FileStore = sessionFileStore(Session);
 
 var config = {
-    env: process.env.NODE_ENV || "dev",
+    env: process.env.NODE_ENV || "pro",
     workers: ["A"],
     bluebird: false,
     lang: "en-US",

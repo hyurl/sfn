@@ -5,7 +5,7 @@ import * as sessionFileStore from "session-file-store";
 const FileStore = sessionFileStore(Session);
 
 export var config: SFNConfig = {
-    env: process.env.NODE_ENV || "dev",
+    env: process.env.NODE_ENV || "pro",
     workers: ["A"],
     bluebird: false,
     lang: "en-US",

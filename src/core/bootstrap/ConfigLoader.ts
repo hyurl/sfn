@@ -12,7 +12,7 @@ export var config: SFNConfig = Object.assign({}, SFNConfig);
 if (fs.existsSync(APP_PATH + "/config.js")) {
     // Load user-defined configurations.
     let m = require(APP_PATH + "/config.js");
-    
+
     if (typeof m.config === "object") {
         config = Object.assign(config, m.config);
     } else if (typeof m.env === "string") {
@@ -21,7 +21,8 @@ if (fs.existsSync(APP_PATH + "/config.js")) {
 }
 
 /** Whether the program is running in development mode. */
-export const isDevMode = config.env == "dev" || config.env == "development";
+export const isDevMode = config.env == "dev" || config.env == "development"
+    || isDebugMode;
 
 if (config.bluebird) {
     global.Promise = require("bluebird");
