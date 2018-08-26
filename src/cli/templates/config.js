@@ -4,7 +4,7 @@ const sessionFileStore = require("session-file-store");
 
 const FileStore = sessionFileStore(Session);
 
-var config = {
+exports.config = {
     env: process.env.NODE_ENV || "pro",
     workers: ["A"],
     bluebird: false,
@@ -78,5 +78,3 @@ var config = {
         port: null
     }
 };
-
-exports.config = config;

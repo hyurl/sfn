@@ -1,22 +1,21 @@
 import * as fs from "fs";
 import { APP_PATH, isDebugMode } from "../../init";
-import { SFNConfig, StaticOptions } from "../../config";
+import { config } from "../../config";
 import { isMaster } from 'sfn-worker';
 import chalk from "chalk";
 
-export { SFNConfig, StaticOptions };
-
-/** The configuration of the program. */
-export var config: SFNConfig = Object.assign({}, SFNConfig);
+export { config };
 
 if (fs.existsSync(APP_PATH + "/config.js")) {
     // Load user-defined configurations.
     let m = require(APP_PATH + "/config.js");
 
-    if (typeof m.config === "object") {
-        config = Object.assign(config, m.config);
-    } else if (typeof m.env === "string") {
-        config = Object.assign(config, m);
+    if (typeof m.config == "object") {
+        Object.assign(config, m.config);
+    } else if (typeof m.default == "object"){
+        Object.assign(config, m.default);
+    } else if (typeof m.env == "string") {
+        Object.assign(config, m);
     }
 }
 

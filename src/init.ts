@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { config as configEnv } from "dotenv";
 
 /** The version of framework. */
-export var version: string = require("../package.json").version;
+export const version: string = require("../package.json").version;
 
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");

@@ -3,22 +3,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const init_1 = require("../../init");
 const config_1 = require("../../config");
-exports.SFNConfig = config_1.SFNConfig;
+exports.config = config_1.config;
 const sfn_worker_1 = require("sfn-worker");
 const chalk_1 = require("chalk");
-exports.config = Object.assign({}, config_1.SFNConfig);
 if (fs.existsSync(init_1.APP_PATH + "/config.js")) {
     let m = require(init_1.APP_PATH + "/config.js");
-    if (typeof m.config === "object") {
-        exports.config = Object.assign(exports.config, m.config);
+    if (typeof m.config == "object") {
+        Object.assign(config_1.config, m.config);
     }
-    else if (typeof m.env === "string") {
-        exports.config = Object.assign(exports.config, m);
+    else if (typeof m.default == "object") {
+        Object.assign(config_1.config, m.default);
+    }
+    else if (typeof m.env == "string") {
+        Object.assign(config_1.config, m);
     }
 }
-exports.isDevMode = exports.config.env == "dev" || exports.config.env == "development"
+exports.isDevMode = config_1.config.env == "dev" || config_1.config.env == "development"
     || init_1.isDebugMode;
-if (exports.config.bluebird) {
+if (config_1.config.bluebird) {
     global.Promise = require("bluebird");
 }
 if (sfn_worker_1.isMaster && exports.isDevMode && !init_1.isDebugMode) {

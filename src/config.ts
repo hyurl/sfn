@@ -129,9 +129,12 @@ export interface SFNConfig {
 
 const FileStore = sessionFileStore(Session);
 
-// Some of these settings are for their dependencies, you may check out all 
-// supported options on their official websites.
-export const SFNConfig: SFNConfig = {
+/**
+ * The configuration of the program.
+ * Some of these settings are for their dependencies, you may check out all 
+ * supported options on their official websites.
+ */
+export const config: SFNConfig = {
     env: process.env.NODE_ENV || "pro",
     workers: ["A"],
     bluebird: false,

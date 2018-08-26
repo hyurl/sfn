@@ -23,6 +23,7 @@ tslib_1.__exportStar(require("sfn-scheduler"), exports);
 tslib_1.__exportStar(require("sfn-cookie"), exports);
 tslib_1.__exportStar(require("sfn-xss"), exports);
 tslib_1.__exportStar(require("./init"), exports);
+tslib_1.__exportStar(require("./config"), exports);
 tslib_1.__exportStar(require("./core/tools/functions"), exports);
 tslib_1.__exportStar(require("./core/tools/HttpError"), exports);
 tslib_1.__exportStar(require("./core/tools/SocketError"), exports);

@@ -14,12 +14,13 @@ export * from "sfn-scheduler";
 export * from "sfn-cookie";
 export * from "sfn-xss";
 export * from "./init";
+export * from "./config";
 export * from "./core/tools/interfaces";
 export * from "./core/tools/functions";
 export * from "./core/tools/HttpError";
 export * from "./core/tools/SocketError";
 export * from "./core/tools/MarkdownParser";
-// load config before loading subsequent modules
+// load user config before loading subsequent modules
 export * from "./core/bootstrap/ConfigLoader";
 export * from "./core/tools/Service";
 export * from "./core/tools/TemplateEngine";
