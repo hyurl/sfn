@@ -1,5 +1,4 @@
 .vscode/settings.json
 node_modules/
-test.js
 logs/
 sessions/

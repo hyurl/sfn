@@ -149,7 +149,6 @@ function callFilterChain(filters, ctrl, skipFinish = false) {
         let result;
         for (let filter of filters) {
             result = yield filter.call(ctrl, ctrl);
-            console.log(result);
             if (result === false
                 || (ctrl["res"] && ctrl["res"].finished && skipFinish)
                 || (ctrl["socket"] && ctrl["socket"].disconnected && skipFinish)) {

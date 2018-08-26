@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.1.16",
+    "version": "0.1.20",
     "description": "A Service Framework for Node.js.",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -48,7 +48,6 @@
         "commander": "^2.17.1",
         "comment-meta": "^0.1.1",
         "cookie-parser": "^1.4.3",
-        "crc": "^3.8.0",
         "dotenv": "^6.0.0",
         "express-session": "^1.15.6",
         "fs-extra": "^6.0.1",

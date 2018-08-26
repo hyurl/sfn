@@ -1,28 +1,19 @@
 import { App } from "webium";
-import { session, getHash } from "../bootstrap/session";
-import { Request, Response } from "../tools/interfaces";
+import * as ExpressSession from "express-session";
+import { config } from "../bootstrap/ConfigLoader";
+import { Response } from "../tools/interfaces";
+
+type SessionHanlder = (req: any, res: any, next: Function) => void;
+
+export var session = <SessionHanlder>ExpressSession(config.session);
 
 export function handleHttpSession(app: App) {
-    app.use((req: Request, res: Response, next) => {
-        // express-session change the `res.end()` method that appears to be 
-        // having a bug which will delay changing the `res.finished` property,
-        // the following code will trying to fix that.
-        session(req, {}, (err) => {
-            if (err) throw err;
-
-            let hash = getHash(req.session),
-                handler = () => {
-                    if (hash !== getHash(req.session)) {
-                        req.session.touch(null);
-                        req.session.save(err => {
-                            if (err) throw err;
-                        });
-                    }
-                };
-
-            res.on("finish", handler).on("close", handler);
-
-            next();
-        });
+    app.use(session).use((req, res: Response, next) => {
+        let _end = res.end;
+        res.end = function end(...args) {
+            res.sent = true;
+            _end.apply(res, args);
+        }
+        next();
     });
 }

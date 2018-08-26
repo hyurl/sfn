@@ -1,3 +1,15 @@
+## 0.1.20
+
+## Fixes
+
+- Fix bugs in session handler.
+
+## New Features
+
+- Support dependency injection backed by [injectable-ts](https://github.com/hyurl/injectable-ts).
+- Add two filter decorators `@before()` and `@after()` to add filter functions
+    before/after the actual method is called.
+
 ## 0.1.14
 
 ## Fixes

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const session_1 = require("../bootstrap/session");
+const HttpSessionHandler_1 = require("./HttpSessionHandler");
 function handleWebSocketSession(io) {
     io.use((socket, next) => {
-        session_1.session(socket.handshake, {}, next);
+        HttpSessionHandler_1.session(socket.handshake, {}, next);
     }).use((socket, next) => {
         socket.session = new Proxy(socket.handshake["session"], {
             set: (session, key, value) => {
@@ -14,10 +14,8 @@ function handleWebSocketSession(io) {
             has: (session, key) => key in session,
             deleteProperty: (session, key) => delete session[key]
         });
-        let hash = session_1.getHash(socket.session);
         socket.on("disconnected", () => {
-            if (hash !== session_1.getHash(socket.session))
-                socket.session.save(() => { });
+            socket.session.save(() => { });
         });
         next();
     });

@@ -60,7 +60,7 @@ exports.SFNConfig = {
             ttl: 3600 * 24
         }),
         cookie: {
-            secure: true
+            maxAge: 3600 * 24 * 1000
         }
     },
     mail: {

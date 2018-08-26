@@ -50,6 +50,8 @@ export interface Request extends webium.Request {
     csrfToken?: string;
     /** In a sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
+    /** The same session ID as `session.id`. */
+    sessionID: string;
     /** 
      * A short-version url, when the url contains more than 64 characters,
      * the rest part will be cut off and changed to `...`.
@@ -68,6 +70,15 @@ export interface Response extends webium.Response {
     xml(data: { [key: string]: any }): void;
     /** Whether the response data should be compressed to GZIP. */
     gzip: boolean;
+    /**
+     * Whether the response has been sent.
+     * Because the framework uses package `express-session`, which will delay 
+     * changing the property `res.finished`, so after calling `res.end()`, 
+     * `res.send()`, `res.redirect()`, the `res.finished` will still be `false`,
+     * so if you want to check if the response has been sent, check `res.sent` 
+     * instead.
+     */
+    sent: boolean;
 }
 
 export interface WebSocket extends SocketIO.Socket {

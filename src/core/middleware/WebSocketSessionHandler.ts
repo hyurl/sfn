@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { WebSocket } from "../tools/interfaces";
-import { session, getHash } from "../bootstrap/session";
+import { session } from "./HttpSessionHandler";
 
 export function handleWebSocketSession(io: Server): void {
     io.use((socket, next) => {
@@ -18,12 +18,9 @@ export function handleWebSocketSession(io: Server): void {
             deleteProperty: (session, key) => delete session[key]
         });
 
-        let hash = getHash(socket.session);
-
         // save session to store when the socket is closed.
         socket.on("disconnected", () => {
-            if (hash !== getHash(socket.session))
-                socket.session.save(() => { });
+            socket.session.save(() => { });
         });
 
         next();

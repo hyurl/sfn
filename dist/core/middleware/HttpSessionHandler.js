@@ -1,23 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const session_1 = require("../bootstrap/session");
+const ExpressSession = require("express-session");
+const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+exports.session = ExpressSession(ConfigLoader_1.config.session);
 function handleHttpSession(app) {
-    app.use((req, res, next) => {
-        session_1.session(req, {}, (err) => {
-            if (err)
-                throw err;
-            let hash = session_1.getHash(req.session), handler = () => {
-                if (hash !== session_1.getHash(req.session)) {
-                    req.session.touch(null);
-                    req.session.save(err => {
-                        if (err)
-                            throw err;
-                    });
-                }
-            };
-            res.on("finish", handler).on("close", handler);
-            next();
-        });
+    app.use(exports.session).use((req, res, next) => {
+        let _end = res.end;
+        res.end = function end(...args) {
+            res.sent = true;
+            _end.apply(res, args);
+        };
+        next();
     });
 }
 exports.handleHttpSession = handleHttpSession;

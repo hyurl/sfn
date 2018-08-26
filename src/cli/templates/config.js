@@ -56,10 +56,10 @@ var config = {
         unset: "destroy",
         store: new FileStore({
             path: ROOT_PATH + "/sessions",
-            ttl: 3600 * 24 // 24 hours
+            ttl: 3600 * 24 // 24 hours (in seconds)
         }),
         cookie: {
-            secure: true
+            maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
         }
     },
     mail: {

@@ -214,7 +214,7 @@ function handleUpload(ctrl, method, resolve, reject) {
 }
 function handleError(err, ctrl) {
     let { req, res } = ctrl;
-    if (res.finished)
+    if (res.sent)
         return handleFinish(ctrl, err);
     if (err instanceof HttpError_1.HttpError && err.code == 405 && req.isEventSource)
         err = new HttpError_1.HttpError(204);
@@ -247,12 +247,12 @@ function getNextHandler(method, action, resolve, reject) {
         ctrl.logOptions.action = action;
         let { req, res } = ctrl, { BeforeFilters, RequireAuth } = ctrl.Class;
         Promise.resolve(ctrl.before()).then(result => {
-            if (result === false || res.finished)
+            if (result === false || res.sent)
                 return result;
             else
                 return functions_inner_1.callFilterChain(BeforeFilters[method], ctrl, true);
         }).then(result => {
-            if (result === false || res.finished) {
+            if (result === false || res.sent) {
                 return resolve(null);
             }
             if (!cors(ctrl.cors, req, res)) {
@@ -296,7 +296,7 @@ function handleGzip(res, data) {
 }
 function handleResponse(ctrl, data) {
     let { req, res } = ctrl;
-    if (!res.finished) {
+    if (!res.sent) {
         if (req.isEventSource) {
             if (data !== null && data !== undefined)
                 ctrl.sse.send(data);

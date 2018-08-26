@@ -260,7 +260,7 @@ function handleError(err: Error, ctrl: HttpController) {
     let { req, res } = ctrl;
 
     // If the response is has already been sent, handle finish immediately.
-    if (res.finished)
+    if (res.sent)
         return handleFinish(ctrl, err);
 
     // If the response hasn't been sent, try to response the error in a proper 
@@ -314,12 +314,12 @@ function getNextHandler(
 
         // Run before filters.
         Promise.resolve(ctrl.before()).then(result => {
-            if (result === false || res.finished)
+            if (result === false || res.sent)
                 return result;
             else
                 return callFilterChain(BeforeFilters[method], ctrl, true);
         }).then(result => {
-            if (result === false || res.finished) {
+            if (result === false || res.sent) {
                 // if the response has been sent before calling the actual method,
                 // resolve the Promise immediately without running any checking 
                 // procedure, and don't call the method.
@@ -382,7 +382,7 @@ function handleGzip(res: Response, data: any): Promise<any> {
 function handleResponse(ctrl: HttpController, data: any) {
     let { req, res } = ctrl;
 
-    if (!res.finished) {
+    if (!res.sent) {
         if (req.isEventSource) {
             if (data !== null && data !== undefined)
                 ctrl.sse.send(data);
