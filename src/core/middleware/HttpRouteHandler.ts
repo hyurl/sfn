@@ -17,6 +17,7 @@ import { Request, Response, HttpRequestMethod } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { RouteMap } from "../tools/RouteMap";
 import { isTypeScript } from '../../init';
+import { Controller } from "../controllers/Controller";
 
 const EFFECT_METHODS: HttpRequestMethod[] = [
     "DELETE",
@@ -25,19 +26,39 @@ const EFFECT_METHODS: HttpRequestMethod[] = [
     "PUT"
 ];
 
+export function handleLog(err: Error, ctrl: Controller, method?: string) {
+    if (config.server.error.log) {
+        // Log the error to a file.
+        let str = err.toString(),
+            action: string;
+
+        if (method && method.indexOf(" ") > 0) {
+            action = method;
+        } else {
+            let i = err.stack.indexOf("\n") + 1,
+                stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
+
+            if (method) stack = stack.replace("<anonymous>", method);
+
+            action = stack.replace("_1", "").slice(3);
+        }
+
+        let logger = ctrl.logger,
+            trace = logger.trace;
+        logger.trace = false; // temporarily disable trace.
+        logger.action = action; // temporarily set action.
+        logger.error(str);
+        logger.trace = trace;
+        logger.action = undefined;
+    }
+}
+
 function finish(ctrl: HttpController): void {
     ctrl.emit("finish", ctrl.req, ctrl.res);
 }
 
-function handleLog(ctrl: HttpController, err: Error) {
-    if (config.server.error.log) {
-        // Log the error to a file.
-        ctrl.logger.error(err.message);
-    }
-}
-
-function handleFinish(ctrl: HttpController, err: Error): void {
-    handleLog(ctrl, err);
+function handleFinish(err: Error, ctrl: HttpController, method: string): void {
+    handleLog(err, ctrl, method);
     finish(ctrl);
 
     if (isDevMode && !(err instanceof HttpError)) {
@@ -256,12 +277,12 @@ function handleUpload(
     }
 }
 
-function handleError(err: Error, ctrl: HttpController) {
+function handleError(err: Error, ctrl: HttpController, method?: string) {
     let { req, res } = ctrl;
 
     // If the response is has already been sent, handle finish immediately.
     if (res.sent)
-        return handleFinish(ctrl, err);
+        return handleFinish(err, ctrl, method);
 
     // If the response hasn't been sent, try to response the error in a proper 
     // form to the client.
@@ -282,7 +303,7 @@ function handleError(err: Error, ctrl: HttpController) {
     if (req.accept == "application/json" || res.jsonp) {
         // Send JSON response.
         res.send(ctrl.error(err.message, (<HttpError>err).code));
-        handleFinish(ctrl, _err);
+        handleFinish(_err, ctrl, method);
     } else {
         res.status = (<HttpError>err).code;
 
@@ -291,24 +312,21 @@ function handleError(err: Error, ctrl: HttpController) {
         ctrl.Class.httpErrorView(<HttpError>err, ctrl).then(content => {
             res.type = "text/html";
             res.send(content);
-            handleFinish(ctrl, _err);
+            handleFinish(_err, ctrl, method);
         }).catch(() => {
             res.type = "text/plain";
             res.send(err.message);
-            handleFinish(ctrl, _err);
+            handleFinish(_err, ctrl, method);
         });
     }
 }
 
 function getNextHandler(
     method: string,
-    action: string,
     resolve: Function,
     reject: Function
 ) {
     return (ctrl: HttpController) => {
-        ctrl.logOptions.action = action;
-
         let { req, res } = ctrl,
             { BeforeFilters, RequireAuth } = ctrl.Class;
 
@@ -412,18 +430,16 @@ function handleResponse(ctrl: HttpController, data: any) {
 
 function getRouteHandler(Class: typeof HttpController, method: string) {
     return (req: Request, res: Response) => {
-        let ctrl: HttpController = null,
-            className = Class.name === "default_1" ? "default" : Class.name,
-            action = `${className}.${method} (${Class.filename})`;
+        let ctrl: HttpController = null;
 
         res.on("error", (err) => {
-            handleLog(ctrl, err);
+            handleLog(err, ctrl, method);
         });
 
         // Handle the procedure in a Promise context.
         new Promise((resolve, reject) => {
             try {
-                let handleNext = getNextHandler(method, action, resolve, reject);
+                let handleNext = getNextHandler(method, resolve, reject);
 
                 if (Class.length === 3) {
                     ctrl = new Class(req, res, handleNext);
@@ -444,9 +460,8 @@ function getRouteHandler(Class: typeof HttpController, method: string) {
                 : callFilterChain(Class.AfterFilters[method], ctrl);
         }).catch((err: Error) => {
             ctrl = ctrl || new HttpController(req, res);
-            ctrl.logOptions.action = action;
 
-            handleError(err, ctrl);
+            handleError(err, ctrl, method);
         });
     }
 }
@@ -464,7 +479,6 @@ export function handleHttpRoute(app: App): void {
     app.onerror = function onerror(err: any, req: Request, res: Response) {
         res.keepAlive = false;
         let ctrl = new HttpController(req, res)
-        ctrl.logOptions.action = req.method + " " + req.url;
 
         if (res.statusCode === 404)
             err = new HttpError(404);
@@ -477,6 +491,6 @@ export function handleHttpRoute(app: App): void {
         else
             err = new HttpError(500);
 
-        handleError(err, ctrl);
+        handleError(err, ctrl, req.method + " " + req.url);
     }
 }

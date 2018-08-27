@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+process.env.FORCE_COLOR = "10";
 require("source-map-support/register");
 require("reflect-metadata");
 const date = require("sfn-date");

@@ -1,5 +1,3 @@
-import * as date from "sfn-date";
-import chalk from "chalk";
 import { Server } from "socket.io";
 import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { SocketError } from "../tools/SocketError";
@@ -9,6 +7,8 @@ import { realDB } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { EventMap } from "../tools/EventMap";
 import { isTypeScript } from '../../init';
+import { handleLog } from "./HttpRouteHandler";
+import { logRequest } from "./HttpInitHandler";
 
 type SocketEventInfo = {
     time: number;
@@ -24,32 +24,10 @@ function finish(ctrl: WebSocketController, info: SocketEventInfo) {
         socket[realDB].release();
 
     ctrl.emit("finish", socket);
-
-    // If it is dev mode, log runtime information.
-    if (isDevMode) {
-        let cost: number | string = Date.now() - info.time,
-            dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
-            type: string = chalk.bold(socket.protocol.toUpperCase()),
-            code: number = info.code,
-            codeStr: string = code.toString();
-
-        cost = chalk.cyan(`${cost}ms`);
-
-        if (code < 200) {
-            codeStr = chalk.blue(codeStr);
-        } else if (code >= 200 && code < 300) {
-            codeStr = chalk.green(codeStr);
-        } else if (code >= 300 && code < 400) {
-            codeStr = chalk.yellow(codeStr);
-        } else {
-            codeStr = chalk.red(codeStr);
-        }
-
-        console.log(`${dateTime} ${type} ${info.event} ${codeStr} ${cost}`);
-    }
+    logRequest(info.time, socket.protocol.toUpperCase(), info.code, info.event);
 }
 
-function handleError(err: any, ctrl: WebSocketController, info: SocketEventInfo) {
+function handleError(err: any, info: SocketEventInfo, ctrl: WebSocketController, method?: string) {
     let _err: Error = err; // The original error.
 
     if (!(err instanceof SocketError)) {
@@ -64,15 +42,9 @@ function handleError(err: any, ctrl: WebSocketController, info: SocketEventInfo)
     // Send error to the client.
     if (info.event) {
         ctrl.socket.emit(info.event, ctrl.error(err.message, info.code));
-    } else {
-        ctrl.logOptions.action = info.event = "unknown";
     }
 
-    if (config.server.error.log) {
-        // Log the original error to a file.
-        ctrl.logger.error(_err.message);
-    }
-
+    handleLog(_err, ctrl, method);
     finish(ctrl, info);
 
     if (isDevMode && !(_err instanceof SocketError)) {
@@ -82,14 +54,11 @@ function handleError(err: any, ctrl: WebSocketController, info: SocketEventInfo)
 
 function getNextHandler(
     method: string,
-    action: string,
     data: any[],
     resolve: Function,
     reject: Function
 ) {
     return (ctrl: WebSocketController) => {
-        ctrl.logOptions.action = action;
-
         let { BeforeFilters, RequireAuth } = ctrl.Class;
 
         Promise.resolve(ctrl.before()).then(result => {
@@ -143,8 +112,6 @@ function getNextHandler(
 
 function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
     let { Class, method } = EventMap[event],
-        className = Class.name === "default_1" ? "default" : Class.name,
-        action = `${className}.${method} (${Class.filename})`,
         ctrl: WebSocketController = null,
         info: SocketEventInfo = {
             time: Date.now(),
@@ -155,7 +122,7 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
     // Handle the procedure in a Promise context.
     new Promise((resolve, reject) => {
         try {
-            let handleNext = getNextHandler(method, action, data, resolve, reject);
+            let handleNext = getNextHandler(method, data, resolve, reject);
 
             if (Class.length === 2) {
                 ctrl = new Class(socket, handleNext);
@@ -180,9 +147,8 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
             : callFilterChain(Class.AfterFilters[method], ctrl);
     }).catch((err: Error) => {
         ctrl = ctrl || new WebSocketController(socket);
-        ctrl.logOptions.action = action;
 
-        handleError(err, ctrl, info);
+        handleError(err, info, ctrl, method);
     });
 }
 
@@ -197,11 +163,11 @@ export function handleWebSocketEvent(io: Server): void {
 
         socket.on("error", (err: Error) => {
             let ctrl = new WebSocketController(socket);
-            handleError(err, ctrl, {
+            handleError(err, {
                 time: Date.now(),
                 event: "",
                 code: 500
-            });
+            }, ctrl, socket.protocol.toUpperCase());
         });
     });
 }

@@ -22,7 +22,7 @@ export const LogOptions: LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
     filename: ROOT_PATH + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
-    action: "default"
+    trace: true
 });
 
 /**
@@ -36,9 +36,7 @@ export class Service extends EventEmitter {
     /** The language of the current service. */
     lang: string = config.lang;
     /** Configurations for the logger in this instance. */
-    logOptions: LogOptions = Object.assign({}, LogOptions, {
-        action: this.constructor.name
-    });
+    logOptions: LogOptions = Object.assign({}, LogOptions);
     /** `deprecated`, use `logOptions` instead. */
     logConfig = this.logOptions;
 
@@ -76,7 +74,6 @@ export class Service extends EventEmitter {
         if (!Service.Loggers[filename]) {
             Service.Loggers[filename] = new Logger(this.logOptions);
         }
-        Service.Loggers[filename].action = this.logOptions.action;
         return Service.Loggers[filename];
     }
 

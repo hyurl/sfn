@@ -12,7 +12,8 @@ class HttpError extends Error {
         this.stack = `${this.name}: ${message}${stack}`;
     }
     toString() {
-        return this.stack.substring(0, this.stack.indexOf("\n"));
+        let str = super.constructor.prototype.toString.call(this), i = str.indexOf(" ");
+        return str.slice(0, i) + " " + this.code + str.slice(i);
     }
 }
 exports.HttpError = HttpError;

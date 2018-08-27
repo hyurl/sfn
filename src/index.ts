@@ -1,3 +1,5 @@
+// Force the console to output colorfully.
+process.env.FORCE_COLOR = "10";
 import "source-map-support/register";
 import "reflect-metadata";
 import * as date from "sfn-date";

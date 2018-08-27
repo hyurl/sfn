@@ -6,30 +6,34 @@ import { version } from "../../init";
 import { isDevMode } from "../bootstrap/ConfigLoader";
 import { Request, Response } from "../tools/interfaces";
 
+export function logRequest(reqTime: number, type: string, code: number, url: string): void {
+    if (isDevMode) {
+        // dev mode log out request info.
+        var cost: number | string = Date.now() - reqTime,
+            dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
+            codeStr = code.toString();
+
+        type = chalk.bold(type);
+        cost = chalk.cyan(`${cost}ms`);
+
+        if (code < 200) {
+            codeStr = chalk.blue(codeStr);
+        } else if (code >= 200 && code < 300) {
+            codeStr = chalk.green(codeStr);
+        } else if (code >= 300 && code < 400) {
+            codeStr = chalk.yellow(codeStr);
+        } else {
+            codeStr = chalk.red(codeStr);
+        }
+
+        console.log(`${dateTime} ${type} ${url} ${codeStr} ${cost}`);
+    }
+}
+
 function getDevLogger(req: Request, res: Response) {
     return () => {
-        if (isDevMode) {
-            // dev mode log out request info.
-            var cost: number | string = Date.now() - req.time,
-                dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
-                type: string = chalk.bold(req.isEventSource ? "SSE" : req.method),
-                code: number = res.statusCode,
-                codeStr: string = res.statusCode.toString();
-
-            cost = chalk.cyan(`${cost}ms`);
-
-            if (code < 200) {
-                codeStr = chalk.blue(codeStr);
-            } else if (code >= 200 && code < 300) {
-                codeStr = chalk.green(codeStr);
-            } else if (code >= 300 && code < 400) {
-                codeStr = chalk.yellow(codeStr);
-            } else {
-                codeStr = chalk.red(codeStr);
-            }
-
-            console.log(`${dateTime} ${type} ${req.shortUrl} ${codeStr} ${cost}`);
-        }
+        let type = req.isEventSource ? "SSE" : req.method;
+        logRequest(req.time, type, res.statusCode, req.shortUrl);
     };
 };
 

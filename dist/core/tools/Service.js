@@ -19,15 +19,13 @@ exports.LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
     filename: init_1.ROOT_PATH + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
-    action: "default"
+    trace: true
 });
 let Service = Service_1 = class Service extends events_1.EventEmitter {
     constructor() {
         super(...arguments);
         this.lang = ConfigLoader_1.config.lang;
-        this.logOptions = Object.assign({}, exports.LogOptions, {
-            action: this.constructor.name
-        });
+        this.logOptions = Object.assign({}, exports.LogOptions);
         this.logConfig = this.logOptions;
     }
     i18n(text, ...replacements) {
@@ -45,7 +43,6 @@ let Service = Service_1 = class Service extends events_1.EventEmitter {
         if (!Service_1.Loggers[filename]) {
             Service_1.Loggers[filename] = new Logger(this.logOptions);
         }
-        Service_1.Loggers[filename].action = this.logOptions.action;
         return Service_1.Loggers[filename];
     }
 };

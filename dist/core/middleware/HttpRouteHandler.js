@@ -24,16 +24,32 @@ const EFFECT_METHODS = [
     "POST",
     "PUT"
 ];
+function handleLog(err, ctrl, method) {
+    if (ConfigLoader_1.config.server.error.log) {
+        let str = err.toString(), action;
+        if (method && method.indexOf(" ") > 0) {
+            action = method;
+        }
+        else {
+            let i = err.stack.indexOf("\n") + 1, stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
+            if (method)
+                stack = stack.replace("<anonymous>", method);
+            action = stack.replace("_1", "").slice(3);
+        }
+        let logger = ctrl.logger, trace = logger.trace;
+        logger.trace = false;
+        logger.action = action;
+        logger.error(str);
+        logger.trace = trace;
+        logger.action = undefined;
+    }
+}
+exports.handleLog = handleLog;
 function finish(ctrl) {
     ctrl.emit("finish", ctrl.req, ctrl.res);
 }
-function handleLog(ctrl, err) {
-    if (ConfigLoader_1.config.server.error.log) {
-        ctrl.logger.error(err.message);
-    }
-}
-function handleFinish(ctrl, err) {
-    handleLog(ctrl, err);
+function handleFinish(err, ctrl, method) {
+    handleLog(err, ctrl, method);
     finish(ctrl);
     if (ConfigLoader_1.isDevMode && !(err instanceof HttpError_1.HttpError)) {
         functions_inner_1.callsiteLog(err);
@@ -212,10 +228,10 @@ function handleUpload(ctrl, method, resolve, reject) {
         resolve(getResult());
     }
 }
-function handleError(err, ctrl) {
+function handleError(err, ctrl, method) {
     let { req, res } = ctrl;
     if (res.sent)
-        return handleFinish(ctrl, err);
+        return handleFinish(err, ctrl, method);
     if (err instanceof HttpError_1.HttpError && err.code == 405 && req.isEventSource)
         err = new HttpError_1.HttpError(204);
     let _err = err;
@@ -227,24 +243,23 @@ function handleError(err, ctrl) {
     }
     if (req.accept == "application/json" || res.jsonp) {
         res.send(ctrl.error(err.message, err.code));
-        handleFinish(ctrl, _err);
+        handleFinish(_err, ctrl, method);
     }
     else {
         res.status = err.code;
         ctrl.Class.httpErrorView(err, ctrl).then(content => {
             res.type = "text/html";
             res.send(content);
-            handleFinish(ctrl, _err);
+            handleFinish(_err, ctrl, method);
         }).catch(() => {
             res.type = "text/plain";
             res.send(err.message);
-            handleFinish(ctrl, _err);
+            handleFinish(_err, ctrl, method);
         });
     }
 }
-function getNextHandler(method, action, resolve, reject) {
+function getNextHandler(method, resolve, reject) {
     return (ctrl) => {
-        ctrl.logOptions.action = action;
         let { req, res } = ctrl, { BeforeFilters, RequireAuth } = ctrl.Class;
         Promise.resolve(ctrl.before()).then(result => {
             if (result === false || res.sent)
@@ -328,13 +343,13 @@ function handleResponse(ctrl, data) {
 }
 function getRouteHandler(Class, method) {
     return (req, res) => {
-        let ctrl = null, className = Class.name === "default_1" ? "default" : Class.name, action = `${className}.${method} (${Class.filename})`;
+        let ctrl = null;
         res.on("error", (err) => {
-            handleLog(ctrl, err);
+            handleLog(err, ctrl, method);
         });
         new Promise((resolve, reject) => {
             try {
-                let handleNext = getNextHandler(method, action, resolve, reject);
+                let handleNext = getNextHandler(method, resolve, reject);
                 if (Class.length === 3) {
                     ctrl = new Class(req, res, handleNext);
                 }
@@ -356,8 +371,7 @@ function getRouteHandler(Class, method) {
                 : functions_inner_1.callFilterChain(Class.AfterFilters[method], ctrl);
         }).catch((err) => {
             ctrl = ctrl || new HttpController_1.HttpController(req, res);
-            ctrl.logOptions.action = action;
-            handleError(err, ctrl);
+            handleError(err, ctrl, method);
         });
     };
 }
@@ -369,7 +383,6 @@ function handleHttpRoute(app) {
     app.onerror = function onerror(err, req, res) {
         res.keepAlive = false;
         let ctrl = new HttpController_1.HttpController(req, res);
-        ctrl.logOptions.action = req.method + " " + req.url;
         if (res.statusCode === 404)
             err = new HttpError_1.HttpError(404);
         else if (res.statusCode === 405)
@@ -380,7 +393,7 @@ function handleHttpRoute(app) {
             err = new HttpError_1.HttpError(500, err);
         else
             err = new HttpError_1.HttpError(500);
-        handleError(err, ctrl);
+        handleError(err, ctrl, req.method + " " + req.url);
     };
 }
 exports.handleHttpRoute = handleHttpRoute;

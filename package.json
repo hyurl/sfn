@@ -68,7 +68,7 @@
         "sfn-cors": "^0.1.5",
         "sfn-date": "^0.1.4",
         "sfn-ejs-engine": "^0.1.7",
-        "sfn-logger": "^0.2.0",
+        "sfn-logger": "^0.2.4",
         "sfn-mail": "^0.2.1",
         "sfn-output-buffer": "^0.2.1",
         "sfn-scheduler": "^0.1.1",

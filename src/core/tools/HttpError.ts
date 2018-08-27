@@ -14,6 +14,8 @@ export class HttpError extends Error {
     }
 
     toString(): string {
-        return this.stack.substring(0, this.stack.indexOf("\n"));
+        let str: string = super.constructor.prototype.toString.call(this),
+            i = str.indexOf(" ");
+        return str.slice(0, i) + " " + this.code + str.slice(i);
     }
 }
