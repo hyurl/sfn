@@ -11,10 +11,10 @@ function timerCallback(event, filename, extnames) {
     if (event === "change" && extnames.includes(ext)) {
         let client = functions_1.getDgramClient();
         client.bind(0);
-        client.on("worker-reload", () => {
+        client.on("worker-reloaded", () => {
             console.log(functions_inner_1.grey("Workers reloaded!"));
             client.close();
-        }).emit("worker-reload", { timeout: 10 }, () => {
+        }).emit("worker-reload", 100, () => {
             console.log(functions_inner_1.grey("Reloading workers..."));
         });
     }
