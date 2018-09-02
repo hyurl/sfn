@@ -1,6 +1,6 @@
 import * as webium from "webium";
 import * as SocketIO from "socket.io";
-import { DB, User } from "modelar";
+import * as modelar from "modelar";
 import { UploadedFile } from "../controllers/HttpController";
 
 export type HttpRequestMethod = string;
@@ -41,9 +41,9 @@ export interface Session extends SessionData {
 
 export interface Request extends webium.Request {
     /** Gets a DB instance for `modelar`. */
-    db: DB;
+    db: modelar.DB;
     /** The logged-in user of the request. */
-    user?: User;
+    user?: modelar.User;
     /** Whether the request comes from an EventSource.  */
     isEventSource: boolean;
     /** Gets the CSRF token if available. */
@@ -87,9 +87,9 @@ export interface WebSocket extends SocketIO.Socket {
     /** The subdomain name of the handshake. */
     subdomain?: string;
     /** Gets a DB instance for `modelar`. */
-    db: DB;
+    db: modelar.DB;
     /** The logged-in user of the socket. */
-    user?: User;
+    user?: modelar.User;
     /** In a sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** * The cookies of handshake. */

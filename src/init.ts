@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import { config as configEnv } from "dotenv";
+// import lowerFirst = require("lodash/lowerFirst");
 
 /** The version of framework. */
 export const version: string = require("../package.json").version;
@@ -11,7 +12,10 @@ var argv = process.execArgv.join(" ");
 /** Whether the current process is running in debug/inspect mode. */
 export const isDebugMode = argv.includes("inspect") || argv.includes("debug");
 
-if (appPath == __dirname + path.sep + "cli") {
+/** Whether the current process is running in command line. */
+export const isCli = appPath == __dirname + path.sep + "cli";
+
+if (isCli) {
     appPath = process.cwd() + path.sep + "dist";
 }
 
@@ -29,7 +33,7 @@ if (!global["SRC_PATH"] && fs.existsSync(tsCfgFile)) {
             srcRoot = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
             appPath = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.outDir);
         }
-    } catch { }
+    } catch (e) { }
 } else if (!global["APP_PATH"]) {
     appPath = ROOT_PATH + path.sep + "src";
 }

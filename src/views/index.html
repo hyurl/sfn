@@ -24,6 +24,17 @@
             console.log("You just said:", data);
         });
         socket.emit("/index");
+
+        if (typeof EventSource == "function") {
+            var es = new EventSource("/sse-test"),
+                count = 0;
+            es.onmessage = function (e) {
+                console.log(e.data);
+                if (++count == 10) {
+                    es.close();
+                }
+            };
+        }
     </script>
 </body>
 

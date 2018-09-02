@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 import * as fs from "fs-extra";
 import * as path from "path";
-import * as cmd from "commander";
+import * as program from "commander";
 import pluralize = require("pluralize");
+import filter = require("lodash/filter");
+import each = require("lodash/each");
+import { hyphenate } from "capitalization";
 import { sfnd, ext } from "./init";
 import { version, APP_PATH, SRC_PATH } from "../init";
-import { hyphenate } from "capitalization";
-import { loadLanguagePack } from "../core/tools/functions-inner";
 import { config } from "../core/bootstrap/ConfigLoader";
+import { loadLanguagePack, grey } from "../core/tools/functions-inner";
 
-cmd.description("create a new controller, model. etc.")
+program.description("create new controllers, models. etc.")
     .version(version, "-v, --version")
     .option("-c, --controller <name>", "create a new controller with a specified name")
     .option("-m, --model <name>", "create a new model with a specified name")
@@ -22,7 +24,21 @@ cmd.description("create a new controller, model. etc.")
         console.log("    sfn -m Article                   create a model named 'Article'");
         console.log("    sfn -l zh-CN                     create a language pack named 'zh-CN'");
         console.log("");
-    }).parse(process.argv);
+    });
+
+var cmdDir = path.resolve(__dirname, "commands"),
+    files = fs.readdirSync(cmdDir);
+
+// automatically load commands
+each(filter(files, file => path.extname(file) == ".js"), file => {
+    require(path.resolve(cmdDir, file));
+});
+
+// Load user-defined bootstrap procedures.
+let cliBootstrap = APP_PATH + "/bootstrap/cli.js";
+fs.existsSync(cliBootstrap) ? require(cliBootstrap) : null;
+
+program.parse(process.argv);
 
 function outputFile(filename: string, data: any, type: string): void {
     var dir = path.dirname(filename);
@@ -34,7 +50,7 @@ function outputFile(filename: string, data: any, type: string): void {
     }
 
     fs.writeFileSync(filename, data);
-    console.log(`${type} '${filename}' created.`);
+    console.log(grey(`${type} '${filename}' created.`));
 
     process.exit();
 }
@@ -48,24 +64,24 @@ function checkSource(filename: string): void {
         throw new Error("Source file is missing.");
 }
 
-if (cmd.controller) { // create controller.
-    let filename = lastChar(cmd.controller) == "/"
-        ? cmd.controller + "index"
-        : cmd.controller;
-    let type = cmd.type == "websocket" ? "WebSocket" : "Http",
+if (program.controller) { // create controller.
+    let filename = lastChar(program.controller) == "/"
+        ? program.controller + "index"
+        : program.controller;
+    let type = program.type == "websocket" ? "WebSocket" : "Http",
         input = `${sfnd}/src/cli/templates/${type}Controller.${ext}`,
         output = `${SRC_PATH}/controllers/${filename}.${ext}`;
 
     checkSource(input);
 
-    let route = hyphenate(cmd.controller, true);
+    let route = hyphenate(program.controller, true);
     let contents = fs.readFileSync(input, "utf8").replace(/\{name\}/g, route);
 
     outputFile(output, contents, "controller");
-} else if (cmd.model) { // create model.
+} else if (program.model) { // create model.
     var input = `${sfnd}/src/cli/templates/Model.${ext}`,
-        output = `${SRC_PATH}/models/${cmd.model}.${ext}`,
-        ModelName = path.basename(cmd.model),
+        output = `${SRC_PATH}/models/${program.model}.${ext}`,
+        ModelName = path.basename(program.model),
         table = pluralize(hyphenate(ModelName, true));
 
     checkSource(input);
@@ -75,8 +91,8 @@ if (cmd.controller) { // create controller.
         .replace(/__table__/g, table);
 
     outputFile(output, contents, "Model");
-} else if (cmd.language) {
-    let output: string = `${SRC_PATH}/locales/${cmd.language}.json`;
+} else if (program.language) {
+    let output: string = `${SRC_PATH}/locales/${program.language}.json`;
     let contents: string;
     let file1 = `${APP_PATH}/locales/${config.lang}.js`;
     let file2 = `${SRC_PATH}/locales/${config.lang}.json`;
@@ -95,7 +111,6 @@ if (cmd.controller) { // create controller.
 
     contents = JSON.stringify(lang, null, "  ");
     outputFile(output, contents, "Language pack");
-} else {
-    cmd.help();
-    // throw new TypeError("No valid argument was specified.");
+} else if (process.argv.length <= 2) {
+    program.help();
 }

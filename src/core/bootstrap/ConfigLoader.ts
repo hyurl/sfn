@@ -1,5 +1,6 @@
 import * as fs from "fs";
-import { APP_PATH, isDebugMode } from "../../init";
+import merge = require("lodash/merge");
+import { APP_PATH, isDebugMode, isCli } from "../../init";
 import { config } from "../../config";
 import { isMaster } from 'sfn-worker';
 import chalk from "chalk";
@@ -11,11 +12,11 @@ if (fs.existsSync(APP_PATH + "/config.js")) {
     let m = require(APP_PATH + "/config.js");
 
     if (typeof m.config == "object") {
-        Object.assign(config, m.config);
+        merge(config, m.config);
     } else if (typeof m.default == "object"){
-        Object.assign(config, m.default);
+        merge(config, m.default);
     } else if (typeof m.env == "string") {
-        Object.assign(config, m);
+        merge(config, m);
     }
 }
 
@@ -23,12 +24,8 @@ if (fs.existsSync(APP_PATH + "/config.js")) {
 export const isDevMode = config.env == "dev" || config.env == "development"
     || isDebugMode;
 
-if (config.bluebird) {
-    global.Promise = require("bluebird");
-}
-
-if (isMaster && isDevMode && !isDebugMode) {
+if (isMaster && isDevMode && !isDebugMode && !isCli) {
     console.log("You program is running in development mode without "
-        + "inspect flag, please consider changing to debug environment.");
+        + "'--inspect' flag, please consider changing to debug environment.");
     console.log("For help, see " + chalk.yellow("https://sfnjs.com/docs/debug"));
 }

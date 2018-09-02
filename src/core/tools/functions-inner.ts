@@ -1,6 +1,8 @@
 import { extname, basename } from "path";
 import { __awaiter } from 'tslib';
 import * as CallSiteRecord from "callsite-record";
+import chalk from "chalk";
+import * as date from "sfn-date";
 import { Locale } from "./interfaces";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
@@ -193,4 +195,36 @@ export async function callFilterChain(
         }
     }
     return result;
+}
+
+export function volume2Str(num: number): string {
+    if (num > 1073741824) { // Db
+        return (num / 1073741824).toFixed(3) + " Gb";
+    } else if (num > 1048576) { // Mb
+        return (num / 1048576).toFixed(3) + " Mb";
+    } else if (num > 1024) {
+        return (num / 1024).toFixed(3) + " Kb";
+    } else {
+        return num + " b";
+    }
+}
+
+function color(color: string, msg: string) {
+    return chalk[color](`[${date("Y-m-d H:i:s.ms")}]`) + " " + msg;
+}
+
+export function grey(msg: string) {
+    return color("grey", msg);
+}
+
+export function green(msg: string) {
+    return color("green", msg);
+}
+
+export function yellow(msg: string) {
+    return color("yellow", msg);
+}
+
+export function red(msg: string) {
+    return color("red", msg);
 }

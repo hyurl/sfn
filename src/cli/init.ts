@@ -15,8 +15,11 @@ if (!fs.existsSync(`${SRC_PATH}/assets`))
 let bootstrap = `${SRC_PATH}/bootstrap`;
 if (!fs.existsSync(bootstrap)) {
     fs.ensureDirSync(bootstrap);
+    fs.writeFileSync(`${bootstrap}/master.${ext}`, "");
+    fs.writeFileSync(`${bootstrap}/worker.${ext}`, "");
     fs.writeFileSync(`${bootstrap}/http.${ext}`, "");
     fs.writeFileSync(`${bootstrap}/websocket.${ext}`, "");
+    fs.writeFileSync(`${bootstrap}/cli.${ext}`, "");
 }
 
 if (!fs.existsSync(`${SRC_PATH}/controllers`)) {

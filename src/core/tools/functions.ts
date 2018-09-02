@@ -1,6 +1,9 @@
+import * as dgram from "dgramx";
+import { config } from "../bootstrap/ConfigLoader";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
+import { red } from "./functions-inner";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
 
@@ -206,4 +209,16 @@ export function after<T extends Controller = Controller>(filter: ControllerFilte
 
         Class.AfterFilters[prop].push(filter);
     }
+}
+
+/** If Datagram server isn't enabled, it will return `null` */
+export function getDgramClient(): dgram.Socket {
+    let port = config.server.dgram.port;
+
+    if (!config.server.dgram.enabled) {
+        console.log(red("Datagram server isn't enabled!"));
+        return null;
+    }
+
+    return dgram.createClient(`udp://127.0.0.1:${port}`);
 }

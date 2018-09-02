@@ -9,6 +9,8 @@ import {
     applyWebSocketControllerDoc
 } from "../tools/functions-inner";
 
+let WS = config.server.websocket;
+
 function isController(m): boolean {
     return m && (m.prototype instanceof HttpController
         || m.prototype instanceof WebSocketController);
@@ -56,7 +58,7 @@ function loadControllers(controllerPath: string) {
                 if (config.enableDocRoute)
                     applyHttpControllerDoc(_class);
 
-            } else if (Class.prototype instanceof WebSocketController) {
+            } else if (WS.enabled && Class.prototype instanceof WebSocketController) {
                 let _class = <typeof WebSocketController>Class;
                 _class.filename = filename;
 

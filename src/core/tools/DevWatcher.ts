@@ -1,9 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as date from "sfn-date";
 import Worker = require("sfn-worker");
-import chalk from "chalk";
-import { config, isDevMode } from "../bootstrap/ConfigLoader";
+import { getDgramClient } from './functions';
+import { grey } from './functions-inner';
 
 var timer: NodeJS.Timer = null;
 
@@ -11,20 +10,14 @@ function timerCallback(event, filename, extnames) {
     let ext = path.extname(filename);
 
     if (event === "change" && extnames.includes(ext)) {
-        let dateTime: string = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`);
+        let client = getDgramClient();
 
-        console.log(`${dateTime} HTTP Server restarting...`);
-
-        Worker.getWorkers(workers => {
-            if (workers.length) {
-                for (let worker of workers) {
-                    worker.reboot();
-                }
-            } else {
-                for (let id of config.workers) {
-                    new Worker(id, !isDevMode);
-                }
-            }
+        client.bind(0);
+        client.on("worker-reload", () => {
+            console.log(grey("Workers reloaded!"));
+            client.close();
+        }).emit("worker-reload", { timeout: 10 }, () => {
+            console.log(grey("Reloading workers..."));
         });
     }
 }
@@ -45,7 +38,7 @@ export class DevWatcher {
             recursive: true,
         }, (event, filename) => {
             clearTimeout(timer);
-            timer = setTimeout(timerCallback, 200, event, filename, extnames);
+            timer = setTimeout(timerCallback, 300, event, filename, extnames);
         });
     }
 

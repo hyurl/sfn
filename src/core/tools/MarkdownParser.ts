@@ -30,7 +30,7 @@ renderer.heading = function (text: string, level: number): string {
 renderer.code = function (code, lang) {
     try {
         code = hljs.highlight(lang, code, true).value;
-    } catch { }
+    } catch (e) { }
     return `<pre><code class="lang-${lang} hljs">${code}</code></pre>\n`;
 };
 

@@ -1,75 +1,46 @@
 import * as fs from "fs";
-import { extname } from 'path';
+import * as path from "path";
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
 import chalk from "chalk";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
-import * as date from "sfn-date";
 import * as Worker from "sfn-worker";
-import { APP_PATH } from "../../init";
+import without = require("lodash/without");
+import { Socket as DgramServer } from "dgramx";
+import { APP_PATH, isCli } from "../../init";
 import { config, isDevMode } from "./ConfigLoader";
 import { DevWatcher } from "../tools/DevWatcher";
+import { grey, red } from "../tools/functions-inner";
 
 /** Whether the current process is the master process. */
 export const isMaster: boolean = Worker.isMaster;
 /** Whether the current process is a worker process. */
 export const isWorker: boolean = Worker.isWorker;
 
-var worker: Worker = null;
-var hostnames = config.server.hostname || config.server.host;
-var hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames;
-var httpServer = config.server.http;
-var enableHttp = httpServer ? httpServer.enabled : true;
-var httpPort = httpServer ? httpServer.port : config.server.port;
-var httpsServer = config.server.https;
-var enableHttps = httpsServer.enabled;
-var httpsPort = httpsServer.port;
-var httpsOptions = httpsServer.options || httpsServer.credentials;
-var WS = config.server.websocket || config.server.socket;
-var enableWs = WS.enabled && (!enableHttps || !httpsServer.forceRedirect);
-var enableWss = WS.enabled && enableHttps;
-
+/** (worker only) The Worker instance created by **sfn-worker**. */
+export var worker: Worker = null;
 /** (worker only) The App instance created by **webium** framework. */
 export var app: App = null;
 /** (worker only) The HTTP server. */
-export var http: HttpServer = null;
-/** (worker only) The HTTPS server. */
-export var https: HttpsServer = null;
-/**
- * (worker only) When `config.server.https.http2` is `true`, this object 
- * contains the working http2 server.
- */
-export var http2: Http2SecureServer = null;
-/** (worker only) The WebSocket created by SocketIO, listens `ws` protocol. */
+export var http: HttpServer | HttpsServer | Http2SecureServer = null;
+/** (deprecated, use `http` instead, worker only) The HTTPS server. */
+export var https: HttpsServer | Http2SecureServer = null;
+/** (worker only) The WebSocket server created by **SocketIO**. */
 export var ws: SocketIO.Server = null;
-/** (worker only) The WebSocket created by SocketIO, listens `wss` protocol. */
+/** (deprecated, use `ws` instead, worker only) The WebSocket server created by **SocketIO**. */
 export var wss: SocketIO.Server = null;
+/** (master only) The Datagram server created by **dgramx**. */
+export var dgram: DgramServer = null;
 
-if (Worker.isWorker) {
-    app = new App({
-        cookieSecret: <string>config.session.secret,
-        domain: hostnames
-    });
-
-    if (enableHttp)
-        http = new HttpServer(app.listener);
-
-    if (enableHttps) {
-        if (httpsServer.http2) {
-            http2 = require("http2").createSecureServer(httpsOptions, app.listener);
-        } else {
-            https = createServer(httpsOptions, app.listener);
-        }
-    }
-
-    if (enableWs)
-        ws = SocketIO(http, WS.options);
-
-    if (enableWss)
-        wss = SocketIO(https, WS.options);
-}
+let hostnames = config.server.hostname,
+    hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames,
+    httpServer = config.server.http,
+    httpPort = httpServer.port,
+    WS = config.server.websocket,
+    workers = config.workers,
+    serverStarted = false;
 
 /**
  * (worker only) Starts HTTP server and socket server (if enabled).
@@ -77,177 +48,186 @@ if (Worker.isWorker) {
 export function startServer() {
     if (Worker.isMaster) {
         throw new Error("The server can only be run in a worker process.");
+    } else if (serverStarted) {
+        throw new Error("Server already started.");
     }
 
-    require("./ControllerLoader");
-    const { handleHttpAuth } = require("../middleware/HttpAuthHandler");
-    const { handleHttpDB } = require("../middleware/HttpDBHandler");
-    const { handleHttpInit } = require("../middleware/HttpInitHandler");
-    const { handleHttpSession } = require("../middleware/HttpSessionHandler");
-    const { redirectHttps } = require("../middleware/HttpsRedirector");
-    const { handleStatic } = require("../middleware/HttpStaticHandler");
-    const { handleHttpXML } = require("../middleware/HttpXMLHandler");
-    const { handleHttpRoute } = require("../middleware/HttpRouteHandler");
-    const { handleWebSocketAuth } = require("../middleware/WebSocketAuthHandler");
-    const { handleWebSocketCookie } = require("../middleware/WebSocketCookieHandler");
-    const { handleWebSocketDB } = require("../middleware/WebSocketDBHandler");
-    const { handleWebSocketProps } = require("../middleware/WebSocketPropsHandler");
-    const { handleWebSocketSession } = require("../middleware/WebSocketSessionHandler");
-    const { handleWebSocketEvent } = require("../middleware/WebSocketEventHandler");
+    serverStarted = true;
 
-    let initWebSocketServer = (io: SocketIO.Server): void => {
-        handleWebSocketProps(io);
-        handleWebSocketCookie(io);
-        handleWebSocketSession(io);
-        handleWebSocketDB(io);
-        handleWebSocketAuth(io);
-    };
-
-    redirectHttps(app);
-    handleHttpInit(app);
-    handleStatic(app);
-    handleHttpSession(app);
-    handleHttpXML(app);
-    handleHttpDB(app);
-    handleHttpAuth(app);
+    // load HTTP middleware
+    require("../handlers/worker/https-redirector");
+    require("../handlers/worker/http-init");
+    require("../handlers/worker/http-static");
+    require("../handlers/worker/http-xml");
+    require("../handlers/worker/http-session");
+    require("../handlers/worker/http-db");
+    require("../handlers/worker/http-auth");
 
     // Load user-defined bootstrap procedures.
-    let file = APP_PATH + "/bootstrap/http.js";
-    if (fs.existsSync(file))
-        require(file);
+    let httpBootstrap = APP_PATH + "/bootstrap/http.js";
+    fs.existsSync(httpBootstrap) ? require(httpBootstrap) : null;
 
-    handleHttpRoute(app);
+    if (WS.enabled) {
+        // load WebSocket middleware
+        require("../handlers/worker/websocket-init");
+        require("../handlers/worker/websocket-cookie");
+        require("../handlers/worker/websocket-session");
+        require("../handlers/worker/websocket-db");
+        require("../handlers/worker/websocket-auth");
+
+        // Load user-defined bootstrap procedures.
+        let wsBootstrap = APP_PATH + "/bootstrap/websocket.js";
+        fs.existsSync(wsBootstrap) ? require(wsBootstrap) : null;
+    }
+
+    // load controllers
+    require("../bootstrap/ControllerLoader");
+
+    // load HTTP route handler
+    require("../handlers/worker/http-route");
+
+    if (WS.enabled) {
+        // load WebSocket event handler
+        require("../handlers/worker/websocket-event");
+    }
 
     // Start HTTP server.
-    if (enableHttp) {
-        http.setTimeout(config.server.timeout);
-        http.listen(httpPort, (err) => {
-            if (err) {
-                console.log(err);
-                process.exit(1);
-            }
-
-            let port: number = http.address()["port"] || httpPort,
-                host: string = `${hostname}` + (port != 80 ? `:${port}` : "");
-
-            worker.emit("start-http-server", host);
-        });
+    if (typeof http["setTimeout"] == "function") {
+        http["setTimeout"](config.server.timeout);
     }
 
-    // Start HTTPS server.
-    if (enableHttps) {
-        let server = httpsServer.http2 ? http2 : https;
+    http.on("error", (err: Error) => {
+        console.log(red(err.toString()));
+    }).listen(httpPort, (err: Error) => {
+        if (!worker.rebootTimes) {
+            let port = http.address()["port"] || httpPort,
+                host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
 
-        if (!httpsServer.http2) {
-            https.setTimeout(config.server.timeout);
+            // aware the master that server has been started.
+            worker.emit("server-started", host);
+        } else {
+            // aware the master that server has been restarted.
+            worker.emit("server-restarted");
         }
-
-        server.listen(httpsPort, (err) => {
-            if (err) {
-                console.log(err);
-                process.exit(1);
-            }
-
-            let port = https.address()["port"] || httpsPort,
-                host = `${hostname}` + (port != 443 ? `:${port}` : "");
-
-            worker.emit("start-https-server", host);
-        });
-    }
-
-    // Start WebSocket server.
-    if (enableWs)
-        initWebSocketServer(ws);
-    if (enableWss)
-        initWebSocketServer(wss);
-
-    // Load user-defined bootstrap procedures.
-    file = APP_PATH + "/bootstrap/websocket.js";
-    if ((enableWs || enableWss) && fs.existsSync(file))
-        require(file);
-
-    if (enableWs)
-        handleWebSocketEvent(ws);
-    if (enableWss)
-        handleWebSocketEvent(wss);
+    });
 }
 
-if (Worker.isMaster) {
+if (Worker.isMaster && !isCli) {
     // Master process, folk workers.
-
-    if (!config.workers || config.workers.length === 0) {
-        throw new Error("There should be at least one worker configured.");
+    if (workers.length === 0) {
+        throw new Error("No worker was configured.");
     }
 
-    let httpCount = 0,
-        httpsCount = 0;
+    if (config.server.dgram.enabled) {
+        // Start UDP Server for receiving commands from outside the program.
+        dgram = new DgramServer("udp4");
+        dgram.bind(config.server.dgram.port);
+    }
+
+    // load Datagram CLI handlers
+    require("../handlers/master/worker-list");
+    require("../handlers/master/worker-reload");
+    require("../handlers/master/service-stop");
+
+    // Load user-defined bootstrap procedures.
+    let masterBootstrap = APP_PATH + "/bootstrap/master.js";
+    fs.existsSync(masterBootstrap) ? require(masterBootstrap) : null;
+
+    let httpCount = 0;
 
     // Listen worker processes, when their servers is started, notify the
     // master and print a message.
     Worker.on("online", worker => {
-        var dateTime = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`);
-
-        console.log(`${dateTime} Worker <` + chalk.yellow(worker.id) + "> online!");
+        console.log(grey(`Worker <` + chalk.yellow(worker.id) + "> online!"));
 
         worker.on("error", (err: Error) => {
-            console.log(err.message);
-        }).on("start-http-server", (host: string) => {
-            httpCount += 1;
+            console.error(red(err.toString()));
+        }).on("server-started", (host: string) => {
+            httpCount++;
+            !workers.includes(worker.id) ? workers.push(worker.id) : null;
 
-            if (httpCount === config.workers.length) {
+            if (httpCount === workers.length) {
                 httpCount = 0;
 
-                let dateTime = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
-                    link = chalk.yellow(`http://${host}`);
+                let type = config.server.http.type,
+                    link = (type == "http2" ? "https" : type) + "://" + host,
+                    msg = grey(`HTTP Server running at ${chalk.yellow(link)}.`),
+                    argv = process.argv[2] || "",
+                    matches = argv.match(/--udp-client=(.+):(.+)/);
 
-                console.log(`${dateTime} HTTP Server running at ${link}.`);
-            }
-        }).on("start-https-server", (host: string) => {
-            httpsCount += 1;
+                if (dgram && matches) {
+                    // send feedback to the CLI.
+                    let addr = matches[1],
+                        port = parseInt(matches[2]);
 
-            if (httpsCount === config.workers.length) {
-                httpsCount = 0;
-
-                let dateTime = chalk.cyan(`[${date("Y-m-d H:i:s.ms")}]`),
-                    link = chalk.yellow(`http://${host}`);
-
-                console.log(`${dateTime} HTTP Server running at ${link}.`);
+                    dgram.to(addr, port).emit("service-started", msg);
+                } else if (!matches) {
+                    console.log(msg);
+                }
             }
         });
+    }).on("exit", (worker) => {
+        workers = without(workers, worker.id);
     });
 
     // folk workers.
-    for (let name of config.workers) {
+    for (let name of workers) {
         new Worker(name, !isDevMode);
     }
 
-    let watches = config.watches || [
-        "index.ts",
-        "config.ts",
-        "bootstrap",
-        "controllers",
-        "locales",
-        "models"
-    ];
-
     // Watch for file changes, when a file is modified, reboot the workers.
     if (isDevMode) {
-        for (let filename of watches) {
-            if (extname(filename) == ".ts")
+        for (let filename of config.watches) {
+            if (path.extname(filename) == ".ts")
                 filename = filename.slice(0, -3) + ".js";
 
-            filename = APP_PATH + "/" + filename;
+            filename = path.resolve(APP_PATH, filename);
 
             fs.exists(filename, exists => {
                 if (exists) new DevWatcher(filename);
             });
         }
     }
-} else {
-    // When the worker is forked and auto-start enabled, start the server 
-    // immediately.
+} else if (isWorker) {
+    app = new App({
+        cookieSecret: <string>config.session.secret,
+        domain: hostnames
+    });
+
+    switch (httpServer.type) {
+        case "http":
+            http = new HttpServer(app.listener);
+            break;
+        case "https":
+            http = https = createServer(httpServer.options, app.listener);
+            break;
+        case "http2":
+            http = https = require("http2").createSecureServer(httpServer.options, app.listener);
+            break;
+    }
+
+    if (WS.enabled) {
+        if (!WS.port)
+            ws = SocketIO(http, WS.options);
+        else
+            ws = SocketIO(WS.port, WS.options);
+
+        if (httpServer.type == "https" || httpServer.type == "http2")
+            wss = ws;
+    }
+
     Worker.on("online", _worker => {
         worker = _worker;
+
+        // load worker message handlers
+        require("../handlers/worker/worker-reload");
+        require("../handlers/worker/worker-stop");
+
+        // Load user-defined bootstrap procedures.
+        let workerBootstrap = APP_PATH + "/bootstrap/worker.js";
+        fs.existsSync(workerBootstrap) ? require(workerBootstrap) : null;
+
+        // If auto-start enabled, start the server immediately.
         if (config.server.autoStart) {
             startServer();
         }

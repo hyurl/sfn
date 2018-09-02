@@ -6,11 +6,10 @@ const FileStore = sessionFileStore(Session);
 
 export const config: SFNConfig = {
     env: process.env.NODE_ENV || "pro",
-    workers: ["A"],
-    bluebird: false,
     lang: "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
+    workers: ["A"],
     statics: [SRC_PATH + "/assets"],
     watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     server: {
@@ -18,22 +17,21 @@ export const config: SFNConfig = {
         timeout: 120000,
         autoStart: true,
         http: {
-            enabled: true,
-            port: 80
-        },
-        https: {
-            enabled: false,
-            port: 443,
-            forceRedirect: true,
+            type: "http",
+            port: 80,
             options: null,
-            http2: false
         },
         websocket: {
             enabled: true,
+            port: undefined,
             options: {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
+        },
+        dgram: {
+            enabled: true,
+            port: 666
         },
         error: {
             show: true,
