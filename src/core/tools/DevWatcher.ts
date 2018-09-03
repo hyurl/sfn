@@ -1,8 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import Worker = require("sfn-worker");
-import { getDgramClient } from './functions';
-import { grey } from './functions-inner';
+import { notifyReload } from './functions';
 
 var timer: NodeJS.Timer = null;
 
@@ -10,15 +9,7 @@ function timerCallback(event, filename, extnames) {
     let ext = path.extname(filename);
 
     if (event === "change" && extnames.includes(ext)) {
-        let client = getDgramClient();
-
-        client.bind(0);
-        client.on("worker-reloaded", () => {
-            console.log(grey("Workers reloaded!"));
-            client.close();
-        }).emit("worker-reload", 100, () => {
-            console.log(grey("Reloading workers..."));
-        });
+        notifyReload();
     }
 }
 

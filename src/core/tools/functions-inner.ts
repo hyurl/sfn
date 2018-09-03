@@ -197,18 +197,6 @@ export async function callFilterChain(
     return result;
 }
 
-export function volume2Str(num: number): string {
-    if (num > 1073741824) { // Db
-        return (num / 1073741824).toFixed(3) + " Gb";
-    } else if (num > 1048576) { // Mb
-        return (num / 1048576).toFixed(3) + " Mb";
-    } else if (num > 1024) {
-        return (num / 1024).toFixed(3) + " Kb";
-    } else {
-        return num + " b";
-    }
-}
-
 function color(color: string, msg: string) {
     return chalk[color](`[${date("Y-m-d H:i:s.ms")}]`) + " " + msg;
 }

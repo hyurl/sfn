@@ -1,9 +1,12 @@
 import * as dgram from "dgramx";
+import { promisify } from "es6-promisify";
+import pidusage = require("pidusage");
+import values = require("lodash/values");
 import { config } from "../bootstrap/ConfigLoader";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { red } from "./functions-inner";
+import { red, grey } from "./functions-inner";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
 
@@ -203,7 +206,7 @@ export function before<T extends Controller = Controller>(filter: ControllerFilt
 export function after<T extends Controller = Controller>(filter: ControllerFilter<T>): ControllerDecorator {
     return (proto: Controller, prop: string) => {
         let Class = <typeof Controller>proto.constructor;
-        
+
         if (Class.AfterFilters[prop] === undefined)
             Class.AfterFilters[prop] = [];
 
@@ -221,4 +224,103 @@ export function getDgramClient(): dgram.Socket {
     }
 
     return dgram.createClient(`udp://127.0.0.1:${port}`);
+}
+
+export function vol2str(num: number): string {
+    if (num > 1073741824) { // Db
+        return (num / 1073741824).toFixed(3) + " Gb";
+    } else if (num > 1048576) { // Mb
+        return (num / 1048576).toFixed(3) + " Mb";
+    } else if (num > 1024) {
+        return (num / 1024).toFixed(3) + " Kb";
+    } else {
+        return num + " b";
+    }
+}
+
+export function sec2str(sec: number): string {
+    sec = Math.round(sec);
+    let str = "";
+
+    if (sec > 86400) {
+        str += Math.ceil(sec / 86400) + "d ";
+        sec %= 86400;
+    }
+    if (sec > 3600) {
+        str += Math.ceil(sec / 3600) + "h ";
+        sec %= 3600;
+    }
+    if (sec > 60) {
+        str += Math.ceil(sec / 60) + "m ";
+        sec %= 60;
+    }
+
+    str += Math.ceil(sec) + "s";
+
+    return str;
+}
+
+/**
+ * Notifies the master process to reload workers.
+ * @param timeout Sets a timeout to force reload.
+ * @param cb Invoked when all workers are reloaded. Only works in master process,
+ *  because the worker itself will exit.
+ */
+export function notifyReload(timeout: number = 100, cb?: () => void) {
+    let client = getDgramClient();
+
+    if (client) {
+        client.bind(0);
+        client.on("worker-reloaded", () => {
+            console.log(grey("Workers reloaded!"));
+            client.close(() => {
+                cb ? cb() : null;
+            });
+        }).emit("worker-reload", timeout, () => {
+            console.log(grey("Reloading workers..."));
+        });
+    }
+}
+
+const pidusageAsync = promisify<any, number>(pidusage);
+
+/**
+ * List out all the workers.
+ * @param withMaster When returning workers, prepend with the master.
+ * @param cb Invoked when all workers are reloaded.
+ */
+export function listWorkers(
+    cb: (err: Error, header: string[], body: Array<(string | number)[]>) => void,
+    withMaster: boolean
+) {
+    let client = getDgramClient();
+
+    if (!client) {
+        cb(new Error("Datagram server isn't enabled."), null, null);
+    }
+
+    let header = ["id", "pid", "state", "reboot", "uptime", "memory", "cpu"],
+        body: Array<(string | number)[]> = [],
+        timer = setTimeout(() => {
+            client.removeAllListeners("worker-list");
+            client.close();
+            cb(new Error("Unable to fetch worker information."), null, null);
+        }, 5000);
+
+    client.bind(0); // bind a random port so that the server can send feedback.
+    client.on("worker-listed", async (workers: any[]) => {
+        clearTimeout(timer);
+
+        for (let worker of workers) {
+            let stats = await pidusageAsync(worker.pid);
+
+            worker.uptime = sec2str(worker.uptime);
+            body.push(values(worker).concat([
+                vol2str(stats.memory),
+                Math.round(stats.cpu) + " %"
+            ]));
+        }
+
+        client.close(() => cb(null, header, body));
+    }).emit("worker-list", withMaster);
 }

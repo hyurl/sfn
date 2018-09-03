@@ -1,1 +1,1 @@
-{"version":3,"file":"SocketError.js","sourceRoot":"","sources":["../../../src/core/tools/SocketError.ts"],"names":[],"mappings":";;AAAA,2CAAwC;AAExC,iBAAyB,SAAQ,qBAAS;CAAI;AAA9C,kCAA8C"}
+{"version":3,"file":"SocketError.js","sourceRoot":"","sources":["../../../src/core/tools/SocketError.ts"],"names":[],"mappings":";;AAAA,2CAAwC;AAExC,MAAa,WAAY,SAAQ,qBAAS;CAAI;AAA9C,kCAA8C"}

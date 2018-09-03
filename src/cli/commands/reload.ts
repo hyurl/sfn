@@ -1,7 +1,6 @@
 import * as program from "commander";
-import { isDevMode } from "../../core/bootstrap/ConfigLoader";
-import { getDgramClient } from "../../core/tools/functions";
-import { grey } from "../../core/tools/functions-inner";
+import { isDevMode, config } from "../../core/bootstrap/ConfigLoader";
+import { notifyReload } from "../../core/tools/functions";
 
 // Command `sfn reload` is used to reload the workers sequentially.
 // A worker may not reload immediately when receiving the command, and even 
@@ -13,21 +12,13 @@ program.command("reload")
     .description("reload workers")
     .option("-t, --timeout <timeout>", "set a timeout to force reload")
     .action(cmd => {
-        let client = getDgramClient();
-
-        if (!client) {
+        if (!config.server.dgram.enabled) {
             process.exit();
         }
 
-        client.bind(0);
         let timeout = !isNaN(cmd.timeout)
             ? parseInt(cmd.timeout) * 1000
             : (isDevMode ? 100 : 5000);
 
-        client.on("worker-reloaded", () => {
-            console.log(grey("Workers reloaded!"));
-            client.close(() => process.exit());
-        }).emit("worker-reload", timeout, () => {
-            console.log(grey("Reloading workers..."));
-        });
+        notifyReload(timeout, () => process.exit());
     });

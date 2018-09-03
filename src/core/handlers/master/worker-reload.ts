@@ -16,7 +16,7 @@ dgram.on("worker-reload", (timeout: number, rinfo) => {
 Worker.on("online", worker => {
     // when a worker should reload, safe to reboot the process.
     worker.on("worker-should-reload", (msg: CLIMessage) => {
-        worker.reboot()
+        worker.reboot();
         worker.once("server-restarted", () => {
             let i = config.workers.indexOf(worker.id),
                 nextWorker = config.workers[i + 1];

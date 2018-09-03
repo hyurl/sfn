@@ -161,21 +161,6 @@ function callFilterChain(filters, ctrl, skipFinish = false) {
     });
 }
 exports.callFilterChain = callFilterChain;
-function volume2Str(num) {
-    if (num > 1073741824) {
-        return (num / 1073741824).toFixed(3) + " Gb";
-    }
-    else if (num > 1048576) {
-        return (num / 1048576).toFixed(3) + " Mb";
-    }
-    else if (num > 1024) {
-        return (num / 1024).toFixed(3) + " Kb";
-    }
-    else {
-        return num + " b";
-    }
-}
-exports.volume2Str = volume2Str;
 function color(color, msg) {
     return chalk_1.default[color](`[${date("Y-m-d H:i:s.ms")}]`) + " " + msg;
 }
