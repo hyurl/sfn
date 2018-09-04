@@ -7,6 +7,7 @@ const index_1 = require("../../bootstrap/index");
 const init_1 = require("../../../init");
 const ConfigLoader_1 = require("../../bootstrap/ConfigLoader");
 const functions_inner_1 = require("../../tools/functions-inner");
+const reqLogged = Symbol("reqLogged");
 index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
     req.isEventSource = SSE.isEventSource(req);
     res.headers["server"] = `NodeJS/${process.version}`;
@@ -47,6 +48,9 @@ function logRequest(reqTime, type, code, url) {
 exports.logRequest = logRequest;
 function getDevLogger(req, res) {
     return () => {
+        if (res[reqLogged])
+            return;
+        res[reqLogged] = true;
         let type = req.isEventSource ? "SSE" : req.method;
         logRequest(req.time, type, res.statusCode, req.shortUrl);
     };

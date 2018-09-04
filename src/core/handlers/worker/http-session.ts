@@ -11,6 +11,13 @@ app.use(session).use((req, res: Response, next) => {
     let _end = res.end;
     res.end = function end(...args) {
         res.sent = true;
+
+        // HTTP/2 disallow setting these headers.
+        if (req.httpVersion == "2.0") {
+            res.statusMessage = "";
+            res.removeHeader("connection");
+        }
+
         _end.apply(res, args);
     }
     next();

@@ -103,10 +103,10 @@ export function startServer() {
             let port = http.address()["port"] || httpPort,
                 host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
 
-            // aware the master that server has been started.
+            // notify the master that server has been started.
             worker.emit("server-started", host);
         } else {
-            // aware the master that server has been restarted.
+            // notify the master that server has been restarted.
             worker.emit("server-restarted");
         }
     });

@@ -10,7 +10,7 @@ worker.on("worker-stop", (msg: CLIMessage) => {
     closeServersInQueue(queue, msg.timeout);
 
     queue.push(() => {
-        // aware the master that services have been closed and safe to reload.
+        // notify the master that services have been closed and safe to reload.
         worker.emit("worker-should-stop", msg);
     });
 });

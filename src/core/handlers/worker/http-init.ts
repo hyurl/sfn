@@ -6,6 +6,8 @@ import { isDevMode } from "../../bootstrap/ConfigLoader";
 import { Request, Response } from "../../tools/interfaces";
 import { grey, red } from "../../tools/functions-inner";
 
+const reqLogged = Symbol("reqLogged");
+
 app.use(async (req: Request, res: Response, next) => {
     req.isEventSource = SSE.isEventSource(req);
     res.headers["server"] = `NodeJS/${process.version}`;
@@ -54,6 +56,8 @@ export function logRequest(reqTime: number, type: string, code: number, url: str
 
 function getDevLogger(req: Request, res: Response) {
     return () => {
+        if (res[reqLogged]) return;
+        res[reqLogged] = true;
         let type = req.isEventSource ? "SSE" : req.method;
         logRequest(req.time, type, res.statusCode, req.shortUrl);
     };

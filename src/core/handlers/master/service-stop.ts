@@ -19,7 +19,7 @@ Worker.on("online", worker => {
         if (nextWorker) {
             Worker.to(nextWorker).emit("worker-stop", msg);
         } else if (msg.address && msg.port) {
-            // aware the CLI that the application is closed.
+            // notify the CLI that the application is closed.
             dgram.to(msg.address, msg.port).emit("service-stopped", () => {
                 process.exit();
             });

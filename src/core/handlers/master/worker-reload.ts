@@ -24,7 +24,7 @@ Worker.on("online", worker => {
             if (nextWorker) {
                 Worker.to(nextWorker).emit("worker-reload", msg);
             } else if (msg.address && msg.port) {
-                // aware the CLI that the application is closed.
+                // notify the CLI that the application is closed.
                 dgram.to(msg.address, msg.port).emit("worker-reloaded");
             }
         });
