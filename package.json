@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "A Service Framework for Node.js.",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -72,7 +72,7 @@
         "sfn-cookie": "^1.0.6",
         "sfn-cors": "^0.1.5",
         "sfn-date": "^0.1.4",
-        "sfn-ejs-engine": "^0.1.7",
+        "sfn-ejs-engine": "^0.1.8",
         "sfn-logger": "^0.2.5",
         "sfn-mail": "^0.2.1",
         "sfn-output-buffer": "^0.2.2",
