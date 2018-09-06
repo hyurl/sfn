@@ -9,7 +9,7 @@ program.command("list")
     .action(() => {
         listWorkers((err, header, body) => {
             if (err) {
-                console.log(red(err.toString()));
+                console.log(red`${err.toString()}`);
                 process.exit();
             }
 

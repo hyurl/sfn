@@ -42,7 +42,7 @@ function logRequest(reqTime, type, code, url) {
             level = "error";
             color = functions_inner_1.red;
         }
-        console[level](color(`${type} ${url} ${codeStr} ${cost}`));
+        console[level](color `${type} ${url} ${codeStr} ${cost}`);
     }
 }
 exports.logRequest = logRequest;

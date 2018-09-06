@@ -1,7 +1,7 @@
 import * as program from "commander";
 import { isDevMode } from "../../core/bootstrap/ConfigLoader";
 import { getDgramClient } from "../../core/tools/functions";
-import { grey } from "../../core/tools/functions-inner";
+import { grey, green } from "../../core/tools/functions-inner";
 
 // Command `sfn stop` is used to terminate the application.
 // A worker may not stop immediately when receiving the command, and even refuse
@@ -25,9 +25,9 @@ program.command("stop")
             : (isDevMode ? 100 : 5000);
 
         client.on("service-stopped", () => {
-            console.log(grey("Service stopped!"));
+            console.log(green`Service stopped!`);
             client.close(() => process.exit());
         }).emit("service-stop", timeout, () => {
-            console.log(grey("Stopping service..."));
+            console.log(grey`Stopping service...`);
         });
     });

@@ -10,7 +10,7 @@ program.command("start")
     .description("start service")
     .option("-d, --daemon", "run the process in daemon mode")
     .action((cmd) => {
-    console.log(functions_inner_1.grey("Service starting..."));
+    console.log(functions_inner_1.grey `Service starting...`);
     let client = functions_1.getDgramClient(), task = null, createTask = () => {
         return child_process_1.spawn(process.execPath, [
             init_1.APP_PATH + "/index.js",
@@ -35,7 +35,7 @@ program.command("start")
     }).bind(0, () => {
         task = createTask();
         task.on("error", (err) => {
-            console.log(functions_inner_2.red(err.toString()));
+            console.log(functions_inner_2.red `${err.toString()}`);
         });
         if (!cmd.daemon) {
             task.on("exit", (code, signal) => {

@@ -197,22 +197,25 @@ export async function callFilterChain(
     return result;
 }
 
-function color(color: string, msg: string) {
+function color(color: string, callSite: TemplateStringsArray, bindings: any[]): string {
+    let msg = callSite.map((str, i) => {
+        return i > 0 ? bindings[i - 1] + str : str;
+    }).join("");
     return chalk[color](`[${date("Y-m-d H:i:s.ms")}]`) + " " + msg;
 }
 
-export function grey(msg: string) {
-    return color("grey", msg);
+export function grey(callSite: TemplateStringsArray, ...bindings: any[]) {
+    return color("grey", callSite, bindings);
 }
 
-export function green(msg: string) {
-    return color("green", msg);
+export function green(callSite: TemplateStringsArray, ...bindings: any[]) {
+    return color("green", callSite, bindings);
 }
 
-export function yellow(msg: string) {
-    return color("yellow", msg);
+export function yellow(callSite: TemplateStringsArray, ...bindings: any[]) {
+    return color("yellow", callSite, bindings);
 }
 
-export function red(msg: string) {
-    return color("red", msg);
+export function red(callSite: TemplateStringsArray, ...bindings: any[]) {
+    return color("red", callSite, bindings);
 }

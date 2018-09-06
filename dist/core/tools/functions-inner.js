@@ -161,23 +161,26 @@ function callFilterChain(filters, ctrl, skipFinish = false) {
     });
 }
 exports.callFilterChain = callFilterChain;
-function color(color, msg) {
+function color(color, callSite, bindings) {
+    let msg = callSite.map((str, i) => {
+        return i > 0 ? bindings[i - 1] + str : str;
+    }).join("");
     return chalk_1.default[color](`[${date("Y-m-d H:i:s.ms")}]`) + " " + msg;
 }
-function grey(msg) {
-    return color("grey", msg);
+function grey(callSite, ...bindings) {
+    return color("grey", callSite, bindings);
 }
 exports.grey = grey;
-function green(msg) {
-    return color("green", msg);
+function green(callSite, ...bindings) {
+    return color("green", callSite, bindings);
 }
 exports.green = green;
-function yellow(msg) {
-    return color("yellow", msg);
+function yellow(callSite, ...bindings) {
+    return color("yellow", callSite, bindings);
 }
 exports.yellow = yellow;
-function red(msg) {
-    return color("red", msg);
+function red(callSite, ...bindings) {
+    return color("red", callSite, bindings);
 }
 exports.red = red;
 //# sourceMappingURL=functions-inner.js.map

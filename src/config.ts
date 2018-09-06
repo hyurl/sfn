@@ -19,8 +19,7 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
 };
 
 export interface SFNConfig {
-    /** `dev` | `development`, `pro` | `production`. */
-    env?: string;
+    env?: "dev" | "development" | "pro" | "production";
     /** Default language of the application. */
     lang?: string;
     /**
@@ -144,8 +143,8 @@ const FileStore = sessionFileStore(Session);
  * supported options on their official websites.
  */
 export const config: SFNConfig = {
-    env: process.env.NODE_ENV || "pro",
-    lang: "en-US",
+    env: <SFNConfig["env"]>process.env.NODE_ENV || "dev",
+    lang: process.env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
     workers: ["A"],
@@ -156,9 +155,9 @@ export const config: SFNConfig = {
         timeout: 120000, // 2 min.
         autoStart: true,
         http: {
-            type: "http",
-            port: 80,
-            options: null,
+            type: <SFNConfig["server"]["http"]["type"]>process.env.HTTP_TYPE || "http",
+            port: parseInt(process.env.HTTP_PORT) || 80,
+            options: null
         },
         websocket: {
             enabled: true,
@@ -178,12 +177,12 @@ export const config: SFNConfig = {
         }
     },
     database: {
-        type: "mysql",
-        host: "localhost",
-        port: 3306,
-        database: "modelar",
-        user: "root",
-        password: "161301"
+        type: process.env.DB_TYPE || "mysql",
+        host: process.env.DB_HOST ||  "localhost",
+        port: parseInt(process.env.DB_PORT) || 3306,
+        database: process.env.DB_NAME || "sfn",
+        user: process.env.DB_USER || "root",
+        password: process.env.DB_PASS || "123456"
     },
     session: {
         secret: "sfn",
@@ -201,17 +200,17 @@ export const config: SFNConfig = {
     },
     mail: {
         pool: false,
-        host: "",
-        port: 25,
+        host: process.env.MAIL_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.MAIL_PORT) || 25,
         secure: false,
-        from: "",
+        from: process.env.MAIL_FROM || "",
         auth: {
-            username: "",
-            password: ""
+            username: process.env.MAIL_USER || "",
+            password: process.env.MAIL_PASS || ""
         }
     },
     redis: {
-        host: null,
-        port: null
+        host: process.env.REDIS_HOST || "",
+        port: parseInt(process.env.REDIS_PORT) || undefined
     }
 };

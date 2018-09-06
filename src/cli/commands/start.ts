@@ -15,7 +15,7 @@ program.command("start")
     .description("start service")
     .option("-d, --daemon", "run the process in daemon mode")
     .action((cmd) => {
-        console.log(grey("Service starting..."));
+        console.log(grey`Service starting...`);
 
         let client = getDgramClient(),
             task: ChildProcess = null,
@@ -50,7 +50,7 @@ program.command("start")
             task = createTask();
 
             task.on("error", (err) => {
-                console.log(red(err.toString()));
+                console.log(red`${err.toString()}`);
             });
 
             if (!cmd.daemon) {

@@ -9,7 +9,7 @@ program.command("list")
     .action(() => {
     functions_1.listWorkers((err, header, body) => {
         if (err) {
-            console.log(functions_inner_1.red(err.toString()));
+            console.log(functions_inner_1.red `${err.toString()}`);
             process.exit();
         }
         console.log(new WordTable(header, body).string());

@@ -12,7 +12,7 @@ program.command("restart")
     .description("restart service")
     .option("-t, --timeout <timeout>", "set a timeout to force stop")
     .action((cmd) => {
-        console.log(grey("Stopping service..."));
+        console.log(grey`Stopping service...`);
 
         let client = getDgramClient(),
             task: ChildProcess = null,
@@ -50,9 +50,9 @@ program.command("restart")
             task = createTask();
 
             task.on("error", (err) => {
-                console.log(red(err.toString()));
+                console.log(red`${err.toString()}`);
             });
         }).emit("service-stop", timeout, () => {
-            console.log(grey("Service restarting..."));
+            console.log(grey`Service restarting...`);
         });
     });

@@ -6,7 +6,7 @@ import { config } from "../bootstrap/ConfigLoader";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { red, grey } from "./functions-inner";
+import { red, grey, green } from "./functions-inner";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
 
@@ -219,7 +219,7 @@ export function getDgramClient(): dgram.Socket {
     let port = config.server.dgram.port;
 
     if (!config.server.dgram.enabled) {
-        console.log(red("Datagram server isn't enabled!"));
+        console.log(red`Datagram server isn't enabled!`);
         return null;
     }
 
@@ -243,15 +243,15 @@ export function sec2str(sec: number): string {
     let str = "";
 
     if (sec > 86400) {
-        str += Math.ceil(sec / 86400) + "d ";
+        str += Math.ceil(sec / 86400) + "d";
         sec %= 86400;
     }
     if (sec > 3600) {
-        str += Math.ceil(sec / 3600) + "h ";
+        str += Math.ceil(sec / 3600) + "h";
         sec %= 3600;
     }
     if (sec > 60) {
-        str += Math.ceil(sec / 60) + "m ";
+        str += Math.ceil(sec / 60) + "m";
         sec %= 60;
     }
 
@@ -272,12 +272,12 @@ export function notifyReload(timeout: number = 100, cb?: () => void) {
     if (client) {
         client.bind(0);
         client.on("worker-reloaded", () => {
-            console.log(grey("Workers reloaded!"));
+            console.log(green`Workers reloaded!`);
             client.close(() => {
                 cb ? cb() : null;
             });
         }).emit("worker-reload", timeout, () => {
-            console.log(grey("Reloading workers..."));
+            console.log(grey`Reloading workers...`);
         });
     }
 }

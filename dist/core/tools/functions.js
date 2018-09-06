@@ -123,7 +123,7 @@ exports.after = after;
 function getDgramClient() {
     let port = ConfigLoader_1.config.server.dgram.port;
     if (!ConfigLoader_1.config.server.dgram.enabled) {
-        console.log(functions_inner_1.red("Datagram server isn't enabled!"));
+        console.log(functions_inner_1.red `Datagram server isn't enabled!`);
         return null;
     }
     return dgram.createClient(`udp://127.0.0.1:${port}`);
@@ -148,15 +148,15 @@ function sec2str(sec) {
     sec = Math.round(sec);
     let str = "";
     if (sec > 86400) {
-        str += Math.ceil(sec / 86400) + "d ";
+        str += Math.ceil(sec / 86400) + "d";
         sec %= 86400;
     }
     if (sec > 3600) {
-        str += Math.ceil(sec / 3600) + "h ";
+        str += Math.ceil(sec / 3600) + "h";
         sec %= 3600;
     }
     if (sec > 60) {
-        str += Math.ceil(sec / 60) + "m ";
+        str += Math.ceil(sec / 60) + "m";
         sec %= 60;
     }
     str += Math.ceil(sec) + "s";
@@ -168,12 +168,12 @@ function notifyReload(timeout = 100, cb) {
     if (client) {
         client.bind(0);
         client.on("worker-reloaded", () => {
-            console.log(functions_inner_1.grey("Workers reloaded!"));
+            console.log(functions_inner_1.green `Workers reloaded!`);
             client.close(() => {
                 cb ? cb() : null;
             });
         }).emit("worker-reload", timeout, () => {
-            console.log(functions_inner_1.grey("Reloading workers..."));
+            console.log(functions_inner_1.grey `Reloading workers...`);
         });
     }
 }

@@ -11,7 +11,7 @@ program.command("restart")
     .description("restart service")
     .option("-t, --timeout <timeout>", "set a timeout to force stop")
     .action((cmd) => {
-    console.log(functions_inner_1.grey("Stopping service..."));
+    console.log(functions_inner_1.grey `Stopping service...`);
     let client = functions_1.getDgramClient(), task = null, createTask = () => {
         return child_process_1.spawn(process.execPath, [
             init_1.APP_PATH + "/index.js",
@@ -38,10 +38,10 @@ program.command("restart")
     }).on("service-stopped", () => {
         task = createTask();
         task.on("error", (err) => {
-            console.log(functions_inner_2.red(err.toString()));
+            console.log(functions_inner_2.red `${err.toString()}`);
         });
     }).emit("service-stop", timeout, () => {
-        console.log(functions_inner_1.grey("Service restarting..."));
+        console.log(functions_inner_1.grey `Service restarting...`);
     });
 });
 //# sourceMappingURL=restart.js.map

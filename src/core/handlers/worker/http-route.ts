@@ -72,6 +72,7 @@ export function handleLog(err: Error, ctrl: Controller, method?: string) {
 
         let logger = ctrl.logger,
             trace = logger.trace;
+
         logger.trace = false; // temporarily disable trace.
         logger.action = action; // temporarily set action.
         logger.error(str);

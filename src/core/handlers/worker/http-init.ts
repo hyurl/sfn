@@ -33,7 +33,7 @@ export function logRequest(reqTime: number, type: string, code: number, url: str
         var cost: number | string = Date.now() - reqTime,
             codeStr = code.toString(),
             level = "log",
-            color: (msg: string) => string = grey;
+            color: Function = grey;
 
         type = chalk.bold(type);
         cost = chalk.cyan(`${cost}ms`);
@@ -50,7 +50,7 @@ export function logRequest(reqTime: number, type: string, code: number, url: str
             color = red;
         }
 
-        console[level](color(`${type} ${url} ${codeStr} ${cost}`));
+        console[level](color`${type} ${url} ${codeStr} ${cost}`);
     }
 }
 

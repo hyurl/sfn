@@ -59,7 +59,7 @@ function startServer() {
         exports.http["setTimeout"](ConfigLoader_1.config.server.timeout);
     }
     exports.http.on("error", (err) => {
-        console.log(functions_inner_1.red(err.toString()));
+        console.log(functions_inner_1.red `${err.toString()}`);
     }).listen(httpPort, (err) => {
         if (!exports.worker.rebootTimes) {
             let port = exports.http.address()["port"] || httpPort, host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
@@ -86,15 +86,15 @@ if (Worker.isMaster && !init_1.isCli) {
     fs.existsSync(masterBootstrap) ? require(masterBootstrap) : null;
     let httpCount = 0;
     Worker.on("online", worker => {
-        console.log(functions_inner_1.grey(`Worker <` + chalk_1.default.yellow(worker.id) + "> online!"));
+        console.log(functions_inner_1.green `Worker <` + chalk_1.default.yellow(worker.id) + "> online!");
         worker.on("error", (err) => {
-            console.error(functions_inner_1.red(err.toString()));
+            console.error(functions_inner_1.red `${err.toString()}`);
         }).on("server-started", (host) => {
             httpCount++;
             !workers.includes(worker.id) ? workers.push(worker.id) : null;
             if (httpCount === workers.length) {
                 httpCount = 0;
-                let type = ConfigLoader_1.config.server.http.type, link = (type == "http2" ? "https" : type) + "://" + host, msg = functions_inner_1.grey(`HTTP Server running at ${chalk_1.default.yellow(link)}.`), argv = process.argv[2] || "", matches = argv.match(/--udp-client=(.+):(.+)/);
+                let type = ConfigLoader_1.config.server.http.type, link = (type == "http2" ? "https" : type) + "://" + host, msg = functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(link)}.`, argv = process.argv[2] || "", matches = argv.match(/--udp-client=(.+):(.+)/);
                 if (exports.dgram && matches) {
                     let addr = matches[1], port = parseInt(matches[2]);
                     exports.dgram.to(addr, port).emit("service-started", msg);

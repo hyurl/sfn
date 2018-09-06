@@ -24,7 +24,7 @@ exports.default = class extends HttpController {
         var count = 0;
         var timer = setInterval(() => {
             count += 1;
-            this.sse.send("Message " + count);
+            this.sse.send("Message from SSE: " + count);
             if (count == 10) {
                 clearInterval(timer);
                 this.sse.close();

@@ -12,7 +12,7 @@ import { Socket as DgramServer } from "dgramx";
 import { APP_PATH, isCli } from "../../init";
 import { config, isDevMode } from "./ConfigLoader";
 import { DevWatcher } from "../tools/DevWatcher";
-import { grey, red } from "../tools/functions-inner";
+import { red, green } from "../tools/functions-inner";
 
 /** Whether the current process is the master process. */
 export const isMaster: boolean = Worker.isMaster;
@@ -97,7 +97,7 @@ export function startServer() {
     }
 
     http.on("error", (err: Error) => {
-        console.log(red(err.toString()));
+        console.log(red`${err.toString()}`);
     }).listen(httpPort, (err: Error) => {
         if (!worker.rebootTimes) {
             let port = http.address()["port"] || httpPort,
@@ -138,10 +138,10 @@ if (Worker.isMaster && !isCli) {
     // Listen worker processes, when their servers is started, notify the
     // master and print a message.
     Worker.on("online", worker => {
-        console.log(grey(`Worker <` + chalk.yellow(worker.id) + "> online!"));
+        console.log(green`Worker <` + chalk.yellow(worker.id) + "> online!");
 
         worker.on("error", (err: Error) => {
-            console.error(red(err.toString()));
+            console.error(red`${err.toString()}`);
         }).on("server-started", (host: string) => {
             httpCount++;
             !workers.includes(worker.id) ? workers.push(worker.id) : null;
@@ -151,7 +151,7 @@ if (Worker.isMaster && !isCli) {
 
                 let type = config.server.http.type,
                     link = (type == "http2" ? "https" : type) + "://" + host,
-                    msg = grey(`HTTP Server running at ${chalk.yellow(link)}.`),
+                    msg = green`HTTP Server running at ${chalk.yellow(link)}.`,
                     argv = process.argv[2] || "",
                     matches = argv.match(/--udp-client=(.+):(.+)/);
 

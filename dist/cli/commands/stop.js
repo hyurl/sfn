@@ -17,10 +17,10 @@ program.command("stop")
         ? parseInt(cmd.timeout) * 1000
         : (ConfigLoader_1.isDevMode ? 100 : 5000);
     client.on("service-stopped", () => {
-        console.log(functions_inner_1.grey("Service stopped!"));
+        console.log(functions_inner_1.green `Service stopped!`);
         client.close(() => process.exit());
     }).emit("service-stop", timeout, () => {
-        console.log(functions_inner_1.grey("Stopping service..."));
+        console.log(functions_inner_1.grey `Stopping service...`);
     });
 });
 //# sourceMappingURL=stop.js.map
