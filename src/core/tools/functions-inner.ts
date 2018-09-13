@@ -189,7 +189,7 @@ export async function callFilterChain(
         result = await filter.call(ctrl, ctrl);
 
         if (result === false
-            || (ctrl["res"] && ctrl["res"].finished && skipFinish)
+            || (ctrl["res"] && ctrl["res"].sent && skipFinish)
             || (ctrl["socket"] && ctrl["socket"].disconnected && skipFinish)) {
             break;
         }

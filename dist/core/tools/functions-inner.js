@@ -152,7 +152,7 @@ function callFilterChain(filters, ctrl, skipFinish = false) {
         for (let filter of filters) {
             result = yield filter.call(ctrl, ctrl);
             if (result === false
-                || (ctrl["res"] && ctrl["res"].finished && skipFinish)
+                || (ctrl["res"] && ctrl["res"].sent && skipFinish)
                 || (ctrl["socket"] && ctrl["socket"].disconnected && skipFinish)) {
                 break;
             }
