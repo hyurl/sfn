@@ -14,22 +14,25 @@ if (exports.isCli) {
 exports.ROOT_PATH = global["ROOT_PATH"] || path.normalize(appPath + "/..");
 var tsCfgFile = exports.ROOT_PATH + "/tsconfig.json";
 var tsCfg;
-var srcRoot = appPath;
+var srcPath = appPath;
 if (!global["SRC_PATH"] && fs.existsSync(tsCfgFile)) {
     try {
         tsCfg = require(tsCfgFile);
         if (tsCfg.compilerOptions && tsCfg.compilerOptions.rootDir) {
-            srcRoot = path.normalize(exports.ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
+            srcPath = path.normalize(exports.ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
             appPath = path.normalize(exports.ROOT_PATH + "/" + tsCfg.compilerOptions.outDir);
         }
     }
-    catch (e) { }
+    catch (e) {
+        srcPath = path.normalize(exports.ROOT_PATH + "/src");
+        appPath = path.normalize(exports.ROOT_PATH + "/dist");
+    }
 }
 else if (!global["APP_PATH"]) {
-    appPath = exports.ROOT_PATH + path.sep + "src";
+    srcPath = appPath = exports.ROOT_PATH + path.sep + "src";
 }
 exports.APP_PATH = global["APP_PATH"] || appPath;
-exports.SRC_PATH = global["SRC_PATH"] || srcRoot;
+exports.SRC_PATH = global["SRC_PATH"] || srcPath;
 exports.isTypeScript = exports.SRC_PATH != exports.APP_PATH;
 dotenv_1.config({
     path: exports.ROOT_PATH + "/.env"

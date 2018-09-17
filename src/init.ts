@@ -24,18 +24,23 @@ export const ROOT_PATH = global["ROOT_PATH"] || path.normalize(appPath + "/..");
 
 var tsCfgFile = ROOT_PATH + "/tsconfig.json";
 var tsCfg: { [x: string]: any; };
-var srcRoot: string = appPath;
+var srcPath: string = appPath;
 
 if (!global["SRC_PATH"] && fs.existsSync(tsCfgFile)) {
+    // TypeScript
     try {
         tsCfg = require(tsCfgFile);
         if (tsCfg.compilerOptions && tsCfg.compilerOptions.rootDir) {
-            srcRoot = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
+            srcPath = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
             appPath = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.outDir);
         }
-    } catch (e) { }
+    } catch (e) {
+        srcPath = path.normalize(ROOT_PATH + "/src");
+        appPath = path.normalize(ROOT_PATH + "/dist");
+    }
 } else if (!global["APP_PATH"]) {
-    appPath = ROOT_PATH + path.sep + "src";
+    // JavaScript
+    srcPath = appPath = ROOT_PATH + path.sep + "src";
 }
 
 /**
@@ -45,7 +50,7 @@ if (!global["SRC_PATH"] && fs.existsSync(tsCfgFile)) {
 export const APP_PATH: string = global["APP_PATH"] || appPath;
 
 /** The source code path. */
-export const SRC_PATH: string = global["SRC_PATH"] || srcRoot;
+export const SRC_PATH: string = global["SRC_PATH"] || srcPath;
 
 /** Whether the project is written in TypeScript. */
 export const isTypeScript = SRC_PATH != APP_PATH;
