@@ -187,7 +187,7 @@ let tryWarnDeprecation = () => {
 }
 
 /**
- * Adds a intercepter function to run before the actual method is called.
+ * Adds an intercepter function to run before the actual method is called.
  * @param fn The intercepter function accepts an only argument which is the 
  *  controller instance, returning `false` in the function will break the 
  *  calling chain. Apart from that, in `HttpController`, calling response 
@@ -209,7 +209,7 @@ export function before<T extends Controller = Controller>(fn: ControllerIntercep
 }
 
 /**
- * Adds a intercepter function to run after the actual method is called.
+ * Adds an intercepter function to run after the actual method is called.
  * @param fn The intercepter function accepts an only argument which is the 
  *  controller instance, returning `false` in the function will break the 
  *  calling chain. You should not send any response in these intercepters.
