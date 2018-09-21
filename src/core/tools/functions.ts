@@ -175,42 +175,55 @@ route.put = function (...args) {
     return _route("PUT", ...args);
 };
 
-export type ControllerFilter<T extends Controller = Controller> = (this: T, ctrl: T) => boolean | void | Promise<boolean | void>;
+export type ControllerIntercepter<T extends Controller = Controller> = (this: T, ctrl: T) => boolean | void | Promise<boolean | void>;
+
+let intercepterWarning = "using `@before()` and `@after()` decorators is deprecated, please install `function-intercepter` module instead.";
+let intercepterWarned = false;
+let tryWarnDeprecation = () => {
+    if (!intercepterWarned) {
+        process.emitWarning(intercepterWarning, "IntercepterWarning");
+        intercepterWarned = true;
+    }
+}
 
 /**
- * Adds a filter function to run before the actual method is called.
- * @param filter The filter function accepts an only argument which is the 
+ * Adds a intercepter function to run before the actual method is called.
+ * @param fn The intercepter function accepts an only argument which is the 
  *  controller instance, returning `false` in the function will break the 
  *  calling chain. Apart from that, in `HttpController`, calling response 
  *  methods like `res.send()`, `res.redirect()`, and in `WebSocketController` 
  *  disconnecting the socket will also break the chain. Once the chain is broke,
  *  the actual method will not be called as well.
  */
-export function before<T extends Controller = Controller>(filter: ControllerFilter<T>): ControllerDecorator {
+export function before<T extends Controller = Controller>(fn: ControllerIntercepter<T>): ControllerDecorator {
+    tryWarnDeprecation();
+
     return (proto: Controller, prop: string) => {
         let Class = <typeof Controller>proto.constructor;
 
-        if (Class.BeforeFilters[prop] === undefined)
-            Class.BeforeFilters[prop] = [];
+        if (Class.BeforeIntercepters[prop] === undefined)
+            Class.BeforeIntercepters[prop] = [];
 
-        Class.BeforeFilters[prop].push(filter);
+        Class.BeforeIntercepters[prop].push(fn);
     }
 }
 
 /**
- * Adds a filter function to run after the actual method is called.
- * @param filter The filter function accepts an only argument which is the 
+ * Adds a intercepter function to run after the actual method is called.
+ * @param fn The intercepter function accepts an only argument which is the 
  *  controller instance, returning `false` in the function will break the 
- *  calling chain. You should not send any response in these filters.
+ *  calling chain. You should not send any response in these intercepters.
  */
-export function after<T extends Controller = Controller>(filter: ControllerFilter<T>): ControllerDecorator {
+export function after<T extends Controller = Controller>(fn: ControllerIntercepter<T>): ControllerDecorator {
+    tryWarnDeprecation();
+
     return (proto: Controller, prop: string) => {
         let Class = <typeof Controller>proto.constructor;
 
-        if (Class.AfterFilters[prop] === undefined)
-            Class.AfterFilters[prop] = [];
+        if (Class.AfterIntercepters[prop] === undefined)
+            Class.AfterIntercepters[prop] = [];
 
-        Class.AfterFilters[prop].push(filter);
+        Class.AfterIntercepters[prop].push(fn);
     }
 }
 

@@ -102,21 +102,31 @@ exports.route.post = function (...args) {
 exports.route.put = function (...args) {
     return _route("PUT", ...args);
 };
-function before(filter) {
+let intercepterWarning = "using `@before()` and `@after()` decorators is deprecated, please install `function-intercepter` module instead.";
+let intercepterWarned = false;
+let tryWarnDeprecation = () => {
+    if (!intercepterWarned) {
+        process.emitWarning(intercepterWarning, "IntercepterWarning");
+        intercepterWarned = true;
+    }
+};
+function before(fn) {
+    tryWarnDeprecation();
     return (proto, prop) => {
         let Class = proto.constructor;
-        if (Class.BeforeFilters[prop] === undefined)
-            Class.BeforeFilters[prop] = [];
-        Class.BeforeFilters[prop].push(filter);
+        if (Class.BeforeIntercepters[prop] === undefined)
+            Class.BeforeIntercepters[prop] = [];
+        Class.BeforeIntercepters[prop].push(fn);
     };
 }
 exports.before = before;
-function after(filter) {
+function after(fn) {
+    tryWarnDeprecation();
     return (proto, prop) => {
         let Class = proto.constructor;
-        if (Class.AfterFilters[prop] === undefined)
-            Class.AfterFilters[prop] = [];
-        Class.AfterFilters[prop].push(filter);
+        if (Class.AfterIntercepters[prop] === undefined)
+            Class.AfterIntercepters[prop] = [];
+        Class.AfterIntercepters[prop].push(fn);
     };
 }
 exports.after = after;

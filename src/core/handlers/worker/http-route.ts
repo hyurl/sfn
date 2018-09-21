@@ -14,7 +14,7 @@ import { Controller } from "../../controllers/Controller";
 import { HttpController, UploadingFile } from "../../controllers/HttpController";
 import { HttpError } from "../../tools/HttpError";
 import { randStr } from "../../tools/functions";
-import { callsiteLog, callMethod, getFuncParams, callFilterChain } from "../../tools/functions-inner";
+import { callsiteLog, callMethod, getFuncParams, callIntercepterChain } from "../../tools/functions-inner";
 import { Request, Response, HttpRequestMethod } from "../../tools/interfaces";
 import { realCsrfToken } from "../../tools/symbols";
 import { RouteMap } from "../../tools/RouteMap";
@@ -356,14 +356,14 @@ function getNextHandler(
 ) {
     return (ctrl: HttpController) => {
         let { req, res } = ctrl,
-            { BeforeFilters, RequireAuth } = ctrl.Class;
+            { BeforeIntercepters, RequireAuth } = ctrl.Class;
 
         // Run before filters.
         Promise.resolve(ctrl.before()).then(result => {
             if (result === false || res.sent)
                 return result;
             else
-                return callFilterChain(BeforeFilters[method], ctrl, true);
+                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
         }).then(result => {
             if (result === false || res.sent) {
                 // if the response has been sent before calling the actual method,
@@ -485,7 +485,7 @@ function getRouteHandler(Class: typeof HttpController, method: string) {
         }).then(result => {
             return result === false
                 ? result
-                : callFilterChain(Class.AfterFilters[method], ctrl);
+                : callIntercepterChain(Class.AfterIntercepters[method], ctrl);
         }).catch((err: Error) => {
             ctrl = ctrl || new HttpController(req, res);
 

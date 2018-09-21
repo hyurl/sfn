@@ -280,12 +280,12 @@ function handleError(err, ctrl, method) {
 }
 function getNextHandler(method, resolve, reject) {
     return (ctrl) => {
-        let { req, res } = ctrl, { BeforeFilters, RequireAuth } = ctrl.Class;
+        let { req, res } = ctrl, { BeforeIntercepters, RequireAuth } = ctrl.Class;
         Promise.resolve(ctrl.before()).then(result => {
             if (result === false || res.sent)
                 return result;
             else
-                return functions_inner_1.callFilterChain(BeforeFilters[method], ctrl, true);
+                return functions_inner_1.callIntercepterChain(BeforeIntercepters[method], ctrl, true);
         }).then(result => {
             if (result === false || res.sent) {
                 return resolve(null);
@@ -388,7 +388,7 @@ function getRouteHandler(Class, method) {
         }).then(result => {
             return result === false
                 ? result
-                : functions_inner_1.callFilterChain(Class.AfterFilters[method], ctrl);
+                : functions_inner_1.callIntercepterChain(Class.AfterIntercepters[method], ctrl);
         }).catch((err) => {
             ctrl = ctrl || new HttpController_1.HttpController(req, res);
             handleError(err, ctrl, method);

@@ -266,7 +266,7 @@ export class HttpController extends Controller {
         this.req.user = v;
     }
 
-    /** Gets a SSE instance. */
+    /** Gets an SSE instance. */
     get sse(): SSE {
         if (!this[realSSE]) {
             this[realSSE] = new SSE(this.req, this.res);

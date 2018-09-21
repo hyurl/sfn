@@ -144,7 +144,7 @@ function getFuncParams(fn) {
     return params;
 }
 exports.getFuncParams = getFuncParams;
-function callFilterChain(filters, ctrl, skipFinish = false) {
+function callIntercepterChain(filters, ctrl, skipFinish = false) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (!filters)
             return;
@@ -160,7 +160,7 @@ function callFilterChain(filters, ctrl, skipFinish = false) {
         return result;
     });
 }
-exports.callFilterChain = callFilterChain;
+exports.callIntercepterChain = callIntercepterChain;
 function color(color, callSite, bindings) {
     let msg = callSite.map((str, i) => {
         return i > 0 ? bindings[i - 1] + str : str;

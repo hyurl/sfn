@@ -3,7 +3,7 @@ import { config, isDevMode } from "../../bootstrap/ConfigLoader";
 import { ws, wss } from "../../bootstrap/index";
 import { SocketError } from "../../tools/SocketError";
 import { WebSocket } from "../../tools/interfaces";
-import { callsiteLog, callMethod, getFuncParams, callFilterChain } from "../../tools/functions-inner";
+import { callsiteLog, callMethod, getFuncParams, callIntercepterChain } from "../../tools/functions-inner";
 import { realDB } from "../../tools/symbols";
 import { WebSocketController } from "../../controllers/WebSocketController";
 import { EventMap } from "../../tools/EventMap";
@@ -80,13 +80,13 @@ function getNextHandler(
     reject: Function
 ) {
     return (ctrl: WebSocketController) => {
-        let { BeforeFilters, RequireAuth } = ctrl.Class;
+        let { BeforeIntercepters, RequireAuth } = ctrl.Class;
 
         Promise.resolve(ctrl.before()).then(result => {
             if (result === false || ctrl.socket.disconnected)
                 return result;
             else
-                return callFilterChain(BeforeFilters[method], ctrl, true);
+                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
         }).then(result => {
             if (result === false || ctrl.socket.disconnected) {
                 // if the socket has been closed before calling the actual method,
@@ -165,7 +165,7 @@ function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
     }).then(result => {
         return result === false || ctrl.socket.disconnect
             ? result
-            : callFilterChain(Class.AfterFilters[method], ctrl);
+            : callIntercepterChain(Class.AfterIntercepters[method], ctrl);
     }).catch((err: Error) => {
         ctrl = ctrl || new WebSocketController(socket);
 

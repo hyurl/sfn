@@ -1,5 +1,5 @@
 import { Service } from "../tools/Service";
-import { ControllerFilter } from '../tools/functions';
+import { ControllerIntercepter } from '../tools/functions';
 
 /**
  * The Controller give you a common API to return data to the underlying 
@@ -16,12 +16,12 @@ export class Controller extends Service {
     /** Sets what methods that require authentication. */
     static RequireAuth: string[] = [];
 
-    static BeforeFilters: {
-        [method: string]: Array<ControllerFilter>
+    static BeforeIntercepters: {
+        [method: string]: Array<ControllerIntercepter>
     } = {};
 
-    static AfterFilters: {
-        [method: string]: Array<ControllerFilter>
+    static AfterIntercepters: {
+        [method: string]: Array<ControllerIntercepter>
     } = {};
 
     /** Indicates whether the operation is authorized. */

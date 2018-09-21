@@ -54,12 +54,12 @@ function handleError(err, info, ctrl, method) {
 }
 function getNextHandler(method, data, resolve, reject) {
     return (ctrl) => {
-        let { BeforeFilters, RequireAuth } = ctrl.Class;
+        let { BeforeIntercepters, RequireAuth } = ctrl.Class;
         Promise.resolve(ctrl.before()).then(result => {
             if (result === false || ctrl.socket.disconnected)
                 return result;
             else
-                return functions_inner_1.callFilterChain(BeforeFilters[method], ctrl, true);
+                return functions_inner_1.callIntercepterChain(BeforeIntercepters[method], ctrl, true);
         }).then(result => {
             if (result === false || ctrl.socket.disconnected) {
                 return resolve(null);
@@ -120,7 +120,7 @@ function handleEvent(socket, event, ...data) {
     }).then(result => {
         return result === false || ctrl.socket.disconnect
             ? result
-            : functions_inner_1.callFilterChain(Class.AfterFilters[method], ctrl);
+            : functions_inner_1.callIntercepterChain(Class.AfterIntercepters[method], ctrl);
     }).catch((err) => {
         ctrl = ctrl || new WebSocketController_1.WebSocketController(socket);
         handleError(err, info, ctrl, method);
