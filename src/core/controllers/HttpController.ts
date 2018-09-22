@@ -61,7 +61,7 @@ export interface UploadedFile extends UploadingFile {
 }
 
 /**
- * HttpController manages requests come from a HTTP client.
+ * HttpController manages requests come from an HTTP client.
  * 
  * When a request fires, the controller will be automatically instantiated and
  * calling the binding method according to the route.

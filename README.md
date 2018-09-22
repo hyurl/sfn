@@ -14,25 +14,27 @@ Create a directory to store files of your project, then use the command
 npm init
 ```
 
-to initiate your project, assume you have some knowledge of **npm** and have 
-**Node.js** (version 6.0+) installed.
+to initiate your project, assume you have some knowledge of 
+[NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
 ### Install TypeScript
 
-**SFN** is written in **TypeScript**, which your own code should as well, 
-but it's not necessary, we will talk about that later.
+**SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
+own code should be as well, but it's not necessary, we will talk about that 
+later.
 
 ```sh
 npm i -g typescript
 ```
 
 If you're not familiar with TypeScript, you may need to learn it first, but 
-if you're not going to using it, this procedure is optional.
+if you're not going to use it, this procedure is optional.
 
 ### Turn On TypeScript Support
 
 To turn on TypeScript support of your project, just add a new file named 
-`tsconfig.json` in your project directory, it's contents should be like these:
+[tsconfig.json](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
+in your project directory, it's contents should be like these:
 
 ```json
 {
@@ -87,7 +89,7 @@ After all files downloaded, type the following command to initiate your project,
 it will create needed files and directories for you automatically.
 
 But before running this procedure, you have to setup the environment for NodeJS 
-to run user-defined commands. See [Command Line](./command-line).
+to run user-defined commands. See [Command Line](https://sfnjs.com/docs/command-line).
 
 ```sh
 sfn init
@@ -103,7 +105,7 @@ TypeScript), then type the command:
 sfn start
 ```
 
-And the server should be started in no seconds.
+And the server should be started in few seconds.
 
 ### Write Your First Controller
 
@@ -143,4 +145,4 @@ design.
 
 ## License
 
-**SFN** is licensed under **MIT**, you're free to use.
+**SFN** is licensed under [MIT](./LICENSE), you're free to use.
