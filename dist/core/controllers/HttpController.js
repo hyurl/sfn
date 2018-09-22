@@ -10,6 +10,7 @@ const Controller_1 = require("./Controller");
 const MarkdownParser_1 = require("../tools/MarkdownParser");
 const symbols_1 = require("../tools/symbols");
 const Engine = new sfn_ejs_engine_1.EjsEngine();
+var warningEmitted = false;
 exports.UploadOptions = {
     maxCount: 1,
     savePath: init_1.ROOT_PATH + "/uploads",
@@ -31,11 +32,14 @@ class HttpController extends Controller_1.Controller {
         this.authorized = req.user !== null;
         this.req = req;
         this.res = res;
-        this.isAsync = next instanceof Function;
         this.lang = (req.query && req.query.lang)
             || (req.cookies && req.cookies.lang)
             || req.lang
             || ConfigLoader_1.config.lang;
+        if ((next instanceof Function) && !warningEmitted) {
+            process.emitWarning("Passing argument `next` to a controller is deprecated.", "DeprecationWarning");
+            warningEmitted = true;
+        }
     }
     getAbsFilename(filename) {
         if (!path.isAbsolute(filename))

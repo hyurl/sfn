@@ -177,7 +177,7 @@ route.put = function (...args) {
 
 export type ControllerIntercepter<T extends Controller = Controller> = (this: T, ctrl: T) => boolean | void | Promise<boolean | void>;
 
-let intercepterWarning = "using `@before()` and `@after()` decorators is deprecated, please install `function-intercepter` module instead.";
+let intercepterWarning = "Using `@before()` and `@after()` decorators is deprecated, please install `function-intercepter` module instead.";
 let intercepterWarned = false;
 let tryWarnDeprecation = () => {
     if (!intercepterWarned) {

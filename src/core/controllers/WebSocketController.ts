@@ -3,6 +3,8 @@ import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
 import { config } from "../bootstrap/ConfigLoader";
 
+var warningEmitted = false;
+
 export type WebSocketNextHandler = (controller: WebSocketController) => void;
 
 /**
@@ -39,8 +41,6 @@ export type WebSocketNextHandler = (controller: WebSocketController) => void;
 export class WebSocketController extends Controller {
     /** Reference to the corresponding socket context. */
     readonly socket: WebSocket;
-    /** Whether the controller is initiated asynchronously. */
-    readonly isAsync: boolean;
 
     /**
      * Creates a new socket controller instance.
@@ -53,10 +53,14 @@ export class WebSocketController extends Controller {
         super();
         this.authorized = socket.user !== null;
         this.socket = socket;
-        this.isAsync = next instanceof Function;
         this.lang = (socket.cookies && socket.cookies.lang)
             || socket.lang
             || config.lang;
+
+        if ((next instanceof Function) && !warningEmitted) {
+            process.emitWarning("Passing argument `next` to a controller is deprecated.", "DeprecationWarning");
+            warningEmitted = true;
+        }
     }
 
     /** A reference to the class object. */

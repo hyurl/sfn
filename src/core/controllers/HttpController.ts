@@ -16,6 +16,7 @@ import { realSSE } from "../tools/symbols";
 export { CorsOptions };
 
 const Engine = new EjsEngine();
+var warningEmitted = false;
 
 export type HttpNextHandler = (controller: HttpController) => void;
 
@@ -137,8 +138,6 @@ export class HttpController extends Controller {
     readonly req: Request;
     /** Reference to the corresponding response context. */
     readonly res: Response;
-    /** Whether the controller is initiated asynchronously. */
-    readonly isAsync: boolean;
 
     /**
      * You can define a fourth parameter `next` to the constructor, if it is 
@@ -150,11 +149,15 @@ export class HttpController extends Controller {
         this.authorized = req.user !== null;
         this.req = req;
         this.res = res;
-        this.isAsync = next instanceof Function;
         this.lang = (req.query && req.query.lang)
             || (req.cookies && req.cookies.lang)
             || req.lang
             || config.lang;
+
+        if ((next instanceof Function) && !warningEmitted) {
+            process.emitWarning("Passing argument `next` to a controller is deprecated.", "DeprecationWarning");
+            warningEmitted = true;
+        }
     }
 
     /** Gets the absolute view filename if the given one is relative. */

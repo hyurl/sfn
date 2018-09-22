@@ -102,7 +102,7 @@ exports.route.post = function (...args) {
 exports.route.put = function (...args) {
     return _route("PUT", ...args);
 };
-let intercepterWarning = "using `@before()` and `@after()` decorators is deprecated, please install `function-intercepter` module instead.";
+let intercepterWarning = "Using `@before()` and `@after()` decorators is deprecated, please install `function-intercepter` module instead.";
 let intercepterWarned = false;
 let tryWarnDeprecation = () => {
     if (!intercepterWarned) {
