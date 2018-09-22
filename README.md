@@ -15,7 +15,7 @@ npm init
 ```
 
 to initiate your project, assume you have some knowledge of **npm** and have 
-**Node.js** installed.
+**Node.js** (version 6.0+) installed.
 
 ### Install TypeScript
 
@@ -40,12 +40,13 @@ To turn on TypeScript support of your project, just add a new file named
         "module": "commonjs",
         "target": "es2015",
         "preserveConstEnums": true,
-        "rootDir": "src/",
-        "outDir": "dist/",
+        "rootDir": "src",
+        "outDir": "dist",
         "newLine": "LF",
         "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "sourceMap": true,
-        "importHelpers": false,
+        "importHelpers": true,
         "pretty": true,
         "removeComments": true,
         "lib": [
@@ -53,16 +54,16 @@ To turn on TypeScript support of your project, just add a new file named
             "es2016.array.include"
         ]
     },
-    "files": [
-        "src/index.ts",
-        "src/config.ts"
-    ],
     "include": [
+        "src/index.ts",
+        "src/config.ts",
+        "src/bootstrap/*.ts",
         "src/controllers/*.ts",
         "src/controllers/*/*.ts",
-        "src/bootstrap/*.ts",
         "src/locales/*.ts",
-        "src/models/*.ts"
+        "src/models/*.ts",
+        "src/schedules/*.ts",
+        "src/services/*.ts"
     ],
     "exclude": [
         "node_modules/*"
@@ -82,8 +83,15 @@ this command:
 npm i sfn
 ```
 
-After all files downloaded, the **SFN** framework will perform initiating 
-procedure, creating needed files and directories for you automatically.
+After all files downloaded, type the following command to initiate your project,
+it will create needed files and directories for you automatically.
+
+But before running this procedure, you have to setup the environment for NodeJS 
+to run user-defined commands. See [Command Line](./command-line).
+
+```sh
+sfn init
+```
 
 ### Start Demo Server
 
@@ -92,15 +100,10 @@ firstly, compile the source code with the command: `tsc` (only with
 TypeScript), then type the command:
 
 ```sh
-node dist/index
+sfn start
 ```
 
-Or `node src/index` in JavaScript.
-
 And the server should be started in no seconds.
-
-You can add the command `start` to the `scripts` field of your `package.json` 
-file, so that whenever you want to start the server, just run `npm start`.
 
 ### Write Your First Controller
 
