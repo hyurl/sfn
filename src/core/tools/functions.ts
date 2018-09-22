@@ -181,7 +181,7 @@ let intercepterWarning = "Using `@before()` and `@after()` decorators is depreca
 let intercepterWarned = false;
 let tryWarnDeprecation = () => {
     if (!intercepterWarned) {
-        process.emitWarning(intercepterWarning, "IntercepterWarning");
+        process.emitWarning(intercepterWarning, "DeprecationWarning");
         intercepterWarned = true;
     }
 }
