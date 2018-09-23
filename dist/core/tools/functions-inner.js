@@ -85,7 +85,7 @@ exports.getDocMeta = getDocMeta;
 function applyHttpControllerDoc(Class) {
     if (Class.hasOwnProperty("UploadFields") === false)
         Class.UploadFields = {};
-    if (!Class.hasOwnProperty("UploadFields"))
+    if (!Class.hasOwnProperty("RequireAuth"))
         Class.RequireAuth = [];
     let meta = getDocMeta(Class);
     for (let method in meta) {

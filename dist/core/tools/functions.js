@@ -35,11 +35,10 @@ function injectCsrfToken(html, token) {
 }
 exports.injectCsrfToken = injectCsrfToken;
 exports.requireAuth = (proto, prop) => {
-    let Class = proto.constructor;
-    if (!Class.hasOwnProperty("RequireAuth"))
-        Class.RequireAuth = [];
-    if (!Class.RequireAuth.includes(prop))
-        Class.RequireAuth.push(prop);
+    if (!proto.Class.hasOwnProperty("RequireAuth"))
+        proto.Class.RequireAuth = [];
+    if (!proto.Class.RequireAuth.includes(prop))
+        proto.Class.RequireAuth.push(prop);
 };
 function event(...args) {
     if (args.length === 1) {
@@ -113,20 +112,24 @@ let tryWarnDeprecation = () => {
 function before(fn) {
     tryWarnDeprecation();
     return (proto, prop) => {
-        let Class = proto.constructor;
-        if (Class.BeforeIntercepters[prop] === undefined)
-            Class.BeforeIntercepters[prop] = [];
-        Class.BeforeIntercepters[prop].push(fn);
+        if (!proto.Class.hasOwnProperty("BeforeIntercepters")) {
+            proto.Class.BeforeIntercepters = {};
+        }
+        if (proto.Class.BeforeIntercepters[prop] === undefined)
+            proto.Class.BeforeIntercepters[prop] = [];
+        proto.Class.BeforeIntercepters[prop].push(fn);
     };
 }
 exports.before = before;
 function after(fn) {
     tryWarnDeprecation();
     return (proto, prop) => {
-        let Class = proto.constructor;
-        if (Class.AfterIntercepters[prop] === undefined)
-            Class.AfterIntercepters[prop] = [];
-        Class.AfterIntercepters[prop].push(fn);
+        if (!proto.Class.hasOwnProperty("AfterIntercepters")) {
+            proto.Class.AfterIntercepters = {};
+        }
+        if (proto.Class.AfterIntercepters[prop] === undefined)
+            proto.Class.AfterIntercepters[prop] = [];
+        proto.Class.AfterIntercepters[prop].push(fn);
     };
 }
 exports.after = after;

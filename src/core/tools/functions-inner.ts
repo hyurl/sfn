@@ -110,7 +110,7 @@ export function getDocMeta(Class: Function): MethodDocMeta {
 export function applyHttpControllerDoc(Class: typeof HttpController) {
     if (Class.hasOwnProperty("UploadFields") === false)
         Class.UploadFields = {};
-    if (!Class.hasOwnProperty("UploadFields"))
+    if (!Class.hasOwnProperty("RequireAuth"))
         Class.RequireAuth = [];
 
     let meta = getDocMeta(Class);

@@ -119,7 +119,7 @@ export class HttpController extends Controller {
     jsonp: string | false = false;
     /**
      * If `true`, when request method is `DELETE`, `PATCH`, `POST` or `PUT`, 
-     * the client must send a `x-csrf-token` field to the server either via 
+     * the client must send an `x-csrf-token` field to the server either via 
      * request header, URL query string or request body. You can call 
      * `req.csrfToken` to get the auto-generated token in a `GET` action and 
      * pass it to a view.
@@ -241,7 +241,6 @@ export class HttpController extends Controller {
         return this.res.send(data);
     }
 
-    /** A reference to the class object. */
     get Class(): typeof HttpController {
         return <any>this.constructor;
     }

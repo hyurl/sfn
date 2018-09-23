@@ -14,7 +14,6 @@ const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const LocaleMap_1 = require("./LocaleMap");
 injectable_ts_1.injectable(Cache);
 injectable_ts_1.injectable(modelar_1.DB);
-;
 exports.LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
     filename: init_1.ROOT_PATH + "/logs/sfn.log",

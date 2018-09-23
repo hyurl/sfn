@@ -13,12 +13,7 @@ import { LocaleMap } from "./LocaleMap";
 injectable(Cache);
 injectable(DB);
 
-export interface LogOptions extends Logger.Options {
-    /** The action will be set by the framework automatically. */
-    action?: string;
-};
-
-export const LogOptions: LogOptions = Object.assign({}, Logger.Options, {
+export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
     ttl: 1000,
     filename: ROOT_PATH + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
@@ -36,7 +31,7 @@ export class Service extends EventEmitter {
     /** The language of the current service. */
     lang: string = config.lang;
     /** Configurations for the logger in this instance. */
-    logOptions: LogOptions = Object.assign({}, LogOptions);
+    logOptions: Logger.Options = Object.assign({}, LogOptions);
     /** `deprecated`, use `logOptions` instead. */
     logConfig = this.logOptions;
 

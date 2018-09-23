@@ -7,6 +7,7 @@ const init_1 = require("../../init");
 const config_1 = require("../../config");
 exports.config = config_1.config;
 const chalk_1 = require("chalk");
+const Mail = require("sfn-mail");
 if (fs.existsSync(init_1.APP_PATH + "/config.js")) {
     let m = require(init_1.APP_PATH + "/config.js");
     if (typeof m.config == "object") {
@@ -31,4 +32,5 @@ if (cluster.isMaster && init_1.isDebugMode) {
         execArgv: process.execArgv.map(flag => flag.split("=")[0])
     });
 }
+Mail.init(config_1.config.mail);
 //# sourceMappingURL=ConfigLoader.js.map

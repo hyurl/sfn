@@ -4,6 +4,7 @@ import merge = require("lodash/merge");
 import { APP_PATH, isDebugMode, isCli } from "../../init";
 import { config } from "../../config";
 import chalk from "chalk";
+import * as Mail from "sfn-mail";
 
 export { config };
 
@@ -35,3 +36,5 @@ if (cluster.isMaster && isDebugMode) {
         execArgv: process.execArgv.map(flag => flag.split("=")[0])
     });
 }
+
+Mail.init(config.mail); // initiate mail configurations

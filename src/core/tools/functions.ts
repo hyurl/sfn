@@ -59,14 +59,15 @@ export interface ControllerDecorator extends Function {
 }
 
 /** Requires authentication when calling the method. */
-export var requireAuth: ControllerDecorator = (proto: Controller, prop: string) => {
-    let Class = <typeof Controller>proto.constructor;
+export var requireAuth: ControllerDecorator = (
+    proto: HttpController | WebSocketController,
+    prop: string
+) => {
+    if (!proto.Class.hasOwnProperty("RequireAuth"))
+        proto.Class.RequireAuth = [];
 
-    if (!Class.hasOwnProperty("RequireAuth"))
-        Class.RequireAuth = [];
-
-    if (!Class.RequireAuth.includes(prop))
-        Class.RequireAuth.push(prop);
+    if (!proto.Class.RequireAuth.includes(prop))
+        proto.Class.RequireAuth.push(prop);
 }
 
 export interface HttpDecorator extends Function {
@@ -198,13 +199,15 @@ let tryWarnDeprecation = () => {
 export function before<T extends Controller = Controller>(fn: ControllerIntercepter<T>): ControllerDecorator {
     tryWarnDeprecation();
 
-    return (proto: Controller, prop: string) => {
-        let Class = <typeof Controller>proto.constructor;
+    return (proto: HttpController | WebSocketController, prop: string) => {
+        if (!proto.Class.hasOwnProperty("BeforeIntercepters")) {
+            proto.Class.BeforeIntercepters = {};
+        }
 
-        if (Class.BeforeIntercepters[prop] === undefined)
-            Class.BeforeIntercepters[prop] = [];
+        if (proto.Class.BeforeIntercepters[prop] === undefined)
+            proto.Class.BeforeIntercepters[prop] = [];
 
-        Class.BeforeIntercepters[prop].push(fn);
+        proto.Class.BeforeIntercepters[prop].push(fn);
     }
 }
 
@@ -217,13 +220,15 @@ export function before<T extends Controller = Controller>(fn: ControllerIntercep
 export function after<T extends Controller = Controller>(fn: ControllerIntercepter<T>): ControllerDecorator {
     tryWarnDeprecation();
 
-    return (proto: Controller, prop: string) => {
-        let Class = <typeof Controller>proto.constructor;
+    return (proto: HttpController | WebSocketController, prop: string) => {
+        if (!proto.Class.hasOwnProperty("AfterIntercepters")) {
+            proto.Class.AfterIntercepters = {};
+        }
 
-        if (Class.AfterIntercepters[prop] === undefined)
-            Class.AfterIntercepters[prop] = [];
+        if (proto.Class.AfterIntercepters[prop] === undefined)
+            proto.Class.AfterIntercepters[prop] = [];
 
-        Class.AfterIntercepters[prop].push(fn);
+        proto.Class.AfterIntercepters[prop].push(fn);
     }
 }
 

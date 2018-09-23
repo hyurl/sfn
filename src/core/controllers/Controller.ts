@@ -6,7 +6,7 @@ import { ControllerIntercepter } from '../tools/functions';
  * response context, all controllers will be automatically handled by the 
  * framework.
  */
-export class Controller extends Service {
+export abstract class Controller extends Service {
     /**
      * The file that defines the current class, this property will be set
      * automatically by the framework when the controller is imported.
@@ -26,6 +26,9 @@ export class Controller extends Service {
 
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
+
+    /** A reference to the class object. */
+    abstract readonly Class;
 
     /** Sends successful action results to the response context. */
     success(data: any, code: number = 200) {
@@ -47,8 +50,8 @@ export class Controller extends Service {
     }
 
     /** This method will be auto-called before calling the actual method. */
-    before(): void | boolean | Promise<void | boolean> { }
+    before(): void | false | Promise<void | false> { }
 
     /** This method will be auto-called after calling the actual method. */
-    after(): void | boolean | Promise<void | boolean> { }
+    after(): void | false | Promise<void | false> { }
 }

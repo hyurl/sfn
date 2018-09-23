@@ -63,7 +63,6 @@ export class WebSocketController extends Controller {
         }
     }
 
-    /** A reference to the class object. */
     get Class(): typeof WebSocketController {
         return <any>this.constructor;
     }
