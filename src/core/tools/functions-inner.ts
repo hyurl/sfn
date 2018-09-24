@@ -7,10 +7,8 @@ import { Locale } from "./interfaces";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { RouteMap } from "./RouteMap";
-import { EventMap } from "./EventMap";
 import { config } from "../bootstrap/ConfigLoader";
-import { ControllerIntercepter } from './functions';
+import { ControllerIntercepter, route, event, upload, requireAuth } from './functions';
 
 export function loadLanguagePack(filename: string): Locale {
     let ext = extname(filename),
@@ -114,13 +112,14 @@ export function applyHttpControllerDoc(Class: typeof HttpController) {
         Class.RequireAuth = [];
 
     let meta = getDocMeta(Class);
+
     for (let method in meta) {
         if (meta[method].route)
-            RouteMap[meta[method].route] = { Class, method };
+            route(meta[method].route, Class, method);
         if (meta[method].upload)
-            Class.UploadFields[method] = meta[method].upload;
-        if (meta[method].requireAuth && !Class.RequireAuth.includes(method))
-            Class.RequireAuth.push(method);
+            upload(...meta[method].upload)(Class.prototype, method);
+        if (meta[method].requireAuth)
+            requireAuth(Class.prototype, method);
     }
 }
 
@@ -128,7 +127,9 @@ export function applyWebSocketControllerDoc(Class: typeof WebSocketController) {
     let meta = getDocMeta(Class);
     for (let method in meta) {
         if (meta[method].event)
-            EventMap[meta[method].event] = { Class, method };
+            event(meta[method].event, Class, method);
+        if (meta[method].requireAuth)
+            requireAuth(Class.prototype, method);
     }
 }
 

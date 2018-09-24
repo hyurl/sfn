@@ -3,11 +3,10 @@ import * as url from "url";
 import endsWith = require("lodash/endsWith");
 import { parseValue as parseAccepts } from "parse-accepts";
 import { config } from "../../bootstrap/ConfigLoader";
-import { ws, wss } from "../../bootstrap/index";
+import { ws } from "../../bootstrap/index";
 import { WebSocket } from "../../tools/interfaces";
 
 ws ? ws.use(handler) : null;
-wss ? wss.use(handler) : null;
 
 function handler(socket: WebSocket, next: (err?: Error) => void) {
     try {

@@ -224,7 +224,7 @@ function handleUpload(
             if (isTypeScript) {
                 // try to convert parameters to proper types according to 
                 // the definition of the method.
-                let meta: Function[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+                let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
                 for (let i in meta) {
                     if (meta[i] == Number) { // inject number

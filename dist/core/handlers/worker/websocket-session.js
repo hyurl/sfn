@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("../../bootstrap/index");
 const http_session_1 = require("./http-session");
 index_1.ws ? index_1.ws.use(handler).use(handler2) : null;
-index_1.wss ? index_1.wss.use(handler).use(handler2) : null;
 function handler(socket, next) {
     http_session_1.session(socket.handshake, {}, next);
 }

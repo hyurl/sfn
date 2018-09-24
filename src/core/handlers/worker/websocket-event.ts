@@ -1,6 +1,6 @@
 import { isTypeScript } from '../../../init';
 import { config, isDevMode } from "../../bootstrap/ConfigLoader";
-import { ws, wss } from "../../bootstrap/index";
+import { ws } from "../../bootstrap/index";
 import { SocketError } from "../../tools/SocketError";
 import { WebSocket } from "../../tools/interfaces";
 import { callsiteLog, callMethod, getFuncParams, callIntercepterChain } from "../../tools/functions-inner";
@@ -11,7 +11,6 @@ import { handleLog } from "./http-route";
 import { logRequest } from "./http-init";
 
 ws ? ws.on("connection", handler) : null;
-wss ? wss.on("connection", handler) : null;
 
 type SocketEventInfo = {
     time: number;
@@ -107,7 +106,7 @@ function getNextHandler(
             if (isTypeScript) {
                 // try to convert parameters to proper types according to 
                 // the definition of the method.
-                let meta: Function[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+                let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
                 for (let i in meta) {
                     if (meta[i] == Object && socketProps.includes(fnParams[i]))

@@ -1,9 +1,8 @@
-import { ws, wss } from "../../bootstrap/index";
+import { ws } from "../../bootstrap/index";
 import { WebSocket } from "../../tools/interfaces";
 import { session } from "./http-session";
 
 ws ? ws.use(handler).use(handler2) : null;
-wss ? wss.use(handler).use(handler2) : null;
 
 function handler(socket: WebSocket, next: (err?: Error) => void) {
     // Parse session.

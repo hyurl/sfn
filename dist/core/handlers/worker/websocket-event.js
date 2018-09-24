@@ -11,7 +11,6 @@ const EventMap_1 = require("../../tools/EventMap");
 const http_route_1 = require("./http-route");
 const http_init_1 = require("./http-init");
 index_1.ws ? index_1.ws.on("connection", handler) : null;
-index_1.wss ? index_1.wss.on("connection", handler) : null;
 function handler(socket) {
     for (let event in EventMap_1.EventMap) {
         socket.on(event, (...data) => {

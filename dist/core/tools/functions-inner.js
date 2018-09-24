@@ -6,9 +6,8 @@ const tslib_2 = require("tslib");
 const CallSiteRecord = require("callsite-record");
 const chalk_1 = require("chalk");
 const date = require("sfn-date");
-const RouteMap_1 = require("./RouteMap");
-const EventMap_1 = require("./EventMap");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const functions_1 = require("./functions");
 function loadLanguagePack(filename) {
     let ext = path_1.extname(filename), name = path_1.basename(filename, ext).replace(/\-/g, ""), _module = require(filename), lang;
     if (typeof _module[name] === "object") {
@@ -90,11 +89,11 @@ function applyHttpControllerDoc(Class) {
     let meta = getDocMeta(Class);
     for (let method in meta) {
         if (meta[method].route)
-            RouteMap_1.RouteMap[meta[method].route] = { Class, method };
+            functions_1.route(meta[method].route, Class, method);
         if (meta[method].upload)
-            Class.UploadFields[method] = meta[method].upload;
-        if (meta[method].requireAuth && !Class.RequireAuth.includes(method))
-            Class.RequireAuth.push(method);
+            functions_1.upload(...meta[method].upload)(Class.prototype, method);
+        if (meta[method].requireAuth)
+            functions_1.requireAuth(Class.prototype, method);
     }
 }
 exports.applyHttpControllerDoc = applyHttpControllerDoc;
@@ -102,7 +101,9 @@ function applyWebSocketControllerDoc(Class) {
     let meta = getDocMeta(Class);
     for (let method in meta) {
         if (meta[method].event)
-            EventMap_1.EventMap[meta[method].event] = { Class, method };
+            functions_1.event(meta[method].event, Class, method);
+        if (meta[method].requireAuth)
+            functions_1.requireAuth(Class.prototype, method);
     }
 }
 exports.applyWebSocketControllerDoc = applyWebSocketControllerDoc;

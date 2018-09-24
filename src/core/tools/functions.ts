@@ -82,20 +82,17 @@ interface WebSocketEventDecorator extends WebSocketDecorator { }
 
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketEventDecorator;
-export function event(name: string, Controller: typeof WebSocketController, method: string): void;
-export function event(...args) {
-    if (args.length === 1) {
+export function event(name: string, Class: typeof WebSocketController, method: string): void;
+export function event(name: string, Class?: typeof WebSocketController, method?: string) {
+    if (arguments.length === 1) {
         return (proto: WebSocketController, prop: string) => {
-            EventMap[args[0]] = {
+            EventMap[name] = {
                 Class: proto.Class,
                 method: prop
             };
         }
     } else {
-        EventMap[args[0]] = {
-            Class: args[1],
-            method: args[2]
-        }
+        return event(name)(Class.prototype, method);
     }
 }
 
@@ -112,7 +109,7 @@ export function upload(...fields: string[]): HttpDecorator {
 function _route(...args) {
     let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
 
-    if (args.length === 1 || args.length === 2) {
+    if (args.length <= 2) {
         return (proto: HttpController, prop: string) => {
             RouteMap[route] = {
                 Class: proto.Class,
@@ -120,10 +117,10 @@ function _route(...args) {
             }
         }
     } else {
-        RouteMap[route] = {
-            Class: args.length === 4 ? args[2] : args[1],
-            method: args.length === 4 ? args[3] : args[2]
-        }
+        let proto = args.length == 4 ? args[2] : args[1],
+            method = args.length == 4 ? args[3] : args[2];
+
+        return _route(route)(proto, method);
     }
 }
 

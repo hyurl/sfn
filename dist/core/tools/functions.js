@@ -40,20 +40,17 @@ exports.requireAuth = (proto, prop) => {
     if (!proto.Class.RequireAuth.includes(prop))
         proto.Class.RequireAuth.push(prop);
 };
-function event(...args) {
-    if (args.length === 1) {
+function event(name, Class, method) {
+    if (arguments.length === 1) {
         return (proto, prop) => {
-            EventMap_1.EventMap[args[0]] = {
+            EventMap_1.EventMap[name] = {
                 Class: proto.Class,
                 method: prop
             };
         };
     }
     else {
-        EventMap_1.EventMap[args[0]] = {
-            Class: args[1],
-            method: args[2]
-        };
+        return event(name)(Class.prototype, method);
     }
 }
 exports.event = event;
@@ -67,7 +64,7 @@ function upload(...fields) {
 exports.upload = upload;
 function _route(...args) {
     let route = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
-    if (args.length === 1 || args.length === 2) {
+    if (args.length <= 2) {
         return (proto, prop) => {
             RouteMap_1.RouteMap[route] = {
                 Class: proto.Class,
@@ -76,10 +73,8 @@ function _route(...args) {
         };
     }
     else {
-        RouteMap_1.RouteMap[route] = {
-            Class: args.length === 4 ? args[2] : args[1],
-            method: args.length === 4 ? args[3] : args[2]
-        };
+        let proto = args.length == 4 ? args[2] : args[1], method = args.length == 4 ? args[3] : args[2];
+        return _route(route)(proto, method);
     }
 }
 exports.route = _route;

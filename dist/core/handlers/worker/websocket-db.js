@@ -5,7 +5,6 @@ const ConfigLoader_1 = require("../../bootstrap/ConfigLoader");
 const index_1 = require("../../bootstrap/index");
 const symbols_1 = require("../../tools/symbols");
 index_1.ws ? index_1.ws.use(handler) : null;
-index_1.wss ? index_1.wss.use(handler) : null;
 function handler(socket, next) {
     Object.defineProperty(socket, "db", {
         get: () => {

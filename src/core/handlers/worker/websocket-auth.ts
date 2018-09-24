@@ -1,9 +1,8 @@
-import { ws, wss } from "../../bootstrap/index";
+import { ws } from "../../bootstrap/index";
 import { WebSocket } from "../../tools/interfaces";
 import { User } from "../../bootstrap/UserLoader";
 
 ws ? ws.use(handler) : null;
-wss ? wss.use(handler) : null;
 
 function handler(socket: WebSocket, next: (err?: Error) => void) {
     socket.user = null;

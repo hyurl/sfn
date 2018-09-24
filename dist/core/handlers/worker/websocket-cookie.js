@@ -4,7 +4,6 @@ const cookieParser = require("cookie-parser");
 const ConfigLoader_1 = require("../../bootstrap/ConfigLoader");
 const index_1 = require("../../bootstrap/index");
 index_1.ws ? index_1.ws.use(handler).use(handler2) : null;
-index_1.wss ? index_1.wss.use(handler).use(handler2) : null;
 const parser = cookieParser(ConfigLoader_1.config.session.secret);
 function handler(socket, next) {
     parser(socket.handshake, {}, next);

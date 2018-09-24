@@ -6,7 +6,6 @@ const parse_accepts_1 = require("parse-accepts");
 const ConfigLoader_1 = require("../../bootstrap/ConfigLoader");
 const index_1 = require("../../bootstrap/index");
 index_1.ws ? index_1.ws.use(handler) : null;
-index_1.wss ? index_1.wss.use(handler) : null;
 function handler(socket, next) {
     try {
         let req = socket.request;
