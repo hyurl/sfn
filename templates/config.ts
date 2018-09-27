@@ -6,8 +6,8 @@ const FileStore = sessionFileStore(Session);
 const env = process.env;
 
 export const config: SFNConfig = {
-    env: <SFNConfig["env"]>process.env.NODE_ENV || "dev",
-    lang: process.env.LANG || "en-US",
+    env: <SFNConfig["env"]>env.NODE_ENV || "dev",
+    lang: env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
     workers: env.WORKERS ? env.WORKERS.split(/,\s*/) : ["A", "B"],
@@ -20,8 +20,8 @@ export const config: SFNConfig = {
         timeout: 120000, // 2 min.
         autoStart: true,
         http: {
-            type: <SFNConfig["server"]["http"]["type"]>process.env.HTTP_PORT || "http",
-            port: parseInt(process.env.HTTP_PORT) || 80,
+            type: <SFNConfig["server"]["http"]["type"]>env.HTTP_PORT || "http",
+            port: parseInt(env.HTTP_PORT) || 80,
             options: null
         },
         websocket: {
@@ -42,12 +42,12 @@ export const config: SFNConfig = {
         }
     },
     database: {
-        type: process.env.DB_TYPE || "mysql",
-        host: process.env.DB_HOST ||  "localhost",
-        port: parseInt(process.env.DB_PORT) || 3306,
-        database: process.env.DB_NAME || "sfn",
-        user: process.env.DB_USER || "root",
-        password: process.env.DB_PASS || "123456"
+        type: env.DB_TYPE || "mysql",
+        host: env.DB_HOST ||  "localhost",
+        port: parseInt(env.DB_PORT) || 3306,
+        database: env.DB_NAME || "sfn",
+        user: env.DB_USER || "root",
+        password: env.DB_PASS || "123456"
     },
     session: {
         secret: "sfn",
@@ -65,17 +65,17 @@ export const config: SFNConfig = {
     },
     mail: {
         pool: false,
-        host: process.env.MAIL_HOST || "smtp.gmail.com",
-        port: parseInt(process.env.MAIL_PORT) || 25,
+        host: env.MAIL_HOST || "smtp.gmail.com",
+        port: parseInt(env.MAIL_PORT) || 25,
         secure: false,
-        from: process.env.MAIL_FROM || "",
+        from: env.MAIL_FROM || "",
         auth: {
-            username: process.env.MAIL_USER || "",
-            password: process.env.MAIL_PASS || ""
+            username: env.MAIL_USER || "",
+            password: env.MAIL_PASS || ""
         }
     },
     redis: {
-        host: process.env.REDIS_HOST || "",
-        port: parseInt(process.env.REDIS_PORT) || undefined
+        host: env.REDIS_HOST || "",
+        port: parseInt(env.REDIS_PORT) || undefined
     }
 };
