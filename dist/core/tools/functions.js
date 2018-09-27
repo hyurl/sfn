@@ -43,7 +43,10 @@ exports.requireAuth = (proto, prop) => {
 function event(name, Class, method) {
     if (arguments.length === 1) {
         return (proto, prop) => {
-            EventMap_1.EventMap[name] = {
+            let nsp = proto.Class.namespace || "/";
+            if (!EventMap_1.EventMap[nsp])
+                EventMap_1.EventMap[nsp] = {};
+            EventMap_1.EventMap[nsp][name] = {
                 Class: proto.Class,
                 method: prop
             };
@@ -62,6 +65,7 @@ function upload(...fields) {
     };
 }
 exports.upload = upload;
+let app, handle;
 function _route(...args) {
     let route = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
     if (args.length <= 2) {
@@ -70,6 +74,10 @@ function _route(...args) {
                 Class: proto.Class,
                 method: prop
             };
+            let __route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : __route[0], path = (proto.Class.baseURI || "") + __route[1];
+            app = app || (app = require("../bootstrap/index").app),
+                handle = handle || (handle = require("../handlers/worker/http-route").getRouteHandler);
+            app.method(method, path, handle(route), true);
         };
     }
     else {

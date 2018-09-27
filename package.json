@@ -111,7 +111,7 @@
         "socket.io": "^2.1.1",
         "source-map-support": "^0.5.9",
         "tslib": "^1.9.3",
-        "webium": "^0.4.1",
+        "webium": "^0.4.2",
         "word-table": "^1.0.3",
         "xml2js": "^0.4.19"
     }

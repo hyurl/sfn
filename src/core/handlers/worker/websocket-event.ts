@@ -9,31 +9,45 @@ import { WebSocketController } from "../../controllers/WebSocketController";
 import { EventMap } from "../../tools/EventMap";
 import { handleLog } from "./http-route";
 import { logRequest } from "./http-init";
+import initHandler from "./websocket-init";
+import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
+import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
+import dbHandler from "./websocket-db";
+import authHandler from "./websocket-auth";
 
-ws ? ws.on("connection", handler) : null;
+if (ws) {
+    for (let nsp in EventMap) {
+        ws.of(nsp)
+            .use(initHandler)
+            .use(cookieHandler)
+            .use(cookieHandler2)
+            .use(sessionHandler)
+            .use(sessionHandler2)
+            .use(dbHandler)
+            .use(authHandler)
+            .on("connection", (socket: WebSocket) => {
+                for (let event in EventMap[nsp]) {
+                    socket.on(event, (...data) => {
+                        handleEvent(socket, nsp, event, ...data);
+                    });
+                }
+
+                socket.on("error", (err: Error) => {
+                    let ctrl = new WebSocketController(socket);
+                    handleError(err, {
+                        time: Date.now(),
+                        event: "",
+                        code: 500
+                    }, ctrl, socket.protocol.toUpperCase());
+                });
+            });
+    }
+}
 
 type SocketEventInfo = {
     time: number;
     event: string;
     code: number;
-}
-
-function handler(socket: WebSocket) {
-    // Bind all socket controllers to the events of underlying socket.
-    for (let event in EventMap) {
-        socket.on(event, (...data) => {
-            handleEvent(socket, event, ...data);
-        });
-    }
-
-    socket.on("error", (err: Error) => {
-        let ctrl = new WebSocketController(socket);
-        handleError(err, {
-            time: Date.now(),
-            event: "",
-            code: 500
-        }, ctrl, socket.protocol.toUpperCase());
-    });
 }
 
 function finish(ctrl: WebSocketController, info: SocketEventInfo) {
@@ -130,8 +144,8 @@ function getNextHandler(
     }
 }
 
-function handleEvent(socket: WebSocket, event: string, ...data: any[]): void {
-    let { Class, method } = EventMap[event],
+function handleEvent(socket: WebSocket, nsp: string, event: string, ...data: any[]): void {
+    let { Class, method } = EventMap[nsp][event],
         ctrl: WebSocketController = null,
         info: SocketEventInfo = {
             time: Date.now(),

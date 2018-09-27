@@ -25,10 +25,6 @@ const EFFECT_METHODS = [
     "POST",
     "PUT"
 ];
-for (let route in RouteMap_1.RouteMap) {
-    let Class = RouteMap_1.RouteMap[route].Class, _route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : _route[0], path = (Class.baseURI || "") + _route[1];
-    index_1.app.method(method, path, getRouteHandler(Class, RouteMap_1.RouteMap[route].method));
-}
 index_1.app.onerror = function onerror(err, req, res) {
     res.keepAlive = false;
     let ctrl = new HttpController_1.HttpController(req, res);
@@ -361,9 +357,9 @@ function handleResponse(ctrl, data) {
     }
     return finish(ctrl);
 }
-function getRouteHandler(Class, method) {
+function getRouteHandler(route) {
     return (req, res) => {
-        let ctrl = null;
+        let { Class, method } = RouteMap_1.RouteMap[route], ctrl = null;
         res.on("error", (err) => {
             handleLog(err, ctrl, method);
         });
@@ -395,4 +391,5 @@ function getRouteHandler(Class, method) {
         });
     };
 }
+exports.getRouteHandler = getRouteHandler;
 //# sourceMappingURL=http-route.js.map

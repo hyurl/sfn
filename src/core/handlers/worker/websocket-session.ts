@@ -1,15 +1,12 @@
-import { ws } from "../../bootstrap/index";
 import { WebSocket } from "../../tools/interfaces";
 import { session } from "./http-session";
 
-ws ? ws.use(handler).use(handler2) : null;
-
-function handler(socket: WebSocket, next: (err?: Error) => void) {
+export default async function (socket: WebSocket, next: (err?: Error) => void) {
     // Parse session.
     session(socket.handshake, {}, next);
 }
 
-function handler2(socket: WebSocket, next: (err?: Error) => void) {
+export async function handler2(socket: WebSocket, next: (err?: Error) => void) {
     // Handle session in socket.
     socket.session = new Proxy(socket.handshake["session"], {
         set: (session, key, value) => {

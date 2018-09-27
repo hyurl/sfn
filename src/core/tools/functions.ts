@@ -9,6 +9,15 @@ import { WebSocketController } from "../controllers/WebSocketController";
 import { red, grey, green } from "./functions-inner";
 import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
+import {
+    ControllerDecorator,
+    HttpDecorator,
+    WebSocketEventDecorator,
+    HttpRoute,
+    Request,
+    Response
+} from './interfaces';
+import { App } from "webium";
 
 /** 
  * Generates a random number.
@@ -54,10 +63,6 @@ export function injectCsrfToken(html: string, token: string): string {
     return html;
 }
 
-export interface ControllerDecorator extends Function {
-    (proto: Controller, prop: string): void;
-}
-
 /** Requires authentication when calling the method. */
 export var requireAuth: ControllerDecorator = (
     proto: HttpController | WebSocketController,
@@ -70,27 +75,21 @@ export var requireAuth: ControllerDecorator = (
         proto.Class.RequireAuth.push(prop);
 }
 
-export interface HttpDecorator extends Function {
-    (proto: HttpController, prop: string): void;
-}
-
-export interface WebSocketDecorator extends Function {
-    (proto: WebSocketController, prop: string): void;
-}
-
-interface WebSocketEventDecorator extends WebSocketDecorator { }
-
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketEventDecorator;
 export function event(name: string, Class: typeof WebSocketController, method: string): void;
 export function event(name: string, Class?: typeof WebSocketController, method?: string) {
     if (arguments.length === 1) {
         return (proto: WebSocketController, prop: string) => {
-            EventMap[name] = {
+            let nsp: string = proto.Class.namespace || "/";
+            
+            if (!EventMap[nsp]) EventMap[nsp] = {};
+
+            EventMap[nsp][name] = {
                 Class: proto.Class,
                 method: prop
             };
-        }
+        };
     } else {
         return event(name)(Class.prototype, method);
     }
@@ -103,8 +102,10 @@ export function upload(...fields: string[]): HttpDecorator {
             proto.Class.UploadFields = {};
 
         proto.Class.UploadFields[prop] = fields;
-    }
+    };
 }
+
+let app: App, handle: (route: string) => (req: Request, res: Response) => void;
 
 function _route(...args) {
     let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
@@ -114,36 +115,23 @@ function _route(...args) {
             RouteMap[route] = {
                 Class: proto.Class,
                 method: prop
-            }
-        }
+            };
+
+            let __route = route.split(/\s+/),
+                method = _route[0] === "SSE" ? "GET" : __route[0],
+                path = (proto.Class.baseURI || "") + __route[1];
+
+            app = app || (app = require("../bootstrap/index").app),
+                handle = handle || (handle = require("../handlers/worker/http-route").getRouteHandler);
+
+            app.method(method, path, handle(route), true);
+        };
     } else {
         let proto = args.length == 4 ? args[2] : args[1],
             method = args.length == 4 ? args[3] : args[2];
 
         return _route(route)(proto, method);
     }
-}
-
-interface HttpRouteDecorator extends HttpDecorator { }
-
-interface HttpRoute extends Function {
-    /** Binds the method to a specified URL route. */
-    (route: string): HttpRouteDecorator;
-    (reqMethod: string, path: string): HttpRouteDecorator;
-    (route: string, Class: typeof HttpController, method: string): void
-    (reqMethod: string, path: string, Class: typeof HttpController, method: string): void;
-    delete(path: string): HttpRouteDecorator;
-    delete(path: string, Class: typeof HttpController, method: string): void;
-    get(path: string): HttpRouteDecorator;
-    get(path: string, Class: typeof HttpController, method: string): void;
-    head(path: string): HttpRouteDecorator;
-    head(path: string, Class: typeof HttpController, method: string): void;
-    post(path: string): HttpRouteDecorator;
-    post(path: string, Class: typeof HttpController, method: string): void;
-    patch(path: string): HttpRouteDecorator;
-    patch(path: string, Class: typeof HttpController, method: string): void;
-    put(path: string): HttpRouteDecorator;
-    put(path: string, Class: typeof HttpController, method: string): void;
 }
 
 /** Sets HTTP routes. */
@@ -205,7 +193,7 @@ export function before<T extends Controller = Controller>(fn: ControllerIntercep
             proto.Class.BeforeIntercepters[prop] = [];
 
         proto.Class.BeforeIntercepters[prop].push(fn);
-    }
+    };
 }
 
 /**
@@ -226,7 +214,7 @@ export function after<T extends Controller = Controller>(fn: ControllerIntercept
             proto.Class.AfterIntercepters[prop] = [];
 
         proto.Class.AfterIntercepters[prop].push(fn);
-    }
+    };
 }
 
 /** If Datagram server isn't enabled, it will return `null` */

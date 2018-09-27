@@ -3,12 +3,9 @@ import * as url from "url";
 import endsWith = require("lodash/endsWith");
 import { parseValue as parseAccepts } from "parse-accepts";
 import { config } from "../../bootstrap/ConfigLoader";
-import { ws } from "../../bootstrap/index";
 import { WebSocket } from "../../tools/interfaces";
 
-ws ? ws.use(handler) : null;
-
-function handler(socket: WebSocket, next: (err?: Error) => void) {
+export default async function (socket: WebSocket, next: (err?: Error) => void) {
     try {
         let req: IncomingMessage = socket.request;
 
@@ -53,8 +50,8 @@ function handler(socket: WebSocket, next: (err?: Error) => void) {
                 break;
             }
         }
-        next();
+        await next();
     } catch (err) {
-        next(err);
+        await next(err);
     }
 }

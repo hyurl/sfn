@@ -3,15 +3,18 @@ import * as Session from "express-session";
 import * as sessionFileStore from "session-file-store";
 
 const FileStore = sessionFileStore(Session);
+const env = process.env;
 
 export const config: SFNConfig = {
     env: <SFNConfig["env"]>process.env.NODE_ENV || "dev",
     lang: process.env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    workers: ["A"],
+    workers: env.WORKERS ? env.WORKERS.split(/,\s*/) : ["A", "B"],
     statics: [SRC_PATH + "/assets"],
     watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
+    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
+    hotReloading: false,
     server: {
         hostname: "localhost",
         timeout: 120000, // 2 min.

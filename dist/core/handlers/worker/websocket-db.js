@@ -1,26 +1,28 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
 const modelar_1 = require("modelar");
 const ConfigLoader_1 = require("../../bootstrap/ConfigLoader");
-const index_1 = require("../../bootstrap/index");
 const symbols_1 = require("../../tools/symbols");
-index_1.ws ? index_1.ws.use(handler) : null;
-function handler(socket, next) {
-    Object.defineProperty(socket, "db", {
-        get: () => {
-            if (socket[symbols_1.realDB] === undefined) {
-                socket[symbols_1.realDB] = new modelar_1.DB(ConfigLoader_1.config.database);
+function default_1(socket, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        Object.defineProperty(socket, "db", {
+            get: () => {
+                if (socket[symbols_1.realDB] === undefined) {
+                    socket[symbols_1.realDB] = new modelar_1.DB(ConfigLoader_1.config.database);
+                }
+                return socket[symbols_1.realDB];
+            },
+            set(v) {
+                socket[symbols_1.realDB] = v;
             }
-            return socket[symbols_1.realDB];
-        },
-        set(v) {
-            socket[symbols_1.realDB] = v;
-        }
+        });
+        socket.on("disconnected", () => {
+            if (socket[symbols_1.realDB])
+                socket[symbols_1.realDB].release();
+        });
+        yield next();
     });
-    socket.on("disconnected", () => {
-        if (socket[symbols_1.realDB])
-            socket[symbols_1.realDB].release();
-    });
-    next();
 }
+exports.default = default_1;
 //# sourceMappingURL=websocket-db.js.map

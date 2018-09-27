@@ -12,6 +12,7 @@ import { Socket as DgramServer } from "dgramx";
 import { APP_PATH, isCli } from "../../init";
 import { config, isDevMode } from "./ConfigLoader";
 import { DevWatcher } from "../tools/DevWatcher";
+import { DevHotReloader } from "../tools/DevHotReloader";
 import { red, green } from "../tools/functions-inner";
 
 /** Whether the current process is the master process. */
@@ -67,28 +68,19 @@ export function startServer() {
     let httpBootstrap = APP_PATH + "/bootstrap/http.js";
     fs.existsSync(httpBootstrap) ? require(httpBootstrap) : null;
 
-    if (WS.enabled) {
-        // load WebSocket middleware
-        require("../handlers/worker/websocket-init");
-        require("../handlers/worker/websocket-cookie");
-        require("../handlers/worker/websocket-session");
-        require("../handlers/worker/websocket-db");
-        require("../handlers/worker/websocket-auth");
-
-        // Load user-defined bootstrap procedures.
-        let wsBootstrap = APP_PATH + "/bootstrap/websocket.js";
-        fs.existsSync(wsBootstrap) ? require(wsBootstrap) : null;
-    }
-
     // load controllers
     require("../bootstrap/ControllerLoader");
 
     // load HTTP route handler
-    require("../handlers/worker/http-route");
+    // require("../handlers/worker/http-route");
 
     if (WS.enabled) {
         // load WebSocket event handler
         require("../handlers/worker/websocket-event");
+
+        // Load user-defined bootstrap procedures.
+        let wsBootstrap = APP_PATH + "/bootstrap/websocket.js";
+        fs.existsSync(wsBootstrap) ? require(wsBootstrap) : null;
     }
 
     // Start HTTP server.
@@ -176,7 +168,7 @@ if (Worker.isMaster && !isCli) {
     }
 
     // Watch for file changes, when a file is modified, reboot the workers.
-    if (isDevMode) {
+    if (isDevMode && !config.hotReloading) {
         for (let filename of config.watches) {
             if (path.extname(filename) == ".ts")
                 filename = filename.slice(0, -3) + ".js";
@@ -232,4 +224,13 @@ if (Worker.isMaster && !isCli) {
             startServer();
         }
     });
+
+    if (isDevMode && config.hotReloading) {
+        for (let dirname of config.controllers) {
+            dirname = path.resolve(APP_PATH, dirname);
+            fs.exists(dirname, exists => {
+                if (exists) new DevHotReloader(dirname);
+            });
+        }
+    }
 }

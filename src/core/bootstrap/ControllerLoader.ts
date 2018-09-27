@@ -72,4 +72,6 @@ function loadControllers(controllerPath: string) {
     }
 }
 
-loadControllers(`${APP_PATH}/controllers`);
+for (let dir of config.controllers) {
+    loadControllers(`${APP_PATH}/${dir}`);
+}

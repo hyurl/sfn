@@ -1,12 +1,9 @@
 import { DB } from "modelar";
 import { config } from "../../bootstrap/ConfigLoader";
-import { ws } from "../../bootstrap/index";
 import { WebSocket } from "../../tools/interfaces";
 import { realDB } from "../../tools/symbols";
 
-ws ? ws.use(handler) : null;
-
-function handler(socket: WebSocket, next: (err?: Error) => void) {
+export default async function (socket: WebSocket, next: (err?: Error) => void) {
     Object.defineProperty(socket, "db", {
         get: () => {
             if (socket[realDB] === undefined) {
@@ -26,5 +23,5 @@ function handler(socket: WebSocket, next: (err?: Error) => void) {
             socket[realDB].release();
     });
 
-    next();
+    await next();
 }

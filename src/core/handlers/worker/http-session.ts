@@ -8,10 +8,10 @@ type SessionHanlder = (req: any, res: any, next: Function) => void;
 
 export var session = <SessionHanlder>ExpressSession(config.session);
 
-app.use(session).use((req, res: Response, next) => {
+app.use(session).use(async (req, res: Response, next) => {
     res.sent = false;
     res.end = intercept(res.end).before(() => {
         res.sent = true;
     });
-    next();
+    await next();
 });

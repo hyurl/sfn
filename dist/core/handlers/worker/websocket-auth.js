@@ -1,22 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const index_1 = require("../../bootstrap/index");
+const tslib_1 = require("tslib");
 const UserLoader_1 = require("../../bootstrap/UserLoader");
-index_1.ws ? index_1.ws.use(handler) : null;
-function handler(socket, next) {
-    socket.user = null;
-    if (socket.session && socket.session.uid) {
-        UserLoader_1.User.use(socket.db)
-            .get(socket.session.uid)
-            .then((user) => {
-            socket.user = user;
-            next();
-        }).catch((err) => {
-            next(err);
-        });
-    }
-    else {
-        next();
-    }
+function default_1(socket, next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        socket.user = null;
+        if (socket.session && socket.session.uid) {
+            try {
+                socket.user = (yield UserLoader_1.User.use(socket.db).get(socket.session.uid));
+            }
+            catch (e) { }
+        }
+        yield next();
+    });
 }
+exports.default = default_1;
 //# sourceMappingURL=websocket-auth.js.map

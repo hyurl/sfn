@@ -36,19 +36,36 @@ export interface SFNConfig {
      * a coroutine function and await its result.
      */
     awaitGenerator?: boolean;
-    /** Worker names, must not more than CPU numbers. */
+    /**
+     * Worker names, each one will be forked as a service worker. In production 
+     * environment, you should at least set two workers, so that to prevent 
+     * temporary shunt-down of service when reloading.
+     */
     workers?: string[];
     /**
      * The directories that serve static resources.
      * @see https://www.npmjs.com/package/serve-static
      */
-    statics?: string[] | { [path: string]: StaticOptions },
+    statics?: string[] | { [path: string]: StaticOptions };
     /** 
      * Watch file changes of the given file/folder names in `APP_PATH` in 
      * development, when watching a folder, watching `.js/.ts` and `.json` files
-     * in it.
+     * in it, if any of them are modified, auto-reload the server.
      */
-    watches?: string[],
+    watches?: string[];
+    /** The directories that contain controllers. */
+    controllers?: string[];
+    /**
+     * Hot-reloading only supports controllers, it will watch file changes in 
+     * the directories set in `controllers`, and it is conflict with the option 
+     * `watches`, if enabled, the later one will stop working.
+     * 
+     * When any controller file has been modified, rather than reload the whole 
+     * server, the system will try to reload the route in memory instead. Make 
+     * sure in your own scripts, **DON'T**, in any where, import any controllers
+     * yourself, otherwise the hot-reloading may not work as expected.
+     */
+    hotReloading?: boolean;
     server: {
         /** Host name(s), used for calculating the subdomain. */
         hostname?: string | string[];
@@ -136,6 +153,7 @@ export interface SFNConfig {
 }
 
 const FileStore = sessionFileStore(Session);
+const env = process.env;
 
 /**
  * The configuration of the program.
@@ -143,20 +161,22 @@ const FileStore = sessionFileStore(Session);
  * supported options on their official websites.
  */
 export const config: SFNConfig = {
-    env: <SFNConfig["env"]>process.env.NODE_ENV || "dev",
-    lang: process.env.LANG || "en-US",
+    env: <SFNConfig["env"]>env.NODE_ENV || "dev",
+    lang: env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    workers: ["A"],
+    workers: env.WORKERS ? env.WORKERS.split(/,\s*/) : ["A", "B"],
     statics: [SRC_PATH + "/assets"],
     watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
+    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
+    hotReloading: false,
     server: {
         hostname: "localhost",
         timeout: 120000, // 2 min.
         autoStart: true,
         http: {
-            type: <SFNConfig["server"]["http"]["type"]>process.env.HTTP_TYPE || "http",
-            port: parseInt(process.env.HTTP_PORT) || 80,
+            type: <SFNConfig["server"]["http"]["type"]>env.HTTP_TYPE || "http",
+            port: parseInt(env.HTTP_PORT) || 80,
             options: null
         },
         websocket: {
@@ -177,12 +197,12 @@ export const config: SFNConfig = {
         }
     },
     database: {
-        type: process.env.DB_TYPE || "mysql",
-        host: process.env.DB_HOST ||  "localhost",
-        port: parseInt(process.env.DB_PORT) || 3306,
-        database: process.env.DB_NAME || "sfn",
-        user: process.env.DB_USER || "root",
-        password: process.env.DB_PASS || "123456"
+        type: env.DB_TYPE || "mysql",
+        host: env.DB_HOST || "localhost",
+        port: parseInt(env.DB_PORT) || 3306,
+        database: env.DB_NAME || "sfn",
+        user: env.DB_USER || "root",
+        password: env.DB_PASS || "123456"
     },
     session: {
         secret: "sfn",
@@ -200,17 +220,17 @@ export const config: SFNConfig = {
     },
     mail: {
         pool: false,
-        host: process.env.MAIL_HOST || "smtp.gmail.com",
-        port: parseInt(process.env.MAIL_PORT) || 25,
+        host: env.MAIL_HOST || "smtp.gmail.com",
+        port: parseInt(env.MAIL_PORT) || 25,
         secure: false,
-        from: process.env.MAIL_FROM || "",
+        from: env.MAIL_FROM || "",
         auth: {
-            username: process.env.MAIL_USER || "",
-            password: process.env.MAIL_PASS || ""
+            username: env.MAIL_USER || "",
+            password: env.MAIL_PASS || ""
         }
     },
     redis: {
-        host: process.env.REDIS_HOST || "",
-        port: parseInt(process.env.REDIS_PORT) || undefined
+        host: env.REDIS_HOST || "",
+        port: parseInt(env.REDIS_PORT) || undefined
     }
 };

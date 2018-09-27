@@ -3,15 +3,18 @@ const Session = require("express-session");
 const sessionFileStore = require("session-file-store");
 
 const FileStore = sessionFileStore(Session);
+const env = process.env;
 
 exports.config = {
     env: process.env.NODE_ENV || "dev",
     lang: process.env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    workers: ["A"],
+    workers: env.WORKERS ? env.WORKERS.split(/,\s*/) : ["A", "B"],
     statics: [SRC_PATH + "/assets"],
     watches: ["index.js", "config.js", "bootstrap", "controllers", "locales", "models"],
+    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
+    hotReloading: false,
     server: {
         hostname: "localhost",
         timeout: 120000,

@@ -56,5 +56,7 @@ function loadControllers(controllerPath) {
         }
     }
 }
-loadControllers(`${init_1.APP_PATH}/controllers`);
+for (let dir of ConfigLoader_1.config.controllers) {
+    loadControllers(`${init_1.APP_PATH}/${dir}`);
+}
 //# sourceMappingURL=ControllerLoader.js.map

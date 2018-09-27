@@ -1,7 +1,9 @@
 import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import * as modelar from "modelar";
-import { UploadedFile } from "../controllers/HttpController";
+import { Controller } from "../controllers/Controller";
+import { HttpController, UploadedFile } from "../controllers/HttpController";
+import { WebSocketController } from "../controllers/WebSocketController";
 
 export type HttpRequestMethod = string;
 
@@ -115,4 +117,40 @@ export interface WebSocket extends SocketIO.Socket {
     langs: string[];
     /** `true` if the protocol is `wss`, `false` otherwise. */
     secure: boolean;
+}
+
+export interface ControllerDecorator extends Function {
+    (proto: Controller, prop: string): void;
+}
+
+export interface HttpDecorator extends Function {
+    (proto: HttpController, prop: string): void;
+}
+
+export interface WebSocketDecorator extends Function {
+    (proto: WebSocketController, prop: string): void;
+}
+
+export interface WebSocketEventDecorator extends WebSocketDecorator { }
+
+export interface HttpRouteDecorator extends HttpDecorator { }
+
+export interface HttpRoute extends Function {
+    /** Binds the method to a specified URL route. */
+    (route: string): HttpRouteDecorator;
+    (reqMethod: string, path: string): HttpRouteDecorator;
+    (route: string, Class: typeof HttpController, method: string): void
+    (reqMethod: string, path: string, Class: typeof HttpController, method: string): void;
+    delete(path: string): HttpRouteDecorator;
+    delete(path: string, Class: typeof HttpController, method: string): void;
+    get(path: string): HttpRouteDecorator;
+    get(path: string, Class: typeof HttpController, method: string): void;
+    head(path: string): HttpRouteDecorator;
+    head(path: string, Class: typeof HttpController, method: string): void;
+    post(path: string): HttpRouteDecorator;
+    post(path: string, Class: typeof HttpController, method: string): void;
+    patch(path: string): HttpRouteDecorator;
+    patch(path: string, Class: typeof HttpController, method: string): void;
+    put(path: string): HttpRouteDecorator;
+    put(path: string, Class: typeof HttpController, method: string): void;
 }

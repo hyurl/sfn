@@ -13,6 +13,7 @@ const dgramx_1 = require("dgramx");
 const init_1 = require("../../init");
 const ConfigLoader_1 = require("./ConfigLoader");
 const DevWatcher_1 = require("../tools/DevWatcher");
+const DevHotReloader_1 = require("../tools/DevHotReloader");
 const functions_inner_1 = require("../tools/functions-inner");
 exports.isMaster = Worker.isMaster;
 exports.isWorker = Worker.isWorker;
@@ -41,19 +42,11 @@ function startServer() {
     require("../handlers/worker/http-auth");
     let httpBootstrap = init_1.APP_PATH + "/bootstrap/http.js";
     fs.existsSync(httpBootstrap) ? require(httpBootstrap) : null;
-    if (WS.enabled) {
-        require("../handlers/worker/websocket-init");
-        require("../handlers/worker/websocket-cookie");
-        require("../handlers/worker/websocket-session");
-        require("../handlers/worker/websocket-db");
-        require("../handlers/worker/websocket-auth");
-        let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket.js";
-        fs.existsSync(wsBootstrap) ? require(wsBootstrap) : null;
-    }
     require("../bootstrap/ControllerLoader");
-    require("../handlers/worker/http-route");
     if (WS.enabled) {
         require("../handlers/worker/websocket-event");
+        let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket.js";
+        fs.existsSync(wsBootstrap) ? require(wsBootstrap) : null;
     }
     if (typeof exports.http["setTimeout"] == "function") {
         exports.http["setTimeout"](ConfigLoader_1.config.server.timeout);
@@ -110,7 +103,7 @@ if (Worker.isMaster && !init_1.isCli) {
     for (let name of workers) {
         new Worker(name, !ConfigLoader_1.isDevMode);
     }
-    if (ConfigLoader_1.isDevMode) {
+    if (ConfigLoader_1.isDevMode && !ConfigLoader_1.config.hotReloading) {
         for (let filename of ConfigLoader_1.config.watches) {
             if (path.extname(filename) == ".ts")
                 filename = filename.slice(0, -3) + ".js";
@@ -156,5 +149,14 @@ else if (exports.isWorker) {
             startServer();
         }
     });
+    if (ConfigLoader_1.isDevMode && ConfigLoader_1.config.hotReloading) {
+        for (let dirname of ConfigLoader_1.config.controllers) {
+            dirname = path.resolve(init_1.APP_PATH, dirname);
+            fs.exists(dirname, exists => {
+                if (exists)
+                    new DevHotReloader_1.DevHotReloader(dirname);
+            });
+        }
+    }
 }
 //# sourceMappingURL=index.js.map

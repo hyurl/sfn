@@ -42,6 +42,8 @@ export class WebSocketController extends Controller {
     /** Reference to the corresponding socket context. */
     readonly socket: WebSocket;
 
+    static namespace: string = "/";
+
     /**
      * Creates a new socket controller instance.
      * 

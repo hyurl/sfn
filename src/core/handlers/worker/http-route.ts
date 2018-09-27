@@ -26,14 +26,14 @@ const EFFECT_METHODS: HttpRequestMethod[] = [
     "PUT"
 ];
 
-for (let route in RouteMap) {
-    let Class = RouteMap[route].Class,
-        _route = route.split(/\s+/),
-        method = _route[0] === "SSE" ? "GET" : _route[0],
-        path = (Class.baseURI || "") + _route[1];
+// for (let route in RouteMap) {
+//     let Class = RouteMap[route].Class,
+//         _route = route.split(/\s+/),
+//         method = _route[0] === "SSE" ? "GET" : _route[0],
+//         path = (Class.baseURI || "") + _route[1];
 
-    app.method(method, path, getRouteHandler(Class, RouteMap[route].method));
-}
+//     app.method(method, path, getRouteHandler(route));
+// }
 
 app.onerror = function onerror(err: any, req: Request, res: Response) {
     res.keepAlive = false;
@@ -456,9 +456,10 @@ function handleResponse(ctrl: HttpController, data: any) {
     return finish(ctrl);
 }
 
-function getRouteHandler(Class: typeof HttpController, method: string) {
+export function getRouteHandler(route: string) {
     return (req: Request, res: Response) => {
-        let ctrl: HttpController = null;
+        let { Class, method } = RouteMap[route],
+            ctrl: HttpController = null;
 
         res.on("error", (err) => {
             handleLog(err, ctrl, method);
