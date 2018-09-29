@@ -11,13 +11,12 @@ import { RouteMap } from "./RouteMap";
 import { EventMap } from "./EventMap";
 import {
     ControllerDecorator,
-    HttpDecorator,
     WebSocketEventDecorator,
-    HttpRoute,
-    Request,
-    Response
+    HttpRoute
 } from './interfaces';
-import { App } from "webium";
+import { App, RouteHandler } from "webium";
+
+export * from "./upload";
 
 /** 
  * Generates a random number.
@@ -96,16 +95,16 @@ export function event(name: string, Class?: typeof WebSocketController, method?:
 }
 
 /** Allows the method accept file uploading with specified fields. */
-export function upload(...fields: string[]): HttpDecorator {
-    return (proto: HttpController, prop: string) => {
-        if (!proto.Class.hasOwnProperty("UploadFields"))
-            proto.Class.UploadFields = {};
+// export function upload(...fields: string[]): HttpDecorator {
+//     return (proto: HttpController, prop: string) => {
+//         if (!proto.Class.hasOwnProperty("UploadFields"))
+//             proto.Class.UploadFields = {};
 
-        proto.Class.UploadFields[prop] = fields;
-    };
-}
+//         proto.Class.UploadFields[prop] = fields;
+//     };
+// }
 
-let app: App, handle: (route: string) => (req: Request, res: Response) => void;
+let app: App, handle: (route: string) => RouteHandler;
 
 function _route(...args) {
     let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;

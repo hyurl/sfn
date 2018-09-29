@@ -32,8 +32,6 @@ export class Service extends EventEmitter {
     lang: string = config.lang;
     /** Configurations for the logger in this instance. */
     logOptions: Logger.Options = Object.assign({}, LogOptions);
-    /** `deprecated`, use `logOptions` instead. */
-    logConfig = this.logOptions;
 
     static readonly Loggers: { [filename: string]: Logger } = {};
 
@@ -65,9 +63,10 @@ export class Service extends EventEmitter {
 
     /** Gets a logger instance. */
     get logger(): Logger {
-        let filename = this.logOptions.filename;
+        let filename = this.logOptions.filename || LogOptions.filename;
         if (!Service.Loggers[filename]) {
-            Service.Loggers[filename] = new Logger(this.logOptions);
+            let options = Object.assign({}, LogOptions, this.logOptions);
+            Service.Loggers[filename] = new Logger(options);
         }
         return Service.Loggers[filename];
     }

@@ -28,7 +28,7 @@ if (ws) {
             .on("connection", (socket: WebSocket) => {
                 for (let event in EventMap[nsp]) {
                     socket.on(event, (...data) => {
-                        handleEvent(socket, nsp, event, ...data);
+                        handleEvent(socket, nsp, event, data);
                     });
                 }
 
@@ -48,103 +48,9 @@ type SocketEventInfo = {
     time: number;
     event: string;
     code: number;
-}
+};
 
-function finish(ctrl: WebSocketController, info: SocketEventInfo) {
-    let socket = ctrl.socket;
-
-    // If has db connection bound to the socket, release.
-    if (socket[realDB])
-        socket[realDB].release();
-
-    ctrl.emit("finish", socket);
-    logRequest(info.time, socket.protocol.toUpperCase(), info.code, info.event);
-}
-
-function handleError(err: any, info: SocketEventInfo, ctrl: WebSocketController, method?: string) {
-    let _err: Error = err; // The original error.
-
-    if (!(err instanceof SocketError)) {
-        if (err instanceof Error && config.server.error.show)
-            err = new SocketError(500, err.message);
-        else
-            err = new SocketError(500);
-    }
-
-    info.code = (<SocketError>err).code;
-
-    // Send error to the client.
-    if (info.event) {
-        ctrl.socket.emit(info.event, ctrl.error(err.message, info.code));
-    }
-
-    handleLog(_err, ctrl, method);
-    finish(ctrl, info);
-
-    if (isDevMode && !(_err instanceof SocketError)) {
-        callsiteLog(_err);
-    }
-}
-
-function getNextHandler(
-    method: string,
-    data: any[],
-    resolve: Function,
-    reject: Function
-) {
-    return (ctrl: WebSocketController) => {
-        let { BeforeIntercepters, RequireAuth } = ctrl.Class;
-
-        Promise.resolve(ctrl.before()).then(result => {
-            if (result === false || ctrl.socket.disconnected)
-                return result;
-            else
-                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
-        }).then(result => {
-            if (result === false || ctrl.socket.disconnected) {
-                // if the socket has been closed before calling the actual method,
-                // resolve the Promise immediately without running any checking 
-                // procedure, and don't call the method.
-                return resolve(null);
-            }
-
-            // Handle authentication.
-            if (RequireAuth.includes(method) && !ctrl.authorized)
-                throw new SocketError(401);
-
-            let params: any[] = [],
-                fnParams = getFuncParams(ctrl[method]),
-                socketProps = ["websocket", "socket", "sock", "webSocket"];
-
-            // Dependency Injection
-            if (isTypeScript) {
-                // try to convert parameters to proper types according to 
-                // the definition of the method.
-                let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
-
-                for (let i in meta) {
-                    if (meta[i] == Object && socketProps.includes(fnParams[i]))
-                        params[i] = ctrl.socket;
-                    else
-                        params[i] = data.shift();
-                }
-            } else {
-                for (let i in fnParams) {
-                    if (socketProps.includes(fnParams[i]))
-                        params[i] = ctrl.socket;
-                    else
-                        params[i] = data.shift();
-                }
-            }
-
-            resolve(callMethod(ctrl, ctrl[method], ...params));
-        }).catch(err => {
-            reject(err);
-        });
-    }
-}
-
-function handleEvent(socket: WebSocket, nsp: string, event: string, ...data: any[]): void {
+function handleEvent(socket: WebSocket, nsp: string, event: string, data: any[]): void {
     let { Class, method } = EventMap[nsp][event],
         ctrl: WebSocketController = null,
         info: SocketEventInfo = {
@@ -184,4 +90,104 @@ function handleEvent(socket: WebSocket, nsp: string, event: string, ...data: any
 
         handleError(err, info, ctrl, method);
     });
+}
+
+function getNextHandler(
+    method: string,
+    data: any[],
+    resolve: (value: any) => any,
+    reject: (err: Error) => void
+) {
+    return (ctrl: WebSocketController) => {
+        let { BeforeIntercepters, RequireAuth } = ctrl.Class;
+
+        Promise.resolve(ctrl.before()).then(result => {
+            if (result === false || ctrl.socket.disconnected)
+                return result;
+            else
+                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
+        }).then(result => {
+            if (result === false || ctrl.socket.disconnected) {
+                // if the socket has been closed before calling the actual method,
+                // resolve the Promise immediately without running any checking 
+                // procedure, and don't call the method.
+                return resolve(null);
+            }
+
+            // Handle authentication.
+            if (RequireAuth.includes(method) && !ctrl.authorized)
+                throw new SocketError(401);
+
+            return getResult(ctrl, method, data);
+        }).then(resolve).catch(reject);
+    }
+}
+
+function getResult(ctrl: WebSocketController, method: string, data: any[]) {
+    return callMethod(ctrl, ctrl[method], ...getArguments(ctrl, method, data));
+}
+
+function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
+    let args: any[] = [],
+        fnParams = getFuncParams(ctrl[method]),
+        socketProps = ["websocket", "socket", "sock", "webSocket"];
+
+    // Dependency Injection
+    if (isTypeScript) {
+        // try to convert parameters to proper types according to 
+        // the definition of the method.
+        let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+
+        for (let i in meta) {
+            if (meta[i] == Object && socketProps.includes(fnParams[i]))
+                args[i] = ctrl.socket;
+            else
+                args[i] = data.shift();
+        }
+    } else {
+        for (let i in fnParams) {
+            if (socketProps.includes(fnParams[i]))
+                args[i] = ctrl.socket;
+            else
+                args[i] = data.shift();
+        }
+    }
+
+    return args;
+}
+
+function finish(ctrl: WebSocketController, info: SocketEventInfo) {
+    let socket = ctrl.socket;
+
+    // If has db connection bound to the socket, release.
+    if (socket[realDB])
+        socket[realDB].release();
+
+    ctrl.emit("finish", socket);
+    logRequest(info.time, socket.protocol.toUpperCase(), info.code, info.event);
+}
+
+function handleError(err: any, info: SocketEventInfo, ctrl: WebSocketController, method?: string) {
+    let _err: Error = err; // The original error.
+
+    if (!(err instanceof SocketError)) {
+        if (err instanceof Error && config.server.error.show)
+            err = new SocketError(500, err.message);
+        else
+            err = new SocketError(500);
+    }
+
+    info.code = (<SocketError>err).code;
+
+    // Send error to the client.
+    if (info.event) {
+        ctrl.socket.emit(info.event, ctrl.error(err.message, info.code));
+    }
+
+    handleLog(_err, ctrl, method);
+    finish(ctrl, info);
+
+    if (isDevMode && !(_err instanceof SocketError)) {
+        callsiteLog(_err);
+    }
 }

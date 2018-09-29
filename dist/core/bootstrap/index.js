@@ -20,9 +20,7 @@ exports.isWorker = Worker.isWorker;
 exports.worker = null;
 exports.app = null;
 exports.http = null;
-exports.https = null;
 exports.ws = null;
-exports.wss = null;
 exports.dgram = null;
 let hostnames = ConfigLoader_1.config.server.hostname, hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames, httpServer = ConfigLoader_1.config.server.http, httpPort = httpServer.port, WS = ConfigLoader_1.config.server.websocket, workers = ConfigLoader_1.config.workers, serverStarted = false;
 function startServer() {
@@ -125,10 +123,10 @@ else if (exports.isWorker) {
             exports.http = new http_1.Server(exports.app.listener);
             break;
         case "https":
-            exports.http = exports.https = https_1.createServer(httpServer.options, exports.app.listener);
+            exports.http = https_1.createServer(httpServer.options, exports.app.listener);
             break;
         case "http2":
-            exports.http = exports.https = require("http2").createSecureServer(httpServer.options, exports.app.listener);
+            exports.http = require("http2").createSecureServer(httpServer.options, exports.app.listener);
             break;
     }
     if (WS.enabled) {
@@ -136,8 +134,6 @@ else if (exports.isWorker) {
             exports.ws = SocketIO(exports.http, WS.options);
         else
             exports.ws = SocketIO(WS.port, WS.options);
-        if (httpServer.type == "https" || httpServer.type == "http2")
-            exports.wss = exports.ws;
     }
     Worker.on("online", _worker => {
         exports.worker = _worker;

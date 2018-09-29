@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "A Service Framework for Node.js.",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -81,7 +81,7 @@
         "es6-promisify": "^6.0.0",
         "express-session": "^1.15.6",
         "fs-extra": "^6.0.1",
-        "function-intercepter": "^0.1.4",
+        "function-intercepter": "^0.1.5",
         "hide-protected-properties": "^0.1.1",
         "highlightjs": "^9.10.0",
         "ideal-filename": "^0.1.2",

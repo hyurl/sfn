@@ -14,7 +14,7 @@ var warningEmitted = false;
 exports.UploadOptions = {
     maxCount: 1,
     savePath: init_1.ROOT_PATH + "/uploads",
-    filter: (file) => file && file.size !== undefined,
+    filter: (file) => !!file,
     filename: "auto-increment"
 };
 class HttpController extends Controller_1.Controller {
@@ -28,7 +28,6 @@ class HttpController extends Controller_1.Controller {
         this.csrfProtection = false;
         this.cors = false;
         this.uploadOptions = Object.assign({}, exports.UploadOptions);
-        this.uploadConfig = this.uploadOptions;
         this.authorized = req.user !== null;
         this.req = req;
         this.res = res;

@@ -9,6 +9,7 @@ const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const functions_inner_1 = require("./functions-inner");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
+tslib_1.__exportStar(require("./upload"), exports);
 function rand(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -57,14 +58,6 @@ function event(name, Class, method) {
     }
 }
 exports.event = event;
-function upload(...fields) {
-    return (proto, prop) => {
-        if (!proto.Class.hasOwnProperty("UploadFields"))
-            proto.Class.UploadFields = {};
-        proto.Class.UploadFields[prop] = fields;
-    };
-}
-exports.upload = upload;
 let app, handle;
 function _route(...args) {
     let route = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;

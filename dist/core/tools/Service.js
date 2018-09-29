@@ -25,7 +25,6 @@ let Service = Service_1 = class Service extends events_1.EventEmitter {
         super(...arguments);
         this.lang = ConfigLoader_1.config.lang;
         this.logOptions = Object.assign({}, exports.LogOptions);
-        this.logConfig = this.logOptions;
     }
     i18n(text, ...replacements) {
         var locale = LocaleMap_1.LocaleMap, lang = this.lang.toLowerCase(), _lang = ConfigLoader_1.config.lang.toLowerCase();
@@ -38,9 +37,10 @@ let Service = Service_1 = class Service extends events_1.EventEmitter {
         return util.format(text, ...replacements);
     }
     get logger() {
-        let filename = this.logOptions.filename;
+        let filename = this.logOptions.filename || exports.LogOptions.filename;
         if (!Service_1.Loggers[filename]) {
-            Service_1.Loggers[filename] = new Logger(this.logOptions);
+            let options = Object.assign({}, exports.LogOptions, this.logOptions);
+            Service_1.Loggers[filename] = new Logger(options);
         }
         return Service_1.Loggers[filename];
     }

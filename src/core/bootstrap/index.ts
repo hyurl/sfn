@@ -26,12 +26,8 @@ export var worker: Worker = null;
 export var app: App = null;
 /** (worker only) The HTTP server. */
 export var http: HttpServer | HttpsServer | Http2SecureServer = null;
-/** (deprecated, use `http` instead, worker only) The HTTPS server. */
-export var https: HttpsServer | Http2SecureServer = null;
 /** (worker only) The WebSocket server created by **SocketIO**. */
 export var ws: SocketIO.Server = null;
-/** (deprecated, use `ws` instead, worker only) The WebSocket server created by **SocketIO**. */
-export var wss: SocketIO.Server = null;
 /** (master only) The Datagram server created by **dgramx**. */
 export var dgram: DgramServer = null;
 
@@ -191,10 +187,10 @@ if (Worker.isMaster && !isCli) {
             http = new HttpServer(app.listener);
             break;
         case "https":
-            http = https = createServer(httpServer.options, app.listener);
+            http = createServer(httpServer.options, app.listener);
             break;
         case "http2":
-            http = https = require("http2").createSecureServer(httpServer.options, app.listener);
+            http = require("http2").createSecureServer(httpServer.options, app.listener);
             break;
     }
 
@@ -203,9 +199,6 @@ if (Worker.isMaster && !isCli) {
             ws = SocketIO(http, WS.options);
         else
             ws = SocketIO(WS.port, WS.options);
-
-        if (httpServer.type == "https" || httpServer.type == "http2")
-            wss = ws;
     }
 
     Worker.on("online", _worker => {

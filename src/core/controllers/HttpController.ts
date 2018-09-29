@@ -22,19 +22,19 @@ export type HttpNextHandler = (controller: HttpController) => void;
 
 export type UploadOptions = {
     /** Maximum number of files that each form field can carry. */
-    maxCount: number;
+    maxCount?: number;
     /** A path in the disk that stores the uploaded files. */
-    savePath: string;
+    savePath?: string;
     /** Returns `true` to accept, `false` to reject. */
-    filter: (file: UploadingFile) => boolean;
+    filter?: (file: UploadingFile) => boolean;
     /** `auto-increment`, `random` or a function returns the filename. */
-    filename: "auto-increment" | "random" | ((file: UploadingFile) => string);
+    filename?: "auto-increment" | "random" | ((file: UploadingFile) => string);
 };
 
 export const UploadOptions: UploadOptions = {
     maxCount: 1,
     savePath: ROOT_PATH + "/uploads",
-    filter: (file) => file && file.size !== undefined,
+    filter: (file) => !!file,
     filename: "auto-increment"
 };
 
@@ -47,8 +47,6 @@ export interface UploadingFile {
     encoding: string;
     /** Mime type of the file. */
     mimetype: string;
-    /** Size of the file in bytes. */
-    size: number;
 }
 
 export interface UploadedFile extends UploadingFile {
@@ -58,6 +56,8 @@ export interface UploadedFile extends UploadingFile {
     filename: string;
     /** Location of the uploaded file. */
     path: string;
+    /** Size of the file in bytes. */
+    size: number;
 }
 
 /**
@@ -132,8 +132,6 @@ export class HttpController extends Controller {
     cors: string | string[] | CorsOptions | false = false;
     /** Configurations for uploading files. */
     uploadOptions: UploadOptions = Object.assign({}, UploadOptions);
-    /** `deprecated`, use `uploadOptions` instead. */
-    uploadConfig: UploadOptions = this.uploadOptions;
     /** Reference to the corresponding request context. */
     readonly req: Request;
     /** Reference to the corresponding response context. */

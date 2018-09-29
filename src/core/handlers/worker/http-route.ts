@@ -1,17 +1,13 @@
-import * as path from "path";
-import * as fs from "fs-extra";
 import * as zlib from "zlib";
-import * as multer from "multer";
 import * as cors from "sfn-cors";
-import * as date from "sfn-date";
 import { Model } from 'modelar';
 import values = require("lodash/values");
-import { idealFilename } from "ideal-filename";
+import { RouteHandler } from "webium";
 import { isTypeScript } from '../../../init';
 import { app } from "../../bootstrap/index";
 import { config, isDevMode } from "../../bootstrap/ConfigLoader";
 import { Controller } from "../../controllers/Controller";
-import { HttpController, UploadingFile } from "../../controllers/HttpController";
+import { HttpController } from "../../controllers/HttpController";
 import { HttpError } from "../../tools/HttpError";
 import { randStr } from "../../tools/functions";
 import { callsiteLog, callMethod, getFuncParams, callIntercepterChain } from "../../tools/functions-inner";
@@ -25,15 +21,6 @@ const EFFECT_METHODS: HttpRequestMethod[] = [
     "POST",
     "PUT"
 ];
-
-// for (let route in RouteMap) {
-//     let Class = RouteMap[route].Class,
-//         _route = route.split(/\s+/),
-//         method = _route[0] === "SSE" ? "GET" : _route[0],
-//         path = (Class.baseURI || "") + _route[1];
-
-//     app.method(method, path, getRouteHandler(route));
-// }
 
 app.onerror = function onerror(err: any, req: Request, res: Response) {
     res.keepAlive = false;
@@ -51,6 +38,104 @@ app.onerror = function onerror(err: any, req: Request, res: Response) {
         err = new HttpError(500);
 
     handleError(err, ctrl, req.method + " " + req.url);
+}
+
+export function getRouteHandler(route: string): RouteHandler {
+    return (req: Request, res: Response) => {
+        let { Class, method } = RouteMap[route],
+            ctrl: HttpController = null;
+
+        res.on("error", (err) => {
+            handleLog(err, ctrl, method);
+        });
+
+        // Handle the procedure in a Promise context.
+        new Promise((resolve, reject) => {
+            try {
+                let handleNext = getNextHandler(method, resolve, reject);
+
+                if (Class.length === 3) {
+                    ctrl = new Class(req, res, handleNext);
+                } else {
+                    ctrl = new Class(req, res);
+                    handleNext(ctrl);
+                }
+            } catch (err) {
+                reject(err);
+            }
+        }).then((data: any) => {
+            return handleResponse(ctrl, data);
+        }).then(() => {
+            return ctrl.after();
+        }).then(result => {
+            return result === false
+                ? result
+                : callIntercepterChain(Class.AfterIntercepters[method], ctrl);
+        }).catch((err: Error) => {
+            ctrl = ctrl || new HttpController(req, res);
+
+            handleError(err, ctrl, method);
+        });
+    }
+}
+
+function getNextHandler(
+    method: string,
+    resolve: (value: any) => any,
+    reject: (err: any) => void
+) {
+    return (ctrl: HttpController) => {
+        let { req, res } = ctrl,
+            { BeforeIntercepters, RequireAuth } = ctrl.Class;
+
+        // Run before filters.
+        Promise.resolve(ctrl.before()).then(result => {
+            if (result === false || res.sent)
+                return result;
+            else
+                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
+        }).then(result => {
+            if (result === false || res.sent) {
+                // if the response has been sent before calling the actual method,
+                // resolve the Promise immediately without running any checking 
+                // procedure, and don't call the method.
+                return resolve(null);
+            }
+
+            // Handle CORS.
+            if (!cors(<any>ctrl.cors, req, res)) {
+                throw new HttpError(410);
+            } else if (req.method === "OPTIONS") {
+                // cors will set proper headers for OPTIONS
+                res.end();
+                return;
+            }
+
+            // Handle authentication.
+            if (RequireAuth.includes(method) && !ctrl.authorized) {
+                if (ctrl.fallbackTo) {
+                    return res.redirect(ctrl.fallbackTo, 302);
+                } else {
+                    throw new HttpError(401);
+                }
+            }
+
+            // Handle CSRF token.
+            handleCsrfToken(ctrl);
+
+            // Handle GZip.
+            res.gzip = req.encoding == "gzip" && ctrl.gzip;
+
+            // Handle jsonp.
+            if (req.method == "GET" && ctrl.jsonp
+                && req.query[ctrl.jsonp]) {
+                res.jsonp = req.query[ctrl.jsonp];
+            }
+
+            // Handle file uploading.
+            return getResult(ctrl, method);
+        }).then(resolve).catch(reject);
+    }
 }
 
 export function handleLog(err: Error, ctrl: Controller, method?: string) {
@@ -81,10 +166,6 @@ export function handleLog(err: Error, ctrl: Controller, method?: string) {
     }
 }
 
-function finish(ctrl: HttpController): void {
-    ctrl.emit("finish", ctrl.req, ctrl.res);
-}
-
 function handleFinish(err: Error, ctrl: HttpController, method: string): void {
     handleLog(err, ctrl, method);
     finish(ctrl);
@@ -92,6 +173,175 @@ function handleFinish(err: Error, ctrl: HttpController, method: string): void {
     if (isDevMode && !(err instanceof HttpError)) {
         callsiteLog(err);
     }
+}
+
+function handleError(err: Error, ctrl: HttpController, method?: string) {
+    let { req, res } = ctrl;
+
+    // If the response is has already been sent, handle finish immediately.
+    if (res.sent)
+        return handleFinish(err, ctrl, method);
+
+    // If the response hasn't been sent, try to response the error in a proper 
+    // form to the client.
+
+    // Be friendly to EventSource.
+    if (err instanceof HttpError && err.code == 405 && req.isEventSource)
+        err = new HttpError(204);
+
+    let _err: Error = err;
+
+    if (!(err instanceof HttpError)) {
+        if (err instanceof Error && config.server.error.show)
+            err = new HttpError(500, err.message);
+        else
+            err = new HttpError(500);
+    }
+
+    if (req.accept == "application/json" || res.jsonp) {
+        // Send JSON response.
+        res.send(ctrl.error(err.message, (<HttpError>err).code));
+        handleFinish(_err, ctrl, method);
+    } else {
+        res.status = (<HttpError>err).code;
+
+        // Try to load the error page, if not present, then show the 
+        // error message.
+        ctrl.Class.httpErrorView(<HttpError>err, ctrl).then(content => {
+            res.type = "text/html";
+            res.send(content);
+            handleFinish(_err, ctrl, method);
+        }).catch(() => {
+            res.type = "text/plain";
+            res.send(err.message);
+            handleFinish(_err, ctrl, method);
+        });
+    }
+}
+
+async function getResult(ctrl: HttpController, method: string) {
+    return callMethod(ctrl, ctrl[method], ...(await getArguments(ctrl, method)));
+}
+
+async function getArguments(ctrl: HttpController, method: string) {
+    let { req, res } = ctrl,
+        data: string[] = values(req.params),
+        args: any[] = [],
+        fnParams = getFuncParams(ctrl[method]),
+        reqProps = ["request", "req"],
+        resProps = ["response", "res"];
+
+    // Dependency Injection
+    if (isTypeScript) {
+        // try to convert parameters to proper types according to 
+        // the definition of the method.
+        let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+
+        for (let i in meta) {
+            if (meta[i] == Number) { // inject number
+                args[i] = parseInt(data.shift());
+            } else if (meta[i] == Boolean) { // inject boolean
+                let val = data.shift();
+                args[i] = val == "false" || val == "0" ? false : true;
+            } else if (meta[i] == Object) {
+                if (reqProps.includes(fnParams[i])) // Inject Request
+                    args[i] = req;
+                else if (resProps.includes(fnParams[i])) // Inject Response
+                    args[i] = res;
+                else
+                    args[i] = data.shift();
+            } else if (meta[i].prototype instanceof Model) { // inject user-defined Model
+                if (req.method == "POST" && req.params.id === undefined) {
+                    // POST request means creating a new model.
+                    // If a POST request with an ID, which means the 
+                    // request isn't a RESTful request, DO NOT 
+                    // create new model.
+                    args[i] = (new (<typeof Model>meta[i])).use(req.db);
+                } else {
+                    // Other type of requests, such as GET, DELETE, 
+                    // PATCH, PUT, all need to retrieve an existing 
+                    // model.
+                    try {
+                        let id = parseInt(req.params.id);
+
+                        if (!id || isNaN(id))
+                            throw new HttpError(400);
+
+                        args[i] = await (<typeof Model>meta[i]).use(req.db).get(id);
+                    } catch (e) {
+                        args[i] = null;
+                        throw e;
+                    }
+                }
+            } else {
+                args[i] = data.shift();
+            }
+        }
+    } else {
+        for (let i in fnParams) {
+            if (reqProps.includes(fnParams[i]))
+                args[i] = req;
+            else if (resProps.includes(fnParams[i]))
+                args[i] = res;
+            else
+                args[i] = data.shift();
+        }
+    }
+
+    return args;
+}
+
+function handleResponse(ctrl: HttpController, data: any) {
+    let { req, res } = ctrl;
+
+    if (!res.sent) {
+        if (req.isEventSource) {
+            if (data !== null && data !== undefined)
+                ctrl.sse.send(data);
+        } else if (req.method === "HEAD") {
+            res.end();
+        } else if (data !== undefined) {
+            // Send data to the client.
+            let xml = /(text|application)\/xml\b/;
+            let type = <string>res.getHeader("Content-Type");
+
+            if (data === null) {
+                res.end("");
+            } else if (typeof data === "object" && type && xml.test(type)) {
+                res.xml(data);
+            } else if (data instanceof Buffer) {
+                res.send(data);
+            } else if (typeof data === "string" && res.gzip) {
+                return handleGzip(ctrl, data);
+            } else {
+                res.send(data);
+            }
+        }
+    }
+
+    return finish(ctrl);
+}
+
+function handleGzip(ctrl: HttpController, data: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+        let { res } = ctrl;
+        zlib.gzip(data, (err, _data) => {
+            if (err)
+                return reject(err);
+
+            res.headers["content-encoding"] = "gzip";
+            res.type = "text/html";
+            // Send compressed data.
+            res.end(_data);
+            resolve(_data);
+        });
+    }).then(data => {
+        return finish(ctrl);
+    });
+}
+
+function finish(ctrl: HttpController): void {
+    ctrl.emit("finish", ctrl.req, ctrl.res);
 }
 
 function handleCsrfToken(ctrl: HttpController): void {
@@ -146,351 +396,5 @@ function handleCsrfToken(ctrl: HttpController): void {
                 }
             });
         }
-    }
-}
-
-function getDestination(savePath: string, reject: Function) {
-    return (req, file: UploadingFile, cb) => {
-        fs.ensureDir(savePath, err => {
-            err ? reject(err) : cb(null, savePath);
-        });
-    }
-}
-
-function getFilename(ctrl: HttpController, savePath: string, reject: Function) {
-    return (req, file: UploadingFile, cb: Function) => {
-        try {
-            if (ctrl.uploadOptions.filename instanceof Function) {
-                // The filename is customized by the user.
-                let filename = ctrl.uploadOptions.filename(file);
-                cb(null, filename);
-            } else if (ctrl.uploadOptions.filename === "random") {
-                // The filename will be a random string.
-                let extname = path.extname(file.originalname),
-                    filename = randStr(32) + extname;
-                cb(null, filename);
-            } else {
-                // auto-increment
-                let filename = `${savePath}/${file.originalname}`;
-                idealFilename(filename).then(filename => {
-                    cb(null, path.basename(filename));
-                }).catch(err => {
-                    reject(err);
-                });
-            }
-        } catch (err) {
-            reject(err);
-        }
-    }
-}
-
-function getStorage(ctrl: HttpController, reject: Function) {
-    let savePath = `${ctrl.uploadOptions.savePath}/` + date("Y-m-d");
-    return multer.diskStorage({
-        destination: getDestination(savePath, reject),
-        filename: getFilename(ctrl, savePath, reject)
-    });
-}
-
-function getUploader(ctrl: HttpController, reject: Function) {
-    return multer({
-        storage: getStorage(ctrl, reject),
-        fileFilter: (req, file: UploadingFile, cb) => {
-            try {
-                cb(null, ctrl.uploadOptions.filter(file));
-            } catch (err) {
-                reject(err);
-            }
-        }
-    });
-}
-
-function handleUpload(
-    ctrl: HttpController,
-    method: string,
-    resolve: Function,
-    reject: Function
-) {
-    let { req, res } = ctrl,
-        uploadFields = ctrl.Class.UploadFields[method],
-        getResult = async () => {
-            let data: string[] = values(req.params),
-                params: any[] = [],
-                fnParams = getFuncParams(ctrl[method]),
-                reqProps = ["request", "req"],
-                resProps = ["response", "res"];
-
-            // Dependency Injection
-            if (isTypeScript) {
-                // try to convert parameters to proper types according to 
-                // the definition of the method.
-                let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
-
-                for (let i in meta) {
-                    if (meta[i] == Number) { // inject number
-                        params[i] = parseInt(data.shift());
-                    } else if (meta[i] == Boolean) { // inject boolean
-                        let val = data.shift();
-                        params[i] = val == "false" || val == "0" ? false : true;
-                    } else if (meta[i] == Object) {
-                        if (reqProps.includes(fnParams[i])) // Inject Request
-                            params[i] = req;
-                        else if (resProps.includes(fnParams[i])) // Inject Response
-                            params[i] = res;
-                        else
-                            params[i] = data.shift();
-                    } else if (meta[i].prototype instanceof Model) { // inject user-defined Model
-                        if (req.method == "POST" && req.params.id === undefined) {
-                            // POST request means creating a new model.
-                            // If a POST request with an ID, which means the 
-                            // request isn't a RESTful request, DO NOT 
-                            // create new model.
-                            params[i] = (new (<typeof Model>meta[i])).use(req.db);
-                        } else {
-                            // Other type of requests, such as GET, DELETE, 
-                            // PATCH, PUT, all need to retrieve an existing 
-                            // model.
-                            try {
-                                let id = parseInt(req.params.id);
-
-                                if (!id || isNaN(id))
-                                    throw new HttpError(400);
-
-                                params[i] = await (<typeof Model>meta[i]).use(req.db).get(id);
-                            } catch (e) {
-                                params[i] = null;
-                                throw e;
-                            }
-                        }
-                    } else {
-                        params[i] = data.shift();
-                    }
-                }
-            } else {
-                for (let i in fnParams) {
-                    if (reqProps.includes(fnParams[i]))
-                        params[i] = req;
-                    else if (resProps.includes(fnParams[i]))
-                        params[i] = res;
-                    else
-                        params[i] = data.shift();
-                }
-            }
-
-            return await callMethod(ctrl, ctrl[method], ...params);
-        };
-
-    if (req.method == "POST" && uploadFields && uploadFields.length) {
-        // Configure fields.
-        let fields: Array<{ name: string, maxCount: number }> = [];
-        for (let field of uploadFields) {
-            fields.push({
-                name: field,
-                maxCount: ctrl.uploadOptions.maxCount
-            });
-        }
-
-        let uploader = getUploader(ctrl, reject);
-        let handle = uploader.fields(fields);
-
-        handle(<any>req, <any>res, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(getResult());
-            }
-        });
-    } else {
-        resolve(getResult());
-    }
-}
-
-function handleError(err: Error, ctrl: HttpController, method?: string) {
-    let { req, res } = ctrl;
-
-    // If the response is has already been sent, handle finish immediately.
-    if (res.sent)
-        return handleFinish(err, ctrl, method);
-
-    // If the response hasn't been sent, try to response the error in a proper 
-    // form to the client.
-
-    // Be friendly to EventSource.
-    if (err instanceof HttpError && err.code == 405 && req.isEventSource)
-        err = new HttpError(204);
-
-    let _err: Error = err;
-
-    if (!(err instanceof HttpError)) {
-        if (err instanceof Error && config.server.error.show)
-            err = new HttpError(500, err.message);
-        else
-            err = new HttpError(500);
-    }
-
-    if (req.accept == "application/json" || res.jsonp) {
-        // Send JSON response.
-        res.send(ctrl.error(err.message, (<HttpError>err).code));
-        handleFinish(_err, ctrl, method);
-    } else {
-        res.status = (<HttpError>err).code;
-
-        // Try to load the error page, if not present, then show the 
-        // error message.
-        ctrl.Class.httpErrorView(<HttpError>err, ctrl).then(content => {
-            res.type = "text/html";
-            res.send(content);
-            handleFinish(_err, ctrl, method);
-        }).catch(() => {
-            res.type = "text/plain";
-            res.send(err.message);
-            handleFinish(_err, ctrl, method);
-        });
-    }
-}
-
-function getNextHandler(
-    method: string,
-    resolve: Function,
-    reject: Function
-) {
-    return (ctrl: HttpController) => {
-        let { req, res } = ctrl,
-            { BeforeIntercepters, RequireAuth } = ctrl.Class;
-
-        // Run before filters.
-        Promise.resolve(ctrl.before()).then(result => {
-            if (result === false || res.sent)
-                return result;
-            else
-                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
-        }).then(result => {
-            if (result === false || res.sent) {
-                // if the response has been sent before calling the actual method,
-                // resolve the Promise immediately without running any checking 
-                // procedure, and don't call the method.
-                return resolve(null);
-            }
-
-            // Handle CORS.
-            if (!cors(<any>ctrl.cors, req, res)) {
-                throw new HttpError(410);
-            } else if (req.method === "OPTIONS") {
-                // cors will set proper headers for OPTIONS
-                res.end();
-                return;
-            }
-
-            // Handle authentication.
-            if (RequireAuth.includes(method) && !ctrl.authorized) {
-                if (ctrl.fallbackTo) {
-                    return res.redirect(ctrl.fallbackTo, 302);
-                } else {
-                    throw new HttpError(401);
-                }
-            }
-
-            // Handle CSRF token.
-            handleCsrfToken(ctrl);
-
-            // Handle GZip.
-            res.gzip = req.encoding == "gzip" && ctrl.gzip;
-
-            // Handle jsonp.
-            if (req.method == "GET" && ctrl.jsonp
-                && req.query[ctrl.jsonp]) {
-                res.jsonp = req.query[ctrl.jsonp];
-            }
-
-            // Handle file uploading.
-            handleUpload(ctrl, method, resolve, reject);
-        }).catch(err => {
-            reject(err);
-        });
-    }
-}
-
-function handleGzip(res: Response, data: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-        zlib.gzip(data, (err, _data) => {
-            if (err)
-                return reject(err);
-
-            res.headers["content-encoding"] = "gzip";
-            res.type = "text/html";
-            // Send compressed data.
-            res.end(_data);
-            resolve(_data);
-        });
-    });
-}
-
-function handleResponse(ctrl: HttpController, data: any) {
-    let { req, res } = ctrl;
-
-    if (!res.sent) {
-        if (req.isEventSource) {
-            if (data !== null && data !== undefined)
-                ctrl.sse.send(data);
-        } else if (req.method === "HEAD") {
-            return res.end();
-        } else if (data !== undefined) {
-            // Send data to the client.
-            let xml = /(text|application)\/xml\b/;
-            let type = <string>res.getHeader("Content-Type");
-
-            if (data === null) {
-                res.end("");
-            } else if (typeof data === "object" && type && xml.test(type)) {
-                res.xml(data);
-            } else if (data instanceof Buffer) {
-                res.send(data);
-            } else if (typeof data === "string" && res.gzip) {
-                return handleGzip(res, data);
-            } else {
-                res.send(data);
-            }
-        }
-    }
-
-    return finish(ctrl);
-}
-
-export function getRouteHandler(route: string) {
-    return (req: Request, res: Response) => {
-        let { Class, method } = RouteMap[route],
-            ctrl: HttpController = null;
-
-        res.on("error", (err) => {
-            handleLog(err, ctrl, method);
-        });
-
-        // Handle the procedure in a Promise context.
-        new Promise((resolve, reject) => {
-            try {
-                let handleNext = getNextHandler(method, resolve, reject);
-
-                if (Class.length === 3) {
-                    ctrl = new Class(req, res, handleNext);
-                } else {
-                    ctrl = new Class(req, res);
-                    handleNext(ctrl);
-                }
-            } catch (err) {
-                reject(err);
-            }
-        }).then((data: any) => {
-            return handleResponse(ctrl, data);
-        }).then(() => {
-            return ctrl.after();
-        }).then(result => {
-            return result === false
-                ? result
-                : callIntercepterChain(Class.AfterIntercepters[method], ctrl);
-        }).catch((err: Error) => {
-            ctrl = ctrl || new HttpController(req, res);
-
-            handleError(err, ctrl, method);
-        });
     }
 }

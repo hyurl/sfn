@@ -96,8 +96,6 @@ export interface SFNConfig {
              */
             options?: https.ServerOptions & http2.ServerOptions;
         };
-        /** (deprecated) use `http` instead. */
-        https?: SFNConfig["server"]["http"];
         /** Configurations of WebSocket server. */
         websocket?: {
             enabled?: boolean;
