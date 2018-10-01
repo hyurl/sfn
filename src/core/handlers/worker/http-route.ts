@@ -88,10 +88,27 @@ function getNextHandler(
         let { req, res } = ctrl,
             { BeforeIntercepters, RequireAuth } = ctrl.Class;
 
-        // Run before filters.
-        Promise.resolve(ctrl.before()).then(result => {
+        new Promise((_resolve, _reject) => {
+            // Handle CORS.
+            if (!cors(<any>ctrl.cors, req, res)) {
+                return _reject(new HttpError(410));
+            } else if (req.method === "OPTIONS") {
+                // cors will set proper headers for OPTIONS
+                res.end();
+                return _resolve(false);
+            }
+
+            // Handle CSRF token.
+            handleCsrfToken(ctrl);
+            _resolve(null);
+        }).then(result => {
             if (result === false || res.sent)
-                return result;
+                return false;
+            else
+                return ctrl.before();
+        }).then(result => {
+            if (result === false || res.sent)
+                return false;
             else
                 return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
         }).then(result => {
@@ -100,15 +117,6 @@ function getNextHandler(
                 // resolve the Promise immediately without running any checking 
                 // procedure, and don't call the method.
                 return resolve(null);
-            }
-
-            // Handle CORS.
-            if (!cors(<any>ctrl.cors, req, res)) {
-                throw new HttpError(410);
-            } else if (req.method === "OPTIONS") {
-                // cors will set proper headers for OPTIONS
-                res.end();
-                return;
             }
 
             // Handle authentication.
@@ -120,9 +128,6 @@ function getNextHandler(
                 }
             }
 
-            // Handle CSRF token.
-            handleCsrfToken(ctrl);
-
             // Handle GZip.
             res.gzip = req.encoding == "gzip" && ctrl.gzip;
 
@@ -132,7 +137,6 @@ function getNextHandler(
                 res.jsonp = req.query[ctrl.jsonp];
             }
 
-            // Handle file uploading.
             return getResult(ctrl, method);
         }).then(resolve).catch(reject);
     }

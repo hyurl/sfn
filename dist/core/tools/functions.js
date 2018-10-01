@@ -5,21 +5,16 @@ const dgram = require("dgramx");
 const es6_promisify_1 = require("es6-promisify");
 const pidusage = require("pidusage");
 const values = require("lodash/values");
+const random = require("lodash/random");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const functions_inner_1 = require("./functions-inner");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
 tslib_1.__exportStar(require("./upload"), exports);
-function rand(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-exports.rand = rand;
 function randStr(length = 5, chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") {
     var str = "", max = chars.length - 1;
     for (let i = 0; i < length; i++) {
-        str += chars[rand(0, max)];
+        str += chars[random(0, max)];
     }
     return str;
 }

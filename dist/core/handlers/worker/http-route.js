@@ -73,21 +73,29 @@ exports.getRouteHandler = getRouteHandler;
 function getNextHandler(method, resolve, reject) {
     return (ctrl) => {
         let { req, res } = ctrl, { BeforeIntercepters, RequireAuth } = ctrl.Class;
-        Promise.resolve(ctrl.before()).then(result => {
+        new Promise((_resolve, _reject) => {
+            if (!cors(ctrl.cors, req, res)) {
+                return _reject(new HttpError_1.HttpError(410));
+            }
+            else if (req.method === "OPTIONS") {
+                res.end();
+                return _resolve(false);
+            }
+            handleCsrfToken(ctrl);
+            _resolve(null);
+        }).then(result => {
             if (result === false || res.sent)
-                return result;
+                return false;
+            else
+                return ctrl.before();
+        }).then(result => {
+            if (result === false || res.sent)
+                return false;
             else
                 return functions_inner_1.callIntercepterChain(BeforeIntercepters[method], ctrl, true);
         }).then(result => {
             if (result === false || res.sent) {
                 return resolve(null);
-            }
-            if (!cors(ctrl.cors, req, res)) {
-                throw new HttpError_1.HttpError(410);
-            }
-            else if (req.method === "OPTIONS") {
-                res.end();
-                return;
             }
             if (RequireAuth.includes(method) && !ctrl.authorized) {
                 if (ctrl.fallbackTo) {
@@ -97,7 +105,6 @@ function getNextHandler(method, resolve, reject) {
                     throw new HttpError_1.HttpError(401);
                 }
             }
-            handleCsrfToken(ctrl);
             res.gzip = req.encoding == "gzip" && ctrl.gzip;
             if (req.method == "GET" && ctrl.jsonp
                 && req.query[ctrl.jsonp]) {

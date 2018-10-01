@@ -2,6 +2,7 @@ import * as dgram from "dgramx";
 import { promisify } from "es6-promisify";
 import pidusage = require("pidusage");
 import values = require("lodash/values");
+import random = require("lodash/random");
 import { config } from "../bootstrap/ConfigLoader";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
@@ -19,17 +20,6 @@ import { App, RouteHandler } from "webium";
 export * from "./upload";
 
 /** 
- * Generates a random number.
- * @param min The minimum number.
- * @param max The maximum number (inclusive).
- */
-export function rand(min: number, max: number): number {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/** 
  * Generates a random string.
  * @param length The string length.
  * @param chars The possible characters.
@@ -41,7 +31,7 @@ export function randStr(
     var str = "",
         max = chars.length - 1;
     for (let i = 0; i < length; i++) {
-        str += chars[rand(0, max)];
+        str += chars[random(0, max)];
     }
     return str;
 }
