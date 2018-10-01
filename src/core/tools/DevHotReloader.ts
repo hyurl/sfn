@@ -1,10 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
 
-/**
- * Development mode file watcher, if a directory is watched, when the files in
- * it is modified, the workers will be restarted.
- */
 export class DevHotReloader {
     readonly watcher: fs.FSWatcher;
 
