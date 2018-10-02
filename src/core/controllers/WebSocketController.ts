@@ -5,6 +5,7 @@ import { config } from "../bootstrap/ConfigLoader";
 
 var warningEmitted = false;
 
+/** @deprecated */
 export type WebSocketNextHandler = (controller: WebSocketController) => void;
 
 /**

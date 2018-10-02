@@ -6,25 +6,44 @@ const multer = require("multer");
 const date = require("sfn-date");
 const ideal_filename_1 = require("ideal-filename");
 const function_intercepter_1 = require("function-intercepter");
+const init_1 = require("../../init");
 const functions_1 = require("./functions");
-const HttpController_1 = require("../controllers/HttpController");
-function upload(...fields) {
+exports.UploadOptions = {
+    maxCount: 1,
+    savePath: init_1.ROOT_PATH + "/uploads",
+    filter: (file) => !!file,
+    filename: "auto-increment"
+};
+function upload(...args) {
     return function_intercepter_1.interceptAsync().before(function () {
-        let _fileds = [], { req, res, uploadOptions: { maxCount = HttpController_1.UploadOptions.maxCount, savePath = HttpController_1.UploadOptions.savePath, filter = HttpController_1.UploadOptions.filter, filename = HttpController_1.UploadOptions.filename } } = this;
+        let fields = [], options = {}, { req, res } = this;
         if (req.method != "POST")
             return;
-        savePath += "/" + date("Y-m-d");
-        fields.forEach(name => _fileds.push({ name, maxCount }));
+        if (typeof args[0] == "object") {
+            options = Object.assign(options, args[0]);
+        }
+        else {
+            for (let field of args) {
+                options[field] = {};
+            }
+        }
+        for (let x in options) {
+            Object.assign(options[x], exports.UploadOptions, this.uploadOptions);
+            options[x].savePath += "/" + date("Y-m-d");
+            fields.push({ name: x, maxCount: options[x].maxCount });
+        }
         return new Promise((resolve, reject) => {
             let handle = multer({
                 storage: multer.diskStorage({
                     destination: (req, file, cb) => {
+                        let { savePath } = options[file.fieldname];
                         fs.ensureDir(savePath, err => {
                             cb(err, savePath);
                         });
                     },
                     filename: (req, file, cb) => {
                         try {
+                            let { filename, savePath } = options[file.fieldname];
                             if (typeof filename == "function") {
                                 cb(null, filename(file));
                             }
@@ -48,13 +67,13 @@ function upload(...fields) {
                 }),
                 fileFilter: (req, file, cb) => {
                     try {
-                        cb(null, filter(file));
+                        cb(null, options[file.fieldname].filter(file));
                     }
                     catch (err) {
                         cb(err, false);
                     }
                 }
-            }).fields(_fileds);
+            }).fields(fields);
             handle(req, res, (err) => {
                 err ? reject(err) : resolve(void 0);
             });

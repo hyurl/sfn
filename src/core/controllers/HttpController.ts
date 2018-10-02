@@ -4,7 +4,7 @@ import { DB, User } from "modelar";
 import { EjsEngine } from "sfn-ejs-engine";
 import * as SSE from "sfn-sse";
 import { CorsOption as CorsOptions } from "sfn-cors";
-import { SRC_PATH, ROOT_PATH } from "../../init";
+import { SRC_PATH } from "../../init";
 import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { Controller } from "./Controller";
 import { TemplateEngine } from "../tools/TemplateEngine";
@@ -12,53 +12,15 @@ import { MarkdownParser } from "../tools/MarkdownParser";
 import { Request, Response, Session } from "../tools/interfaces";
 import { HttpError } from "../tools/HttpError";
 import { realSSE } from "../tools/symbols";
+import { UploadOptions } from "../tools/upload";
 
 export { CorsOptions };
 
 const Engine = new EjsEngine();
 var warningEmitted = false;
 
+/** @deprecated */
 export type HttpNextHandler = (controller: HttpController) => void;
-
-export type UploadOptions = {
-    /** Maximum number of files that each form field can carry. */
-    maxCount?: number;
-    /** A path in the disk that stores the uploaded files. */
-    savePath?: string;
-    /** Returns `true` to accept, `false` to reject. */
-    filter?: (file: UploadingFile) => boolean;
-    /** `auto-increment`, `random` or a function returns the filename. */
-    filename?: "auto-increment" | "random" | ((file: UploadingFile) => string);
-};
-
-export const UploadOptions: UploadOptions = {
-    maxCount: 1,
-    savePath: ROOT_PATH + "/uploads",
-    filter: (file) => !!file,
-    filename: "auto-increment"
-};
-
-export interface UploadingFile {
-    /** Field name specified in the form. */
-    fieldname: string;
-    /** Name of the file on the user's computer. */
-    originalname: string;
-    /** Encoding type of the file. */
-    encoding: string;
-    /** Mime type of the file. */
-    mimetype: string;
-}
-
-export interface UploadedFile extends UploadingFile {
-    /** The folder to which the file has been saved. */
-    destination: string;
-    /** The name of the file within the destination. */
-    filename: string;
-    /** Location of the uploaded file. */
-    path: string;
-    /** Size of the file in bytes. */
-    size: number;
-}
 
 /**
  * HttpController manages requests come from an HTTP client.

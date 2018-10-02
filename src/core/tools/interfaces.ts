@@ -2,10 +2,9 @@ import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import * as modelar from "modelar";
 import { Controller } from "../controllers/Controller";
-import { HttpController, UploadedFile } from "../controllers/HttpController";
+import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-
-export type HttpRequestMethod = string;
+import { UploadedFile } from "./upload";
 
 export interface Locale {
     [statement: string]: string;

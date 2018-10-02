@@ -130,7 +130,7 @@ function getResult(ctrl: WebSocketController, method: string, data: any[]) {
 function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
     let args: any[] = [],
         fnParams = getFuncParams(ctrl[method]),
-        socketProps = ["websocket", "socket", "sock", "webSocket"];
+        socketParams = ["websocket", "socket", "sock", "webSocket"];
 
     // Dependency Injection
     if (isTypeScript) {
@@ -138,15 +138,15 @@ function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
         // the definition of the method.
         let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
-        for (let i in meta) {
-            if (meta[i] == Object && socketProps.includes(fnParams[i]))
+        for (let i = 0; i < meta.length; i++) {
+            if (meta[i] == Object && socketParams.includes(fnParams[i]))
                 args[i] = ctrl.socket;
             else
                 args[i] = data.shift();
         }
     } else {
-        for (let i in fnParams) {
-            if (socketProps.includes(fnParams[i]))
+        for (let i = 0; i < fnParams.length; i++) {
+            if (socketParams.includes(fnParams[i]))
                 args[i] = ctrl.socket;
             else
                 args[i] = data.shift();

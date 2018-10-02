@@ -100,19 +100,19 @@ function getResult(ctrl, method, data) {
     return functions_inner_1.callMethod(ctrl, ctrl[method], ...getArguments(ctrl, method, data));
 }
 function getArguments(ctrl, method, data) {
-    let args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), socketProps = ["websocket", "socket", "sock", "webSocket"];
+    let args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), socketParams = ["websocket", "socket", "sock", "webSocket"];
     if (init_1.isTypeScript) {
         let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
-        for (let i in meta) {
-            if (meta[i] == Object && socketProps.includes(fnParams[i]))
+        for (let i = 0; i < meta.length; i++) {
+            if (meta[i] == Object && socketParams.includes(fnParams[i]))
                 args[i] = ctrl.socket;
             else
                 args[i] = data.shift();
         }
     }
     else {
-        for (let i in fnParams) {
-            if (socketProps.includes(fnParams[i]))
+        for (let i = 0; i < fnParams.length; i++) {
+            if (socketParams.includes(fnParams[i]))
                 args[i] = ctrl.socket;
             else
                 args[i] = data.shift();

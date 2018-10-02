@@ -14,7 +14,7 @@ import { SRC_PATH, ROOT_PATH } from "./init";
 /**
  * @see https://www.npmjs.com/package/serve-static
  */
-export interface StaticOptions extends serveStatic.ServeStaticOptions {
+interface StaticOptions extends serveStatic.ServeStaticOptions {
     setHeaders?: (res: ServerResponse, path: string, stat: Stats) => void;
 };
 

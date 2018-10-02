@@ -11,11 +11,11 @@ import { HttpController } from "../../controllers/HttpController";
 import { HttpError } from "../../tools/HttpError";
 import { randStr } from "../../tools/functions";
 import { callsiteLog, callMethod, getFuncParams, callIntercepterChain } from "../../tools/functions-inner";
-import { Request, Response, HttpRequestMethod } from "../../tools/interfaces";
+import { Request, Response } from "../../tools/interfaces";
 import { realCsrfToken } from "../../tools/symbols";
 import { RouteMap } from "../../tools/RouteMap";
 
-const EFFECT_METHODS: HttpRequestMethod[] = [
+const EFFECT_METHODS: string[] = [
     "DELETE",
     "PATCH",
     "POST",
@@ -232,8 +232,8 @@ async function getArguments(ctrl: HttpController, method: string) {
         data: string[] = values(req.params),
         args: any[] = [],
         fnParams = getFuncParams(ctrl[method]),
-        reqProps = ["request", "req"],
-        resProps = ["response", "res"];
+        reqParams = ["request", "req"],
+        resParams = ["response", "res"];
 
     // Dependency Injection
     if (isTypeScript) {
@@ -241,16 +241,16 @@ async function getArguments(ctrl: HttpController, method: string) {
         // the definition of the method.
         let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
-        for (let i in meta) {
+        for (let i = 0; i < meta.length; i++) {
             if (meta[i] == Number) { // inject number
                 args[i] = parseInt(data.shift());
             } else if (meta[i] == Boolean) { // inject boolean
                 let val = data.shift();
                 args[i] = val == "false" || val == "0" ? false : true;
             } else if (meta[i] == Object) {
-                if (reqProps.includes(fnParams[i])) // Inject Request
+                if (reqParams.includes(fnParams[i])) // Inject Request
                     args[i] = req;
-                else if (resProps.includes(fnParams[i])) // Inject Response
+                else if (resParams.includes(fnParams[i])) // Inject Response
                     args[i] = res;
                 else
                     args[i] = data.shift();
@@ -282,10 +282,10 @@ async function getArguments(ctrl: HttpController, method: string) {
             }
         }
     } else {
-        for (let i in fnParams) {
-            if (reqProps.includes(fnParams[i]))
+        for (let i = 0; i < fnParams.length; i++) {
+            if (reqParams.includes(fnParams[i]))
                 args[i] = req;
-            else if (resProps.includes(fnParams[i]))
+            else if (resParams.includes(fnParams[i]))
                 args[i] = res;
             else
                 args[i] = data.shift();
@@ -337,9 +337,9 @@ function handleGzip(ctrl: HttpController, data: any): Promise<any> {
             res.type = "text/html";
             // Send compressed data.
             res.end(_data);
-            resolve(_data);
+            resolve(null);
         });
-    }).then(data => {
+    }).then(() => {
         return finish(ctrl);
     });
 }

@@ -8,6 +8,7 @@ const chalk_1 = require("chalk");
 const date = require("sfn-date");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const functions_1 = require("./functions");
+const upload_1 = require("./upload");
 function loadLanguagePack(filename) {
     let ext = path_1.extname(filename), name = path_1.basename(filename, ext).replace(/\-/g, ""), _module = require(filename), lang;
     if (typeof _module[name] === "object") {
@@ -91,7 +92,7 @@ function applyHttpControllerDoc(Class) {
         if (meta[method].route)
             functions_1.route(meta[method].route, Class, method);
         if (meta[method].upload)
-            functions_1.upload(...meta[method].upload)(Class.prototype, method);
+            upload_1.upload(...meta[method].upload)(Class.prototype, method);
         if (meta[method].requireAuth)
             functions_1.requireAuth(Class.prototype, method);
     }

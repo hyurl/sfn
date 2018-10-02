@@ -13,7 +13,7 @@ import Cache = require("sfn-cache");
 
 export { date, Mail, OutputBuffer, Logger, Worker, Validator, SSE, Cache };
 export * from "sfn-scheduler";
-export * from "sfn-cookie";
+export { Cookie, CookieOptions } from "sfn-cookie";
 export * from "sfn-xss";
 export * from "./init";
 export * from "./config";
@@ -22,8 +22,7 @@ export * from "./core/tools/functions";
 export * from "./core/tools/HttpError";
 export * from "./core/tools/SocketError";
 export * from "./core/tools/MarkdownParser";
-export * from "./core/tools/RouteMap";
-export * from "./core/tools/EventMap";
+export * from "./core/tools/upload";
 // load user config before loading subsequent modules
 export * from "./core/bootstrap/ConfigLoader";
 export * from "./core/tools/Service";

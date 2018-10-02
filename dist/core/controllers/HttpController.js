@@ -9,14 +9,9 @@ const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const Controller_1 = require("./Controller");
 const MarkdownParser_1 = require("../tools/MarkdownParser");
 const symbols_1 = require("../tools/symbols");
+const upload_1 = require("../tools/upload");
 const Engine = new sfn_ejs_engine_1.EjsEngine();
 var warningEmitted = false;
-exports.UploadOptions = {
-    maxCount: 1,
-    savePath: init_1.ROOT_PATH + "/uploads",
-    filter: (file) => !!file,
-    filename: "auto-increment"
-};
 class HttpController extends Controller_1.Controller {
     constructor(req, res, next = null) {
         super();
@@ -27,7 +22,7 @@ class HttpController extends Controller_1.Controller {
         this.jsonp = false;
         this.csrfProtection = false;
         this.cors = false;
-        this.uploadOptions = Object.assign({}, exports.UploadOptions);
+        this.uploadOptions = Object.assign({}, upload_1.UploadOptions);
         this.authorized = req.user !== null;
         this.req = req;
         this.res = res;

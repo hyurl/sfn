@@ -10,7 +10,6 @@ const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const functions_inner_1 = require("./functions-inner");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
-tslib_1.__exportStar(require("./upload"), exports);
 function randStr(length = 5, chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") {
     var str = "", max = chars.length - 1;
     for (let i = 0; i < length; i++) {

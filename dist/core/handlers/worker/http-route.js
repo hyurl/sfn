@@ -179,10 +179,10 @@ function getResult(ctrl, method) {
 }
 function getArguments(ctrl, method) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let { req, res } = ctrl, data = values(req.params), args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), reqProps = ["request", "req"], resProps = ["response", "res"];
+        let { req, res } = ctrl, data = values(req.params), args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), reqParams = ["request", "req"], resParams = ["response", "res"];
         if (init_1.isTypeScript) {
             let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
-            for (let i in meta) {
+            for (let i = 0; i < meta.length; i++) {
                 if (meta[i] == Number) {
                     args[i] = parseInt(data.shift());
                 }
@@ -191,9 +191,9 @@ function getArguments(ctrl, method) {
                     args[i] = val == "false" || val == "0" ? false : true;
                 }
                 else if (meta[i] == Object) {
-                    if (reqProps.includes(fnParams[i]))
+                    if (reqParams.includes(fnParams[i]))
                         args[i] = req;
-                    else if (resProps.includes(fnParams[i]))
+                    else if (resParams.includes(fnParams[i]))
                         args[i] = res;
                     else
                         args[i] = data.shift();
@@ -221,10 +221,10 @@ function getArguments(ctrl, method) {
             }
         }
         else {
-            for (let i in fnParams) {
-                if (reqProps.includes(fnParams[i]))
+            for (let i = 0; i < fnParams.length; i++) {
+                if (reqParams.includes(fnParams[i]))
                     args[i] = req;
-                else if (resProps.includes(fnParams[i]))
+                else if (resParams.includes(fnParams[i]))
                     args[i] = res;
                 else
                     args[i] = data.shift();
@@ -274,9 +274,9 @@ function handleGzip(ctrl, data) {
             res.headers["content-encoding"] = "gzip";
             res.type = "text/html";
             res.end(_data);
-            resolve(_data);
+            resolve(null);
         });
-    }).then(data => {
+    }).then(() => {
         return finish(ctrl);
     });
 }

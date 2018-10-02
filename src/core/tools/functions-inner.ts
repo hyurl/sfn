@@ -8,7 +8,8 @@ import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { config } from "../bootstrap/ConfigLoader";
-import { ControllerIntercepter, route, event, upload, requireAuth } from './functions';
+import { ControllerIntercepter, route, event, requireAuth } from './functions';
+import { upload } from "./upload";
 
 export function loadLanguagePack(filename: string): Locale {
     let ext = extname(filename),

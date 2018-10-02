@@ -17,8 +17,6 @@ import {
 } from './interfaces';
 import { App, RouteHandler } from "webium";
 
-export * from "./upload";
-
 /** 
  * Generates a random string.
  * @param length The string length.
@@ -150,6 +148,7 @@ route.put = function (...args) {
     return _route("PUT", ...args);
 };
 
+/** @deprecated */
 export type ControllerIntercepter<T extends Controller = Controller> = (this: T, ctrl: T) => boolean | void | Promise<boolean | void>;
 
 let intercepterWarning = "Using `@before()` and `@after()` decorators is deprecated, please install `function-intercepter` module instead.";
@@ -163,6 +162,7 @@ let tryWarnDeprecation = () => {
 
 /**
  * Adds an intercepter function to run before the actual method is called.
+ * @deprecated
  * @param fn The intercepter function accepts an only argument which is the 
  *  controller instance, returning `false` in the function will break the 
  *  calling chain. Apart from that, in `HttpController`, calling response 
@@ -187,6 +187,7 @@ export function before<T extends Controller = Controller>(fn: ControllerIntercep
 
 /**
  * Adds an intercepter function to run after the actual method is called.
+ * @deprecated
  * @param fn The intercepter function accepts an only argument which is the 
  *  controller instance, returning `false` in the function will break the 
  *  calling chain. You should not send any response in these intercepters.
