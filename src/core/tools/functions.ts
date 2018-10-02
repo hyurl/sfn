@@ -69,7 +69,7 @@ export function event(name: string, Class?: typeof WebSocketController, method?:
     if (arguments.length === 1) {
         return (proto: WebSocketController, prop: string) => {
             let nsp: string = proto.Class.namespace || "/";
-            
+
             if (!EventMap[nsp]) EventMap[nsp] = {};
 
             EventMap[nsp][name] = {
@@ -81,16 +81,6 @@ export function event(name: string, Class?: typeof WebSocketController, method?:
         return event(name)(Class.prototype, method);
     }
 }
-
-/** Allows the method accept file uploading with specified fields. */
-// export function upload(...fields: string[]): HttpDecorator {
-//     return (proto: HttpController, prop: string) => {
-//         if (!proto.Class.hasOwnProperty("UploadFields"))
-//             proto.Class.UploadFields = {};
-
-//         proto.Class.UploadFields[prop] = fields;
-//     };
-// }
 
 let app: App, handle: (route: string) => RouteHandler;
 
@@ -108,8 +98,8 @@ function _route(...args) {
                 method = _route[0] === "SSE" ? "GET" : __route[0],
                 path = (proto.Class.baseURI || "") + __route[1];
 
-            app = app || (app = require("../bootstrap/index").app),
-                handle = handle || (handle = require("../handlers/worker/http-route").getRouteHandler);
+            app = app || (app = require("../bootstrap/index").app);
+            handle = handle || (handle = require("../handlers/worker/http-route").getRouteHandler);
 
             app.method(method, path, handle(route), true);
         };
