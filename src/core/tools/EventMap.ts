@@ -1,7 +1,7 @@
 import { WebSocketController } from "../controllers/WebSocketController";
 
 export interface EventMap {
-    [namespace: string]: {
+    [nsp: string]: {
         [event: string]: {
             Class: typeof WebSocketController;
             method: string;

@@ -35,6 +35,6 @@ class WebSocketController extends Controller_1.Controller {
         this.socket.user = v;
     }
 }
-WebSocketController.namespace = "/";
+WebSocketController.nsp = "/";
 exports.WebSocketController = WebSocketController;
 //# sourceMappingURL=WebSocketController.js.map

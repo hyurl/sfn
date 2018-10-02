@@ -38,7 +38,7 @@ exports.requireAuth = (proto, prop) => {
 function event(name, Class, method) {
     if (arguments.length === 1) {
         return (proto, prop) => {
-            let nsp = proto.Class.namespace || "/";
+            let nsp = proto.Class.nsp || "/";
             if (!EventMap_1.EventMap[nsp])
                 EventMap_1.EventMap[nsp] = {};
             EventMap_1.EventMap[nsp][name] = {

@@ -68,7 +68,7 @@ export function event(name: string, Class: typeof WebSocketController, method: s
 export function event(name: string, Class?: typeof WebSocketController, method?: string) {
     if (arguments.length === 1) {
         return (proto: WebSocketController, prop: string) => {
-            let nsp: string = proto.Class.namespace || "/";
+            let nsp: string = proto.Class.nsp || "/";
 
             if (!EventMap[nsp]) EventMap[nsp] = {};
 
