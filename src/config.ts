@@ -37,22 +37,10 @@ export interface SFNConfig {
      */
     awaitGenerator?: boolean;
     /**
-     * Worker names, each one will be forked as a service worker. In production 
-     * environment, you should at least set two workers, so that to prevent 
-     * temporary shunt-down of service when reloading.
-     */
-    workers?: string[];
-    /**
      * The directories that serve static resources.
      * @see https://www.npmjs.com/package/serve-static
      */
     statics?: string[] | { [path: string]: StaticOptions };
-    /** 
-     * Watch file changes of the given file/folder names in `APP_PATH` in 
-     * development, when watching a folder, watching `.js/.ts` and `.json` files
-     * in it, if any of them are modified, auto-reload the server.
-     */
-    watches?: string[];
     /** The directories that contain controllers. */
     controllers?: string[];
     /**
@@ -154,9 +142,7 @@ export const config: SFNConfig = {
     lang: env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    workers: env.WORKERS ? env.WORKERS.split(/,\s*/) : ["A", "B"],
     statics: [SRC_PATH + "/assets"],
-    watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,
     server: {

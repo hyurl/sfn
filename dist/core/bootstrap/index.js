@@ -6,6 +6,7 @@ const http_1 = require("http");
 const https_1 = require("https");
 const webium_1 = require("webium");
 const SocketIO = require("socket.io");
+const chalk_1 = require("chalk");
 const init_1 = require("../../init");
 const ConfigLoader_1 = require("./ConfigLoader");
 const DevHotReloader_1 = require("../tools/DevHotReloader");
@@ -40,7 +41,13 @@ function startServer() {
     exports.http.on("error", (err) => {
         console.log(functions_inner_1.red `${err.toString()}`);
     }).listen(httpPort, () => {
-        process.send("ready");
+        if (typeof process.send == "function") {
+            process.send("ready");
+        }
+        else {
+            let hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames, port = exports.http.address()["port"] || httpPort, host = hostname + (port == 80 || port == 443 ? "" : ":" + port), type = ConfigLoader_1.config.server.http.type, link = (type == "http2" ? "https" : type) + "://" + host, msg = functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(link)}.`;
+            console.log(msg);
+        }
     });
 }
 exports.startServer = startServer;

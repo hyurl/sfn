@@ -5,10 +5,11 @@ import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
+import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
 import { config, isDevMode } from "./ConfigLoader";
 import { DevHotReloader } from "../tools/DevHotReloader";
-import { red } from "../tools/functions-inner";
+import { red, green } from "../tools/functions-inner";
 
 /** (worker only) The App instance created by **webium** framework. */
 export var app: App = null;
@@ -70,7 +71,18 @@ export function startServer() {
         console.log(red`${err.toString()}`);
     }).listen(httpPort, () => {
         // notify PM2 that the service is available.
-        process.send("ready");
+        if (typeof process.send == "function") {
+            process.send("ready");
+        } else {
+            let hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames,
+                port = http.address()["port"] || httpPort,
+                host = hostname + (port == 80 || port == 443 ? "" : ":" + port),
+                type = config.server.http.type,
+                link = (type == "http2" ? "https" : type) + "://" + host,
+                msg = green`HTTP Server running at ${chalk.yellow(link)}.`;
+
+            console.log(msg);
+        }
     });
 }
 

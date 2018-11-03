@@ -10,9 +10,7 @@ export const config: SFNConfig = {
     lang: env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    workers: env.WORKERS ? env.WORKERS.split(/,\s*/) : ["A", "B"],
     statics: [SRC_PATH + "/assets"],
-    watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,
     server: {
