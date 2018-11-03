@@ -111,15 +111,6 @@ export interface SFNConfig {
              */
             options?: ServerOptions;
         };
-        /**
-         * Datagram server is different from other servers, it runs in the 
-         * master process, internally it is used for receiving commands from 
-         * outside the program.
-         */
-        dgram?: {
-            enabled: boolean;
-            port?: number;
-        };
         /** Configurations when HTTP requests or socket events throw errors. */
         error?: {
             /** If `true`, display full error information to the client. */
@@ -184,10 +175,6 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        },
-        dgram: {
-            enabled: true,
-            port: 666
         },
         error: {
             show: true,

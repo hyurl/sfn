@@ -38,7 +38,7 @@ each(filter(files, file => path.extname(file) == ".js"), file => {
 
 // Load user-defined bootstrap procedures.
 let cliBootstrap = APP_PATH + "/bootstrap/cli.js";
-fs.existsSync(cliBootstrap) ? require(cliBootstrap) : null;
+fs.existsSync(cliBootstrap) && require(cliBootstrap);
 
 program.parse(process.argv);
 

@@ -33,10 +33,6 @@ exports.config = {
                 pingInterval: 5000
             },
         },
-        dgram: {
-            enabled: true,
-            port: 666
-        },
         error: {
             show: true,
             log: true,
