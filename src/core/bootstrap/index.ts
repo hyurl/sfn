@@ -70,8 +70,8 @@ export function startServer() {
     http.on("error", (err: Error) => {
         console.log(red`${err.toString()}`);
     }).listen(httpPort, () => {
-        // notify PM2 that the service is available.
         if (typeof process.send == "function") {
+            // notify PM2 that the service is available.
             process.send("ready");
         } else {
             let hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames,

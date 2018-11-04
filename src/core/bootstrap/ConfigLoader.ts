@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import * as cluster from "cluster";
 import merge = require("lodash/merge");
 import { APP_PATH, isDebugMode, isCli } from "../../init";
 import { config } from "../../config";
@@ -25,16 +24,11 @@ if (fs.existsSync(APP_PATH + "/config.js")) {
 export const isDevMode = config.env == "dev" || config.env == "development"
     || isDebugMode;
 
-if (cluster.isMaster && isDevMode && !isDebugMode && !isCli) {
+if (isDevMode && !isDebugMode && !isCli) {
     console.log("You program is running in development mode without "
         + "'--inspect' flag, please consider changing to debug environment.");
-    console.log("For help, see " + chalk.yellow("https://sfnjs.com/docs/debug"));
-}
-
-if (cluster.isMaster && isDebugMode) {
-    cluster.setupMaster({
-        execArgv: process.execArgv.map(flag => flag.split("=")[0])
-    });
+    console.log("For help, see "
+        + chalk.yellow("https://sfnjs.com/docs/v0.3.x/debug"));
 }
 
 Mail.init(config.mail); // initiate mail configurations
