@@ -53,6 +53,7 @@
     },
     "dependencies": {
         "@types/body-parser": "^1.17.0",
+        "@types/chokidar": "^1.7.5",
         "@types/crc": "^3.4.0",
         "@types/dotenv": "^4.0.3",
         "@types/es6-promisify": "^6.0.0",
@@ -71,6 +72,7 @@
         "callsite-record": "^4.1.3",
         "capitalization": "^1.0.0",
         "chalk": "^2.4.1",
+        "chokidar": "^2.0.4",
         "commander": "^2.19.0",
         "comment-meta": "^0.1.1",
         "cookie-parser": "^1.4.3",
