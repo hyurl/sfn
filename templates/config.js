@@ -8,7 +8,7 @@ const env = process.env;
 exports.config = {
     env: env.NODE_ENV || "dev",
     lang: env.LANG || "en-US",
-    enableDocRoute: false,
+    enableDocRoute: true,
     awaitGenerator: false,
     statics: [SRC_PATH + "/assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],

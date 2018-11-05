@@ -98,7 +98,7 @@ function _route(...args) {
             app.method(method, path, handle(route), true);
         };
     } else {
-        let proto = args.length == 4 ? args[2] : args[1],
+        let proto = (args.length == 4 ? args[2] : args[1]).prototype,
             method = args.length == 4 ? args[3] : args[2];
 
         return _route(route)(proto, method);

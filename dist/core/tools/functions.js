@@ -61,7 +61,7 @@ function _route(...args) {
         };
     }
     else {
-        let proto = args.length == 4 ? args[2] : args[1], method = args.length == 4 ? args[3] : args[2];
+        let proto = (args.length == 4 ? args[2] : args[1]).prototype, method = args.length == 4 ? args[3] : args[2];
         return _route(route)(proto, method);
     }
 }

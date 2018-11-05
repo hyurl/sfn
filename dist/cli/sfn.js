@@ -20,11 +20,11 @@ program.description("create new controllers, models. etc.")
     .option("-l, --language <name>", "create a new language pack with a specified name")
     .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
     .on("--help", () => {
-    console.log("  Examples:\n");
-    console.log("    sfn -c Article                   create an http controller named 'Article'");
-    console.log("    sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'");
-    console.log("    sfn -m Article                   create a model named 'Article'");
-    console.log("    sfn -l zh-CN                     create a language pack named 'zh-CN'");
+    console.log("\nExamples:");
+    console.log("  sfn -c Article                   create an http controller named 'Article'");
+    console.log("  sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'");
+    console.log("  sfn -m Article                   create a model named 'Article'");
+    console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
     console.log("");
 });
 var cmdDir = path.resolve(__dirname, "commands"), files = fs.readdirSync(cmdDir);

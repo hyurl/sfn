@@ -29,15 +29,15 @@ function loadControllers(controllerPath: string) {
                 basename: string = path.basename(filename, ".js"),
                 Class: typeof HttpController | typeof WebSocketController;
 
-            if (isController(_module)) {
-                // export = Controller
-                Class = _module;
+            if (_module.default && isController(_module.default)) {
+                // export default class Controller { }
+                Class = _module.default;
             } else if (_module[basename] && isController(_module[basename])) {
                 // export class Controller { }
                 Class = _module[basename];
-            } else if (_module.default && isController(_module.default)) {
-                // export default class Controller { }
-                Class = _module.default;
+            } else if (isController(_module)) {
+                // export = Controller
+                Class = _module;
             } else {
                 continue;
             }
@@ -45,7 +45,7 @@ function loadControllers(controllerPath: string) {
             if (SRC_PATH !== APP_PATH) {
                 let _filename = filename.substring(APP_PATH.length, filename.length - 3);
                 _filename = path.normalize(SRC_PATH + _filename + ".ts");
-                
+
                 if (fs.existsSync(_filename)) {
                     filename = _filename;
                 }
