@@ -18,7 +18,7 @@ export const config: SFNConfig = {
         timeout: 120000, // 2 min.
         autoStart: true,
         http: {
-            type: <SFNConfig["server"]["http"]["type"]>env.HTTP_PORT || "http",
+            type: <SFNConfig["server"]["http"]["type"]>env.HTTP_TYPE || "http",
             port: parseInt(env.HTTP_PORT) || 80,
             options: null
         },
