@@ -64,3 +64,34 @@ var schedule = new Schedule("runs every 2 minutes", () => {
     schedule.stop();
 });
 ```
+
+## Run In Multi-Processing Scenario
+
+SFN production mode is always run in multiple processes, under multi-processing 
+scenario, when you set a schedule task, if not handled properly, you will face 
+the problem that the task runs repeatedly in every process. To fix that problem,
+you will need to use [first-officer](https://github.com/hyurl/first-officer)
+module, to get the unique **First Officer** process, and run the schedule task 
+only in that process.
+
+First install the dependency module via this command:
+
+```sh
+npm i first-officer
+```
+
+And then use the function it provides to check if the current process should 
+execute the task.
+
+```typescript
+import { isFirstOfficer } from "first-officer";
+import { Schedule } from "sfn-scheduler";
+
+(async () => {
+    if (await isFirstOfficer()) {
+        var schedule = new Schedule("every 2 seconds", () => {
+            console.log("This schedule runs every 2 seconds.");
+        });
+    }
+})();
+```
