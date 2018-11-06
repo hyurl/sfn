@@ -161,3 +161,21 @@ design.
 ## License
 
 **SFN** is licensed under [MIT](./LICENSE), you're free to use.
+
+## Run Test
+
+SFN currently doesn't provide any unit tests of the framework (but dependency 
+modules do), the only way to test it is simply clone the repository from GitHub 
+to your computer, install all the dependencies and run the built-in 
+documentation website.
+
+```sh
+git clone https://github.com/hyurl/sfn
+cd sfn
+npm i
+node dist
+```
+
+And the doc server will started, note that the server port is `80` by default, 
+if it's not available on your machine, simply modify it in `.env` file before 
+running the application.

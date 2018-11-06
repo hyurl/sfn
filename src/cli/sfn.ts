@@ -12,6 +12,7 @@ import { loadLanguagePack, green, red } from "../core/tools/functions-inner";
 
 var sfnd = path.normalize(__dirname + "/../..");
 var ext = isTypeScript ? "ts" : "js";
+var tplDir = `${sfnd}/templates`;
 
 program.description("create new controllers, models. etc.")
     .version(version, "-v, --version")
@@ -72,7 +73,7 @@ try {
             ? program.controller + "index"
             : program.controller;
         let type = program.type == "websocket" ? "WebSocket" : "Http",
-            input = `${sfnd}/templates/${type}Controller.${ext}`,
+            input = `${tplDir}/${ext}/${type}Controller.${ext}`,
             output = `${SRC_PATH}/controllers/${filename}.${ext}`;
     
         checkSource(input);
@@ -82,7 +83,7 @@ try {
     
         outputFile(output, contents, "controller");
     } else if (program.model) { // create model.
-        var input = `${sfnd}/templates/Model.${ext}`,
+        var input = `${tplDir}/${ext}/Model.${ext}`,
             output = `${SRC_PATH}/models/${program.model}.${ext}`,
             ModelName = path.basename(program.model),
             table = pluralize(hyphenate(ModelName, true));
