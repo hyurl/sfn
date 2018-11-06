@@ -40,6 +40,9 @@ function startServer() {
     }
     exports.http.on("error", (err) => {
         console.log(functions_inner_1.red `${err.toString()}`);
+        if (err.message.includes("listen")) {
+            process.exit(1);
+        }
     }).listen(httpPort, () => {
         if (typeof process.send == "function") {
             process.send("ready");

@@ -8,7 +8,7 @@ const functions_inner_1 = require("../../core/tools/functions-inner");
 program.command("init")
     .description("initiate a new project")
     .action(() => {
-    console.log(functions_inner_1.red `Initiating...`);
+    console.log(functions_inner_1.grey `Initiating...`);
     try {
         let sfnd = path.normalize(__dirname + "/../../.."), tplDir = `${sfnd}/templates`, ext = init_1.isTypeScript ? "ts" : "js", bootstrap = `${init_1.SRC_PATH}/bootstrap`, assetsDir = `${init_1.SRC_PATH}/assets`, ctrlDir = `${init_1.SRC_PATH}/controllers`, localeDir = `${init_1.SRC_PATH}/locales`, viewDir = `${init_1.SRC_PATH}/views`, modelDir = `${init_1.SRC_PATH}/models`, scheduleDir = `${init_1.SRC_PATH}/schedules`, serviceDir = `${init_1.SRC_PATH}/services`, configFile = `${init_1.SRC_PATH}/config.${ext}`, indexFile = `${init_1.SRC_PATH}/index.${ext}`, envFile = `${init_1.ROOT_PATH}/.env`;
         if (!fs.existsSync(envFile))

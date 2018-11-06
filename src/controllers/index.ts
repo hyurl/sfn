@@ -1,33 +1,25 @@
-import { HttpController, Request, route } from "sfn";
+import { HttpController, route, version, config } from "sfn";
 
 /**
  * The Home controller is a special controller, it handles requests which 
  * visit the home page of the website through `GET /`.
  */
 export default class extends HttpController {
+    viewExtname = ".ejs";
+    isZh = this.lang.includes("zh");
+    indexVars = {
+        title: "Service Framework for Node.js",
+        anotherLang: this.isZh ? "en-US" : "zh-CN",
+        changeLang: this.isZh ? "English (US)" : "中文 (简体)",
+        home: this.isZh ? "主页" : "Home",
+        docs: this.isZh ? "文档" : "Documentation",
+        sourceCode: this.isZh ? "源代码" : "Source Code",
+        version
+    };
 
-    @route("GET /")
-    index(req: Request) {
-        return this.view("index", {
-            title: "Service Framework for Node.js",
-            protocol: req.protocol,
-            host: req.headers.host
-        });
-    }
-
-    /**
-     * @example new EventSource("/sse-test")
-     */
-    @route("SSE /sse-test")
-    sseTest() {
-        var count = 0;
-        var timer = setInterval(() => {
-            count += 1;
-            this.sse.send("Message from SSE: " + count);
-            if (count == 10) {
-                clearInterval(timer);
-                this.sse.close();
-            }
-        }, 1000);
+    @route.get("/")
+    async index() {
+        let data = await this.view(this.isZh ? "index.zh" : "index", this.indexVars);
+        this.res.send(data);
     }
 }

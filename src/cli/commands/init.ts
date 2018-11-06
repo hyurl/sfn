@@ -3,13 +3,13 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import * as program from "commander";
 import { SRC_PATH, isTypeScript, ROOT_PATH } from "../../init";
-import { red, green } from "../../core/tools/functions-inner";
+import { red, green, grey } from "../../core/tools/functions-inner";
 
 // Command `sfn init` is used to initiate your project.
 program.command("init")
     .description("initiate a new project")
     .action(() => {
-        console.log(red`Initiating...`);
+        console.log(grey`Initiating...`);
 
         try {
             let sfnd = path.normalize(__dirname + "/../../.."),

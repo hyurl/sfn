@@ -69,6 +69,9 @@ export function startServer() {
 
     http.on("error", (err: Error) => {
         console.log(red`${err.toString()}`);
+        if (err.message.includes("listen")) {
+            process.exit(1);
+        }
     }).listen(httpPort, () => {
         if (typeof process.send == "function") {
             // notify PM2 that the service is available.
