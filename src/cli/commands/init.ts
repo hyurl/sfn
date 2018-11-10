@@ -3,16 +3,17 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import * as program from "commander";
 import { SRC_PATH, isTypeScript, ROOT_PATH } from "../../init";
-import { red, green } from "../../core/tools/functions-inner";
+import { red, green, grey } from "../../core/tools/functions-inner";
 
 // Command `sfn init` is used to initiate your project.
 program.command("init")
     .description("initiate a new project")
     .action(() => {
-        console.log(red`Initiating...`);
+        console.log(grey`Initiating...`);
 
         try {
             let sfnd = path.normalize(__dirname + "/../../.."),
+                tplDir = `${sfnd}/templates`,
                 ext = isTypeScript ? "ts" : "js",
                 bootstrap = `${SRC_PATH}/bootstrap`,
                 assetsDir = `${SRC_PATH}/assets`,
@@ -33,8 +34,7 @@ program.command("init")
                 fs.ensureDirSync(SRC_PATH);
 
             if (!fs.existsSync(assetsDir))
-                fs.copySync(`${sfnd}/src/assets`, assetsDir);
-
+                fs.copySync(`${tplDir}/assets`, assetsDir);
 
             if (!fs.existsSync(bootstrap)) {
                 fs.ensureDirSync(bootstrap);
@@ -46,15 +46,15 @@ program.command("init")
             }
 
             if (!fs.existsSync(ctrlDir)) {
-                let dir = sfnd + (isTypeScript ? "/src" : "/templates") + "/controllers";
+                let dir = `${tplDir}/${ext}/controllers`;
                 fs.copySync(dir, ctrlDir);
             }
 
             if (!fs.existsSync(localeDir))
-                fs.copySync(`${sfnd}/src/locales`, localeDir);
+                fs.copySync(`${tplDir}/locales`, localeDir);
 
             if (!fs.existsSync(viewDir))
-                fs.copySync(`${sfnd}/src/views`, viewDir);
+                fs.copySync(`${tplDir}/views`, viewDir);
 
             if (!fs.existsSync(modelDir))
                 fs.ensureDirSync(modelDir);
@@ -66,10 +66,10 @@ program.command("init")
                 fs.ensureDirSync(serviceDir);
 
             if (!fs.existsSync(configFile))
-                fs.copySync(`${sfnd}/templates/config.${ext}`, configFile);
+                fs.copySync(`${tplDir}/${ext}/config.${ext}`, configFile);
 
             if (!fs.existsSync(indexFile))
-                fs.copySync(`${sfnd}/templates/index.${ext}`, indexFile);
+                fs.copySync(`${tplDir}/${ext}/index.${ext}`, indexFile);
 
             // expose vscode debug configurations
             let dir = `${ROOT_PATH}/.vscode/`,
@@ -83,8 +83,7 @@ program.command("init")
                             request: "launch",
                             protocol: "auto",
                             name: "Start Server",
-                            program: "${workspaceFolder}/" + (isTypeScript ? "dist" : "src") + "/index",
-                            autoAttachChildProcesses: true
+                            program: "${workspaceFolder}/" + (isTypeScript ? "dist" : "src") + "/index"
                         }
                     ]
                 }, { spaces: 4 });

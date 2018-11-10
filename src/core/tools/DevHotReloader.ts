@@ -1,28 +1,35 @@
-import * as fs from "fs";
+import * as chokidar from "chokidar";
 import * as path from "path";
+import startsWith = require("lodash/startsWith");
 
 export class DevHotReloader {
-    readonly watcher: fs.FSWatcher;
+    readonly watcher: chokidar.FSWatcher;
 
     constructor(dirname: string, extnames = [".js", ".json"]) {
-        this.watcher = fs.watch(dirname, {
-            recursive: true,
-        }, (event, filename) => {
-            let basename = path.basename(dirname),
-                ext = path.extname(filename);
+        this.watcher = DevHotReloader.watchers[dirname] = chokidar.watch(dirname, {
+            awaitWriteFinish: true,
+            followSymlinks: false
+        });
 
-            if (event === "change" && extnames.includes(ext)) {
-                if (basename == filename) {
-                    filename = dirname;
-                } else {
-                    filename = path.resolve(dirname, filename);
-                }
-
-                if (require.cache[filename]) {
-                    // reload the script
+        this.watcher.on("add", filename => {
+            let ext = path.extname(filename);
+            if (extnames.includes(ext)) {
+                require(filename);
+            }
+        }).on("change", filename => {
+            let ext = path.extname(filename);
+            if (require.cache[filename]) {
+                delete require.cache[filename];
+                require(filename);
+            }
+        }).on("unlink", filename => {
+            if (require.cache[filename])
+                delete require.cache[filename];
+        }).on("unlinkDir", dirname => {
+            dirname = dirname + path.sep;
+            for (let filename in require.cache) {
+                if (startsWith(filename, dirname))
                     delete require.cache[filename];
-                    require(filename);
-                }
             }
         });
     }
@@ -30,4 +37,8 @@ export class DevHotReloader {
     close(): void {
         this.watcher.close();
     }
+}
+
+export namespace DevHotReloader {
+    export const watchers: { [dirname: string]: chokidar.FSWatcher } = {};
 }

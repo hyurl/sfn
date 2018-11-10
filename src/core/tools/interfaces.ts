@@ -10,33 +10,7 @@ export interface Locale {
     [statement: string]: string;
 }
 
-interface SessionCookieData {
-    path: string;
-    maxAge: number | null;
-    secure?: boolean;
-    httpOnly: boolean;
-    domain?: string;
-    expires: Date | boolean;
-}
-
-interface SessionData {
-    [key: string]: any;
-    readonly cookie: SessionCookieData;
-}
-
-interface SessionCookie extends SessionCookieData {
-    serialize(name: string, value: string): string;
-}
-
-export interface Session extends SessionData {
-    readonly id: string;
-    regenerate(callback: (err: any) => void): void;
-    destroy(callback: (err: any) => void): void;
-    reload(callback: (err: any) => void): void;
-    save(callback: (err: any) => void): void;
-    touch(callback: (err: any) => void): void;
-    readonly cookie: SessionCookie;
-    /** ID of logged-in user. */
+export interface Session extends Express.Session {
     uid: number;
 }
 
@@ -51,8 +25,6 @@ export interface Request extends webium.Request {
     csrfToken?: string;
     /** In a sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
-    /** The same session ID as `session.id`. */
-    sessionID: string;
     /** 
      * A short-version url, when the url contains more than 64 characters,
      * the rest part will be cut off and changed to `...`.

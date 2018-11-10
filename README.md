@@ -40,32 +40,28 @@ in your project directory, it's contents should be like these:
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es2015",
+        "target": "es2017",
         "preserveConstEnums": true,
-        "rootDir": "src",
-        "outDir": "dist",
+        "rootDir": "src/",
+        "outDir": "dist/",
         "newLine": "LF",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "sourceMap": true,
         "importHelpers": true,
         "pretty": true,
-        "removeComments": true,
-        "lib": [
-            "es2015",
-            "es2016.array.include"
-        ]
+        "removeComments": true
     },
-    "include": [
+    "files": [
         "src/index.ts",
-        "src/config.ts",
-        "src/bootstrap/*.ts",
+        "src/config.ts"
+    ],
+    "include": [
         "src/controllers/*.ts",
         "src/controllers/*/*.ts",
+        "src/bootstrap/*.ts",
         "src/locales/*.ts",
-        "src/models/*.ts",
-        "src/schedules/*.ts",
-        "src/services/*.ts"
+        "src/models/*.ts"
     ],
     "exclude": [
         "node_modules/*"
@@ -75,6 +71,17 @@ in your project directory, it's contents should be like these:
 
 Just copy this example, and it will be fine for most cases. If `tsconfig.json`
 is missing, the framework will run in pure JavaScript mode.
+
+### Install PM2
+
+Since version 0.3.x, SFN uses [PM2](https://pm2.io) as its application manager 
+and load-balancer, so to better deploy your application, you'd also install PM2
+and use it to start you application (however it is production environment 
+requirement, not necessary during development).
+
+```sh
+npm i -g pm2
+```
 
 ### Install Framework
 
@@ -89,7 +96,7 @@ After all files downloaded, type the following command to initiate your project,
 it will create needed files and directories for you automatically.
 
 But before running this procedure, you have to setup the environment for NodeJS 
-to run user-defined commands. See [Command Line](https://sfnjs.com/docs/command-line).
+to run user-defined commands. See [Command Line](./command-line).
 
 ```sh
 sfn init
@@ -102,10 +109,18 @@ firstly, compile the source code with the command: `tsc` (only with
 TypeScript), then type the command:
 
 ```sh
-sfn start
+node dist
 ```
 
-And the server should be started in few seconds.
+And the server should be started in few seconds (If you're not coding TypeScript,
+the command should be `node src`).
+
+If you have PM2 installed, you can use the following command to start the 
+application, and auto-scale according to the CPU numbers.
+
+```sh
+pm2 start dist/index.js -i max
+```
 
 ### Write Your First Controller
 
@@ -146,3 +161,21 @@ design.
 ## License
 
 **SFN** is licensed under [MIT](./LICENSE), you're free to use.
+
+## Run Test
+
+SFN currently doesn't provide any unit tests of the framework (but dependency 
+modules do), the only way to test it is simply clone the repository from GitHub 
+to your computer, install all the dependencies and run the built-in 
+documentation website.
+
+```sh
+git clone https://github.com/hyurl/sfn
+cd sfn
+npm i
+node dist
+```
+
+And the doc server will started, note that the server port is `80` by default, 
+if it's not available on your machine, simply modify it in `.env` file before 
+running the application.

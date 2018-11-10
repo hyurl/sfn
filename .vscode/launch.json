@@ -8,9 +8,8 @@
             "type": "node",
             "request": "launch",
             "protocol": "auto",
-            "name": "Start Demo",
-            "program": "${workspaceFolder}\\dist\\index",
-            "autoAttachChildProcesses": true,
+            "name": "Start Server",
+            "program": "${workspaceFolder}/dist/index"
         }
     ]
 }

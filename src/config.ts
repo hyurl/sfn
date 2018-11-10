@@ -37,22 +37,10 @@ export interface SFNConfig {
      */
     awaitGenerator?: boolean;
     /**
-     * Worker names, each one will be forked as a service worker. In production 
-     * environment, you should at least set two workers, so that to prevent 
-     * temporary shunt-down of service when reloading.
-     */
-    workers?: string[];
-    /**
      * The directories that serve static resources.
      * @see https://www.npmjs.com/package/serve-static
      */
     statics?: string[] | { [path: string]: StaticOptions };
-    /** 
-     * Watch file changes of the given file/folder names in `APP_PATH` in 
-     * development, when watching a folder, watching `.js/.ts` and `.json` files
-     * in it, if any of them are modified, auto-reload the server.
-     */
-    watches?: string[];
     /** The directories that contain controllers. */
     controllers?: string[];
     /**
@@ -111,15 +99,6 @@ export interface SFNConfig {
              */
             options?: ServerOptions;
         };
-        /**
-         * Datagram server is different from other servers, it runs in the 
-         * master process, internally it is used for receiving commands from 
-         * outside the program.
-         */
-        dgram?: {
-            enabled: boolean;
-            port?: number;
-        };
         /** Configurations when HTTP requests or socket events throw errors. */
         error?: {
             /** If `true`, display full error information to the client. */
@@ -163,9 +142,7 @@ export const config: SFNConfig = {
     lang: env.LANG || "en-US",
     enableDocRoute: false,
     awaitGenerator: false,
-    workers: env.WORKERS ? env.WORKERS.split(/,\s*/) : ["A", "B"],
     statics: [SRC_PATH + "/assets"],
-    watches: ["index.ts", "config.ts", "bootstrap", "controllers", "locales", "models"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,
     server: {
@@ -184,10 +161,6 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        },
-        dgram: {
-            enabled: true,
-            port: 666
         },
         error: {
             show: true,

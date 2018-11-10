@@ -1,13 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
-const dgram = require("dgramx");
-const es6_promisify_1 = require("es6-promisify");
-const pidusage = require("pidusage");
-const values = require("lodash/values");
 const random = require("lodash/random");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
-const functions_inner_1 = require("./functions-inner");
 const RouteMap_1 = require("./RouteMap");
 const EventMap_1 = require("./EventMap");
 function randStr(length = 5, chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") {
@@ -63,12 +56,12 @@ function _route(...args) {
             };
             let __route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : __route[0], path = (proto.Class.baseURI || "") + __route[1];
             app = app || (app = require("../bootstrap/index").app);
-            handle = handle || (handle = require("../handlers/worker/http-route").getRouteHandler);
+            handle = handle || (handle = require("../handlers/http-route").getRouteHandler);
             app.method(method, path, handle(route), true);
         };
     }
     else {
-        let proto = args.length == 4 ? args[2] : args[1], method = args.length == 4 ? args[3] : args[2];
+        let proto = (args.length == 4 ? args[2] : args[1]).prototype, method = args.length == 4 ? args[3] : args[2];
         return _route(route)(proto, method);
     }
 }
@@ -123,15 +116,6 @@ function after(fn) {
     };
 }
 exports.after = after;
-function getDgramClient() {
-    let port = ConfigLoader_1.config.server.dgram.port;
-    if (!ConfigLoader_1.config.server.dgram.enabled) {
-        console.log(functions_inner_1.red `Datagram server isn't enabled!`);
-        return null;
-    }
-    return dgram.createClient(`udp://127.0.0.1:${port}`);
-}
-exports.getDgramClient = getDgramClient;
 function vol2str(num) {
     if (num > 1073741824) {
         return (num / 1073741824).toFixed(3) + " Gb";
@@ -166,45 +150,4 @@ function sec2str(sec) {
     return str;
 }
 exports.sec2str = sec2str;
-function notifyReload(timeout = 100, cb) {
-    let client = getDgramClient();
-    if (client) {
-        client.bind(0);
-        client.on("worker-reloaded", () => {
-            console.log(functions_inner_1.green `Workers reloaded!`);
-            client.close(() => {
-                cb ? cb() : null;
-            });
-        }).emit("worker-reload", timeout, () => {
-            console.log(functions_inner_1.grey `Reloading workers...`);
-        });
-    }
-}
-exports.notifyReload = notifyReload;
-const pidusageAsync = es6_promisify_1.promisify(pidusage);
-function listWorkers(cb, withMaster) {
-    let client = getDgramClient();
-    if (!client) {
-        cb(new Error("Datagram server isn't enabled."), null, null);
-    }
-    let header = ["id", "pid", "state", "reboot", "uptime", "memory", "cpu"], body = [], timer = setTimeout(() => {
-        client.removeAllListeners("worker-list");
-        client.close();
-        cb(new Error("Unable to fetch worker information."), null, null);
-    }, 5000);
-    client.bind(0);
-    client.on("worker-listed", (workers) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        clearTimeout(timer);
-        for (let worker of workers) {
-            let stats = yield pidusageAsync(worker.pid);
-            worker.uptime = sec2str(worker.uptime);
-            body.push(values(worker).concat([
-                vol2str(stats.memory),
-                Math.round(stats.cpu) + " %"
-            ]));
-        }
-        client.close(() => cb(null, header, body));
-    })).emit("worker-list", withMaster);
-}
-exports.listWorkers = listWorkers;
 //# sourceMappingURL=functions.js.map

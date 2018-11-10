@@ -19,14 +19,14 @@ function loadControllers(controllerPath) {
         let stat = fs.statSync(filename);
         if (stat.isFile() && path.extname(file) == ".js") {
             let _module = require(filename), basename = path.basename(filename, ".js"), Class;
-            if (isController(_module)) {
-                Class = _module;
+            if (_module.default && isController(_module.default)) {
+                Class = _module.default;
             }
             else if (_module[basename] && isController(_module[basename])) {
                 Class = _module[basename];
             }
-            else if (_module.default && isController(_module.default)) {
-                Class = _module.default;
+            else if (isController(_module)) {
+                Class = _module;
             }
             else {
                 continue;

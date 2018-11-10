@@ -1,24 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = require("fs");
+const chokidar = require("chokidar");
 const path = require("path");
+const startsWith = require("lodash/startsWith");
 class DevHotReloader {
     constructor(dirname, extnames = [".js", ".json"]) {
-        this.watcher = fs.watch(dirname, {
-            recursive: true,
-        }, (event, filename) => {
-            let basename = path.basename(dirname), ext = path.extname(filename);
-            if (event === "change" && extnames.includes(ext)) {
-                if (basename == filename) {
-                    filename = dirname;
-                }
-                else {
-                    filename = path.resolve(dirname, filename);
-                }
-                if (require.cache[filename]) {
+        this.watcher = DevHotReloader.watchers[dirname] = chokidar.watch(dirname, {
+            awaitWriteFinish: true,
+            followSymlinks: false
+        });
+        this.watcher.on("add", filename => {
+            let ext = path.extname(filename);
+            if (extnames.includes(ext)) {
+                require(filename);
+            }
+        }).on("change", filename => {
+            let ext = path.extname(filename);
+            if (require.cache[filename]) {
+                delete require.cache[filename];
+                require(filename);
+            }
+        }).on("unlink", filename => {
+            if (require.cache[filename])
+                delete require.cache[filename];
+        }).on("unlinkDir", dirname => {
+            dirname = dirname + path.sep;
+            for (let filename in require.cache) {
+                if (startsWith(filename, dirname))
                     delete require.cache[filename];
-                    require(filename);
-                }
             }
         });
     }
@@ -27,4 +36,7 @@ class DevHotReloader {
     }
 }
 exports.DevHotReloader = DevHotReloader;
+(function (DevHotReloader) {
+    DevHotReloader.watchers = {};
+})(DevHotReloader = exports.DevHotReloader || (exports.DevHotReloader = {}));
 //# sourceMappingURL=DevHotReloader.js.map
