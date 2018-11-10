@@ -67,23 +67,23 @@ var schedule = new Schedule("runs every 2 minutes", () => {
 
 SFN 生产模式经常运行在多进程中，在多进程环境下，当你设置了定时任务，如果没有合适的处理，你将会
 面临任务在多个进程中重复运行的问题。要解决这个问题，你需要使用 
-[first-officer](https://github.com/hyurl/first-officer) 模块，来获取一个唯一的
-**大副**进程，并使计划任务只运行在这个进程中。
+[manager-process](https://github.com/hyurl/manager-process) 模块，来获取一个唯一的
+**管理员**进程，并使计划任务只运行在这个进程中。
 
 首先通过下面的命令安装依赖模块：
 
 ```sh
-npm i first-officer
+npm i manager-process
 ```
 
 然后在程序中使用它提供的函数来判断当前进程是否适合执行任务：
 
 ```typescript
-import { isFirstOfficer } from "first-officer";
+import { isManager } from "manager-process";
 import { Schedule } from "sfn-scheduler";
 
 (async () => {
-    if (await isFirstOfficer()) {
+    if (await isManager()) {
         var schedule = new Schedule("every 2 seconds", () => {
             console.log("This schedule runs every 2 seconds.");
         });

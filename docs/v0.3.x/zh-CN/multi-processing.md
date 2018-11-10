@@ -17,7 +17,63 @@ pm2 start dist/index.js -i max
 PM2 提供了很多有用的工具，使你能够轻松的管理你的应用，你应该前往其网站学习和了解更多关于它的
 使用技巧。
 
-## 工作进程以及主进程之间的通讯
+## 进程间通信
 
-PM2 同时也提供了简单的多进程通讯方案，SFN 目前接受了这种方案并用来替换 SFN 原有的方案，虽然 
-PM2 的多进程通讯方案较为原始和麻烦，不过 SFN 也在计划引入一个新的更为友好和简洁的进程通信模块。
+虽然 PM2 提供了它自己的 IPC 通信解决方案，但在 SFN 应用中是非常不建议使用它的，因为它依赖于
+**child_process** 模块，这可能会在不使用 PM2 的开发过程中导致程序出现意外。
+
+在 SFN 中，要使你的进程能够相互通讯，你需要使用 
+[ipchannel](https://github.com/hyurl/ipchannel) 模块，这是唯一一个设计能够同时工作在
+单进程和多进程中的 IPC 工具包。这意味着即使你没有使用 PM2, 你所设计的逻辑依旧能够工作。
+
+```typescript
+import channel from "ipchannel";
+
+// listening messages without event
+channel.on("message", (sender, msg) => {
+    console.log(`Peer ${sender} says: ${msg}`);
+});
+
+// By default, the channel is not connnected immediately, and `channel.pid` 
+// (peer id) will only be available after the connection is established, so the 
+// following code will output undefined since the channel is not open yet.
+console.log(channel.pid); // => undefined
+
+// If you check `channel.connected`, it will be false initially.
+console.log(channel.connected); // => false
+
+// Even the channel is not yet connected, you still can send messages now, they
+// will be queued and flushed once the connection is established.
+channel.to(1).send("This message is sent before connection.");
+
+channel.on("connect", () => {
+    // now that channel is connected
+    console.log(channel.connected); // => true
+
+    switch (channel.pid) {
+        case 1:
+            // listening messages with a custom event
+            channel.on("custom-event", (sender, ...data) => {
+                console.log(`Peer ${sender} emits: ${JSON.stringify(data)}`);
+            });
+            break;
+
+        case 2:
+            // send message to peer 1
+            channel.to(1).send("Hi peer 1, I'm peer 2.");
+            break;
+
+        case 3:
+            // send message with an event to peer 1
+            channel.to(1).emit("custom-event", "hello world");
+            break;
+
+        case 4:
+            // send message to all peers
+            channel.to("all").send("all attention");
+            // send message with an event to all peers
+            channel.to("all").emit("custom-event", "all attention");
+            break;
+    }
+});
+```
