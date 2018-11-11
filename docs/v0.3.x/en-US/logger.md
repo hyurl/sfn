@@ -83,7 +83,7 @@ the filename, the line number and the column number,  when the method `index()`
 is called, it will log something like this:
 
 ```plain
-[2018-02-20 17:48:16] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
+[2018-02-20T17:48:16] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
 ```
 
 ## Special Performance in **SFN**

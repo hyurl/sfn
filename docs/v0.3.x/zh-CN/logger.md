@@ -35,12 +35,11 @@ var srv = new Service;
 
 ## `console` 和 `logger` 的区别
 
-There are three major differences in `logger` than `console`. 
+`logger` 中主要有三个与 `console` 不同的地方
 
-- `logger` writes logs to a disk file.
-- `logger` is asynchronous and non-blocking.
-- `logger` is safe in multi-processing scenario, you don't have to worry 
-    *concurrency control*.
+- `logger` 将日志写出到一个磁盘文件。
+- `logger` 是异步非阻塞的。
+- `logger` 是多进程安全的，你不必担心**并发控制**的问题。
 
 ## 配置
 
@@ -80,7 +79,7 @@ export default class extends HttpController {
 的信息：
 
 ```plain
-[2018-02-20 17:48:16] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
+[2018-02-20T17:48:16] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
 ```
 
 ## 在 **SFN** 框架中的特殊表现

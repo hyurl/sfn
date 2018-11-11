@@ -1,8 +1,8 @@
 import { extname, basename } from "path";
 import { __awaiter } from 'tslib';
 import * as CallSiteRecord from "callsite-record";
+import * as moment from "moment";
 import chalk from "chalk";
-import * as date from "sfn-date";
 import { Locale } from "./interfaces";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
@@ -203,7 +203,7 @@ function color(color: string, callSite: TemplateStringsArray, bindings: any[]): 
     let msg = callSite.map((str, i) => {
         return i > 0 ? bindings[i - 1] + str : str;
     }).join("");
-    return chalk[color](`[${date("Y-m-d H:i:s.ms")}]`) + " " + msg;
+    return chalk[color](`[${moment().format("YYYY-MM-DDTHH:mm:ss")}]`) + " " + msg;
 }
 
 export function grey(callSite: TemplateStringsArray, ...bindings: any[]) {

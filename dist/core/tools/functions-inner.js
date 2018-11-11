@@ -4,8 +4,8 @@ const tslib_1 = require("tslib");
 const path_1 = require("path");
 const tslib_2 = require("tslib");
 const CallSiteRecord = require("callsite-record");
+const moment = require("moment");
 const chalk_1 = require("chalk");
-const date = require("sfn-date");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const functions_1 = require("./functions");
 const upload_1 = require("./upload");
@@ -167,7 +167,7 @@ function color(color, callSite, bindings) {
     let msg = callSite.map((str, i) => {
         return i > 0 ? bindings[i - 1] + str : str;
     }).join("");
-    return chalk_1.default[color](`[${date("Y-m-d H:i:s.ms")}]`) + " " + msg;
+    return chalk_1.default[color](`[${moment().format("YYYY-MM-DDTHH:mm:ss")}]`) + " " + msg;
 }
 function grey(callSite, ...bindings) {
     return color("grey", callSite, bindings);

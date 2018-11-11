@@ -4,8 +4,6 @@ const tslib_1 = require("tslib");
 process.env.FORCE_COLOR = "10";
 require("source-map-support/register");
 require("reflect-metadata");
-const date = require("sfn-date");
-exports.date = date;
 const Mail = require("sfn-mail");
 exports.Mail = Mail;
 const Logger = require("sfn-logger");

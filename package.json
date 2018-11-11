@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "description": "A Service Framework for Node.js.",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -91,6 +91,7 @@
         "lodash": "^4.17.11",
         "marked": "^0.3.19",
         "modelar": "^3.2.0",
+        "moment": "^2.22.2",
         "multer": "^1.4.1",
         "pluralize": "^7.0.0",
         "reflect-metadata": "^0.1.12",
@@ -99,7 +100,6 @@
         "sfn-cache": "^0.1.7",
         "sfn-cookie": "^1.0.6",
         "sfn-cors": "^0.1.5",
-        "sfn-date": "^0.1.4",
         "sfn-ejs-engine": "^0.1.8",
         "sfn-logger": "^0.3.3",
         "sfn-mail": "^0.2.1",

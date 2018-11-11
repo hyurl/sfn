@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import * as multer from "multer";
-import * as date from "sfn-date";
+import * as moment from "moment";
 import idealFilename from "ideal-filename";
 import { interceptAsync } from "function-intercepter";
 import { ROOT_PATH } from "../../init";
@@ -71,7 +71,7 @@ export function upload(...args): HttpDecorator {
 
         for (let x in options) {
             Object.assign(options[x], UploadOptions, this.uploadOptions);
-            options[x].savePath += "/" + date("Y-m-d");
+            options[x].savePath += "/" + moment().format("YYYY-MM-DD");
             fields.push({ name: x, maxCount: options[x].maxCount });
         }
 

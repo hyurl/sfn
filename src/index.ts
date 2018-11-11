@@ -3,14 +3,13 @@ process.env.FORCE_COLOR = "10";
 
 import "source-map-support/register";
 import "reflect-metadata";
-import * as date from "sfn-date";
 import * as Mail from "sfn-mail";
 import * as Logger from "sfn-logger";
 import * as Validator from "sfn-validator";
 import * as SSE from "sfn-sse";
 import Cache = require("sfn-cache");
 
-export { date, Mail, Logger, Validator, SSE, Cache };
+export { Mail, Logger, Validator, SSE, Cache };
 export { Cookie, CookieOptions } from "sfn-cookie";
 export * from "sfn-scheduler";
 export * from "sfn-xss";

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const fs = require("fs-extra");
 const multer = require("multer");
-const date = require("sfn-date");
+const moment = require("moment");
 const ideal_filename_1 = require("ideal-filename");
 const function_intercepter_1 = require("function-intercepter");
 const init_1 = require("../../init");
@@ -29,7 +29,7 @@ function upload(...args) {
         }
         for (let x in options) {
             Object.assign(options[x], exports.UploadOptions, this.uploadOptions);
-            options[x].savePath += "/" + date("Y-m-d");
+            options[x].savePath += "/" + moment().format("YYYY-MM-DD");
             fields.push({ name: x, maxCount: options[x].maxCount });
         }
         return new Promise((resolve, reject) => {
