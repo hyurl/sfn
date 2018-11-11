@@ -101,7 +101,7 @@
         "sfn-cors": "^0.1.5",
         "sfn-date": "^0.1.4",
         "sfn-ejs-engine": "^0.1.8",
-        "sfn-logger": "^0.3.2",
+        "sfn-logger": "^0.3.3",
         "sfn-mail": "^0.2.1",
         "sfn-scheduler": "^0.1.1",
         "sfn-sse": "^0.1.8",

@@ -35,10 +35,12 @@ var srv = new Service;
 
 ## `console` 和 `logger` 的区别
 
-这两个对象之间有两个主要的区别：
+There are three major differences in `logger` than `console`. 
 
-- `logger` 将日志保存到一个磁盘文件中。
-- `logger` 是异步非阻塞的。
+- `logger` writes logs to a disk file.
+- `logger` is asynchronous and non-blocking.
+- `logger` is safe in multi-processing scenario, you don't have to worry 
+    *concurrency control*.
 
 ## 配置
 

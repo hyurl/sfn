@@ -34,12 +34,14 @@ var srv = new Service;
 })(1);
 ```
 
-## Difference Between `console` And `logger`
+## Difference Between `logger` And `console`
 
-There are two major differences between these two objects. 
+There are three major differences in `logger` than `console`. 
 
 - `logger` writes logs to a disk file.
 - `logger` is asynchronous and non-blocking.
+- `logger` is safe in multi-processing scenario, you don't have to worry 
+    *concurrency control*.
 
 ## Configuration
 
