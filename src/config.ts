@@ -44,9 +44,8 @@ export interface SFNConfig {
     /** The directories that contain controllers. */
     controllers?: string[];
     /**
-     * Hot-reloading only supports controllers, it will watch file changes in 
-     * the directories set in `controllers`, and it is conflict with the option 
-     * `watches`, if enabled, the later one will stop working.
+     * Hot-reloading is an exprimental feature and only supports controllers, it
+     * will watch file changes in the directories set in `controllers`.
      * 
      * When any controller file has been modified, rather than reload the whole 
      * server, the system will try to reload the route in memory instead. Make 
