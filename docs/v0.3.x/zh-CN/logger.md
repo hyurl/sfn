@@ -74,12 +74,12 @@ export default class extends HttpController {
 
 ## 自动栈追踪
 
-在记录日志时，**sfn-logger** 会自动追踪调用栈（可配置，默认开启），从而输出包含调用函数、
-文件名、行号和列号的记录，在上述的例子中，当方法 `index()` 被调用时，它将会记录类似这样
+在记录日志时，**sfn-logger** 会自动追踪调用栈（可配置，SFN 中默认开启），从而输出包含调用
+函数、文件名、行号和列号的记录，在上述的例子中，当方法 `index()` 被调用时，它将会记录类似这样
 的信息：
 
 ```plain
-[2018-02-20T17:48:16] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
+[2018-10-17T17:48:16] [DEBUG] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
 ```
 
 ## 在 **SFN** 框架中的特殊表现

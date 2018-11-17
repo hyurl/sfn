@@ -78,12 +78,12 @@ export default class extends HttpController {
 ## Auto Stack Trace
 
 When logging, **sfn-logger** will automatically trace the invoking stack (
-configurable, enabled by default), and output records with the caller function, 
-the filename, the line number and the column number,  when the method `index()` 
-is called, it will log something like this:
+configurable, enabled by default in SFN), and output records with the caller 
+function, the filename, the line number and the column number,  when the method 
+`index()` is called, it will log something like this:
 
 ```plain
-[2018-02-20T17:48:16] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
+[2018-10-17T17:48:16] [DEBUG] [default.index (d:/my-website/src/controllers/Example.ts:16:24)] - An example log.
 ```
 
 ## Special Performance in **SFN**
@@ -95,4 +95,4 @@ special performance different to the original `new Logger()` from
 First, logger instances are cached in memory and differed by filenames, that 
 means even in different services, if only you set the `logOptions.filename` to 
 a same name, that won't make a deference, only the first referenced 
-configuration will be use.
+configuration will be used.

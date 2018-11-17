@@ -3,3 +3,7 @@ node_modules/
 logs/
 sessions/
 docs/
+src/assets/
+src/controllers/
+src/locales/
+src/views/
