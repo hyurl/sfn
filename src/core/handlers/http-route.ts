@@ -145,28 +145,21 @@ function getNextHandler(
 export function handleLog(err: Error, ctrl: Controller, method?: string) {
     if (config.server.error.log) {
         // Log the error to a file.
-        let str = err.toString(),
-            action: string;
+        let msg = err.toString(),
+            stack: string;
 
         if (method && method.indexOf(" ") > 0) {
-            action = method;
+            stack = method;
         } else {
-            let i = err.stack.indexOf("\n") + 1,
-                stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
+            let i = err.stack.indexOf("\n") + 1;
 
-            if (method) stack = stack.replace("<anonymous>", method);
-
-            action = stack.replace("_1", "").slice(3);
+            stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
+            method && (stack = stack.replace("<anonymous>", method));
+            stack = stack.replace("_1", "").slice(3);
         }
 
-        let logger = ctrl.logger,
-            trace = logger.trace;
-
-        logger.trace = false; // temporarily disable trace.
-        logger.action = action; // temporarily set action.
-        logger.error(str);
-        logger.trace = trace;
-        logger.action = undefined;
+        ctrl.logger.hackTrace(stack);
+        ctrl.logger.error(msg);
     }
 }
 

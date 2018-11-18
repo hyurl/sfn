@@ -116,22 +116,18 @@ function getNextHandler(method, resolve, reject) {
 }
 function handleLog(err, ctrl, method) {
     if (ConfigLoader_1.config.server.error.log) {
-        let str = err.toString(), action;
+        let msg = err.toString(), stack;
         if (method && method.indexOf(" ") > 0) {
-            action = method;
+            stack = method;
         }
         else {
-            let i = err.stack.indexOf("\n") + 1, stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
-            if (method)
-                stack = stack.replace("<anonymous>", method);
-            action = stack.replace("_1", "").slice(3);
+            let i = err.stack.indexOf("\n") + 1;
+            stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
+            method && (stack = stack.replace("<anonymous>", method));
+            stack = stack.replace("_1", "").slice(3);
         }
-        let logger = ctrl.logger, trace = logger.trace;
-        logger.trace = false;
-        logger.action = action;
-        logger.error(str);
-        logger.trace = trace;
-        logger.action = undefined;
+        ctrl.logger.hackTrace(stack);
+        ctrl.logger.error(msg);
     }
 }
 exports.handleLog = handleLog;
