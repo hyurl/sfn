@@ -6,12 +6,11 @@ import pluralize = require("pluralize");
 import filter = require("lodash/filter");
 import each = require("lodash/each");
 import { hyphenate } from "capitalization";
-import { version, APP_PATH, SRC_PATH, isTypeScript } from "../init";
+import { version, APP_PATH, SRC_PATH } from "../init";
 import { config } from "../core/bootstrap/ConfigLoader";
 import { loadLanguagePack, green, red } from "../core/tools/functions-inner";
 
 var sfnd = path.normalize(__dirname + "/../..");
-var ext = isTypeScript ? "ts" : "js";
 var tplDir = `${sfnd}/templates`;
 
 program.description("create new controllers, models. etc.")
@@ -73,8 +72,8 @@ try {
             ? program.controller + "index"
             : program.controller;
         let type = program.type == "websocket" ? "WebSocket" : "Http",
-            input = `${tplDir}/${ext}/${type}Controller.${ext}`,
-            output = `${SRC_PATH}/controllers/${filename}.${ext}`;
+            input = `${tplDir}/${type}Controller.ts`,
+            output = `${SRC_PATH}/controllers/${filename}.ts`;
     
         checkSource(input);
     
@@ -83,8 +82,8 @@ try {
     
         outputFile(output, contents, "controller");
     } else if (program.model) { // create model.
-        var input = `${tplDir}/${ext}/Model.${ext}`,
-            output = `${SRC_PATH}/models/${program.model}.${ext}`,
+        var input = `${tplDir}/Model.ts`,
+            output = `${SRC_PATH}/models/${program.model}.ts`,
             ModelName = path.basename(program.model),
             table = pluralize(hyphenate(ModelName, true));
     

@@ -6,7 +6,6 @@ const init_1 = require("../../init");
 const ConfigLoader_1 = require("./ConfigLoader");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
-const functions_inner_1 = require("../tools/functions-inner");
 let WS = ConfigLoader_1.config.server.websocket;
 function isController(m) {
     return m && (m.prototype instanceof HttpController_1.HttpController
@@ -41,14 +40,10 @@ function loadControllers(controllerPath) {
             if (Class.prototype instanceof HttpController_1.HttpController) {
                 let _class = Class;
                 _class.filename = filename;
-                if (ConfigLoader_1.config.enableDocRoute)
-                    functions_inner_1.applyHttpControllerDoc(_class);
             }
             else if (WS.enabled && Class.prototype instanceof WebSocketController_1.WebSocketController) {
                 let _class = Class;
                 _class.filename = filename;
-                if (ConfigLoader_1.config.enableDocRoute)
-                    functions_inner_1.applyWebSocketControllerDoc(_class);
             }
         }
         else if (stat.isDirectory()) {

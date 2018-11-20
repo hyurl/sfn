@@ -10,7 +10,7 @@ program.command("init")
     .action(() => {
     console.log(functions_inner_1.grey `Initiating...`);
     try {
-        let sfnd = path.normalize(__dirname + "/../../.."), tplDir = `${sfnd}/templates`, ext = init_1.isTypeScript ? "ts" : "js", bootstrap = `${init_1.SRC_PATH}/bootstrap`, assetsDir = `${init_1.SRC_PATH}/assets`, ctrlDir = `${init_1.SRC_PATH}/controllers`, localeDir = `${init_1.SRC_PATH}/locales`, viewDir = `${init_1.SRC_PATH}/views`, modelDir = `${init_1.SRC_PATH}/models`, scheduleDir = `${init_1.SRC_PATH}/schedules`, serviceDir = `${init_1.SRC_PATH}/services`, configFile = `${init_1.SRC_PATH}/config.${ext}`, indexFile = `${init_1.SRC_PATH}/index.${ext}`, envFile = `${init_1.ROOT_PATH}/.env`;
+        let sfnd = path.normalize(__dirname + "/../../.."), tplDir = `${sfnd}/templates`, bootstrap = `${init_1.SRC_PATH}/bootstrap`, assetsDir = `${init_1.SRC_PATH}/assets`, ctrlDir = `${init_1.SRC_PATH}/controllers`, localeDir = `${init_1.SRC_PATH}/locales`, viewDir = `${init_1.SRC_PATH}/views`, modelDir = `${init_1.SRC_PATH}/models`, scheduleDir = `${init_1.SRC_PATH}/schedules`, serviceDir = `${init_1.SRC_PATH}/services`, configFile = `${init_1.SRC_PATH}/config.js`, indexFile = `${init_1.SRC_PATH}/index.js`, envFile = `${init_1.ROOT_PATH}/.env`;
         if (!fs.existsSync(envFile))
             fs.copyFileSync(`${sfnd}/.env`, envFile);
         if (!fs.existsSync(init_1.SRC_PATH))
@@ -19,14 +19,14 @@ program.command("init")
             fs.copySync(`${tplDir}/assets`, assetsDir);
         if (!fs.existsSync(bootstrap)) {
             fs.ensureDirSync(bootstrap);
-            fs.writeFileSync(`${bootstrap}/master.${ext}`, "");
-            fs.writeFileSync(`${bootstrap}/worker.${ext}`, "");
-            fs.writeFileSync(`${bootstrap}/http.${ext}`, "");
-            fs.writeFileSync(`${bootstrap}/websocket.${ext}`, "");
-            fs.writeFileSync(`${bootstrap}/cli.${ext}`, "");
+            fs.writeFileSync(`${bootstrap}/master.ts`, "");
+            fs.writeFileSync(`${bootstrap}/worker.ts`, "");
+            fs.writeFileSync(`${bootstrap}/http.ts`, "");
+            fs.writeFileSync(`${bootstrap}/websocket.ts`, "");
+            fs.writeFileSync(`${bootstrap}/cli.ts`, "");
         }
         if (!fs.existsSync(ctrlDir)) {
-            let dir = `${tplDir}/${ext}/controllers`;
+            let dir = `${tplDir}/controllers`;
             fs.copySync(dir, ctrlDir);
         }
         if (!fs.existsSync(localeDir))
@@ -40,9 +40,9 @@ program.command("init")
         if (!fs.existsSync(serviceDir))
             fs.ensureDirSync(serviceDir);
         if (!fs.existsSync(configFile))
-            fs.copySync(`${tplDir}/${ext}/config.${ext}`, configFile);
+            fs.copySync(`${tplDir}/config.ts`, configFile);
         if (!fs.existsSync(indexFile))
-            fs.copySync(`${tplDir}/${ext}/index.${ext}`, indexFile);
+            fs.copySync(`${tplDir}/index.ts`, indexFile);
         let dir = `${init_1.ROOT_PATH}/.vscode/`, file = `${dir}/launch.json`;
         if (fs.existsSync(dir) && !fs.existsSync(file)) {
             fs.writeJsonSync(file, {
@@ -53,7 +53,7 @@ program.command("init")
                         request: "launch",
                         protocol: "auto",
                         name: "Start Server",
-                        program: "${workspaceFolder}/" + (init_1.isTypeScript ? "dist" : "src") + "/index"
+                        program: "${workspaceFolder}/dist/index"
                     }
                 ]
             }, { spaces: 4 });

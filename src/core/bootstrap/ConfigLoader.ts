@@ -21,8 +21,7 @@ if (fs.existsSync(APP_PATH + "/config.js")) {
 }
 
 /** Whether the program is running in development mode. */
-export const isDevMode = config.env == "dev" || config.env == "development"
-    || isDebugMode;
+export const isDevMode = isDebugMode || !process.send;
 
 if (isDevMode && !isDebugMode && !isCli) {
     console.log("You program is running in development mode without "

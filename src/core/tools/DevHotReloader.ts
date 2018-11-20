@@ -17,7 +17,6 @@ export class DevHotReloader {
                 require(filename);
             }
         }).on("change", filename => {
-            let ext = path.extname(filename);
             if (require.cache[filename]) {
                 delete require.cache[filename];
                 require(filename);

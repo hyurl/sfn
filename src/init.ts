@@ -22,38 +22,26 @@ if (isCli) {
 /** The root path of the project. */
 export const ROOT_PATH = global["ROOT_PATH"] || path.normalize(appPath + "/..");
 
-var tsCfgFile = ROOT_PATH + "/tsconfig.json";
 var tsCfg: { [x: string]: any; };
 var srcPath: string = appPath;
 
-if (!global["SRC_PATH"] && fs.existsSync(tsCfgFile)) {
-    // TypeScript
-    try {
-        tsCfg = require(tsCfgFile);
-        if (tsCfg.compilerOptions && tsCfg.compilerOptions.rootDir) {
-            srcPath = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
-            appPath = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.outDir);
-        }
-    } catch (e) {
-        srcPath = path.normalize(ROOT_PATH + "/src");
-        appPath = path.normalize(ROOT_PATH + "/dist");
+try {
+    tsCfg = require(ROOT_PATH + "/tsconfig.json");
+
+    if (tsCfg.compilerOptions && tsCfg.compilerOptions.rootDir) {
+        srcPath = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
+        appPath = path.normalize(ROOT_PATH + "/" + tsCfg.compilerOptions.outDir);
     }
-} else if (!global["APP_PATH"]) {
-    // JavaScript
-    srcPath = appPath = ROOT_PATH + path.sep + "src";
+} catch (e) {
+    srcPath = path.normalize(ROOT_PATH + "/src");
+    appPath = path.normalize(ROOT_PATH + "/dist");
 }
 
-/**
- * The application path, usually it's the distribution path. If your project 
- * isn't written in TypeScript, then `APP_PATH` equals `SRC_PATH`.
- */
+/** The application path, usually it's the distribution path. */
 export const APP_PATH: string = global["APP_PATH"] || appPath;
 
 /** The source code path. */
 export const SRC_PATH: string = global["SRC_PATH"] || srcPath;
-
-/** Whether the project is written in TypeScript. */
-export const isTypeScript = SRC_PATH != APP_PATH;
 
 // support .env configuration file
 configEnv({

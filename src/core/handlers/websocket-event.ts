@@ -1,4 +1,3 @@
-import { isTypeScript } from '../../init';
 import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { ws } from "../bootstrap/index";
 import { SocketError } from "../tools/SocketError";
@@ -13,9 +12,7 @@ import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
 import dbHandler from "./websocket-db";
 import authHandler from "./websocket-auth";
-import {
-    callsiteLog, callMethod, getFuncParams, callIntercepterChain
-} from "../tools/functions-inner";
+import { callsiteLog, getFuncParams } from "../tools/functions-inner";
 
 if (ws) {
     for (let nsp in EventMap) {
@@ -52,8 +49,9 @@ type SocketEventInfo = {
     code: number;
 };
 
-function handleEvent(socket: WebSocket, nsp: string, event: string, data: any[]): void {
+async function handleEvent(socket: WebSocket, nsp: string, event: string, data: any[]) {
     let { Class, method } = EventMap[nsp][event],
+        { RequireAuth } = Class,
         ctrl: WebSocketController = null,
         info: SocketEventInfo = {
             time: Date.now(),
@@ -61,72 +59,31 @@ function handleEvent(socket: WebSocket, nsp: string, event: string, data: any[])
             code: 200
         };
 
-    // Handle the procedure in a Promise context.
-    new Promise((resolve, reject) => {
-        try {
-            let handleNext = getNextHandler(method, data, resolve, reject);
+    try {
+        ctrl = new Class(socket);
 
-            if (Class.length === 2) {
-                ctrl = new Class(socket, handleNext);
-            } else {
-                ctrl = new Class(socket);
-                handleNext(ctrl);
-            }
-        } catch (err) {
-            reject(err);
-        }
-    }).then((_data: any) => {
-        if (_data !== undefined) {
-            // Send data to the client.
-            socket.emit(event, _data);
-        }
+        // if the socket has been disconnected before calling the actual method, 
+        // return immediately without running any checking procedure, and don't 
+        // call the method.
+        if (socket.disconnected || false === (await ctrl.before())) return;
+
+        // Handle authentication.
+        if (RequireAuth.includes(method) && !ctrl.authorized)
+            throw new SocketError(401);
+
+        let _data = await ctrl[method](...getArguments(ctrl, method, data));
+
+        // Send data to the client.
+        _data === undefined || socket.emit(event, _data);
+
         finish(ctrl, info);
-    }).then(() => {
-        return ctrl.after();
-    }).then(result => {
-        return result === false || ctrl.socket.disconnect
-            ? result
-            : callIntercepterChain(Class.AfterIntercepters[method], ctrl);
-    }).catch((err: Error) => {
+
+        await ctrl.after();
+    } catch (err) {
         ctrl = ctrl || new WebSocketController(socket);
 
-        handleError(err, info, ctrl, method);
-    });
-}
-
-function getNextHandler(
-    method: string,
-    data: any[],
-    resolve: (value: any) => any,
-    reject: (err: Error) => void
-) {
-    return (ctrl: WebSocketController) => {
-        let { BeforeIntercepters, RequireAuth } = ctrl.Class;
-
-        Promise.resolve(ctrl.before()).then(result => {
-            if (result === false || ctrl.socket.disconnected)
-                return result;
-            else
-                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
-        }).then(result => {
-            if (result === false || ctrl.socket.disconnected) {
-                // if the socket has been closed before calling the actual method,
-                // resolve the Promise immediately without running any checking 
-                // procedure, and don't call the method.
-                return resolve(null);
-            }
-
-            // Handle authentication.
-            if (RequireAuth.includes(method) && !ctrl.authorized)
-                throw new SocketError(401);
-
-            return getResult(ctrl, method, data);
-        }).then(resolve).catch(reject);
+        await handleError(err, info, ctrl, method);
     }
-}
-
-function getResult(ctrl: WebSocketController, method: string, data: any[]) {
-    return callMethod(ctrl, ctrl[method], ...getArguments(ctrl, method, data));
 }
 
 function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
@@ -135,24 +92,15 @@ function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
         socketParams = ["websocket", "socket", "sock", "webSocket"];
 
     // Dependency Injection
-    if (isTypeScript) {
-        // try to convert parameters to proper types according to 
-        // the definition of the method.
-        let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+    // try to convert parameters to proper types according to the definition of 
+    // the method.
+    let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
-        for (let i = 0; i < meta.length; i++) {
-            if (meta[i] == Object && socketParams.includes(fnParams[i]))
-                args[i] = ctrl.socket;
-            else
-                args[i] = data.shift();
-        }
-    } else {
-        for (let i = 0; i < fnParams.length; i++) {
-            if (socketParams.includes(fnParams[i]))
-                args[i] = ctrl.socket;
-            else
-                args[i] = data.shift();
-        }
+    for (let i = 0; i < meta.length; i++) {
+        if (meta[i] == Object && socketParams.includes(fnParams[i]))
+            args[i] = ctrl.socket;
+        else
+            args[i] = data.shift();
     }
 
     return args;
@@ -169,7 +117,12 @@ function finish(ctrl: WebSocketController, info: SocketEventInfo) {
     logRequest(info.time, socket.protocol.toUpperCase(), info.code, info.event);
 }
 
-function handleError(err: any, info: SocketEventInfo, ctrl: WebSocketController, method?: string) {
+async function handleError(
+    err: any,
+    info: SocketEventInfo,
+    ctrl: WebSocketController,
+    method?: string
+) {
     let _err: Error = err; // The original error.
 
     if (!(err instanceof SocketError)) {
@@ -190,6 +143,6 @@ function handleError(err: any, info: SocketEventInfo, ctrl: WebSocketController,
     finish(ctrl, info);
 
     if (isDevMode && !(_err instanceof SocketError)) {
-        callsiteLog(_err);
+        await callsiteLog(_err);
     }
 }

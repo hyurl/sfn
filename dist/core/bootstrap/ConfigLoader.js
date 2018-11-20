@@ -19,8 +19,7 @@ if (fs.existsSync(init_1.APP_PATH + "/config.js")) {
         merge(config_1.config, m);
     }
 }
-exports.isDevMode = config_1.config.env == "dev" || config_1.config.env == "development"
-    || init_1.isDebugMode;
+exports.isDevMode = init_1.isDebugMode || !process.send;
 if (exports.isDevMode && !init_1.isDebugMode && !init_1.isCli) {
     console.log("You program is running in development mode without "
         + "'--inspect' flag, please consider changing to debug environment.");

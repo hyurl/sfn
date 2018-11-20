@@ -1,24 +1,21 @@
-const { SRC_PATH, ROOT_PATH } = require("sfn");
-const Session = require("express-session");
-const sessionFileStore = require("session-file-store");
+import { SFNConfig, SRC_PATH, ROOT_PATH } from "sfn";
+import * as Session from "express-session";
+import * as sessionFileStore from "session-file-store";
 
 const FileStore = sessionFileStore(Session);
 const env = process.env;
 
-exports.config = {
-    env: env.NODE_ENV || "dev",
+export const config: SFNConfig = {
     lang: env.LANG || "en-US",
-    enableDocRoute: true,
-    awaitGenerator: false,
     statics: [SRC_PATH + "/assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,
     server: {
         hostname: "localhost",
-        timeout: 120000,
+        timeout: 120000, // 2 min.
         autoStart: true,
         http: {
-            type: env.HTTP_TYPE || "http",
+            type: <SFNConfig["server"]["http"]["type"]>env.HTTP_TYPE || "http",
             port: parseInt(env.HTTP_PORT) || 80,
             options: null
         },
@@ -37,7 +34,7 @@ exports.config = {
     },
     database: {
         type: env.DB_TYPE || "mysql",
-        host: env.DB_HOST || "localhost",
+        host: env.DB_HOST ||  "localhost",
         port: parseInt(env.DB_PORT) || 3306,
         database: env.DB_NAME || "sfn",
         user: env.DB_USER || "root",
@@ -51,10 +48,10 @@ exports.config = {
         unset: "destroy",
         store: new FileStore({
             path: ROOT_PATH + "/sessions",
-            ttl: 3600 * 24
+            ttl: 3600 * 24 // 24 hours (in seconds)
         }),
         cookie: {
-            maxAge: 3600 * 24 * 1000
+            maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
         }
     },
     mail: {

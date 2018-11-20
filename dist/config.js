@@ -7,10 +7,7 @@ const init_1 = require("./init");
 const FileStore = sessionFileStore(Session);
 const env = process.env;
 exports.config = {
-    env: env.NODE_ENV || "dev",
     lang: env.LANG || "en-US",
-    enableDocRoute: false,
-    awaitGenerator: false,
     statics: [init_1.SRC_PATH + "/assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,

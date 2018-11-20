@@ -12,7 +12,6 @@ const init_1 = require("../init");
 const ConfigLoader_1 = require("../core/bootstrap/ConfigLoader");
 const functions_inner_1 = require("../core/tools/functions-inner");
 var sfnd = path.normalize(__dirname + "/../..");
-var ext = init_1.isTypeScript ? "ts" : "js";
 var tplDir = `${sfnd}/templates`;
 program.description("create new controllers, models. etc.")
     .version(init_1.version, "-v, --version")
@@ -60,14 +59,14 @@ try {
         let filename = lastChar(program.controller) == "/"
             ? program.controller + "index"
             : program.controller;
-        let type = program.type == "websocket" ? "WebSocket" : "Http", input = `${tplDir}/${ext}/${type}Controller.${ext}`, output = `${init_1.SRC_PATH}/controllers/${filename}.${ext}`;
+        let type = program.type == "websocket" ? "WebSocket" : "Http", input = `${tplDir}/${type}Controller.ts`, output = `${init_1.SRC_PATH}/controllers/${filename}.ts`;
         checkSource(input);
         let route = capitalization_1.hyphenate(program.controller, true);
         let contents = fs.readFileSync(input, "utf8").replace(/\{name\}/g, route);
         outputFile(output, contents, "controller");
     }
     else if (program.model) {
-        var input = `${tplDir}/${ext}/Model.${ext}`, output = `${init_1.SRC_PATH}/models/${program.model}.${ext}`, ModelName = path.basename(program.model), table = pluralize(capitalization_1.hyphenate(ModelName, true));
+        var input = `${tplDir}/Model.ts`, output = `${init_1.SRC_PATH}/models/${program.model}.ts`, ModelName = path.basename(program.model), table = pluralize(capitalization_1.hyphenate(ModelName, true));
         checkSource(input);
         var contents = fs.readFileSync(input, "utf8")
             .replace(/__Model__/g, ModelName)

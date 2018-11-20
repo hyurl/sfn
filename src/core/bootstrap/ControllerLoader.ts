@@ -4,10 +4,6 @@ import { APP_PATH, SRC_PATH } from "../../init";
 import { config } from "./ConfigLoader";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import {
-    applyHttpControllerDoc,
-    applyWebSocketControllerDoc
-} from "../tools/functions-inner";
 
 let WS = config.server.websocket;
 
@@ -55,15 +51,9 @@ function loadControllers(controllerPath: string) {
                 let _class = <typeof HttpController>Class;
                 _class.filename = filename;
 
-                if (config.enableDocRoute)
-                    applyHttpControllerDoc(_class);
-
             } else if (WS.enabled && Class.prototype instanceof WebSocketController) {
                 let _class = <typeof WebSocketController>Class;
                 _class.filename = filename;
-
-                if (config.enableDocRoute)
-                    applyWebSocketControllerDoc(_class);
             }
         } else if (stat.isDirectory()) {
             // load files recursively.

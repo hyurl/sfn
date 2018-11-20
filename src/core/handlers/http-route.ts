@@ -3,14 +3,13 @@ import * as cors from "sfn-cors";
 import { Model } from 'modelar';
 import values = require("lodash/values");
 import { RouteHandler } from "webium";
-import { isTypeScript } from '../../init';
 import { app } from "../bootstrap/index";
 import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
-import { callsiteLog, callMethod, getFuncParams, callIntercepterChain } from "../tools/functions-inner";
+import { callsiteLog, getFuncParams } from "../tools/functions-inner";
 import { Request, Response } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { RouteMap } from "../tools/RouteMap";
@@ -41,83 +40,33 @@ app.onerror = function onerror(err: any, req: Request, res: Response) {
 }
 
 export function getRouteHandler(route: string): RouteHandler {
-    return (req: Request, res: Response) => {
+    return async (req: Request, res: Response) => {
         let { Class, method } = RouteMap[route],
+            { RequireAuth } = Class,
             ctrl: HttpController = null;
 
         res.on("error", (err) => {
             handleLog(err, ctrl, method);
         });
 
-        // Handle the procedure in a Promise context.
-        new Promise((resolve, reject) => {
-            try {
-                let handleNext = getNextHandler(method, resolve, reject);
+        try {
+            ctrl = new Class(req, res);
 
-                if (Class.length === 3) {
-                    ctrl = new Class(req, res, handleNext);
-                } else {
-                    ctrl = new Class(req, res);
-                    handleNext(ctrl);
-                }
-            } catch (err) {
-                reject(err);
-            }
-        }).then((data: any) => {
-            return handleResponse(ctrl, data);
-        }).then(() => {
-            return ctrl.after();
-        }).then(result => {
-            return result === false
-                ? result
-                : callIntercepterChain(Class.AfterIntercepters[method], ctrl);
-        }).catch((err: Error) => {
-            ctrl = ctrl || new HttpController(req, res);
-
-            handleError(err, ctrl, method);
-        });
-    }
-}
-
-function getNextHandler(
-    method: string,
-    resolve: (value: any) => any,
-    reject: (err: any) => void
-) {
-    return (ctrl: HttpController) => {
-        let { req, res } = ctrl,
-            { BeforeIntercepters, RequireAuth } = ctrl.Class;
-
-        new Promise((_resolve, _reject) => {
             // Handle CORS.
             if (!cors(<any>ctrl.cors, req, res)) {
-                return _reject(new HttpError(410));
+                throw new HttpError(410);
             } else if (req.method === "OPTIONS") {
                 // cors will set proper headers for OPTIONS
                 res.end();
-                return _resolve(false);
             }
 
             // Handle CSRF token.
             handleCsrfToken(ctrl);
-            _resolve(null);
-        }).then(result => {
-            if (result === false || res.sent)
-                return false;
-            else
-                return ctrl.before();
-        }).then(result => {
-            if (result === false || res.sent)
-                return false;
-            else
-                return callIntercepterChain(BeforeIntercepters[method], ctrl, true);
-        }).then(result => {
-            if (result === false || res.sent) {
-                // if the response has been sent before calling the actual method,
-                // resolve the Promise immediately without running any checking 
-                // procedure, and don't call the method.
-                return resolve(null);
-            }
+
+            // if the response has been sent before calling the actual method, 
+            // return immediately without running any checking procedure, and 
+            // don't call the method.
+            if (res.sent || false === (await ctrl.before())) return;
 
             // Handle authentication.
             if (RequireAuth.includes(method) && !ctrl.authorized) {
@@ -132,13 +81,19 @@ function getNextHandler(
             res.gzip = req.encoding == "gzip" && ctrl.gzip;
 
             // Handle jsonp.
-            if (req.method == "GET" && ctrl.jsonp
-                && req.query[ctrl.jsonp]) {
+            if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
                 res.jsonp = req.query[ctrl.jsonp];
             }
 
-            return getResult(ctrl, method);
-        }).then(resolve).catch(reject);
+            let result = await ctrl[method](...await getArguments(ctrl, method));
+
+            await handleResponse(ctrl, result);
+            await ctrl.after();
+        } catch (err) {
+            ctrl = ctrl || new HttpController(req, res);
+
+            handleError(err, ctrl, method);
+        }
     }
 }
 
@@ -163,16 +118,16 @@ export function handleLog(err: Error, ctrl: Controller, method?: string) {
     }
 }
 
-function handleFinish(err: Error, ctrl: HttpController, method: string): void {
+async function handleFinish(err: Error, ctrl: HttpController, method: string) {
     handleLog(err, ctrl, method);
     finish(ctrl);
 
     if (isDevMode && !(err instanceof HttpError)) {
-        callsiteLog(err);
+        await callsiteLog(err);
     }
 }
 
-function handleError(err: Error, ctrl: HttpController, method?: string) {
+async function handleError(err: Error, ctrl: HttpController, method?: string) {
     let { req, res } = ctrl;
 
     // If the response is has already been sent, handle finish immediately.
@@ -198,26 +153,23 @@ function handleError(err: Error, ctrl: HttpController, method?: string) {
     if (req.accept == "application/json" || res.jsonp) {
         // Send JSON response.
         res.send(ctrl.error(err.message, (<HttpError>err).code));
-        handleFinish(_err, ctrl, method);
     } else {
         res.status = (<HttpError>err).code;
 
         // Try to load the error page, if not present, then show the 
         // error message.
-        ctrl.Class.httpErrorView(<HttpError>err, ctrl).then(content => {
+        try {
+            let content = await ctrl.Class.httpErrorView(<HttpError>err, ctrl);
+
             res.type = "text/html";
             res.send(content);
-            handleFinish(_err, ctrl, method);
-        }).catch(() => {
+        } catch (err) {
             res.type = "text/plain";
             res.send(err.message);
-            handleFinish(_err, ctrl, method);
-        });
+        }
     }
-}
 
-async function getResult(ctrl: HttpController, method: string) {
-    return callMethod(ctrl, ctrl[method], ...(await getArguments(ctrl, method)));
+    await handleFinish(_err, ctrl, method);
 }
 
 async function getArguments(ctrl: HttpController, method: string) {
@@ -229,66 +181,55 @@ async function getArguments(ctrl: HttpController, method: string) {
         resParams = ["response", "res"];
 
     // Dependency Injection
-    if (isTypeScript) {
-        // try to convert parameters to proper types according to 
-        // the definition of the method.
-        let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
+    // try to convert parameters to proper types according to 
+    // the definition of the method.
+    let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
-        for (let i = 0; i < meta.length; i++) {
-            if (meta[i] == Number) { // inject number
-                args[i] = parseInt(data.shift());
-            } else if (meta[i] == Boolean) { // inject boolean
-                let val = data.shift();
-                args[i] = val == "false" || val == "0" ? false : true;
-            } else if (meta[i] == Object) {
-                if (reqParams.includes(fnParams[i])) // Inject Request
-                    args[i] = req;
-                else if (resParams.includes(fnParams[i])) // Inject Response
-                    args[i] = res;
-                else
-                    args[i] = data.shift();
-            } else if (meta[i].prototype instanceof Model) { // inject user-defined Model
-                if (req.method == "POST" && req.params.id === undefined) {
-                    // POST request means creating a new model.
-                    // If a POST request with an ID, which means the 
-                    // request isn't a RESTful request, DO NOT 
-                    // create new model.
-                    args[i] = (new (<typeof Model>meta[i])).use(req.db);
-                } else {
-                    // Other type of requests, such as GET, DELETE, 
-                    // PATCH, PUT, all need to retrieve an existing 
-                    // model.
-                    try {
-                        let id = parseInt(req.params.id);
-
-                        if (!id || isNaN(id))
-                            throw new HttpError(400);
-
-                        args[i] = await (<typeof Model>meta[i]).use(req.db).get(id);
-                    } catch (e) {
-                        args[i] = null;
-                        throw e;
-                    }
-                }
-            } else {
-                args[i] = data.shift();
-            }
-        }
-    } else {
-        for (let i = 0; i < fnParams.length; i++) {
-            if (reqParams.includes(fnParams[i]))
+    for (let i = 0; i < meta.length; i++) {
+        if (meta[i] == Number) { // inject number
+            args[i] = parseInt(data.shift());
+        } else if (meta[i] == Boolean) { // inject boolean
+            let val = data.shift();
+            args[i] = val == "false" || val == "0" ? false : true;
+        } else if (meta[i] == Object) {
+            if (reqParams.includes(fnParams[i])) // Inject Request
                 args[i] = req;
-            else if (resParams.includes(fnParams[i]))
+            else if (resParams.includes(fnParams[i])) // Inject Response
                 args[i] = res;
             else
                 args[i] = data.shift();
+        } else if (meta[i].prototype instanceof Model) { // inject user-defined Model
+            if (req.method == "POST" && req.params.id === undefined) {
+                // POST request means creating a new model.
+                // If a POST request with an ID, which means the 
+                // request isn't a RESTful request, DO NOT 
+                // create new model.
+                args[i] = (new (<typeof Model>meta[i])).use(req.db);
+            } else {
+                // Other type of requests, such as GET, DELETE, 
+                // PATCH, PUT, all need to retrieve an existing 
+                // model.
+                try {
+                    let id = parseInt(req.params.id);
+
+                    if (!id || isNaN(id))
+                        throw new HttpError(400);
+
+                    args[i] = await (<typeof Model>meta[i]).use(req.db).get(id);
+                } catch (e) {
+                    args[i] = null;
+                    throw e;
+                }
+            }
+        } else {
+            args[i] = data.shift();
         }
     }
 
     return args;
 }
 
-function handleResponse(ctrl: HttpController, data: any) {
+async function handleResponse(ctrl: HttpController, data: any) {
     let { req, res } = ctrl;
 
     if (!res.sent) {
@@ -309,7 +250,7 @@ function handleResponse(ctrl: HttpController, data: any) {
             } else if (data instanceof Buffer) {
                 res.send(data);
             } else if (typeof data === "string" && res.gzip) {
-                return handleGzip(ctrl, data);
+                await handleGzip(ctrl, data);
             } else {
                 res.send(data);
             }
@@ -319,22 +260,15 @@ function handleResponse(ctrl: HttpController, data: any) {
     return finish(ctrl);
 }
 
-function handleGzip(ctrl: HttpController, data: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-        let { res } = ctrl;
-        zlib.gzip(data, (err, _data) => {
-            if (err)
-                return reject(err);
-
-            res.headers["content-encoding"] = "gzip";
-            res.type = "text/html";
-            // Send compressed data.
-            res.end(_data);
-            resolve(null);
-        });
-    }).then(() => {
-        return finish(ctrl);
+async function handleGzip(ctrl: HttpController, data: any): Promise<any> {
+    let { res } = ctrl;
+    data = await new Promise((resolve, reject) => {
+        zlib.gzip(data, (err, data) => err ? reject(err) : resolve(data));
     });
+
+    res.headers["content-encoding"] = "gzip";
+    res.type = "text/html";
+    res.end(data);
 }
 
 function finish(ctrl: HttpController): void {

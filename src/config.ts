@@ -19,23 +19,8 @@ interface StaticOptions extends serveStatic.ServeStaticOptions {
 };
 
 export interface SFNConfig {
-    env?: "dev" | "development" | "pro" | "production";
     /** Default language of the application. */
     lang?: string;
-    /**
-	 * If `true`, when a method's jsdoc contains tag `@route` (for 
-	 * `HttpController`s) or `@event` (for `SocektController`s), the value 
-	 * after them will be used as a HTTP route or socket event.
-	 * @example
-	 * @route GET /user/:id
-	 * @event show-user-info
-	 */
-    enableDocRoute?: boolean;
-    /**
-     * If `true`, when a method is a generator function, it will be treated as
-     * a coroutine function and await its result.
-     */
-    awaitGenerator?: boolean;
     /**
      * The directories that serve static resources.
      * @see https://www.npmjs.com/package/serve-static
@@ -137,10 +122,7 @@ const env = process.env;
  * supported options on their official websites.
  */
 export const config: SFNConfig = {
-    env: <SFNConfig["env"]>env.NODE_ENV || "dev",
     lang: env.LANG || "en-US",
-    enableDocRoute: false,
-    awaitGenerator: false,
     statics: [SRC_PATH + "/assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,

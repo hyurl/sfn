@@ -2,7 +2,7 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import * as program from "commander";
-import { SRC_PATH, isTypeScript, ROOT_PATH } from "../../init";
+import { SRC_PATH, ROOT_PATH } from "../../init";
 import { red, green, grey } from "../../core/tools/functions-inner";
 
 // Command `sfn init` is used to initiate your project.
@@ -14,7 +14,6 @@ program.command("init")
         try {
             let sfnd = path.normalize(__dirname + "/../../.."),
                 tplDir = `${sfnd}/templates`,
-                ext = isTypeScript ? "ts" : "js",
                 bootstrap = `${SRC_PATH}/bootstrap`,
                 assetsDir = `${SRC_PATH}/assets`,
                 ctrlDir = `${SRC_PATH}/controllers`,
@@ -23,8 +22,8 @@ program.command("init")
                 modelDir = `${SRC_PATH}/models`,
                 scheduleDir = `${SRC_PATH}/schedules`,
                 serviceDir = `${SRC_PATH}/services`,
-                configFile = `${SRC_PATH}/config.${ext}`,
-                indexFile = `${SRC_PATH}/index.${ext}`,
+                configFile = `${SRC_PATH}/config.js`,
+                indexFile = `${SRC_PATH}/index.js`,
                 envFile = `${ROOT_PATH}/.env`;
 
             if (!fs.existsSync(envFile))
@@ -38,15 +37,15 @@ program.command("init")
 
             if (!fs.existsSync(bootstrap)) {
                 fs.ensureDirSync(bootstrap);
-                fs.writeFileSync(`${bootstrap}/master.${ext}`, "");
-                fs.writeFileSync(`${bootstrap}/worker.${ext}`, "");
-                fs.writeFileSync(`${bootstrap}/http.${ext}`, "");
-                fs.writeFileSync(`${bootstrap}/websocket.${ext}`, "");
-                fs.writeFileSync(`${bootstrap}/cli.${ext}`, "");
+                fs.writeFileSync(`${bootstrap}/master.ts`, "");
+                fs.writeFileSync(`${bootstrap}/worker.ts`, "");
+                fs.writeFileSync(`${bootstrap}/http.ts`, "");
+                fs.writeFileSync(`${bootstrap}/websocket.ts`, "");
+                fs.writeFileSync(`${bootstrap}/cli.ts`, "");
             }
 
             if (!fs.existsSync(ctrlDir)) {
-                let dir = `${tplDir}/${ext}/controllers`;
+                let dir = `${tplDir}/controllers`;
                 fs.copySync(dir, ctrlDir);
             }
 
@@ -66,10 +65,10 @@ program.command("init")
                 fs.ensureDirSync(serviceDir);
 
             if (!fs.existsSync(configFile))
-                fs.copySync(`${tplDir}/${ext}/config.${ext}`, configFile);
+                fs.copySync(`${tplDir}/config.ts`, configFile);
 
             if (!fs.existsSync(indexFile))
-                fs.copySync(`${tplDir}/${ext}/index.${ext}`, indexFile);
+                fs.copySync(`${tplDir}/index.ts`, indexFile);
 
             // expose vscode debug configurations
             let dir = `${ROOT_PATH}/.vscode/`,
@@ -83,7 +82,7 @@ program.command("init")
                             request: "launch",
                             protocol: "auto",
                             name: "Start Server",
-                            program: "${workspaceFolder}/" + (isTypeScript ? "dist" : "src") + "/index"
+                            program: "${workspaceFolder}/dist/index"
                         }
                     ]
                 }, { spaces: 4 });
