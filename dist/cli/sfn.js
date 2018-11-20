@@ -5,8 +5,6 @@ const fs = require("fs-extra");
 const path = require("path");
 const program = require("commander");
 const pluralize = require("pluralize");
-const filter = require("lodash/filter");
-const each = require("lodash/each");
 const capitalization_1 = require("capitalization");
 const init_1 = require("../init");
 const ConfigLoader_1 = require("../core/bootstrap/ConfigLoader");
@@ -26,10 +24,6 @@ program.description("create new controllers, models. etc.")
     console.log("  sfn -m Article                   create a model named 'Article'");
     console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
     console.log("");
-});
-var cmdDir = path.resolve(__dirname, "commands"), files = fs.readdirSync(cmdDir);
-each(filter(files, file => path.extname(file) == ".js"), file => {
-    require(path.resolve(cmdDir, file));
 });
 let cliBootstrap = init_1.APP_PATH + "/bootstrap/cli.js";
 fs.existsSync(cliBootstrap) && require(cliBootstrap);

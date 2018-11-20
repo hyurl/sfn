@@ -3,8 +3,6 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as program from "commander";
 import pluralize = require("pluralize");
-import filter = require("lodash/filter");
-import each = require("lodash/each");
 import { hyphenate } from "capitalization";
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { config } from "../core/bootstrap/ConfigLoader";
@@ -27,14 +25,6 @@ program.description("create new controllers, models. etc.")
         console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
         console.log("");
     });
-
-var cmdDir = path.resolve(__dirname, "commands"),
-    files = fs.readdirSync(cmdDir);
-
-// automatically load commands
-each(filter(files, file => path.extname(file) == ".js"), file => {
-    require(path.resolve(cmdDir, file));
-});
 
 // Load user-defined bootstrap procedures.
 let cliBootstrap = APP_PATH + "/bootstrap/cli.js";

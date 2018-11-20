@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2017",
+        "preserveConstEnums": true,
+        "rootDir": "src",
+        "outDir": "dist",
+        "newLine": "LF",
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "importHelpers": true,
+        "pretty": true,
+        "removeComments": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "emitDecoratorMetadata": true,
+    },
+    "include": [
+        "src/*.ts",
+        "src/bootstrap/*.ts",
+        "src/controllers/*.ts",
+        "src/controllers/*/*.ts",
+        "src/locales/*.ts",
+        "src/core/*/*.ts",
+        "src/core/*/*/*.ts",
+        "src/cli/*.ts",
+        "src/cli/commands/*.ts"
+    ],
+    "exclude": [
+        "./node_modules/*"
+    ]
+}
