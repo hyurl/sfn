@@ -9,7 +9,9 @@ if (process.cwd() != sfnd)
     process.exit();
 console.log(functions_inner_1.grey `Initiating...`);
 try {
-    let tplDir = `${sfnd}/templates`, bootstrap = `${init_1.SRC_PATH}/bootstrap`, assetsDir = `${init_1.SRC_PATH}/assets`, ctrlDir = `${init_1.SRC_PATH}/controllers`, localeDir = `${init_1.SRC_PATH}/locales`, viewDir = `${init_1.SRC_PATH}/views`, modelDir = `${init_1.SRC_PATH}/models`, scheduleDir = `${init_1.SRC_PATH}/schedules`, serviceDir = `${init_1.SRC_PATH}/services`, configFile = `${init_1.SRC_PATH}/config.js`, indexFile = `${init_1.SRC_PATH}/index.js`, envFile = `${init_1.ROOT_PATH}/.env`;
+    let tplDir = `${sfnd}/templates`, bootstrap = `${init_1.SRC_PATH}/bootstrap`, assetsDir = `${init_1.SRC_PATH}/assets`, ctrlDir = `${init_1.SRC_PATH}/controllers`, localeDir = `${init_1.SRC_PATH}/locales`, viewDir = `${init_1.SRC_PATH}/views`, modelDir = `${init_1.SRC_PATH}/models`, scheduleDir = `${init_1.SRC_PATH}/schedules`, serviceDir = `${init_1.SRC_PATH}/services`, configFile = `${init_1.SRC_PATH}/config.js`, indexFile = `${init_1.SRC_PATH}/index.js`, envFile = `${init_1.ROOT_PATH}/.env`, tsconfig = `${init_1.SRC_PATH}/tsconfig.json`;
+    if (!fs.existsSync(tsconfig))
+        fs.copyFileSync(`${tplDir}/tsconfig.json`, tsconfig);
     if (!fs.existsSync(envFile))
         fs.copyFileSync(`${sfnd}/.env`, envFile);
     if (!fs.existsSync(init_1.SRC_PATH))

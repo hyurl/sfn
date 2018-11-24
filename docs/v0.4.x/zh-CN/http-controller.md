@@ -41,36 +41,6 @@ export default class extends HttpController {
 - `route.post(path: string)`
 - `route.put(path: string)`
 
-### 兼容 JavaScript
-
-如果你正在使用纯 JavaScript 来编程，它并不支持装饰器（尚未支持），但框架提供了一种
-兼容的方式能够让你使用相似的特性，通过使用 **jsdoc** 注释块配合 `@route` 标签。你
-必须先在 `config.js` 中打开 `enableDocRoute` 选项才能使用这个特性。下面这个示例和
-上面的效果是一样的。
-
-```javascript
-// config.js
-exports.default = {
-    // ...
-    enableDocRoute: true,
-    // ...
-};
-```
-
-```javascript
-// src/controllers/Demo.js
-const { HttpController } = require("sfn");
-
-exports.default = class extends HttpController {
-    /**
-     * @route GET /demo
-     */
-    index() {
-        return "Hello, World!";
-    }
-}
-```
-
 ### 路由格式
 
 框架使用 [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 来解析 
@@ -154,25 +124,6 @@ export default class extends HttpController {
 从上面的例子中，你可以看到我传递了一个 `req: Request` 到绑定到路由的方法中。实际上，
 你可以做得更多，请查看章节 [依赖注入](./di#在控制器中自动注入).
 
-### 在 JavaScript 中
-
-由于 JavaScript 不支持类型标注，因此你不能在方法上设置参数（实际上可以，但只有部分效果），
-因此与其将它们传递为参数，你可以在方法中从 `this` 对象来获取它们。
-
-```javascript
-const { HttpController } = require("sfn");
-
-exports.default = class extends HttpController {
-    /**
-     * @route GET /
-     */
-    index() {
-        let { req, res } = this;
-        // ...
-    }
-}
-```
-
 ## 处理异步操作
 
 当处理异步操作时，你可以使用修饰符 `async`，就像下面这样：
@@ -184,37 +135,6 @@ export default class extends HttpController {
     @route.get("/")
     async index(req: Request, res: Response) {
         // you can use `await` here
-    }
-}
-```
-
-### 在 JavaScript 中
-
-无论你是使用 TypeScript 或者 JavaScript 编程，只要你的 NodeJS 版本高于 `7.6`，你都
-总是可以使用 `async/await` 修饰符。但如果你是在版低于 `7.6` 的 NodeJS 环境中编程，
-你可以使用另一个兼容的方案来实现这个功能。
-
-编辑你的 `config.js` 文件，设置 `config.awaitGenerator` 为 `true`，然后你就可以
-使用迭代器函数和 `yield` 来处理异步操作了，就像这样：
-
-```javascript
-// config.js
-exports.default = {
-    // ...
-    awaitGenerator: true,
-    // ...
-};
-```
-
-```javascript
-const { HttpController } = require("sfn");
-
-exports.default = class extends HttpController {
-    /**
-     * @route GET /
-     */
-    * index() {
-        // you can use `yield` here
     }
 }
 ```
@@ -253,14 +173,14 @@ export default class extends HttpController {
 }
 ```
 
-更高级的用法，请查看 [面向切面编程](./aop-mixins#面向切面编程)。
+更高级的方案，请查看 [面向切面编程](./aop-mixins#面向切面编程)。
 
 ### 处理非 Promise 过程
 
 如果你的代码中使用的某些异步的函数、第三方包不支持 `Promise`，那么你就不能使用 
-`await` 或者 `yield` 来处理它们，要处理这些异步的操作，你可以使用 `util` 模块中的 
-`promisify()` 函数来将其包装成 Promise（NodeJS 版本高于 `8.0`），或者直接使用它们，
-然后在你想要返回数据给前端的地方，直接调用 `res.send()` 方法即可。请看下面的示例：
+`await` 来处理它们，要处理这些异步的操作，你可以使用 `util` 模块中的 `promisify()` 函数来
+将其包装成 Promise（NodeJS 版本高于 `8.0`），或者直接使用它们，然后在你想要返回数据给前端的
+地方，直接调用 `res.send()` 方法即可。请看下面的示例：
 
 ```typescript
 import { HttpController, Request, Response, route } from "sfn";
@@ -327,11 +247,6 @@ var obj = new Request;
 if (obj instanceof Request) {
     // ...
 }
-```
-接口（和类型）在 JavaScript 中是不导出的，因此下面的代码是不正确的。
-
-```javascript
-const { Request } = require("sfn"); // Request would be undefined.
 ```
 
 ## 在控制器中抛出 HttpError

@@ -21,6 +21,8 @@ export * from "./core/tools/HttpError";
 export * from "./core/tools/SocketError";
 export * from "./core/tools/MarkdownParser";
 export * from "./core/tools/upload";
+export * from "./core/tools/EventMap";
+export * from "./core/tools/RouteMap";
 
 // load user config before loading subsequent modules
 export * from "./core/bootstrap/ConfigLoader";

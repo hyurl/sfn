@@ -39,18 +39,6 @@ If you're not familiar with `vi`, you can use a visual editor instead.
 
 ## Commands
 
-### `sfn init`
-
-Initiates the project and create needed files. This command should be run right
-after you install the framework. But you can also run it to recover 
-must-be-present files when any missing.
-
-*In history versions, SFN once provided some commands like **start**, **stop**,*
-*and **reload** to inactive with the program. But since 0.3.0, SFN started being*
-*friendly to [PM2](https://pm2.io), and use PM2 as its load balancer, so thoes*
-*commands has been removed. Please check the documentation of PM2 for how to*
-*inactive with the application.*
-
 ### `sfn -c <name> [-t <type>]`
 
 Creates controller file according to the specified name. In a **SFN** 

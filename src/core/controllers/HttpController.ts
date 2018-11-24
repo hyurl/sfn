@@ -17,10 +17,6 @@ import { UploadOptions } from "../tools/upload";
 export { CorsOptions };
 
 const Engine = new EjsEngine();
-var warningEmitted = false;
-
-/** @deprecated */
-export type HttpNextHandler = (controller: HttpController) => void;
 
 /**
  * HttpController manages requests come from an HTTP client.
@@ -99,12 +95,7 @@ export class HttpController extends Controller {
     /** Reference to the corresponding response context. */
     readonly res: Response;
 
-    /**
-     * You can define a fourth parameter `next` to the constructor, if it is 
-     * defined, then the constructor can handle asynchronous actions. And at 
-     * where you want to call the real method, use `next(this)` to call it.
-     */
-    constructor(req: Request, res: Response, next: HttpNextHandler = null) {
+    constructor(req: Request, res: Response) {
         super();
         this.authorized = req.user !== null;
         this.req = req;
@@ -113,11 +104,6 @@ export class HttpController extends Controller {
             || (req.cookies && req.cookies.lang)
             || req.lang
             || config.lang;
-
-        if ((next instanceof Function) && !warningEmitted) {
-            process.emitWarning("Passing argument `next` to a controller is deprecated.", "DeprecationWarning");
-            warningEmitted = true;
-        }
     }
 
     /** Gets the absolute view filename if the given one is relative. */

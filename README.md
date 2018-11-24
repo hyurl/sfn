@@ -52,15 +52,13 @@ files and directories for you automatically.
 ### Start Demo Server
 
 **SFN** provides a demo, so you can now start server and see what will happen.
-firstly, compile the source code with the command: `tsc` (only with 
-TypeScript), then type the command:
+firstly, compile the source code with the command: `tsc`, then type the command:
 
 ```sh
 node dist
 ```
 
-And the server should be started in few seconds (If you're not coding TypeScript,
-the command should be `node src`).
+And the server should be started in few seconds.
 
 If you have PM2 installed, you can use the following command to start the 
 application, and auto-scale according to the CPU numbers.

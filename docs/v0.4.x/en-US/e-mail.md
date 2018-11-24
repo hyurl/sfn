@@ -10,8 +10,8 @@ to send e-mails.
 ### Configuration
 
 You must configure properly before you can actually send an e-mail, modify 
-your configuration file `config.ts` (or `config.js` in JavaScript), set a 
-proper host and port, username, password, etc.
+your configuration file `config.ts`, set a proper host and port, username, 
+password, etc.
 
 ```typescript
 export const conifg: SFNConfig = {

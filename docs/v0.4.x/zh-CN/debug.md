@@ -34,9 +34,6 @@ Visual Studio Code 调试是直接支持 TypeScript 的，因此你可以直接�
 
 <img src="/images/vscode-debug.png" alt="Debug Panel" title="Debug Panel" width="auto" />
 
-注意如果你没有使用 TypeScript 来进行开发，请记得把 
-`${workspaceFolder}/dist/index` 修改为 `${workspaceFolder}/src/index`。
-
 更多关于 Visual Studio Code 调试应用的详情，请查阅
 [Debugging in Visual Studio Code](https://code.visualstudio.com/docs/editor/debugging)。
 
@@ -86,8 +83,7 @@ WebStorm 窗口中打开你的项目目录，点击顶部菜单栏的 **Run** �
 # 在 Visual Studio 2017 中调试
 
 在 Visual Studio 2017 中调试 JavaScript/TypeScript 项目是很简单的，你只需要在
-**解决方案资源管理器** 中将入口文件`dist/index.js`（或者 `src/index.js`） 
-**设置为启动项** 即可，就像这样：
+**解决方案资源管理器** 中将入口文件`dist/index.js` **设置为启动项** 即可，就像这样：
 
 <img src="/images/vs-debug.png"/>
 
@@ -97,7 +93,7 @@ WebStorm 窗口中打开你的项目目录，点击顶部菜单栏的 **Run** �
 <img src="/images/vs-debug-button.png"/>
 
 Visual Studio 表现得和 VS Code 与 WebStorm 有些不同，在调试时，一个新的控制台窗口将会弹出。
-除此之外，其他的所有操作都几乎一样，你也可以直接在 JavaScript/TypeScript 源代码中设置断点。
+除此之外，其他的所有操作都几乎一样，你也可以直接在 TypeScript 源代码中设置断点。
 
 <img src="/images/vs-debug2.png"/>
 
@@ -120,20 +116,12 @@ Visual Studio 表现得和 VS Code 与 WebStorm 有些不同，在调试时，�
 npm i --save-dev ts-node typescript
 ```
 
-然而，如果你并不大算使用 TypeScript 编程，则这个步骤可以忽略。
-
 ### 使用调试命令启动应用
 
 请使用这个命令来启动你的应用，注意 `--inspect` 一定要处在正确的位置。
 
 ```sh
 node --inspect --require ts-node/register src
-```
-
-如果你没有使用 TypeScript 编程，则直接这么做：
-
-```sh
-node --inspect src
 ```
 
 ### 打开 Chrome 调试器
@@ -172,10 +160,7 @@ node --inspect src
 
 # 在 Sublime Text 中调试
 
-关于如何在 Sublime Text 中调试 JavaScript 应用的知识，请查阅插件
-[Web Inspector](https://packagecontrol.io/packages/Web%20Inspector)。
-
-关于调试 TypeScript 应用的知识，请查阅微软官方的插件
+关于如何在 Sublime Text 中调试 TypeScript 应用的知识，请查阅微软官方的插件
 [TypeScript-Sublime-Plugin](https://github.com/Microsoft/TypeScript-Sublime-Plugin).
 
 # 在 Firefox 中调试

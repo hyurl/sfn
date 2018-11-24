@@ -9,8 +9,8 @@
 
 ### 配置
 
-你必须要在真的发送邮件之前进行合适的配置，修改你的配置文件 `config.ts`（或者 
-JavaScript 的 `config.js`），设置合适的主机名和端口，以及用户名、密码等等。
+你必须要在真的发送邮件之前进行合适的配置，修改你的配置文件 `config.ts`，设置合适的主机名和
+端口，以及用户名、密码等等。
 
 ```typescript
 export const config: SFNConfig = {

@@ -11,9 +11,8 @@ const MarkdownParser_1 = require("../tools/MarkdownParser");
 const symbols_1 = require("../tools/symbols");
 const upload_1 = require("../tools/upload");
 const Engine = new sfn_ejs_engine_1.EjsEngine();
-var warningEmitted = false;
 class HttpController extends Controller_1.Controller {
-    constructor(req, res, next = null) {
+    constructor(req, res) {
         super();
         this.viewPath = this.Class.viewPath;
         this.viewExtname = this.Class.viewExtname;
@@ -30,10 +29,6 @@ class HttpController extends Controller_1.Controller {
             || (req.cookies && req.cookies.lang)
             || req.lang
             || ConfigLoader_1.config.lang;
-        if ((next instanceof Function) && !warningEmitted) {
-            process.emitWarning("Passing argument `next` to a controller is deprecated.", "DeprecationWarning");
-            warningEmitted = true;
-        }
     }
     getAbsFilename(filename) {
         if (!path.isAbsolute(filename))

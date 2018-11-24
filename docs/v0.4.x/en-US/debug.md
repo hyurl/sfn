@@ -39,9 +39,6 @@ debugging a pure JavaScript project.
 
 <img src="/images/vscode-debug.png" alt="Debug Panel" title="Debug Panel" width="auto" />
 
-Be aware if you're not coding in TypeScript, please remember to change 
-`${workspaceFolder}/dist/index` to `${workspaceFolder}/src/index`.
-
 More about Visual Studio Code debugging details, please check
 [Debugging in Visual Studio Code](https://code.visualstudio.com/docs/editor/debugging)。
 
@@ -97,7 +94,7 @@ click the **continue** button so your program won't hang still):
 # Debug in Visual Studio 2017
 
 Debugging JavaScript/TypeScript project in Visual Studio is easy, you just have 
-to set the entry file `dist/index.js` (or `src/index.js`) as **Startup Item** in
+to set the entry file `dist/index.js` as **Startup Item** in
 **Solution Explorer**, just like this:
 
 <img src="/images/vs-debug.png"/>
@@ -109,8 +106,8 @@ the top menu:
 
 Visual Studio debugger behave a little different than VS Code or WebStorm, when
 debugging, a new console window will be open. Except that, other operations are 
-almost the same, and you can set breakpoints directly in the 
-JavaScript/TypeScript source code.
+almost the same, and you can set breakpoints directly in the TypeScript source 
+code.
 
 <img src="/images/vs-debug2.png"/>
 
@@ -135,8 +132,6 @@ To allow Chrome debugging a TypeScript project, you must first have
 npm i --save-dev ts-node typescript
 ```
 
-However, if you're not planning coding TypeScript, this procedure can be ignored.
-
 ### Start Application With Inspect Flag
 
 Using this command to start your application, note that `--inspect` flag must be
@@ -144,12 +139,6 @@ presented at right position.
 
 ```sh
 node --inspect --require ts-node/register src
-```
-
-If you're not coding TypeScript, just do this:
-
-```sh
-node --inspect src
 ```
 
 ### Open Chrome Debugger
@@ -192,10 +181,8 @@ experimental feature in SFN).
 
 # Debug in Sublime Text
 
-For how to debug a JavaScript application in Sublime Text, please check the 
-plugin [Web Inspector](https://packagecontrol.io/packages/Web%20Inspector).
-
-For debugging a TypeScript application, please check Microsoft official plugin 
+For how to debug a TypeScript application in Sublime Text, please check 
+Microsoft official plugin 
 [TypeScript-Sublime-Plugin](https://github.com/Microsoft/TypeScript-Sublime-Plugin).
 
 # Debug In Firefox
