@@ -90,6 +90,9 @@ class HttpController extends Controller_1.Controller {
     set user(v) {
         this.req.user = v;
     }
+    get url() {
+        return this.req.url;
+    }
     get sse() {
         if (!this[symbols_1.realSSE]) {
             this[symbols_1.realSSE] = new SSE(this.req, this.res);

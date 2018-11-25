@@ -15,6 +15,7 @@ const websocket_session_1 = require("./websocket-session");
 const websocket_db_1 = require("./websocket-db");
 const websocket_auth_1 = require("./websocket-auth");
 const functions_inner_1 = require("../tools/functions-inner");
+const last = require("lodash/last");
 if (index_1.ws) {
     for (let nsp in EventMap_1.EventMap) {
         index_1.ws.of(nsp)
@@ -50,7 +51,9 @@ function handleEvent(socket, nsp, event, data) {
             code: 200
         };
         try {
+            socket[symbols_1.activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
             ctrl = new Class(socket);
+            ctrl.event;
             if (socket.disconnected || false === (yield ctrl.before()))
                 return;
             if (RequireAuth.includes(method) && !ctrl.authorized)

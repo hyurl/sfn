@@ -214,6 +214,11 @@ export class HttpController extends Controller {
         this.req.user = v;
     }
 
+    /** Alias of `req.url`. */
+    get url(): string {
+        return this.req.url;
+    }
+
     /** Gets an SSE instance. */
     get sse(): SSE {
         if (!this[realSSE]) {

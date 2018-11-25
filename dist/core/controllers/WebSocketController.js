@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Controller_1 = require("./Controller");
 const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const symbols_1 = require("../tools/symbols");
 class WebSocketController extends Controller_1.Controller {
     constructor(socket) {
         super();
@@ -28,6 +29,10 @@ class WebSocketController extends Controller_1.Controller {
     }
     set user(v) {
         this.socket.user = v;
+    }
+    get event() {
+        return this[symbols_1.activeEvent]
+            || (this[symbols_1.activeEvent] = this.socket[symbols_1.activeEvent]);
     }
 }
 WebSocketController.nsp = "/";

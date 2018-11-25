@@ -2,7 +2,7 @@ import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { ws } from "../bootstrap/index";
 import { SocketError } from "../tools/SocketError";
 import { WebSocket } from "../tools/interfaces";
-import { realDB } from "../tools/symbols";
+import { realDB, activeEvent } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { EventMap } from "../tools/EventMap";
 import { handleLog } from "./http-route";
@@ -13,6 +13,7 @@ import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session
 import dbHandler from "./websocket-db";
 import authHandler from "./websocket-auth";
 import { callsiteLog, getFuncParams } from "../tools/functions-inner";
+import last = require("lodash/last");
 
 if (ws) {
     for (let nsp in EventMap) {
@@ -60,7 +61,16 @@ async function handleEvent(socket: WebSocket, nsp: string, event: string, data: 
         };
 
     try {
+        socket[activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
         ctrl = new Class(socket);
+
+        // HACK, because the activeEvent stored in the socket object will be 
+        // frequently changed time to time a new event activated, so when the 
+        // first time access to `ctrl.event` properties, the active event will 
+        // be copied to the controller instance, so that no matter how it 
+        // changed, the instance will always access to the original event when 
+        // it was emitted.
+        ctrl.event;
 
         // if the socket has been disconnected before calling the actual method, 
         // return immediately without running any checking procedure, and don't 

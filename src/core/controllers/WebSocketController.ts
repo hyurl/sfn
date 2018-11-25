@@ -2,6 +2,7 @@ import { DB, User } from "modelar";
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
 import { config } from "../bootstrap/ConfigLoader";
+import { activeEvent } from "../tools/symbols";
 
 /**
  * WebSocketController manages messages come from a socket.io client.
@@ -74,5 +75,13 @@ export class WebSocketController extends Controller {
 
     set user(v: User) {
         this.socket.user = v;
+    }
+
+    /**
+     * The active event (namesapce included) when the controller is instantiated.
+     */
+    get event(): string {
+        return this[activeEvent]
+            || (this[activeEvent] = this.socket[activeEvent]);
     }
 }
