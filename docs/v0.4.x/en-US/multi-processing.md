@@ -84,3 +84,29 @@ channel.on("connect", () => {
     }
 });
 ```
+
+## Concurrency Control
+
+When running the program in multi-processing,  you will be easily facing 
+concurrency control issues, e.g. when two processes modified the same file at 
+the same time, or manipulate database at the same time. To solve such a problem,
+you'll need another package 
+[cluster-synchronize](https://github.com/hyurl/cluster-synchronize) to 
+synchronously running your logic (actually it's still asynchronous, but will run 
+the procedure sequentially).
+
+```typescript
+import { HttpController, route } from "sfn";
+import synchronize from "cluster-synchronize";
+
+export default class extends HttpController {
+    @route.get("/example")
+    async index() {
+        await synchronize(async () => {
+            // Do everything asynchronous and don't worry about concurrency 
+            // control issues.
+        });
+        return "Hello, World!";
+    }
+}
+```

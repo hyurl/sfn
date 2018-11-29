@@ -77,3 +77,26 @@ channel.on("connect", () => {
     }
 });
 ```
+
+## 并发控制
+
+在多进程运行程序时，你很容易遇到并发控制的问题，例如两个进程同时修改文件，同时操作数据库
+等等。为了解决这样的问题，你需要使用一个第三方模块
+[cluster-synchronize](https://github.com/hyurl/cluster-synchronize) 来“同步”执行
+逻辑（实际上还是异步的，但会依次有序的执行过程）。
+
+```typescript
+import { HttpController, route } from "sfn";
+import synchronize from "cluster-synchronize";
+
+export default class extends HttpController {
+    @route.get("/example")
+    async index() {
+        await synchronize(async () => {
+            // Do everything asynchronous and don't worry about concurrency 
+            // control issues.
+        });
+        return "Hello, World!";
+    }
+}
+```
