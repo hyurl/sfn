@@ -48,8 +48,7 @@ function startServer() {
             process.send("ready");
         }
         else {
-            let hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames, port = exports.http.address()["port"] || httpPort, host = hostname + (port == 80 || port == 443 ? "" : ":" + port), type = ConfigLoader_1.config.server.http.type, link = (type == "http2" ? "https" : type) + "://" + host, msg = functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(link)}.`;
-            console.log(msg);
+            console.log(functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(ConfigLoader_1.baseUrl)}.`);
         }
     });
 }

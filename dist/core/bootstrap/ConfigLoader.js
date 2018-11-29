@@ -19,6 +19,8 @@ if (fs.existsSync(init_1.APP_PATH + "/config.js")) {
         merge(config_1.config, m);
     }
 }
+let { server: { hostname, http: { port, type } } } = config_1.config, host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
+exports.baseUrl = (type == "http2" ? "https" : type) + "://" + host;
 exports.isDevMode = init_1.isDebugMode || !process.send;
 if (exports.isDevMode && !init_1.isDebugMode && !init_1.isCli) {
     console.log("You program is running in development mode without "
