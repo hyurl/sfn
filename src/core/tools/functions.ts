@@ -130,4 +130,3 @@ route.post = function (...args) {
 route.put = function (...args) {
     return _route("PUT", ...args);
 };
-

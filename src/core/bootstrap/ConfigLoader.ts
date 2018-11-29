@@ -20,6 +20,12 @@ if (fs.existsSync(APP_PATH + "/config.js")) {
     }
 }
 
+let { server: { hostname, http: { port, type } } } = config,
+    host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
+
+/** The base URL of the server (calculated according to the config). */
+export const baseUrl = (type == "http2" ? "https" : type) + "://" + host;
+
 /** Whether the program is running in development mode. */
 export const isDevMode = isDebugMode || !process.send;
 

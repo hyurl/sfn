@@ -4,8 +4,6 @@ import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
 import chalk from "chalk";
 import { Locale } from "./interfaces";
-import { Controller } from "../controllers/Controller";
-import { config } from "../bootstrap/ConfigLoader";
 
 export function loadLanguagePack(filename: string): Locale {
     let ext = extname(filename),

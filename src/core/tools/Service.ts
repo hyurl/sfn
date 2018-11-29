@@ -1,6 +1,6 @@
 import * as util from "util";
 import { EventEmitter } from "events";
-import Cache  = require("sfn-cache");
+import Cache = require("sfn-cache");
 import * as Logger from "sfn-logger";
 import { DB } from "modelar";
 import { injectable, injected } from "injectable-ts";

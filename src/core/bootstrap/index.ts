@@ -7,7 +7,7 @@ import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
-import { config, isDevMode } from "./ConfigLoader";
+import { config, isDevMode, baseUrl } from "./ConfigLoader";
 import { DevHotReloader } from "../tools/DevHotReloader";
 import { red, green } from "../tools/functions-inner";
 
@@ -77,14 +77,7 @@ export function startServer() {
             // notify PM2 that the service is available.
             process.send("ready");
         } else {
-            let hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames,
-                port = http.address()["port"] || httpPort,
-                host = hostname + (port == 80 || port == 443 ? "" : ":" + port),
-                type = config.server.http.type,
-                link = (type == "http2" ? "https" : type) + "://" + host,
-                msg = green`HTTP Server running at ${chalk.yellow(link)}.`;
-
-            console.log(msg);
+            console.log(green`HTTP Server running at ${chalk.yellow(baseUrl)}.`);
         }
     });
 }
