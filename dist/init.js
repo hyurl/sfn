@@ -7,6 +7,7 @@ var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
 exports.isDebugMode = argv.includes("inspect") || argv.includes("debug");
 exports.isCli = appPath == __dirname + path.sep + "cli";
+exports.isTsNode = argv.includes("ts-node");
 if (exports.isCli) {
     appPath = process.cwd() + path.sep + "dist";
 }
@@ -24,8 +25,8 @@ catch (e) {
     srcPath = path.normalize(exports.ROOT_PATH + "/src");
     appPath = path.normalize(exports.ROOT_PATH + "/dist");
 }
-exports.APP_PATH = global["APP_PATH"] || appPath;
 exports.SRC_PATH = global["SRC_PATH"] || srcPath;
+exports.APP_PATH = exports.isTsNode ? exports.SRC_PATH : global["APP_PATH"] || appPath;
 dotenv_1.config({
     path: exports.ROOT_PATH + "/.env"
 });

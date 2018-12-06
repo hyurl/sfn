@@ -1,7 +1,5 @@
 import * as path from "path";
-import * as fs from "fs";
 import { config as configEnv } from "dotenv";
-// import lowerFirst = require("lodash/lowerFirst");
 
 /** The version of framework. */
 export const version: string = require("../package.json").version;
@@ -14,6 +12,9 @@ export const isDebugMode = argv.includes("inspect") || argv.includes("debug");
 
 /** Whether the current process is running in command line. */
 export const isCli = appPath == __dirname + path.sep + "cli";
+
+/** Whether the current process is running in ts-node. */
+export const isTsNode = argv.includes("ts-node");
 
 if (isCli) {
     appPath = process.cwd() + path.sep + "dist";
@@ -37,11 +38,11 @@ try {
     appPath = path.normalize(ROOT_PATH + "/dist");
 }
 
-/** The application path, usually it's the distribution path. */
-export const APP_PATH: string = global["APP_PATH"] || appPath;
-
 /** The source code path. */
 export const SRC_PATH: string = global["SRC_PATH"] || srcPath;
+
+/** The application path, usually it's the distribution path. */
+export const APP_PATH: string = isTsNode ? SRC_PATH : global["APP_PATH"] || appPath;
 
 // support .env configuration file
 configEnv({

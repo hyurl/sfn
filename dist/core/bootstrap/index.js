@@ -27,13 +27,13 @@ function startServer() {
     require("../handlers/http-session");
     require("../handlers/http-db");
     require("../handlers/http-auth");
-    let httpBootstrap = init_1.APP_PATH + "/bootstrap/http.js";
-    fs.existsSync(httpBootstrap) && require(httpBootstrap);
+    let httpBootstrap = init_1.APP_PATH + "/bootstrap/http";
+    functions_inner_1.moduleExists(httpBootstrap) && require(httpBootstrap);
     require("../bootstrap/ControllerLoader");
     if (WS.enabled) {
         require("../handlers/websocket-event");
-        let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket.js";
-        fs.existsSync(wsBootstrap) && require(wsBootstrap);
+        let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket";
+        functions_inner_1.moduleExists(wsBootstrap) && require(wsBootstrap);
     }
     if (typeof exports.http["setTimeout"] == "function") {
         exports.http["setTimeout"](ConfigLoader_1.config.server.timeout);
@@ -76,8 +76,8 @@ if (!init_1.isCli) {
             exports.ws = SocketIO(WS.port, WS.options);
     }
     require("../handlers/worker-shutdown");
-    let workerBootstrap = init_1.APP_PATH + "/bootstrap/worker.js";
-    fs.existsSync(workerBootstrap) && require(workerBootstrap);
+    let workerBootstrap = init_1.APP_PATH + "/bootstrap/worker";
+    functions_inner_1.moduleExists(workerBootstrap) && require(workerBootstrap);
     if (ConfigLoader_1.config.server.autoStart) {
         startServer();
     }

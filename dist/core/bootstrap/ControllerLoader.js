@@ -7,6 +7,7 @@ const ConfigLoader_1 = require("./ConfigLoader");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 let WS = ConfigLoader_1.config.server.websocket;
+let ext = init_1.isTsNode ? ".ts" : ".js";
 function isController(m) {
     return m && (m.prototype instanceof HttpController_1.HttpController
         || m.prototype instanceof WebSocketController_1.WebSocketController);
@@ -16,8 +17,8 @@ function loadControllers(controllerPath) {
     for (let file of files) {
         let filename = controllerPath + "/" + file;
         let stat = fs.statSync(filename);
-        if (stat.isFile() && path.extname(file) == ".js") {
-            let _module = require(filename), basename = path.basename(filename, ".js"), Class;
+        if (stat.isFile() && path.extname(file) == ext) {
+            let _module = require(filename), basename = path.basename(filename, ext), Class;
             if (_module.default && isController(_module.default)) {
                 Class = _module.default;
             }

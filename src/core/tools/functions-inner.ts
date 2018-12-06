@@ -4,6 +4,12 @@ import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
 import chalk from "chalk";
 import { Locale } from "./interfaces";
+import * as fs from "fs";
+import { isTsNode } from "../../init";
+
+export function moduleExists(name: string): boolean {
+    return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
+}
 
 export function loadLanguagePack(filename: string): Locale {
     let ext = extname(filename),

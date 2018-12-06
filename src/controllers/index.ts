@@ -1,4 +1,4 @@
-import { HttpController, route, version, config } from "sfn";
+import { HttpController, route, version } from "sfn";
 
 /**
  * The Home controller is a special controller, it handles requests which 

@@ -9,7 +9,7 @@ import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
 import { config, isDevMode, baseUrl } from "./ConfigLoader";
 import { DevHotReloader } from "../tools/DevHotReloader";
-import { red, green } from "../tools/functions-inner";
+import { red, green, moduleExists } from "../tools/functions-inner";
 
 /** (worker only) The App instance created by **webium** framework. */
 export var app: App = null;
@@ -44,8 +44,8 @@ export function startServer() {
     require("../handlers/http-auth");
 
     // Load user-defined bootstrap procedures.
-    let httpBootstrap = APP_PATH + "/bootstrap/http.js";
-    fs.existsSync(httpBootstrap) && require(httpBootstrap);
+    let httpBootstrap = APP_PATH + "/bootstrap/http";
+    moduleExists(httpBootstrap) && require(httpBootstrap);
 
     // load controllers
     require("../bootstrap/ControllerLoader");
@@ -58,8 +58,8 @@ export function startServer() {
         require("../handlers/websocket-event");
 
         // Load user-defined bootstrap procedures.
-        let wsBootstrap = APP_PATH + "/bootstrap/websocket.js";
-        fs.existsSync(wsBootstrap) && require(wsBootstrap);
+        let wsBootstrap = APP_PATH + "/bootstrap/websocket";
+        moduleExists(wsBootstrap) && require(wsBootstrap);
     }
 
     // Start HTTP server.
@@ -112,8 +112,8 @@ if (!isCli) {
     require("../handlers/worker-shutdown");
 
     // Load user-defined bootstrap procedures.
-    let workerBootstrap = APP_PATH + "/bootstrap/worker.js";
-    fs.existsSync(workerBootstrap) && require(workerBootstrap);
+    let workerBootstrap = APP_PATH + "/bootstrap/worker";
+    moduleExists(workerBootstrap) && require(workerBootstrap);
 
     // If auto-start enabled, start the server immediately.
     if (config.server.autoStart) {

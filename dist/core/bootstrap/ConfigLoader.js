@@ -1,14 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = require("fs");
 const merge = require("lodash/merge");
+const startsWith = require("lodash/startsWith");
 const init_1 = require("../../init");
 const config_1 = require("../../config");
 exports.config = config_1.config;
 const chalk_1 = require("chalk");
 const Mail = require("sfn-mail");
-if (fs.existsSync(init_1.APP_PATH + "/config.js")) {
-    let m = require(init_1.APP_PATH + "/config.js");
+const functions_inner_1 = require("../tools/functions-inner");
+let moduleName = init_1.APP_PATH + "/config";
+if (!startsWith(__filename, init_1.APP_PATH) && functions_inner_1.moduleExists(moduleName)) {
+    let m = require(moduleName);
     if (typeof m.config == "object") {
         merge(config_1.config, m.config);
     }

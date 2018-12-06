@@ -1,11 +1,12 @@
 import * as fs from "fs";
 import * as path from "path";
-import { APP_PATH, SRC_PATH } from "../../init";
+import { APP_PATH, SRC_PATH, isTsNode } from "../../init";
 import { config } from "./ConfigLoader";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 
 let WS = config.server.websocket;
+let ext = isTsNode ? ".ts" : ".js";
 
 function isController(m): boolean {
     return m && (m.prototype instanceof HttpController
@@ -19,10 +20,9 @@ function loadControllers(controllerPath: string) {
         let filename = controllerPath + "/" + file;
         let stat = fs.statSync(filename);
 
-        if (stat.isFile() && path.extname(file) == ".js") {
-
+        if (stat.isFile() && path.extname(file) == ext) {
             let _module = require(filename),
-                basename: string = path.basename(filename, ".js"),
+                basename: string = path.basename(filename, ext),
                 Class: typeof HttpController | typeof WebSocketController;
 
             if (_module.default && isController(_module.default)) {

@@ -5,6 +5,12 @@ const path_1 = require("path");
 const CallSiteRecord = require("callsite-record");
 const moment = require("moment");
 const chalk_1 = require("chalk");
+const fs = require("fs");
+const init_1 = require("../../init");
+function moduleExists(name) {
+    return fs.existsSync(name + (init_1.isTsNode ? ".ts" : ".js"));
+}
+exports.moduleExists = moduleExists;
 function loadLanguagePack(filename) {
     let ext = path_1.extname(filename), name = path_1.basename(filename, ext).replace(/\-/g, ""), _module = require(filename), lang;
     if (typeof _module[name] === "object") {

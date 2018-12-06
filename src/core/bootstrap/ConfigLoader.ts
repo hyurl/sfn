@@ -1,15 +1,19 @@
 import * as fs from "fs";
 import merge = require("lodash/merge");
+import startsWith = require("lodash/startsWith");
 import { APP_PATH, isDebugMode, isCli } from "../../init";
 import { config } from "../../config";
 import chalk from "chalk";
 import * as Mail from "sfn-mail";
+import { moduleExists } from '../tools/functions-inner';
 
 export { config };
 
-if (fs.existsSync(APP_PATH + "/config.js")) {
+let moduleName = APP_PATH + "/config";
+
+if (!startsWith(__filename, APP_PATH) && moduleExists(moduleName)) {
     // Load user-defined configurations.
-    let m = require(APP_PATH + "/config.js");
+    let m = require(moduleName);
 
     if (typeof m.config == "object") {
         merge(config, m.config);
