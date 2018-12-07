@@ -171,6 +171,8 @@ documentation website.
 
 ```sh
 git clone https://github.com/hyurl/sfn
+mkdir ./node_modules
+ln -s ./sfn ./node_modules/sfn # sfn is required to be in node_modules
 cd sfn
 npm i
 node dist
