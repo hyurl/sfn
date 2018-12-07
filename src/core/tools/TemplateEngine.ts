@@ -3,12 +3,12 @@ import { isDevMode } from "../bootstrap/ConfigLoader";
 export interface TemplateOptions {
     [option: string]: any;
     /**
-     * Whether the compiler should be cached in memory, in `dev` mode, it's 
-     * `true` by default, while in `pro` mode, it's `false`.
+     * Whether the compiled function should be cached in memory, in `dev` mode, 
+     * it's `false` by default, while in `pro` mode, it's `true`.
      */
     cache?: boolean;
     /**
-     * Sets a specified encoding to load a template file (default: `utf8`).
+     * Sets a specified encoding for loading the template file (default: `utf8`).
      */
     encoding?: string;
 }
