@@ -124,8 +124,8 @@ documentation website.
 
 ```sh
 git clone https://github.com/hyurl/sfn
-mkdir ../node_modules
-ln -s ./sfn ../node_modules/sfn # some modules require sfn in node_modules
+mkdir ./node_modules
+ln -s ./sfn ./node_modules/sfn # some modules require sfn in node_modules
 cd sfn
 npm i
 node dist
