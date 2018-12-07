@@ -8,7 +8,7 @@ export interface TemplateOptions {
      */
     cache?: boolean;
     /**
-     * Sets a specified encoding to load a template file (default: `utf8`).
+     * Sets a specified encoding for loading the template file (default: `utf8`).
      */
     encoding?: string;
 }

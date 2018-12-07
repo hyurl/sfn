@@ -20,8 +20,7 @@ export default class extends HttpController {
     };
 
     @route.get("/")
-    async index() {
-        let data = await this.view(this.isZh ? "index.zh" : "index", this.indexVars);
-        this.res.send(data);
+    index() {
+        return this.view(this.isZh ? "index.zh" : "index", this.indexVars);
     }
 }
