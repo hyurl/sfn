@@ -29,8 +29,8 @@ export interface SFNConfig {
     /** The directories that contain controllers. */
     controllers?: string[];
     /**
-     * Hot-reloading is an exprimental feature and only supports controllers, it
-     * will watch file changes in the directories set in `controllers`.
+     * Hot-reloading is an experimental feature and only supports controllers, 
+     * it will watch file changes in the directories set in `controllers`.
      * 
      * When any controller file has been modified, rather than reload the whole 
      * server, the system will try to reload the route in memory instead. Make 
@@ -82,13 +82,6 @@ export interface SFNConfig {
              * @see https://socket.io
              */
             options?: ServerOptions;
-        };
-        /** Configurations when HTTP requests or socket events throw errors. */
-        error?: {
-            /** If `true`, display full error information to the client. */
-            show?: boolean;
-            /** If `true` errors will be logged to disk files. */
-            log?: boolean;
         };
     };
     /**
@@ -142,10 +135,6 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        },
-        error: {
-            show: true,
-            log: true,
         }
     },
     database: {

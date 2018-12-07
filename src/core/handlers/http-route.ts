@@ -4,15 +4,15 @@ import { Model } from 'modelar';
 import values = require("lodash/values");
 import { RouteHandler } from "webium";
 import { app } from "../bootstrap/index";
-import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
-import { callsiteLog, getFuncParams } from "../tools/functions-inner";
+import { getFuncParams, callsiteLog } from "../tools/functions-inner";
 import { Request, Response } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { RouteMap } from "../tools/RouteMap";
+import { isDevMode } from '../../init';
 
 const EFFECT_METHODS: string[] = [
     "DELETE",
@@ -98,7 +98,12 @@ export function getRouteHandler(route: string): RouteHandler {
 }
 
 export function handleLog(err: Error, ctrl: Controller, method?: string) {
-    if (config.server.error.log) {
+    // do not log http errors except they are server-side errors. 
+    if (err instanceof HttpError && err.code < 500) return;
+
+    if (isDevMode) {
+        callsiteLog(err);
+    } else {
         // Log the error to a file.
         let msg = err.toString(),
             stack: string;
@@ -118,13 +123,9 @@ export function handleLog(err: Error, ctrl: Controller, method?: string) {
     }
 }
 
-async function handleFinish(err: Error, ctrl: HttpController, method: string) {
+function handleFinish(err: Error, ctrl: HttpController, method: string) {
     handleLog(err, ctrl, method);
     finish(ctrl);
-
-    if (isDevMode && !(err instanceof HttpError)) {
-        await callsiteLog(err);
-    }
 }
 
 async function handleError(err: Error, ctrl: HttpController, method?: string) {
@@ -137,29 +138,27 @@ async function handleError(err: Error, ctrl: HttpController, method?: string) {
     // If the response hasn't been sent, try to response the error in a proper 
     // form to the client.
 
-    // Be friendly to EventSource.
-    if (err instanceof HttpError && err.code == 405 && req.isEventSource)
-        err = new HttpError(204);
+    let _err: HttpError;
 
-    let _err: Error = err;
-
-    if (!(err instanceof HttpError)) {
-        if (err instanceof Error && config.server.error.show)
-            err = new HttpError(500, err.message);
-        else
-            err = new HttpError(500);
+    if (err instanceof HttpError) {
+        // Be friendly to EventSource.
+        _err = err.code == 405 && req.isEventSource ? new HttpError(204) : err;
+    } else if (err instanceof Error && isDevMode) {
+        _err = new HttpError(500, err.message);
+    } else {
+        _err = new HttpError(500);
     }
 
     if (req.accept == "application/json" || res.jsonp) {
         // Send JSON response.
-        res.send(ctrl.error(err.message, (<HttpError>err).code));
+        res.send(ctrl.error(_err.message, _err.code));
     } else {
-        res.status = (<HttpError>err).code;
+        res.status = _err.code;
 
         // Try to load the error page, if not present, then show the 
         // error message.
         try {
-            let content = await ctrl.Class.httpErrorView(<HttpError>err, ctrl);
+            let content = await ctrl.Class.httpErrorView(_err, ctrl);
 
             res.type = "text/html";
             res.send(content);
@@ -169,7 +168,7 @@ async function handleError(err: Error, ctrl: HttpController, method?: string) {
         }
     }
 
-    await handleFinish(_err, ctrl, method);
+    handleFinish(err, ctrl, method);
 }
 
 async function getArguments(ctrl: HttpController, method: string) {

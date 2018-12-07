@@ -1,7 +1,9 @@
 // Force the console to output colorfully.
 process.env.FORCE_COLOR = "10";
 
-import "source-map-support/register";
+let isTsNode = process.execArgv.join(" ").includes("ts-node");
+!isTsNode && require("source-map-support/register");
+
 import "reflect-metadata";
 import * as Mail from "sfn-mail";
 import * as Logger from "sfn-logger";

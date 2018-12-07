@@ -50,7 +50,7 @@ class HttpController extends Controller_1.Controller {
         }
         return this.engine.renderFile(filename, vars);
     }
-    viewRaw(filename, cache = !ConfigLoader_1.isDevMode) {
+    viewRaw(filename, cache = !init_1.isDevMode) {
         filename = this.getAbsFilename(filename);
         this.res.type = path.extname(filename);
         if (cache && this.Class.LoadedViews[filename] !== undefined) {
@@ -64,7 +64,7 @@ class HttpController extends Controller_1.Controller {
             });
         }
     }
-    viewMarkdown(filename, cache = !ConfigLoader_1.isDevMode) {
+    viewMarkdown(filename, cache = !init_1.isDevMode) {
         if (path.extname(filename) != ".md")
             filename += ".md";
         return this.viewRaw(filename, cache).then(MarkdownParser_1.MarkdownParser.parse);

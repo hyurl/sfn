@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const index_1 = require("../bootstrap/index");
 const SocketError_1 = require("../tools/SocketError");
 const symbols_1 = require("../tools/symbols");
@@ -16,6 +15,7 @@ const websocket_db_1 = require("./websocket-db");
 const websocket_auth_1 = require("./websocket-auth");
 const functions_inner_1 = require("../tools/functions-inner");
 const last = require("lodash/last");
+const init_1 = require("../../init");
 if (index_1.ws) {
     for (let nsp in EventMap_1.EventMap) {
         index_1.ws.of(nsp)
@@ -89,22 +89,22 @@ function finish(ctrl, info) {
 }
 function handleError(err, info, ctrl, method) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let _err = err;
-        if (!(err instanceof SocketError_1.SocketError)) {
-            if (err instanceof Error && ConfigLoader_1.config.server.error.show)
-                err = new SocketError_1.SocketError(500, err.message);
-            else
-                err = new SocketError_1.SocketError(500);
+        let _err;
+        if (err instanceof SocketError_1.SocketError) {
+            _err = err;
         }
-        info.code = err.code;
+        else if (err instanceof Error && init_1.isDevMode) {
+            _err = new SocketError_1.SocketError(500, err.message);
+        }
+        else {
+            _err = new SocketError_1.SocketError(500);
+        }
+        info.code = _err.code;
         if (info.event) {
-            ctrl.socket.emit(info.event, ctrl.error(err.message, info.code));
+            ctrl.socket.emit(info.event, ctrl.error(_err.message, _err.code));
         }
-        http_route_1.handleLog(_err, ctrl, method);
+        http_route_1.handleLog(err, ctrl, method);
         finish(ctrl, info);
-        if (ConfigLoader_1.isDevMode && !(_err instanceof SocketError_1.SocketError)) {
-            yield functions_inner_1.callsiteLog(_err);
-        }
     });
 }
 //# sourceMappingURL=websocket-event.js.map

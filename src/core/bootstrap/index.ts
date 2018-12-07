@@ -6,10 +6,10 @@ import { Http2SecureServer } from "http2";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
-import { APP_PATH, isCli } from "../../init";
-import { config, isDevMode, baseUrl } from "./ConfigLoader";
+import { APP_PATH, isCli, isDevMode } from "../../init";
+import { config, baseUrl } from "./ConfigLoader";
 import { DevHotReloader } from "../tools/DevHotReloader";
-import { red, green, moduleExists } from "../tools/functions-inner";
+import { red, green, moduleExists, createImport } from "../tools/functions-inner";
 
 /** (worker only) The App instance created by **webium** framework. */
 export var app: App = null;
@@ -18,6 +18,7 @@ export var http: HttpServer | HttpsServer | Http2SecureServer = null;
 /** (worker only) The WebSocket server created by **SocketIO**. */
 export var ws: SocketIO.Server = null;
 
+const tryImport = createImport(require);
 let hostnames = config.server.hostname,
     httpServer = config.server.http,
     httpPort = httpServer.port,
@@ -45,7 +46,7 @@ export function startServer() {
 
     // Load user-defined bootstrap procedures.
     let httpBootstrap = APP_PATH + "/bootstrap/http";
-    moduleExists(httpBootstrap) && require(httpBootstrap);
+    moduleExists(httpBootstrap) && tryImport(httpBootstrap);
 
     // load controllers
     require("../bootstrap/ControllerLoader");
@@ -59,7 +60,7 @@ export function startServer() {
 
         // Load user-defined bootstrap procedures.
         let wsBootstrap = APP_PATH + "/bootstrap/websocket";
-        moduleExists(wsBootstrap) && require(wsBootstrap);
+        moduleExists(wsBootstrap) && tryImport(wsBootstrap);
     }
 
     // Start HTTP server.
@@ -113,7 +114,7 @@ if (!isCli) {
 
     // Load user-defined bootstrap procedures.
     let workerBootstrap = APP_PATH + "/bootstrap/worker";
-    moduleExists(workerBootstrap) && require(workerBootstrap);
+    moduleExists(workerBootstrap) && tryImport(workerBootstrap);
 
     // If auto-start enabled, start the server immediately.
     if (config.server.autoStart) {

@@ -4,8 +4,8 @@ const tslib_1 = require("tslib");
 const path_1 = require("path");
 const CallSiteRecord = require("callsite-record");
 const moment = require("moment");
-const chalk_1 = require("chalk");
 const fs = require("fs");
+const chalk_1 = require("chalk");
 const init_1 = require("../../init");
 function moduleExists(name) {
     return fs.existsSync(name + (init_1.isTsNode ? ".ts" : ".js"));
@@ -49,6 +49,33 @@ function callsiteLog(err) {
     });
 }
 exports.callsiteLog = callsiteLog;
+let logService;
+function createImport(require) {
+    return (id) => {
+        try {
+            return require(id);
+        }
+        catch (err) {
+            if (init_1.isDevMode) {
+                callsiteLog(err);
+            }
+            else {
+                let msg = err.toString(), i = err.stack.indexOf("\n") + 1, stack;
+                stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
+                stack = stack.replace("_1", "").slice(3);
+                process.nextTick(() => {
+                    if (!logService) {
+                        logService = new (require("./Service").Service);
+                    }
+                    logService.logger.hackTrace(stack);
+                    logService.logger.error(msg);
+                });
+            }
+            return {};
+        }
+    };
+}
+exports.createImport = createImport;
 function getFuncParams(fn) {
     let fnStr = fn.toString(), start = fnStr.indexOf("("), end = fnStr.indexOf(")"), paramStr = fnStr.slice(start + 1, end).trim(), params = paramStr.split(",").map(param => {
         return param.replace(/\s/g, "").split("=")[0];

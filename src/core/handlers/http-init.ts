@@ -1,8 +1,7 @@
 import SSE = require("sfn-sse");
 import chalk from "chalk";
 import { app } from "../bootstrap/index";
-import { version } from "../../init";
-import { isDevMode } from "../bootstrap/ConfigLoader";
+import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { grey, red } from "../tools/functions-inner";
 

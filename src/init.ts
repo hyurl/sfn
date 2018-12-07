@@ -1,5 +1,6 @@
 import * as path from "path";
 import { config as configEnv } from "dotenv";
+import chalk from "chalk";
 
 /** The version of framework. */
 export const version: string = require("../package.json").version;
@@ -44,7 +45,17 @@ export const SRC_PATH: string = global["SRC_PATH"] || srcPath;
 /** The application path, usually it's the distribution path. */
 export const APP_PATH: string = isTsNode ? SRC_PATH : global["APP_PATH"] || appPath;
 
+/** Whether the program is running in development mode. */
+export const isDevMode = isDebugMode || !process.send;
+
 // support .env configuration file
 configEnv({
     path: ROOT_PATH + "/.env"
 });
+
+if (isDevMode && !isDebugMode && !isCli) {
+    console.log("You program is running in development mode without "
+        + "'--inspect' flag, please consider changing to debug environment.");
+    console.log("For help, see "
+        + chalk.yellow("https://sfnjs.com/docs/v0.3.x/debug"));
+}

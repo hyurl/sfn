@@ -1,11 +1,13 @@
 import { HttpController, route, version } from "sfn";
 
+HttpController.viewExtname = ".ejs";
+
 /**
  * The Home controller is a special controller, it handles requests which 
  * visit the home page of the website through `GET /`.
  */
 export default class extends HttpController {
-    viewExtname = ".ejs";
+    // viewExtname = ".ejs";
     isZh = this.lang.includes("zh");
     indexVars = {
         title: "Service Framework for Node.js",

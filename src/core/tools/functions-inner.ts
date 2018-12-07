@@ -2,10 +2,11 @@ import { extname, basename } from "path";
 import { __awaiter } from 'tslib';
 import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
+import * as fs from "fs";
 import chalk from "chalk";
 import { Locale } from "./interfaces";
-import * as fs from "fs";
-import { isTsNode } from "../../init";
+import { Service } from './Service';
+import { isTsNode, isDevMode } from "../../init";
 
 export function moduleExists(name: string): boolean {
     return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
@@ -51,6 +52,40 @@ export async function callsiteLog(err: Error) {
         console.log(str);
         console.log();
     }
+}
+
+let logService: Service;
+
+export function createImport(require: Function) {
+    return (id: string) => {
+        try {
+            return require(id);
+        } catch (err) {
+            if (isDevMode) {
+                callsiteLog(err);
+            } else {
+                let msg = err.toString(),
+                    i = err.stack.indexOf("\n") + 1,
+                    stack: string;
+
+                stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
+                stack = stack.replace("_1", "").slice(3);
+
+                process.nextTick(() => {
+                    // Delay importing the Server module, allow configurations
+                    // finish import before using them in service.
+                    if (!logService) {
+                        logService = new (require("./Service").Service);
+                    }
+
+                    logService.logger.hackTrace(stack);
+                    logService.logger.error(msg);
+                });
+            }
+
+            return {};
+        }
+    };
 }
 
 export function getFuncParams(fn: Function) {

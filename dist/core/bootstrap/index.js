@@ -14,6 +14,7 @@ const functions_inner_1 = require("../tools/functions-inner");
 exports.app = null;
 exports.http = null;
 exports.ws = null;
+const tryImport = functions_inner_1.createImport(require);
 let hostnames = ConfigLoader_1.config.server.hostname, httpServer = ConfigLoader_1.config.server.http, httpPort = httpServer.port, WS = ConfigLoader_1.config.server.websocket, serverStarted = false;
 function startServer() {
     if (serverStarted) {
@@ -28,12 +29,12 @@ function startServer() {
     require("../handlers/http-db");
     require("../handlers/http-auth");
     let httpBootstrap = init_1.APP_PATH + "/bootstrap/http";
-    functions_inner_1.moduleExists(httpBootstrap) && require(httpBootstrap);
+    functions_inner_1.moduleExists(httpBootstrap) && tryImport(httpBootstrap);
     require("../bootstrap/ControllerLoader");
     if (WS.enabled) {
         require("../handlers/websocket-event");
         let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket";
-        functions_inner_1.moduleExists(wsBootstrap) && require(wsBootstrap);
+        functions_inner_1.moduleExists(wsBootstrap) && tryImport(wsBootstrap);
     }
     if (typeof exports.http["setTimeout"] == "function") {
         exports.http["setTimeout"](ConfigLoader_1.config.server.timeout);
@@ -77,11 +78,11 @@ if (!init_1.isCli) {
     }
     require("../handlers/worker-shutdown");
     let workerBootstrap = init_1.APP_PATH + "/bootstrap/worker";
-    functions_inner_1.moduleExists(workerBootstrap) && require(workerBootstrap);
+    functions_inner_1.moduleExists(workerBootstrap) && tryImport(workerBootstrap);
     if (ConfigLoader_1.config.server.autoStart) {
         startServer();
     }
-    if (ConfigLoader_1.isDevMode && ConfigLoader_1.config.hotReloading) {
+    if (init_1.isDevMode && ConfigLoader_1.config.hotReloading) {
         for (let dirname of ConfigLoader_1.config.controllers) {
             dirname = path.resolve(init_1.APP_PATH, dirname);
             fs.exists(dirname, exists => {

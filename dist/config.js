@@ -27,10 +27,6 @@ exports.config = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        },
-        error: {
-            show: true,
-            log: true,
         }
     },
     database: {

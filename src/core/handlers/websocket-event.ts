@@ -1,4 +1,3 @@
-import { config, isDevMode } from "../bootstrap/ConfigLoader";
 import { ws } from "../bootstrap/index";
 import { SocketError } from "../tools/SocketError";
 import { WebSocket } from "../tools/interfaces";
@@ -12,8 +11,9 @@ import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
 import dbHandler from "./websocket-db";
 import authHandler from "./websocket-auth";
-import { callsiteLog, getFuncParams } from "../tools/functions-inner";
+import { getFuncParams } from "../tools/functions-inner";
 import last = require("lodash/last");
+import { isDevMode } from '../../init';
 
 if (ws) {
     for (let nsp in EventMap) {
@@ -133,26 +133,23 @@ async function handleError(
     ctrl: WebSocketController,
     method?: string
 ) {
-    let _err: Error = err; // The original error.
+    let _err: SocketError; // The original error.
 
-    if (!(err instanceof SocketError)) {
-        if (err instanceof Error && config.server.error.show)
-            err = new SocketError(500, err.message);
-        else
-            err = new SocketError(500);
+    if (err instanceof SocketError) {
+        _err = err;
+    } else if (err instanceof Error && isDevMode) {
+        _err = new SocketError(500, err.message);
+    } else {
+        _err = new SocketError(500);
     }
 
-    info.code = (<SocketError>err).code;
+    info.code = _err.code;
 
     // Send error to the client.
     if (info.event) {
-        ctrl.socket.emit(info.event, ctrl.error(err.message, info.code));
+        ctrl.socket.emit(info.event, ctrl.error(_err.message, _err.code));
     }
 
-    handleLog(_err, ctrl, method);
+    handleLog(err, ctrl, method);
     finish(ctrl, info);
-
-    if (isDevMode && !(_err instanceof SocketError)) {
-        await callsiteLog(_err);
-    }
 }

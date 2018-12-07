@@ -6,13 +6,13 @@ const cors = require("sfn-cors");
 const modelar_1 = require("modelar");
 const values = require("lodash/values");
 const index_1 = require("../bootstrap/index");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const HttpController_1 = require("../controllers/HttpController");
 const HttpError_1 = require("../tools/HttpError");
 const functions_1 = require("../tools/functions");
 const functions_inner_1 = require("../tools/functions-inner");
 const symbols_1 = require("../tools/symbols");
 const RouteMap_1 = require("../tools/RouteMap");
+const init_1 = require("../../init");
 const EFFECT_METHODS = [
     "DELETE",
     "PATCH",
@@ -75,7 +75,12 @@ function getRouteHandler(route) {
 }
 exports.getRouteHandler = getRouteHandler;
 function handleLog(err, ctrl, method) {
-    if (ConfigLoader_1.config.server.error.log) {
+    if (err instanceof HttpError_1.HttpError && err.code < 500)
+        return;
+    if (init_1.isDevMode) {
+        functions_inner_1.callsiteLog(err);
+    }
+    else {
         let msg = err.toString(), stack;
         if (method && method.indexOf(" ") > 0) {
             stack = method;
@@ -92,35 +97,31 @@ function handleLog(err, ctrl, method) {
 }
 exports.handleLog = handleLog;
 function handleFinish(err, ctrl, method) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        handleLog(err, ctrl, method);
-        finish(ctrl);
-        if (ConfigLoader_1.isDevMode && !(err instanceof HttpError_1.HttpError)) {
-            yield functions_inner_1.callsiteLog(err);
-        }
-    });
+    handleLog(err, ctrl, method);
+    finish(ctrl);
 }
 function handleError(err, ctrl, method) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         let { req, res } = ctrl;
         if (res.sent)
             return handleFinish(err, ctrl, method);
-        if (err instanceof HttpError_1.HttpError && err.code == 405 && req.isEventSource)
-            err = new HttpError_1.HttpError(204);
-        let _err = err;
-        if (!(err instanceof HttpError_1.HttpError)) {
-            if (err instanceof Error && ConfigLoader_1.config.server.error.show)
-                err = new HttpError_1.HttpError(500, err.message);
-            else
-                err = new HttpError_1.HttpError(500);
+        let _err;
+        if (err instanceof HttpError_1.HttpError) {
+            _err = err.code == 405 && req.isEventSource ? new HttpError_1.HttpError(204) : err;
         }
-        if (req.accept == "application/json" || res.jsonp) {
-            res.send(ctrl.error(err.message, err.code));
+        else if (err instanceof Error && init_1.isDevMode) {
+            _err = new HttpError_1.HttpError(500, err.message);
         }
         else {
-            res.status = err.code;
+            _err = new HttpError_1.HttpError(500);
+        }
+        if (req.accept == "application/json" || res.jsonp) {
+            res.send(ctrl.error(_err.message, _err.code));
+        }
+        else {
+            res.status = _err.code;
             try {
-                let content = yield ctrl.Class.httpErrorView(err, ctrl);
+                let content = yield ctrl.Class.httpErrorView(_err, ctrl);
                 res.type = "text/html";
                 res.send(content);
             }
@@ -129,7 +130,7 @@ function handleError(err, ctrl, method) {
                 res.send(err.message);
             }
         }
-        yield handleFinish(_err, ctrl, method);
+        handleFinish(err, ctrl, method);
     });
 }
 function getArguments(ctrl, method) {

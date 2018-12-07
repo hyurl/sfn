@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const sfn_1 = require("sfn");
+sfn_1.HttpController.viewExtname = ".ejs";
 class default_1 extends sfn_1.HttpController {
     constructor() {
         super(...arguments);
-        this.viewExtname = ".ejs";
         this.isZh = this.lang.includes("zh");
         this.indexVars = {
             title: "Service Framework for Node.js",

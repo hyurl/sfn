@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 process.env.FORCE_COLOR = "10";
-require("source-map-support/register");
+let isTsNode = process.execArgv.join(" ").includes("ts-node");
+!isTsNode && require("source-map-support/register");
 require("reflect-metadata");
 const Mail = require("sfn-mail");
 exports.Mail = Mail;

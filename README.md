@@ -17,13 +17,17 @@ npm init
 to initiate your project, assume you have some knowledge of 
 [NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
-### Install TypeScript
+### Install TypeScript Compiler And Runtime
 
 **SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
 own code should be as well.
 
+*The runtime [ts-node](https://github.com/TypeStrong/ts-node) is optional, only*
+*needed if you want to run your program without compiling.*
+
 ```sh
 npm i -g typescript
+npm i -g ts-node
 ```
 
 ### Install PM2 (Optional)
@@ -103,6 +107,10 @@ For such a goal, **SFN** provides many features, etc. **shared session**,
 don't need to worry how the framework does those jobs, just focus on your own 
 design.
 
+Additionally, SFN is written in TypeScript, the strong-typed language instead of 
+pure JavaScript, it's way more safer than just using JavaScript for a strong and
+featured web program.
+
 ## License
 
 **SFN** is licensed under [MIT](./LICENSE), you're free to use.
@@ -116,6 +124,8 @@ documentation website.
 
 ```sh
 git clone https://github.com/hyurl/sfn
+mkdir ../node_modules
+ln -s ./sfn ../node_modules/sfn # some modules require sfn in node_modules
 cd sfn
 npm i
 node dist

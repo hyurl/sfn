@@ -55,8 +55,10 @@ function _route(...args) {
                 method: prop
             };
             let __route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : __route[0], path = (proto.Class.baseURI || "") + __route[1];
-            app = app || (app = require("../bootstrap/index").app);
-            handle = handle || (handle = require("../handlers/http-route").getRouteHandler);
+            if (!app || !handle) {
+                app = require("../bootstrap/index").app;
+                handle = require("../handlers/http-route").getRouteHandler;
+            }
             app.method(method, path, handle(route), true);
         };
     }

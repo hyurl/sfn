@@ -9,7 +9,13 @@
             "request": "launch",
             "protocol": "auto",
             "name": "Start Server",
-            "program": "${workspaceFolder}/dist/index"
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "args": [
+                "${workspaceFolder}/src/index.ts"
+            ]
         }
     ]
 }

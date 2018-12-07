@@ -5,7 +5,6 @@ const SSE = require("sfn-sse");
 const chalk_1 = require("chalk");
 const index_1 = require("../bootstrap/index");
 const init_1 = require("../../init");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
 const functions_inner_1 = require("../tools/functions-inner");
 const reqLogged = Symbol("reqLogged");
 index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -24,7 +23,7 @@ index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, func
     yield next();
 }));
 function logRequest(reqTime, type, code, url) {
-    if (ConfigLoader_1.isDevMode) {
+    if (init_1.isDevMode) {
         var cost = Date.now() - reqTime, codeStr = code.toString(), level = "log", color = functions_inner_1.grey;
         type = chalk_1.default.bold(type);
         cost = chalk_1.default.cyan(`${cost}ms`);
