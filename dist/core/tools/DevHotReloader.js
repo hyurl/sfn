@@ -4,7 +4,7 @@ const chokidar = require("chokidar");
 const path = require("path");
 const startsWith = require("lodash/startsWith");
 class DevHotReloader {
-    constructor(dirname, extnames = [".js", ".json"]) {
+    constructor(dirname, extnames = [".ts", ".js", ".json"]) {
         this.watcher = DevHotReloader.watchers[dirname] = chokidar.watch(dirname, {
             awaitWriteFinish: true,
             followSymlinks: false

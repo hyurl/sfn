@@ -119,7 +119,7 @@ function _route(...args) {
 }
 
 /** Sets HTTP routes. */
-export var route: HttpRoute = <any>_route;
+export const route: HttpRoute = <any>_route;
 
 route.delete = function (...args) {
     return _route("DELETE", ...args);

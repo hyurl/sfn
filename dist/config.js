@@ -8,7 +8,7 @@ const FileStore = sessionFileStore(Session);
 const env = process.env;
 exports.config = {
     lang: env.LANG || "en-US",
-    statics: [init_1.SRC_PATH + "/assets"],
+    statics: ["assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,
     server: {

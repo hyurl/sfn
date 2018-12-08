@@ -14,7 +14,13 @@ import { SRC_PATH, ROOT_PATH } from "./init";
 /**
  * @see https://www.npmjs.com/package/serve-static
  */
-interface StaticOptions extends serveStatic.ServeStaticOptions {
+export interface StaticOptions extends serveStatic.ServeStaticOptions {
+    /** 
+     * If `true`, the URL must contain the folder name (relative to `SRC_PATH`) 
+     * as prefix to reach the static resource. Also you can set a specified 
+     * prefix other than the folder name.
+     */
+    prefix?: boolean | string;
     setHeaders?: (res: ServerResponse, path: string, stat: Stats) => void;
 };
 
@@ -116,7 +122,7 @@ const env = process.env;
  */
 export const config: SFNConfig = {
     lang: env.LANG || "en-US",
-    statics: [SRC_PATH + "/assets"],
+    statics: ["assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,
     server: {

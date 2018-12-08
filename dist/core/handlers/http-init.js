@@ -6,18 +6,15 @@ const chalk_1 = require("chalk");
 const index_1 = require("../bootstrap/index");
 const init_1 = require("../../init");
 const functions_inner_1 = require("../tools/functions-inner");
+const truncate = require("lodash/truncate");
 const reqLogged = Symbol("reqLogged");
 index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    req["originalUrl"] = req.url;
+    req.shortUrl = truncate(req.url, { length: 32 });
     req.isEventSource = SSE.isEventSource(req);
     res.headers["server"] = `NodeJS/${process.version}`;
     res.headers["x-powered-by"] = `sfn/${init_1.version}`;
     res.gzip = false;
-    if (req.url.length > 64) {
-        req.shortUrl = req.url.substring(0, 61) + "...";
-    }
-    else {
-        req.shortUrl = req.url;
-    }
     let logger = getDevLogger(req, res);
     res.on("finish", logger).on("close", logger);
     yield next();

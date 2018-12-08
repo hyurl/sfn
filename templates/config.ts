@@ -7,7 +7,7 @@ const env = process.env;
 
 export const config: SFNConfig = {
     lang: env.LANG || "en-US",
-    statics: [SRC_PATH + "/assets"],
+    statics: ["assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: false,
     server: {
@@ -30,7 +30,7 @@ export const config: SFNConfig = {
     },
     database: {
         type: env.DB_TYPE || "mysql",
-        host: env.DB_HOST ||  "localhost",
+        host: env.DB_HOST || "localhost",
         port: parseInt(env.DB_PORT) || 3306,
         database: env.DB_NAME || "sfn",
         user: env.DB_USER || "root",
