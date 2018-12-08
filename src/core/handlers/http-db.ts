@@ -1,6 +1,6 @@
 import { DB } from "modelar";
 import { app } from "../bootstrap/index";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { Request, Response } from "../tools/interfaces";
 import { realDB } from "../tools/symbols";
 

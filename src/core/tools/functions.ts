@@ -9,6 +9,9 @@ import {
     HttpRoute
 } from './interfaces';
 import { App, RouteHandler } from "webium";
+import { interceptAsync } from 'function-intercepter';
+import { HttpError } from './HttpError';
+import { SocketError } from './SocketError';
 
 /** 
  * Generates a random string.
@@ -44,16 +47,24 @@ export function injectCsrfToken(html: string, token: string): string {
 }
 
 /** Requires authentication when calling the method. */
-export var requireAuth: ControllerDecorator = (
-    proto: HttpController | WebSocketController,
-    prop: string
-) => {
-    if (!proto.Class.hasOwnProperty("RequireAuth"))
-        proto.Class.RequireAuth = [];
+export const requireAuth: ControllerDecorator = interceptAsync().before(function () {
+    if (!this.authorized) {
+        if (this instanceof HttpController) {
+            if (this.fallbackTo) {
+                this.res.redirect(this.fallbackTo, 302);
+                return false;
+            } else {
+                throw new HttpError(401);
+            }
+        } else {
+            throw new SocketError(401);
+        }
+    }
+});
 
-    if (!proto.Class.RequireAuth.includes(prop))
-        proto.Class.RequireAuth.push(prop);
-}
+let app: App,
+    handle: (route: string) => RouteHandler,
+    tryImport: (nsp: string) => void;
 
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketEventDecorator;
@@ -64,7 +75,10 @@ export function event(name: string, Class?: typeof WebSocketController, method?:
             let nsp: string = proto.Class.nsp || "/";
 
             if (!EventMap[nsp]) EventMap[nsp] = {};
+            if (!tryImport)
+                tryImport = require("../handlers/websocket-event").tryImport;
 
+            tryImport(nsp);
             EventMap[nsp][name] = {
                 Class: proto.Class,
                 method: prop
@@ -74,8 +88,6 @@ export function event(name: string, Class?: typeof WebSocketController, method?:
         return event(name)(Class.prototype, method);
     }
 }
-
-let app: App, handle: (route: string) => RouteHandler;
 
 function _route(...args) {
     let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;

@@ -36,7 +36,7 @@ index_1.app.onerror = function onerror(err, req, res) {
 };
 function getRouteHandler(route) {
     return (req, res) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let { Class, method } = RouteMap_1.RouteMap[route], { RequireAuth } = Class, ctrl = null;
+        let { Class, method } = RouteMap_1.RouteMap[route], ctrl = null;
         res.on("error", (err) => {
             handleLog(err, ctrl, method);
         });
@@ -51,14 +51,6 @@ function getRouteHandler(route) {
             handleCsrfToken(ctrl);
             if (res.sent || false === (yield ctrl.before()))
                 return;
-            if (RequireAuth.includes(method) && !ctrl.authorized) {
-                if (ctrl.fallbackTo) {
-                    return res.redirect(ctrl.fallbackTo, 302);
-                }
-                else {
-                    throw new HttpError_1.HttpError(401);
-                }
-            }
             res.gzip = req.encoding == "gzip" && ctrl.gzip;
             if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
                 res.jsonp = req.query[ctrl.jsonp];

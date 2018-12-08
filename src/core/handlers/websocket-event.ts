@@ -15,44 +15,45 @@ import { getFuncParams } from "../tools/functions-inner";
 import last = require("lodash/last");
 import { isDevMode } from '../../init';
 
-if (ws) {
-    for (let nsp in EventMap) {
-        ws.of(nsp)
-            .use(initHandler)
-            .use(cookieHandler)
-            .use(cookieHandler2)
-            .use(sessionHandler)
-            .use(sessionHandler2)
-            .use(dbHandler)
-            .use(authHandler)
-            .on("connection", (socket: WebSocket) => {
-                for (let event in EventMap[nsp]) {
-                    socket.on(event, (...data) => {
-                        handleEvent(socket, nsp, event, data);
-                    });
-                }
-
-                socket.on("error", (err: Error) => {
-                    let ctrl = new WebSocketController(socket);
-                    handleError(err, {
-                        time: Date.now(),
-                        event: "",
-                        code: 500
-                    }, ctrl, socket.protocol.toUpperCase());
-                });
-            });
-    }
-}
-
+let importedNamesapces: string[] = [];
 type SocketEventInfo = {
     time: number;
     event: string;
     code: number;
 };
 
+export function tryImport(nsp: string) {
+    if (!importedNamesapces.includes(nsp)) return;
+
+    importedNamesapces.push(nsp);
+    ws.of(nsp)
+        .use(initHandler)
+        .use(cookieHandler)
+        .use(cookieHandler2)
+        .use(sessionHandler)
+        .use(sessionHandler2)
+        .use(dbHandler)
+        .use(authHandler)
+        .on("connection", (socket: WebSocket) => {
+            for (let event in EventMap[nsp]) {
+                socket.on(event, (...data) => {
+                    handleEvent(socket, nsp, event, data);
+                });
+            }
+
+            socket.on("error", (err: Error) => {
+                let ctrl = new WebSocketController(socket);
+                handleError(err, {
+                    time: Date.now(),
+                    event: "",
+                    code: 500
+                }, ctrl, socket.protocol.toUpperCase());
+            });
+        });
+}
+
 async function handleEvent(socket: WebSocket, nsp: string, event: string, data: any[]) {
     let { Class, method } = EventMap[nsp][event],
-        { RequireAuth } = Class,
         ctrl: WebSocketController = null,
         info: SocketEventInfo = {
             time: Date.now(),
@@ -76,10 +77,6 @@ async function handleEvent(socket: WebSocket, nsp: string, event: string, data: 
         // return immediately without running any checking procedure, and don't 
         // call the method.
         if (socket.disconnected || false === (await ctrl.before())) return;
-
-        // Handle authentication.
-        if (RequireAuth.includes(method) && !ctrl.authorized)
-            throw new SocketError(401);
 
         let _data = await ctrl[method](...getArguments(ctrl, method, data));
 

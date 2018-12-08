@@ -4,9 +4,11 @@ const tslib_1 = require("tslib");
 const path_1 = require("path");
 const CallSiteRecord = require("callsite-record");
 const moment = require("moment");
-const fs = require("fs");
+const fs = require("fs-extra");
 const chalk_1 = require("chalk");
 const init_1 = require("../../init");
+let logService;
+const FileCache = {};
 function moduleExists(name) {
     return fs.existsSync(name + (init_1.isTsNode ? ".ts" : ".js"));
 }
@@ -32,6 +34,19 @@ function loadLanguagePack(filename) {
     return lang;
 }
 exports.loadLanguagePack = loadLanguagePack;
+function loadFile(filename, fromCache = false) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        if (fromCache && FileCache[filename] !== undefined) {
+            return FileCache[filename];
+        }
+        else {
+            let content = yield fs.readFile(filename, "utf8");
+            fromCache && (FileCache[filename] = content);
+            return content;
+        }
+    });
+}
+exports.loadFile = loadFile;
 function callsiteLog(err) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         var csr = CallSiteRecord({
@@ -49,7 +64,6 @@ function callsiteLog(err) {
     });
 }
 exports.callsiteLog = callsiteLog;
-let logService;
 function createImport(require) {
     return (id) => {
         try {

@@ -1,6 +1,6 @@
 import * as ExpressSession from "express-session";
 import { intercept } from "function-intercepter";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { app } from "../bootstrap/index";
 import { Response } from "../tools/interfaces";
 

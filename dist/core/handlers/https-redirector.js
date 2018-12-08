@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = require("http");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const load_config_1 = require("../bootstrap/load-config");
 const functions_inner_1 = require("../tools/functions-inner");
 const init_1 = require("../../init");
-let server = ConfigLoader_1.config.server.http;
+let server = load_config_1.config.server.http;
 if (server.type == "https" || server.type == "http2") {
     http_1.createServer((req, res) => {
         let port = server.port == 443 ? "" : ":" + server.port;

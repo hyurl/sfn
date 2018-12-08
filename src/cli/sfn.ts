@@ -3,9 +3,9 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as program from "commander";
 import pluralize = require("pluralize");
-import { hyphenate } from "capitalization";
+import kebabCase = require("lodash/kebabCase");
 import { version, APP_PATH, SRC_PATH } from "../init";
-import { config } from "../core/bootstrap/ConfigLoader";
+import { config } from "../core/bootstrap/load-config";
 import { loadLanguagePack, green, red } from "../core/tools/functions-inner";
 
 var sfnd = path.normalize(__dirname + "/../..");
@@ -67,7 +67,7 @@ try {
     
         checkSource(input);
     
-        let route = hyphenate(program.controller, true);
+        let route = kebabCase(program.controller);
         let contents = fs.readFileSync(input, "utf8").replace(/\{name\}/g, route);
     
         outputFile(output, contents, "controller");
@@ -75,7 +75,7 @@ try {
         var input = `${tplDir}/Model.ts`,
             output = `${SRC_PATH}/models/${program.model}.ts`,
             ModelName = path.basename(program.model),
-            table = pluralize(hyphenate(ModelName, true));
+            table = pluralize(kebabCase(ModelName));
     
         checkSource(input);
     

@@ -2,11 +2,14 @@ import { extname, basename } from "path";
 import { __awaiter } from 'tslib';
 import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import chalk from "chalk";
 import { Locale } from "./interfaces";
 import { Service } from './Service';
 import { isTsNode, isDevMode } from "../../init";
+
+let logService: Service;
+const FileCache: { [filename: string]: string } = {};
 
 export function moduleExists(name: string): boolean {
     return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
@@ -37,6 +40,18 @@ export function loadLanguagePack(filename: string): Locale {
     return lang;
 }
 
+export async function loadFile(filename, fromCache = false): Promise<string> {
+    if (fromCache && FileCache[filename] !== undefined) {
+        return FileCache[filename];
+    } else {
+        let content = await fs.readFile(filename, "utf8");
+
+        fromCache && (FileCache[filename] = content);
+
+        return content;
+    }
+}
+
 export async function callsiteLog(err: Error) {
     var csr = CallSiteRecord({
         forError: err,
@@ -53,8 +68,6 @@ export async function callsiteLog(err: Error) {
         console.log();
     }
 }
-
-let logService: Service;
 
 export function createImport(require: Function) {
     return (id: string) => {

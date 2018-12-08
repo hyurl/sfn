@@ -18,19 +18,19 @@ export * from "sfn-xss";
 export * from "./init";
 export * from "./config";
 export * from "./core/tools/interfaces";
-export * from "./core/tools/functions";
 export * from "./core/tools/HttpError";
 export * from "./core/tools/SocketError";
 export * from "./core/tools/MarkdownParser";
-export * from "./core/tools/upload";
 export * from "./core/tools/EventMap";
 export * from "./core/tools/RouteMap";
 
 // load user config before loading subsequent modules
-export * from "./core/bootstrap/ConfigLoader";
+export * from "./core/bootstrap/load-config";
 
 export * from "./core/tools/Service";
 export * from "./core/tools/TemplateEngine";
 export * from "./core/controllers/HttpController";
 export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
+export * from "./core/tools/functions";
+export * from "./core/tools/upload";

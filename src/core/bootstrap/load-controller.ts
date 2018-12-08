@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import { APP_PATH, SRC_PATH, isTsNode } from "../../init";
-import { config } from "./ConfigLoader";
+import { config } from "./load-config";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { createImport } from '../tools/functions-inner';

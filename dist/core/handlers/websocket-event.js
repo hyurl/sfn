@@ -16,36 +16,39 @@ const websocket_auth_1 = require("./websocket-auth");
 const functions_inner_1 = require("../tools/functions-inner");
 const last = require("lodash/last");
 const init_1 = require("../../init");
-if (index_1.ws) {
-    for (let nsp in EventMap_1.EventMap) {
-        index_1.ws.of(nsp)
-            .use(websocket_init_1.default)
-            .use(websocket_cookie_1.default)
-            .use(websocket_cookie_1.handler2)
-            .use(websocket_session_1.default)
-            .use(websocket_session_1.handler2)
-            .use(websocket_db_1.default)
-            .use(websocket_auth_1.default)
-            .on("connection", (socket) => {
-            for (let event in EventMap_1.EventMap[nsp]) {
-                socket.on(event, (...data) => {
-                    handleEvent(socket, nsp, event, data);
-                });
-            }
-            socket.on("error", (err) => {
-                let ctrl = new WebSocketController_1.WebSocketController(socket);
-                handleError(err, {
-                    time: Date.now(),
-                    event: "",
-                    code: 500
-                }, ctrl, socket.protocol.toUpperCase());
+let importedNamesapces = [];
+function tryImport(nsp) {
+    if (!importedNamesapces.includes(nsp))
+        return;
+    importedNamesapces.push(nsp);
+    index_1.ws.of(nsp)
+        .use(websocket_init_1.default)
+        .use(websocket_cookie_1.default)
+        .use(websocket_cookie_1.handler2)
+        .use(websocket_session_1.default)
+        .use(websocket_session_1.handler2)
+        .use(websocket_db_1.default)
+        .use(websocket_auth_1.default)
+        .on("connection", (socket) => {
+        for (let event in EventMap_1.EventMap[nsp]) {
+            socket.on(event, (...data) => {
+                handleEvent(socket, nsp, event, data);
             });
+        }
+        socket.on("error", (err) => {
+            let ctrl = new WebSocketController_1.WebSocketController(socket);
+            handleError(err, {
+                time: Date.now(),
+                event: "",
+                code: 500
+            }, ctrl, socket.protocol.toUpperCase());
         });
-    }
+    });
 }
+exports.tryImport = tryImport;
 function handleEvent(socket, nsp, event, data) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let { Class, method } = EventMap_1.EventMap[nsp][event], { RequireAuth } = Class, ctrl = null, info = {
+        let { Class, method } = EventMap_1.EventMap[nsp][event], ctrl = null, info = {
             time: Date.now(),
             event,
             code: 200
@@ -56,8 +59,6 @@ function handleEvent(socket, nsp, event, data) {
             ctrl.event;
             if (socket.disconnected || false === (yield ctrl.before()))
                 return;
-            if (RequireAuth.includes(method) && !ctrl.authorized)
-                throw new SocketError_1.SocketError(401);
             let _data = yield ctrl[method](...getArguments(ctrl, method, data));
             _data === undefined || socket.emit(event, _data);
             finish(ctrl, info);

@@ -24,6 +24,5 @@ class Controller extends Service_1.Service {
     before() { }
     after() { }
 }
-Controller.RequireAuth = [];
 exports.Controller = Controller;
 //# sourceMappingURL=Controller.js.map

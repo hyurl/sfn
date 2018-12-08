@@ -24,4 +24,4 @@ else {
     UserClass = modelar.User;
 }
 exports.User = UserClass;
-//# sourceMappingURL=UserLoader.js.map
+//# sourceMappingURL=load-user.js.map

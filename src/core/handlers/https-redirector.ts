@@ -1,5 +1,5 @@
 import { createServer, STATUS_CODES } from "http";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { red } from "../tools/functions-inner";
 import { version } from "../../init";
 

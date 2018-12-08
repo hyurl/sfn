@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
-const fs = require("fs-extra");
 const sfn_ejs_engine_1 = require("sfn-ejs-engine");
 const SSE = require("sfn-sse");
 const init_1 = require("../../init");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const load_config_1 = require("../bootstrap/load-config");
 const Controller_1 = require("./Controller");
 const MarkdownParser_1 = require("../tools/MarkdownParser");
 const symbols_1 = require("../tools/symbols");
 const upload_1 = require("../tools/upload");
+const functions_inner_1 = require("../tools/functions-inner");
 const Engine = new sfn_ejs_engine_1.EjsEngine();
 class HttpController extends Controller_1.Controller {
     constructor(req, res) {
@@ -28,7 +28,7 @@ class HttpController extends Controller_1.Controller {
         this.lang = (req.query && req.query.lang)
             || (req.cookies && req.cookies.lang)
             || req.lang
-            || ConfigLoader_1.config.lang;
+            || load_config_1.config.lang;
     }
     getAbsFilename(filename) {
         if (!path.isAbsolute(filename))
@@ -53,20 +53,10 @@ class HttpController extends Controller_1.Controller {
     viewRaw(filename, cache = !init_1.isDevMode) {
         filename = this.getAbsFilename(filename);
         this.res.type = path.extname(filename);
-        if (cache && this.Class.LoadedViews[filename] !== undefined) {
-            return Promise.resolve(this.Class.LoadedViews[filename]);
-        }
-        else {
-            return fs.readFile(filename, "utf8").then(content => {
-                if (cache)
-                    this.Class.LoadedViews[filename] = content;
-                return content;
-            });
-        }
+        return functions_inner_1.loadFile(filename, cache);
     }
     viewMarkdown(filename, cache = !init_1.isDevMode) {
-        if (path.extname(filename) != ".md")
-            filename += ".md";
+        path.extname(filename) != ".md" && (filename += ".md");
         return this.viewRaw(filename, cache).then(MarkdownParser_1.MarkdownParser.parse);
     }
     send(data) {
@@ -112,7 +102,5 @@ class HttpController extends Controller_1.Controller {
 HttpController.viewPath = init_1.SRC_PATH + "/views";
 HttpController.viewExtname = ".html";
 HttpController.engine = Engine;
-HttpController.UploadFields = {};
-HttpController.LoadedViews = {};
 exports.HttpController = HttpController;
 //# sourceMappingURL=HttpController.js.map

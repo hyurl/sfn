@@ -1,5 +1,5 @@
 import serveStatic = require("serve-static");
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { app } from "../bootstrap/index";
 
 if (Array.isArray(config.statics)) {

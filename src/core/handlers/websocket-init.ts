@@ -2,7 +2,7 @@ import { IncomingMessage } from "http";
 import * as url from "url";
 import endsWith = require("lodash/endsWith");
 import { parseValue as parseAccepts } from "parse-accepts";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { WebSocket } from "../tools/interfaces";
 
 export default async function (socket: WebSocket, next: (err?: Error) => void) {

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
 const fs = require("fs");
 const path = require("path");
 const http_1 = require("http");
@@ -8,14 +9,14 @@ const webium_1 = require("webium");
 const SocketIO = require("socket.io");
 const chalk_1 = require("chalk");
 const init_1 = require("../../init");
-const ConfigLoader_1 = require("./ConfigLoader");
+const load_config_1 = require("./load-config");
 const DevHotReloader_1 = require("../tools/DevHotReloader");
 const functions_inner_1 = require("../tools/functions-inner");
 exports.app = null;
 exports.http = null;
 exports.ws = null;
 const tryImport = functions_inner_1.createImport(require);
-let hostnames = ConfigLoader_1.config.server.hostname, httpServer = ConfigLoader_1.config.server.http, httpPort = httpServer.port, WS = ConfigLoader_1.config.server.websocket, serverStarted = false;
+let hostnames = load_config_1.config.server.hostname, httpServer = load_config_1.config.server.http, httpPort = httpServer.port, WS = load_config_1.config.server.websocket, serverStarted = false;
 function startServer() {
     if (serverStarted) {
         throw new Error("Server already started.");
@@ -30,33 +31,32 @@ function startServer() {
     require("../handlers/http-auth");
     let httpBootstrap = init_1.APP_PATH + "/bootstrap/http";
     functions_inner_1.moduleExists(httpBootstrap) && tryImport(httpBootstrap);
-    require("../bootstrap/ControllerLoader");
     if (WS.enabled) {
-        require("../handlers/websocket-event");
         let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket";
         functions_inner_1.moduleExists(wsBootstrap) && tryImport(wsBootstrap);
     }
     if (typeof exports.http["setTimeout"] == "function") {
-        exports.http["setTimeout"](ConfigLoader_1.config.server.timeout);
+        exports.http["setTimeout"](load_config_1.config.server.timeout);
     }
     exports.http.on("error", (err) => {
         console.log(functions_inner_1.red `${err.toString()}`);
         if (err.message.includes("listen")) {
             process.exit(1);
         }
-    }).listen(httpPort, () => {
+    }).listen(httpPort, () => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        require("../bootstrap/load-controller");
         if (typeof process.send == "function") {
             process.send("ready");
         }
         else {
-            console.log(functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(ConfigLoader_1.baseUrl)}.`);
+            console.log(functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(load_config_1.baseUrl)}.`);
         }
-    });
+    }));
 }
 exports.startServer = startServer;
 if (!init_1.isCli) {
     exports.app = new webium_1.App({
-        cookieSecret: ConfigLoader_1.config.session.secret,
+        cookieSecret: load_config_1.config.session.secret,
         domain: hostnames
     });
     switch (httpServer.type) {
@@ -79,11 +79,11 @@ if (!init_1.isCli) {
     require("../handlers/worker-shutdown");
     let workerBootstrap = init_1.APP_PATH + "/bootstrap/worker";
     functions_inner_1.moduleExists(workerBootstrap) && tryImport(workerBootstrap);
-    if (ConfigLoader_1.config.server.autoStart) {
+    if (load_config_1.config.server.autoStart) {
         startServer();
     }
-    if (init_1.isDevMode && ConfigLoader_1.config.hotReloading) {
-        for (let dirname of ConfigLoader_1.config.controllers) {
+    if (init_1.isDevMode && load_config_1.config.hotReloading) {
+        for (let dirname of load_config_1.config.controllers) {
             dirname = path.resolve(init_1.APP_PATH, dirname);
             fs.exists(dirname, exists => {
                 if (exists)

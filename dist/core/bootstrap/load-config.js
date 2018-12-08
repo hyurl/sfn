@@ -24,4 +24,4 @@ if (!startsWith(__filename, init_1.APP_PATH) && functions_inner_1.moduleExists(m
 let { server: { hostname, http: { port, type } } } = config_1.config, host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
 exports.baseUrl = (type == "http2" ? "https" : type) + "://" + host;
 Mail.init(config_1.config.mail);
-//# sourceMappingURL=ConfigLoader.js.map
+//# sourceMappingURL=load-config.js.map

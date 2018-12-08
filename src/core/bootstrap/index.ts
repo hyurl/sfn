@@ -7,7 +7,7 @@ import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
 import { APP_PATH, isCli, isDevMode } from "../../init";
-import { config, baseUrl } from "./ConfigLoader";
+import { config, baseUrl } from "./load-config";
 import { DevHotReloader } from "../tools/DevHotReloader";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
 
@@ -48,16 +48,7 @@ export function startServer() {
     let httpBootstrap = APP_PATH + "/bootstrap/http";
     moduleExists(httpBootstrap) && tryImport(httpBootstrap);
 
-    // load controllers
-    require("../bootstrap/ControllerLoader");
-
-    // load HTTP route handler
-    // require("../handlers/http-route");
-
     if (WS.enabled) {
-        // load WebSocket event handler
-        require("../handlers/websocket-event");
-
         // Load user-defined bootstrap procedures.
         let wsBootstrap = APP_PATH + "/bootstrap/websocket";
         moduleExists(wsBootstrap) && tryImport(wsBootstrap);
@@ -73,7 +64,10 @@ export function startServer() {
         if (err.message.includes("listen")) {
             process.exit(1);
         }
-    }).listen(httpPort, () => {
+    }).listen(httpPort, async () => {
+        // load controllers
+        require("../bootstrap/load-controller");
+
         if (typeof process.send == "function") {
             // notify PM2 that the service is available.
             process.send("ready");

@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const modelar_1 = require("modelar");
 const index_1 = require("../bootstrap/index");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const load_config_1 = require("../bootstrap/load-config");
 const symbols_1 = require("../tools/symbols");
 index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
     Object.defineProperty(req, "db", {
         get() {
             if (req[symbols_1.realDB] === undefined) {
-                req[symbols_1.realDB] = new modelar_1.DB(ConfigLoader_1.config.database);
+                req[symbols_1.realDB] = new modelar_1.DB(load_config_1.config.database);
             }
             return req[symbols_1.realDB];
         },

@@ -5,9 +5,9 @@ const fs = require("fs-extra");
 const path = require("path");
 const program = require("commander");
 const pluralize = require("pluralize");
-const capitalization_1 = require("capitalization");
+const kebabCase = require("lodash/kebabCase");
 const init_1 = require("../init");
-const ConfigLoader_1 = require("../core/bootstrap/ConfigLoader");
+const load_config_1 = require("../core/bootstrap/load-config");
 const functions_inner_1 = require("../core/tools/functions-inner");
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
@@ -55,12 +55,12 @@ try {
             : program.controller;
         let type = program.type == "websocket" ? "WebSocket" : "Http", input = `${tplDir}/${type}Controller.ts`, output = `${init_1.SRC_PATH}/controllers/${filename}.ts`;
         checkSource(input);
-        let route = capitalization_1.hyphenate(program.controller, true);
+        let route = kebabCase(program.controller);
         let contents = fs.readFileSync(input, "utf8").replace(/\{name\}/g, route);
         outputFile(output, contents, "controller");
     }
     else if (program.model) {
-        var input = `${tplDir}/Model.ts`, output = `${init_1.SRC_PATH}/models/${program.model}.ts`, ModelName = path.basename(program.model), table = pluralize(capitalization_1.hyphenate(ModelName, true));
+        var input = `${tplDir}/Model.ts`, output = `${init_1.SRC_PATH}/models/${program.model}.ts`, ModelName = path.basename(program.model), table = pluralize(kebabCase(ModelName));
         checkSource(input);
         var contents = fs.readFileSync(input, "utf8")
             .replace(/__Model__/g, ModelName)
@@ -70,9 +70,9 @@ try {
     else if (program.language) {
         let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
         let contents;
-        let file1 = `${init_1.APP_PATH}/locales/${ConfigLoader_1.config.lang}.js`;
-        let file2 = `${init_1.SRC_PATH}/locales/${ConfigLoader_1.config.lang}.json`;
-        let file3 = `${init_1.SRC_PATH}/locales/${ConfigLoader_1.config.lang}.js`;
+        let file1 = `${init_1.APP_PATH}/locales/${load_config_1.config.lang}.js`;
+        let file2 = `${init_1.SRC_PATH}/locales/${load_config_1.config.lang}.json`;
+        let file3 = `${init_1.SRC_PATH}/locales/${load_config_1.config.lang}.js`;
         let lang;
         if (fs.existsSync(file1)) {
             lang = functions_inner_1.loadLanguagePack(file1);

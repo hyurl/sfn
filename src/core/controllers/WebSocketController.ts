@@ -1,7 +1,7 @@
 import { DB, User } from "modelar";
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { activeEvent } from "../tools/symbols";
 
 /**

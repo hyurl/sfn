@@ -1,5 +1,5 @@
 import { DB } from "modelar";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { WebSocket } from "../tools/interfaces";
 import { realDB } from "../tools/symbols";
 

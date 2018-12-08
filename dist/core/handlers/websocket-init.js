@@ -4,7 +4,7 @@ const tslib_1 = require("tslib");
 const url = require("url");
 const endsWith = require("lodash/endsWith");
 const parse_accepts_1 = require("parse-accepts");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const load_config_1 = require("../bootstrap/load-config");
 function default_1(socket, next) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +34,7 @@ function default_1(socket, next) {
             let urlObj = url.parse(socket.protocol + "://" + socket.host);
             socket.hostname = urlObj.hostname;
             socket.port = urlObj.port && parseInt(urlObj.port);
-            let hostname = ConfigLoader_1.config.server.hostname;
+            let hostname = load_config_1.config.server.hostname;
             let domains = Array.isArray(hostname) ? hostname : [hostname];
             for (let domain of domains) {
                 if (socket.hostname.length > domain.length

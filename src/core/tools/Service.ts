@@ -6,7 +6,7 @@ import { DB } from "modelar";
 import { injectable, injected } from "injectable-ts";
 import HideProtectedProperties = require("hide-protected-properties");
 import { ROOT_PATH } from "../../init";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { LocaleMap } from "./LocaleMap";
 
 // make Cache and DB injectable

@@ -42,7 +42,6 @@ app.onerror = function onerror(err: any, req: Request, res: Response) {
 export function getRouteHandler(route: string): RouteHandler {
     return async (req: Request, res: Response) => {
         let { Class, method } = RouteMap[route],
-            { RequireAuth } = Class,
             ctrl: HttpController = null;
 
         res.on("error", (err) => {
@@ -67,15 +66,6 @@ export function getRouteHandler(route: string): RouteHandler {
             // return immediately without running any checking procedure, and 
             // don't call the method.
             if (res.sent || false === (await ctrl.before())) return;
-
-            // Handle authentication.
-            if (RequireAuth.includes(method) && !ctrl.authorized) {
-                if (ctrl.fallbackTo) {
-                    return res.redirect(ctrl.fallbackTo, 302);
-                } else {
-                    throw new HttpError(401);
-                }
-            }
 
             // Handle GZip.
             res.gzip = req.encoding == "gzip" && ctrl.gzip;

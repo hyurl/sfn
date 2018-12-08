@@ -12,9 +12,6 @@ export abstract class Controller extends Service {
      */
     static filename: string;
 
-    /** Sets what methods that require authentication. */
-    static RequireAuth: string[] = [];
-
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
 

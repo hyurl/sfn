@@ -10,7 +10,7 @@ const modelar_1 = require("modelar");
 const injectable_ts_1 = require("injectable-ts");
 const HideProtectedProperties = require("hide-protected-properties");
 const init_1 = require("../../init");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
+const load_config_1 = require("../bootstrap/load-config");
 const LocaleMap_1 = require("./LocaleMap");
 injectable_ts_1.injectable(Cache);
 injectable_ts_1.injectable(modelar_1.DB);
@@ -23,11 +23,11 @@ exports.LogOptions = Object.assign({}, Logger.Options, {
 let Service = Service_1 = class Service extends events_1.EventEmitter {
     constructor() {
         super(...arguments);
-        this.lang = ConfigLoader_1.config.lang;
+        this.lang = load_config_1.config.lang;
         this.logOptions = Object.assign({}, exports.LogOptions);
     }
     i18n(text, ...replacements) {
-        var locale = LocaleMap_1.LocaleMap, lang = this.lang.toLowerCase(), _lang = ConfigLoader_1.config.lang.toLowerCase();
+        var locale = LocaleMap_1.LocaleMap, lang = this.lang.toLowerCase(), _lang = load_config_1.config.lang.toLowerCase();
         if (locale[lang] && locale[lang][text]) {
             text = locale[lang][text];
         }
@@ -47,11 +47,11 @@ let Service = Service_1 = class Service extends events_1.EventEmitter {
 };
 Service.Loggers = {};
 tslib_1.__decorate([
-    injectable_ts_1.injected([ConfigLoader_1.config.redis]),
+    injectable_ts_1.injected([load_config_1.config.redis]),
     tslib_1.__metadata("design:type", Cache)
 ], Service.prototype, "cache", void 0);
 tslib_1.__decorate([
-    injectable_ts_1.injected([ConfigLoader_1.config.database]),
+    injectable_ts_1.injected([load_config_1.config.database]),
     tslib_1.__metadata("design:type", modelar_1.DB)
 ], Service.prototype, "db", void 0);
 Service = Service_1 = tslib_1.__decorate([

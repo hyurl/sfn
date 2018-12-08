@@ -4,11 +4,11 @@ const tslib_1 = require("tslib");
 const fs = require("fs-extra");
 const path = require("path");
 const init_1 = require("../../init");
-const ConfigLoader_1 = require("./ConfigLoader");
+const load_config_1 = require("./load-config");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const functions_inner_1 = require("../tools/functions-inner");
-let WS = ConfigLoader_1.config.server.websocket;
+let WS = load_config_1.config.server.websocket;
 let ext = init_1.isTsNode ? ".ts" : ".js";
 const tryImport = functions_inner_1.createImport(require);
 function isController(m) {
@@ -57,7 +57,7 @@ function loadControllers(controllerPath) {
         }
     });
 }
-for (let dir of ConfigLoader_1.config.controllers) {
+for (let dir of load_config_1.config.controllers) {
     loadControllers(`${init_1.APP_PATH}/${dir}`);
 }
-//# sourceMappingURL=ControllerLoader.js.map
+//# sourceMappingURL=load-controller.js.map

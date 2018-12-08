@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const cookieParser = require("cookie-parser");
-const ConfigLoader_1 = require("../bootstrap/ConfigLoader");
-const parser = cookieParser(ConfigLoader_1.config.session.secret);
+const load_config_1 = require("../bootstrap/load-config");
+const parser = cookieParser(load_config_1.config.session.secret);
 function default_1(socket, next) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         parser(socket.handshake, {}, next);

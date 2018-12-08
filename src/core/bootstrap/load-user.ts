@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import * as modelar from "modelar";
 import { APP_PATH } from '../../init';
 import { moduleExists } from '../tools/functions-inner';

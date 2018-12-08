@@ -5,7 +5,7 @@ import { EjsEngine } from "sfn-ejs-engine";
 import * as SSE from "sfn-sse";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH, isDevMode } from "../../init";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { Controller } from "./Controller";
 import { TemplateEngine } from "../tools/TemplateEngine";
 import { MarkdownParser } from "../tools/MarkdownParser";
@@ -13,6 +13,7 @@ import { Request, Response, Session } from "../tools/interfaces";
 import { HttpError } from "../tools/HttpError";
 import { realSSE } from "../tools/symbols";
 import { UploadOptions } from "../tools/upload";
+import { loadFile } from '../tools/functions-inner';
 
 export { CorsOptions };
 
@@ -53,14 +54,6 @@ export class HttpController extends Controller {
     static engine: TemplateEngine = Engine;
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
-    /**
-     * The key represents the method name, and the value sets form fields.
-     */
-    static UploadFields: {
-        [method: string]: string[]
-    } = {};
-
-    private static LoadedViews: { [filename: string]: string } = {};
 
     viewPath = this.Class.viewPath;
     viewExtname = this.Class.viewExtname;
@@ -146,22 +139,12 @@ export class HttpController extends Controller {
      * Sends a view file with raw contents to the response context.
      * 
      * @param filename The template file, stored in `views/` by default.
-     * @param cache Stores the file content in cache.
+     * @param fromCache Try retrieving contents from cache first.
      */
     viewRaw(filename: string, cache = !isDevMode): Promise<string> {
         filename = this.getAbsFilename(filename);
         this.res.type = path.extname(filename);
-
-        if (cache && this.Class.LoadedViews[filename] !== undefined) {
-            return Promise.resolve(this.Class.LoadedViews[filename]);
-        } else {
-            return fs.readFile(filename, "utf8").then(content => {
-                if (cache)
-                    this.Class.LoadedViews[filename] = content;
-
-                return content;
-            });
-        }
+        return loadFile(filename, cache);
     }
 
     /**
@@ -173,12 +156,10 @@ export class HttpController extends Controller {
      * 
      * @param filename The template filename, if no extension presented, then 
      *  `.md` will be used. Template files are by default stored in `views/`.
-     * @param cache Stores the file content in cache.
+     * @param fromCache Try retrieving contents from cache first.
      */
     viewMarkdown(filename: string, cache = !isDevMode): Promise<string> {
-        if (path.extname(filename) != ".md")
-            filename += ".md";
-
+        path.extname(filename) != ".md" && (filename += ".md");
         return this.viewRaw(filename, cache).then(MarkdownParser.parse);
     }
 
