@@ -5,8 +5,8 @@
 
 # 如何使用？
 
-你只需要在 `src/controllers` 目录下创建一个文件，并且这个文件导出一个默认的类，它
-继承于 `HttpController`，然后它就可以在服务器启动时被自动加载。
+你只需要在 `src/controllers` 目录下创建一个文件，并且这个文件导出一个默认的类，它继承于 
+`HttpController`，然后它就可以在服务器启动时被自动加载。
 
 ## 示例
 
@@ -23,9 +23,8 @@ export default class extends HttpController {
 
 ## 路由和方法之间的关系
 
-当一个方法被 `@route` 修饰时，这个方法就会被绑定到一个确定的 URL 路由上。当访问一个
-匹配路由的 URL 地址时，这个方法就会被自动地调用，其返回值将会以合适的形式返回给发起
-请求的客户端。
+当一个方法被 `@route` 修饰时，这个方法就会被绑定到一个确定的 URL 路由上。当访问一个匹配路由的
+URL 地址时，这个方法就会被自动地调用，其返回值将会以合适的形式返回给发起请求的客户端。
 
 装饰器 `route` 是一个函数及接口。当作为函数调用时，它支持这些形式：
 
@@ -43,9 +42,9 @@ export default class extends HttpController {
 
 ### 路由格式
 
-框架使用 [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 来解析 
-URL 路由，这里我只会给你一些常用的用法以加深你对路由的印象，关于更多的细节，你需要
-自己去查阅该模块的文档。
+框架使用 [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 来解析 URL 
+路由，这里我只会给你一些常用的用法以加深你对路由的印象，关于更多的细节，你需要自己去查阅该模块的
+文档。
 
 ```typescript
 import { HttpController, Request, route } from "sfn";
@@ -142,8 +141,8 @@ export default class extends HttpController {
 ## 前置和后置操作
 
 如果你想要在调用实际的方法前执行一些异步的操作，JavaScript 是不会允许你定义一个 
-`async constructor()` 的，但不用担心，**SFN** 提供了一个特别的方式让你可以这么做。
-框架允许你定义方法 `before()` 和 `after()` 来控制过程流。
+`async constructor()` 的，但不用担心，**SFN** 提供了一个简单的方式让你可以这么做。框架允许
+你定义方法 `before()` 和 `after()` 来控制流程。
 
 ```typescript
 import * as fs from "fs";
@@ -218,8 +217,8 @@ export default class extends HttpController {
 
 ## 构造函数
 
-有些时候你可能想要在真正的方法被调用前做一些事情，你可能想要进行一些额外的配置，在类被
-实例化前，你想要自定义类的 `constructor`。就像下面这样：
+有些时候你可能想要在真正的方法被调用前做一些事情，你可能想要进行一些额外的配置，在类被实例化前，
+你想要自定义类的 `constructor`。就像下面这样：
 
 ```typescript
 import { HttpController, Request, Response } from "sfn";
@@ -227,7 +226,6 @@ import { HttpController, Request, Response } from "sfn";
 export default class extends HttpController {
     constructor(req: Request, res: Response) {
         super(req, res);
-        
         // your stuffs...
     }
 }
@@ -235,9 +233,9 @@ export default class extends HttpController {
 
 ### 关于 Request 和 Response 的提示
 
-`Request` 和 `Response` 是 TypeScript 接口，实际上在 **SFN** 框架中存在着很多的
-接口（和别名类型）。它们并不是类，因此也不能被实例化，或者使用 `instanceof` 来
-检测，如果你在代码中有任何这样的代码，那只会给你自己造成麻烦。
+`Request` 和 `Response` 是 TypeScript 接口，实际上在 **SFN** 框架中存在着很多的接口（和
+别名类型）。它们并不是类，因此也不能被实例化，或者使用 `instanceof` 来检测，如果你在代码中有
+任何这样的代码，那只会给你自己造成麻烦。
 
 ```typescript
 // This example is wrong and should be avoid.
@@ -251,9 +249,8 @@ if (obj instanceof Request) {
 
 ## 在控制器中抛出 HttpError
 
-`HttpError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到
-客户端时使用它。当一个 HttpError 被抛出时，框架将会对其进行合适的处理，并自动地发送
-错误响应内容。
+`HttpError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到客户端时
+使用它。当一个 HttpError 被抛出时，框架将会对其进行合适的处理，并自动地发送错误响应内容。
 
 ```typescript
 import { HttpController, HttpError, route } from "sfn";
@@ -274,20 +271,20 @@ export default class extends HttpController {
 }
 ```
 
-框架会检查客户端所接受地响应类型，并用合适的方式发送错误信息。通常地，一个普通的 HTTP
-错误页面会被返回。但如果在请求头中出现了 `Accept: application/json`，一个状态码为 
-`200` 并携带 JSON 信息 `{success: false, code, error}` 的响应将会被返回，这个响应
-形式来自于控制器方法 [error()](./http-controller#Common-API-response).。
+框架会检查客户端所接受地响应类型，并用合适的方式发送错误信息。通常地，一个普通的 HTTP 错误页面
+会被返回。但如果在请求头中出现了 `Accept: application/json`，一个状态码为 `200` 并携带 
+JSON 信息 `{success: false, code, error}` 的响应将会被返回，这个响应形式来自于控制器方法 
+[error()](./http-controller#Common-API-response).。
 
-如果这个响应头没有出现，那么框架会检查是否在 `src/views/` 目录中存在着一个名称和错误
-代码对应的模板（如 `404.html`）。如果文件存在，那它将会被发送为错误页面，否则，一个
-简单的错误响应将会被返回。
+如果这个响应头没有出现，那么框架会检查是否在 `src/views/` 目录中存在着一个名称和错误代码对应
+的模板（如 `404.html`）。如果文件存在，那它将会被发送为错误页面，否则，一个简单的错误响应将会
+被返回。
 
 ### 自定义错误页面
 
-默认地，框架会根据错误代码发送一个对应的视图文件，并且仅传递 `err: HttpError` 对象
-到模板中，它可能并不满足一些复杂的需求。因此，框架允许你自定义错误处理器，通过重写静态
-方法 `HttpController.httpErrorView` 来实现。下面的示例将向你展示如何做。
+默认地，框架会根据错误代码发送一个对应的视图文件，并且仅传递 `err: HttpError` 对象到模板中，
+它可能并不满足一些复杂的需求。因此，框架允许你自定义错误处理器，通过重写静态方法
+`HttpController.httpErrorView` 来实现。下面的示例将向你展示如何做。
 
 ```typescript
 // src/bootstrap/http.ts
@@ -336,5 +333,5 @@ export default class extends HttpController {
 
 ## HttpController 与服务
 
-一个控制器实际上就是一个服务，你可以在一个控制器中使用任何在 [Service](./service) 
-中有效的特性。
+一个控制器实际上就是一个服务，你可以在一个控制器中使用任何在 [Service](./service) 中有效的
+特性。

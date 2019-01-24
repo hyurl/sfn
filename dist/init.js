@@ -4,7 +4,7 @@ const path = require("path");
 const dotenv_1 = require("dotenv");
 const chalk_1 = require("chalk");
 const fs = require("fs");
-const jsonc = require("jsonc-parser");
+const FRON = require("fron");
 exports.version = require("../package.json").version;
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
@@ -16,7 +16,7 @@ if (exports.isCli)
 exports.ROOT_PATH = path.normalize(appPath + "/..");
 var srcPath = appPath;
 try {
-    let json = fs.readFileSync(exports.ROOT_PATH + "/tsconfig.json", "utf8"), { compilerOptions } = jsonc.parse(json), { rootDir, outDir } = compilerOptions || {};
+    let filename = exports.ROOT_PATH + "/tsconfig.json", jsonc = fs.readFileSync(filename, "utf8"), { compilerOptions } = FRON.parse(jsonc, filename), { rootDir, outDir } = compilerOptions || {};
     if (rootDir)
         srcPath = path.normalize(exports.ROOT_PATH + "/" + rootDir);
     if (outDir)

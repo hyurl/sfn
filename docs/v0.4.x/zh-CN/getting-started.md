@@ -13,13 +13,17 @@ npm init
 来初始化你的项目，假设你已经对 [NPM](https://www.npmjs.com/) 有了一定的理解并安装了
 [NodeJS](https://nodejs.org) 环境。
 
-### 安装 TypeScript
+### 安装 TypeScript 编译器和运行时
 
 **SFN** 是使用 [TypeScript](https://www.typescriptlang.org) 编写的，因此你也应该
 使用它来编写你的代码。
 
+*运行时 [ts-node](https://github.com/TypeStrong/ts-node) 是可选的，只有在你希望不编译*
+*而直接运行程序时才需要。*
+
 ```sh
 npm i -g typescript
+npm i -g ts-node
 ```
 
 ### 安装 PM2（可选）
@@ -43,8 +47,15 @@ npm i sfn
 
 ### 启动服务器示例
 
-**SFN** 提供了一个简单的示例，因此你可以立马开启服务器并观察将会发生什么。首先，使用
-命令 `tsc` 编译源代码，然后输入这个命令：
+**SFN** 提供了一个简单的示例，因此你可以立马开启服务器并观察将会发生什么。
+
+如果你已经安装了 **ts-node**，那么则可以直接使用下面的命令来启动项目：
+
+```sh
+ts-node src
+```
+
+否则，使用命令 `tsc` 编译源代码，然后运行这个命令：
 
 ```sh
 node dist

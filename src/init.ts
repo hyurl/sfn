@@ -2,7 +2,7 @@ import * as path from "path";
 import { config as configEnv } from "dotenv";
 import chalk from "chalk";
 import * as fs from "fs";
-import * as jsonc from "jsonc-parser";
+import * as FRON from "fron";
 
 /** The version of framework. */
 export const version: string = require("../package.json").version;
@@ -28,8 +28,9 @@ export const ROOT_PATH = path.normalize(appPath + "/..");
 var srcPath: string = appPath;
 
 try {
-    let json = fs.readFileSync(ROOT_PATH + "/tsconfig.json", "utf8"),
-        { compilerOptions } = jsonc.parse(json),
+    let filename = ROOT_PATH + "/tsconfig.json",
+        jsonc = fs.readFileSync(filename, "utf8"),
+        { compilerOptions } = FRON.parse(jsonc, filename),
         { rootDir, outDir } = compilerOptions || <any>{};
 
     if (rootDir)

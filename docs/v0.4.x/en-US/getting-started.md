@@ -14,13 +14,17 @@ npm init
 to initiate your project, assume you have some knowledge of 
 [NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
-### Install TypeScript
+### Install TypeScript Compiler And Runtime
 
 **SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
 own code should be as well.
 
+*The runtime [ts-node](https://github.com/TypeStrong/ts-node) is optional, only*
+*needed if you want to run your program without compiling.*
+
 ```sh
 npm i -g typescript
+npm i -g ts-node
 ```
 
 ### Install PM2 (Optional)
@@ -49,7 +53,14 @@ files and directories for you automatically.
 ### Start Demo Server
 
 **SFN** provides a demo, so you can now start server and see what will happen.
-firstly, compile the source code with the command: `tsc`, then type the command:
+
+If you have installed **ts-node**, use this command to start the project.
+
+```sh
+ts-node src
+```
+
+Otherwise, compile the source code with command: `tsc`, then run the command:
 
 ```sh
 node dist
