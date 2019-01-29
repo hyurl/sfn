@@ -1,13 +1,13 @@
 import * as BodyParser from "body-parser";
 import { Builder, parseString, OptionsV2 } from "xml2js";
 import { IncomingMessage } from "http";
-import { promisify } from "es6-promisify";
+import { promisify } from "util";
 import { app } from "../bootstrap/index";
 import { Request, Response } from "../tools/interfaces";
 
 const plainType = /text\/plain\b/;
 const xmlType = /(text|application)\/xml\b/;
-const parseStringAsync = promisify<any, any, OptionsV2>(parseString);
+const parseStringAsync = promisify<any, OptionsV2, any>(<any>parseString);
 
 app.use(<any>BodyParser.text({
     type: parsingType

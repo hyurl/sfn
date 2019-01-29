@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const BodyParser = require("body-parser");
 const xml2js_1 = require("xml2js");
-const es6_promisify_1 = require("es6-promisify");
+const util_1 = require("util");
 const index_1 = require("../bootstrap/index");
 const plainType = /text\/plain\b/;
 const xmlType = /(text|application)\/xml\b/;
-const parseStringAsync = es6_promisify_1.promisify(xml2js_1.parseString);
+const parseStringAsync = util_1.promisify(xml2js_1.parseString);
 index_1.app.use(BodyParser.text({
     type: parsingType
 })).use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
