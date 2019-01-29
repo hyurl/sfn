@@ -7,3 +7,4 @@ src/assets/
 src/controllers/
 src/locales/
 src/views/
+*.db

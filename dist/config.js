@@ -61,10 +61,6 @@ exports.config = {
             username: env.MAIL_USER || "",
             password: env.MAIL_PASS || ""
         }
-    },
-    redis: {
-        host: env.REDIS_HOST || "",
-        port: parseInt(env.REDIS_PORT) || undefined
     }
 };
 //# sourceMappingURL=config.js.map

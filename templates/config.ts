@@ -60,9 +60,5 @@ export const config: SFNConfig = {
             username: env.MAIL_USER || "",
             password: env.MAIL_PASS || ""
         }
-    },
-    redis: {
-        host: env.REDIS_HOST || "",
-        port: parseInt(env.REDIS_PORT) || undefined
     }
 };

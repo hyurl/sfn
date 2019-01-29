@@ -13,8 +13,6 @@ const Validator = require("sfn-validator");
 exports.Validator = Validator;
 const SSE = require("sfn-sse");
 exports.SSE = SSE;
-const Cache = require("sfn-cache");
-exports.Cache = Cache;
 var sfn_cookie_1 = require("sfn-cookie");
 exports.Cookie = sfn_cookie_1.Cookie;
 tslib_1.__exportStar(require("sfn-scheduler"), exports);

@@ -25,6 +25,7 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
 };
 
 export interface SFNConfig {
+    [x: string]: any;
     /** Default language of the application. */
     lang?: string;
     /**
@@ -105,11 +106,6 @@ export interface SFNConfig {
      * @see https://github.com/Hyurl/sfn-mail
      */
     mail?: Mail.Options & Mail.Message;
-    /**
-     * Configurations for Redis.
-     * @see https://www.npmjs.com/package/redis
-     */
-    redis?: ClientOpts;
 }
 
 const FileStore = sessionFileStore(Session);
@@ -175,9 +171,5 @@ export const config: SFNConfig = {
             username: env.MAIL_USER || "",
             password: env.MAIL_PASS || ""
         }
-    },
-    redis: {
-        host: env.REDIS_HOST || "",
-        port: parseInt(env.REDIS_PORT) || undefined
     }
 };
