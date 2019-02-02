@@ -1,40 +1,39 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
-const fs = require("fs");
 const dotenv_1 = require("dotenv");
+const chalk_1 = require("chalk");
+const fs = require("fs");
+const FRON = require("fron");
 exports.version = require("../package.json").version;
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
 exports.isDebugMode = argv.includes("inspect") || argv.includes("debug");
+exports.isTsNode = argv.includes("ts-node");
 exports.isCli = appPath == __dirname + path.sep + "cli";
-if (exports.isCli) {
+if (exports.isCli)
     appPath = process.cwd() + path.sep + "dist";
-}
-exports.ROOT_PATH = global["ROOT_PATH"] || path.normalize(appPath + "/..");
-var tsCfgFile = exports.ROOT_PATH + "/tsconfig.json";
-var tsCfg;
+exports.ROOT_PATH = path.normalize(appPath + "/..");
 var srcPath = appPath;
-if (!global["SRC_PATH"] && fs.existsSync(tsCfgFile)) {
-    try {
-        tsCfg = require(tsCfgFile);
-        if (tsCfg.compilerOptions && tsCfg.compilerOptions.rootDir) {
-            srcPath = path.normalize(exports.ROOT_PATH + "/" + tsCfg.compilerOptions.rootDir);
-            appPath = path.normalize(exports.ROOT_PATH + "/" + tsCfg.compilerOptions.outDir);
-        }
-    }
-    catch (e) {
-        srcPath = path.normalize(exports.ROOT_PATH + "/src");
-        appPath = path.normalize(exports.ROOT_PATH + "/dist");
-    }
+try {
+    let filename = exports.ROOT_PATH + "/tsconfig.json", jsonc = fs.readFileSync(filename, "utf8"), { compilerOptions } = FRON.parse(jsonc, filename), { rootDir, outDir } = compilerOptions || {};
+    if (rootDir)
+        srcPath = path.normalize(exports.ROOT_PATH + "/" + rootDir);
+    if (outDir)
+        appPath = path.normalize(exports.ROOT_PATH + "/" + outDir);
 }
-else if (!global["APP_PATH"]) {
-    srcPath = appPath = exports.ROOT_PATH + path.sep + "src";
+catch (e) {
+    srcPath = path.normalize(exports.ROOT_PATH + "/src");
+    appPath = path.normalize(exports.ROOT_PATH + "/dist");
 }
-exports.APP_PATH = global["APP_PATH"] || appPath;
-exports.SRC_PATH = global["SRC_PATH"] || srcPath;
-exports.isTypeScript = exports.SRC_PATH != exports.APP_PATH;
-dotenv_1.config({
-    path: exports.ROOT_PATH + "/.env"
-});
+exports.SRC_PATH = srcPath;
+exports.APP_PATH = exports.isTsNode ? exports.SRC_PATH : appPath;
+exports.isDevMode = exports.isDebugMode || !process.send;
+dotenv_1.config({ path: exports.ROOT_PATH + "/.env" });
+if (exports.isDevMode && !exports.isDebugMode && !exports.isCli) {
+    console.log("You program is running in development mode without "
+        + "'--inspect' flag, please consider changing to debug environment.");
+    console.log("For help, see "
+        + chalk_1.default.yellow("https://sfnjs.com/docs/v0.3.x/debug"));
+}
 //# sourceMappingURL=init.js.map

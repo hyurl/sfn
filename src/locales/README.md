@@ -1,7 +1,7 @@
 This folder stores language packages, each package are named in RFC1766 
-standard, both js and json files are supported.
+standard, both ts and json files are supported.
 
-JavaScript (zh-CN.ts):
+TypeScript (zh-CN.ts):
 
 ```typescript
 import { Locale } from "sfn";

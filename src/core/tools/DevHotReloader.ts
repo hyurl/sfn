@@ -5,7 +5,7 @@ import startsWith = require("lodash/startsWith");
 export class DevHotReloader {
     readonly watcher: chokidar.FSWatcher;
 
-    constructor(dirname: string, extnames = [".js", ".json"]) {
+    constructor(dirname: string, extnames = [".ts", ".js", ".json"]) {
         this.watcher = DevHotReloader.watchers[dirname] = chokidar.watch(dirname, {
             awaitWriteFinish: true,
             followSymlinks: false
@@ -17,7 +17,6 @@ export class DevHotReloader {
                 require(filename);
             }
         }).on("change", filename => {
-            let ext = path.extname(filename);
             if (require.cache[filename]) {
                 delete require.cache[filename];
                 require(filename);

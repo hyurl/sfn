@@ -1,12 +1,8 @@
 import { DB, User } from "modelar";
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
-import { config } from "../bootstrap/ConfigLoader";
-
-var warningEmitted = false;
-
-/** @deprecated */
-export type WebSocketNextHandler = (controller: WebSocketController) => void;
+import { config } from "../bootstrap/load-config";
+import { activeEvent } from "../tools/symbols";
 
 /**
  * WebSocketController manages messages come from a socket.io client.
@@ -45,25 +41,13 @@ export class WebSocketController extends Controller {
 
     static nsp: string = "/";
 
-    /**
-     * Creates a new socket controller instance.
-     * 
-     * You can pass a third parameter `next` to the constructor, if it is is 
-     * defined, then the constructor can handle asynchronous actions. And at 
-     * where you want to call the real method, use `next(this)` to call it.
-     */
-    constructor(socket: WebSocket, next: WebSocketNextHandler = null) {
+    constructor(socket: WebSocket) {
         super();
         this.authorized = socket.user !== null;
         this.socket = socket;
         this.lang = (socket.cookies && socket.cookies.lang)
             || socket.lang
             || config.lang;
-
-        if ((next instanceof Function) && !warningEmitted) {
-            process.emitWarning("Passing argument `next` to a controller is deprecated.", "DeprecationWarning");
-            warningEmitted = true;
-        }
     }
 
     get Class(): typeof WebSocketController {
@@ -91,5 +75,13 @@ export class WebSocketController extends Controller {
 
     set user(v: User) {
         this.socket.user = v;
+    }
+
+    /**
+     * The active event (namesapce included) when the controller is instantiated.
+     */
+    get event(): string {
+        return this[activeEvent]
+            || (this[activeEvent] = this.socket[activeEvent]);
     }
 }

@@ -8,13 +8,15 @@ const webium_1 = require("webium");
 const SocketIO = require("socket.io");
 const chalk_1 = require("chalk");
 const init_1 = require("../../init");
-const ConfigLoader_1 = require("./ConfigLoader");
+const load_config_1 = require("./load-config");
 const DevHotReloader_1 = require("../tools/DevHotReloader");
 const functions_inner_1 = require("../tools/functions-inner");
+const Service_1 = require("../tools/Service");
 exports.app = null;
 exports.http = null;
 exports.ws = null;
-let hostnames = ConfigLoader_1.config.server.hostname, httpServer = ConfigLoader_1.config.server.http, httpPort = httpServer.port, WS = ConfigLoader_1.config.server.websocket, serverStarted = false;
+const tryImport = functions_inner_1.createImport(require);
+let hostnames = load_config_1.config.server.hostname, httpServer = load_config_1.config.server.http, httpPort = httpServer.port, WS = load_config_1.config.server.websocket, serverStarted = false;
 function startServer() {
     if (serverStarted) {
         throw new Error("Server already started.");
@@ -27,36 +29,38 @@ function startServer() {
     require("../handlers/http-session");
     require("../handlers/http-db");
     require("../handlers/http-auth");
-    let httpBootstrap = init_1.APP_PATH + "/bootstrap/http.js";
-    fs.existsSync(httpBootstrap) && require(httpBootstrap);
-    require("../bootstrap/ControllerLoader");
+    let httpBootstrap = init_1.APP_PATH + "/bootstrap/http";
+    functions_inner_1.moduleExists(httpBootstrap) && tryImport(httpBootstrap);
     if (WS.enabled) {
-        require("../handlers/websocket-event");
-        let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket.js";
-        fs.existsSync(wsBootstrap) && require(wsBootstrap);
+        let wsBootstrap = init_1.APP_PATH + "/bootstrap/websocket";
+        functions_inner_1.moduleExists(wsBootstrap) && tryImport(wsBootstrap);
     }
     if (typeof exports.http["setTimeout"] == "function") {
-        exports.http["setTimeout"](ConfigLoader_1.config.server.timeout);
+        exports.http["setTimeout"](load_config_1.config.server.timeout);
     }
     exports.http.on("error", (err) => {
         console.log(functions_inner_1.red `${err.toString()}`);
         if (err.message.includes("listen")) {
             process.exit(1);
         }
-    }).listen(httpPort, () => {
+    }).listen(httpPort, async () => {
+        try {
+            await (new Service_1.Service).cache.sync();
+        }
+        catch (e) { }
+        require("../bootstrap/load-controller");
         if (typeof process.send == "function") {
             process.send("ready");
         }
         else {
-            let hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames, port = exports.http.address()["port"] || httpPort, host = hostname + (port == 80 || port == 443 ? "" : ":" + port), type = ConfigLoader_1.config.server.http.type, link = (type == "http2" ? "https" : type) + "://" + host, msg = functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(link)}.`;
-            console.log(msg);
+            console.log(functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(load_config_1.baseUrl)}.`);
         }
     });
 }
 exports.startServer = startServer;
 if (!init_1.isCli) {
     exports.app = new webium_1.App({
-        cookieSecret: ConfigLoader_1.config.session.secret,
+        cookieSecret: load_config_1.config.session.secret,
         domain: hostnames
     });
     switch (httpServer.type) {
@@ -77,13 +81,13 @@ if (!init_1.isCli) {
             exports.ws = SocketIO(WS.port, WS.options);
     }
     require("../handlers/worker-shutdown");
-    let workerBootstrap = init_1.APP_PATH + "/bootstrap/worker.js";
-    fs.existsSync(workerBootstrap) && require(workerBootstrap);
-    if (ConfigLoader_1.config.server.autoStart) {
+    let workerBootstrap = init_1.APP_PATH + "/bootstrap/worker";
+    functions_inner_1.moduleExists(workerBootstrap) && tryImport(workerBootstrap);
+    if (load_config_1.config.server.autoStart) {
         startServer();
     }
-    if (ConfigLoader_1.isDevMode && ConfigLoader_1.config.hotReloading) {
-        for (let dirname of ConfigLoader_1.config.controllers) {
+    if (init_1.isDevMode && load_config_1.config.hotReloading) {
+        for (let dirname of load_config_1.config.controllers) {
             dirname = path.resolve(init_1.APP_PATH, dirname);
             fs.exists(dirname, exists => {
                 if (exists)

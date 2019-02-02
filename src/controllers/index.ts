@@ -1,11 +1,13 @@
-import { HttpController, route, version, config } from "sfn";
+import { HttpController, route, version, isDevMode } from "sfn";
+
+HttpController.viewExtname = ".ejs";
 
 /**
  * The Home controller is a special controller, it handles requests which 
  * visit the home page of the website through `GET /`.
  */
 export default class extends HttpController {
-    viewExtname = ".ejs";
+    // viewExtname = ".ejs";
     isZh = this.lang.includes("zh");
     indexVars = {
         title: "Service Framework for Node.js",
@@ -19,7 +21,11 @@ export default class extends HttpController {
 
     @route.get("/")
     async index() {
-        let data = await this.view(this.isZh ? "index.zh" : "index", this.indexVars);
-        this.res.send(data);
+        let ver = this.isZh ? "index.zh" : "index.en";
+
+        return !isDevMode && this.cache.get(ver) || this.cache.set(
+            ver,
+            await this.view(ver, this.indexVars)
+        );
     }
 }

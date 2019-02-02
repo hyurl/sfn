@@ -5,37 +5,28 @@ import { Stats } from "fs";
 import serveStatic = require("serve-static");
 import * as Mail from "sfn-mail";
 import { DBConfig } from "modelar";
-import { ClientOpts } from "redis";
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { SRC_PATH, ROOT_PATH } from "./init";
+import { ROOT_PATH } from "./init";
 
 /**
  * @see https://www.npmjs.com/package/serve-static
  */
-interface StaticOptions extends serveStatic.ServeStaticOptions {
+export interface StaticOptions extends serveStatic.ServeStaticOptions {
+    /** 
+     * If `true`, the URL must contain the folder name (relative to `SRC_PATH`) 
+     * as prefix to reach the static resource. Also you can set a specified 
+     * prefix other than the folder name.
+     */
+    prefix?: boolean | string;
     setHeaders?: (res: ServerResponse, path: string, stat: Stats) => void;
 };
 
 export interface SFNConfig {
-    env?: "dev" | "development" | "pro" | "production";
+    [x: string]: any;
     /** Default language of the application. */
     lang?: string;
-    /**
-	 * If `true`, when a method's jsdoc contains tag `@route` (for 
-	 * `HttpController`s) or `@event` (for `SocektController`s), the value 
-	 * after them will be used as a HTTP route or socket event.
-	 * @example
-	 * @route GET /user/:id
-	 * @event show-user-info
-	 */
-    enableDocRoute?: boolean;
-    /**
-     * If `true`, when a method is a generator function, it will be treated as
-     * a coroutine function and await its result.
-     */
-    awaitGenerator?: boolean;
     /**
      * The directories that serve static resources.
      * @see https://www.npmjs.com/package/serve-static
@@ -44,8 +35,8 @@ export interface SFNConfig {
     /** The directories that contain controllers. */
     controllers?: string[];
     /**
-     * Hot-reloading is an exprimental feature and only supports controllers, it
-     * will watch file changes in the directories set in `controllers`.
+     * Hot-reloading is an experimental feature and only supports controllers, 
+     * it will watch file changes in the directories set in `controllers`.
      * 
      * When any controller file has been modified, rather than reload the whole 
      * server, the system will try to reload the route in memory instead. Make 
@@ -98,13 +89,6 @@ export interface SFNConfig {
              */
             options?: ServerOptions;
         };
-        /** Configurations when HTTP requests or socket events throw errors. */
-        error?: {
-            /** If `true`, display full error information to the client. */
-            show?: boolean;
-            /** If `true` errors will be logged to disk files. */
-            log?: boolean;
-        };
     };
     /**
      * Configurations for Modelar ORM.
@@ -121,11 +105,6 @@ export interface SFNConfig {
      * @see https://github.com/Hyurl/sfn-mail
      */
     mail?: Mail.Options & Mail.Message;
-    /**
-     * Configurations for Redis.
-     * @see https://www.npmjs.com/package/redis
-     */
-    redis?: ClientOpts;
 }
 
 const FileStore = sessionFileStore(Session);
@@ -137,13 +116,10 @@ const env = process.env;
  * supported options on their official websites.
  */
 export const config: SFNConfig = {
-    env: <SFNConfig["env"]>env.NODE_ENV || "dev",
     lang: env.LANG || "en-US",
-    enableDocRoute: false,
-    awaitGenerator: false,
-    statics: [SRC_PATH + "/assets"],
+    statics: ["assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
-    hotReloading: false,
+    hotReloading: true,
     server: {
         hostname: "localhost",
         timeout: 120000, // 2 min.
@@ -160,10 +136,6 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        },
-        error: {
-            show: true,
-            log: true,
         }
     },
     database: {
@@ -198,9 +170,5 @@ export const config: SFNConfig = {
             username: env.MAIL_USER || "",
             password: env.MAIL_PASS || ""
         }
-    },
-    redis: {
-        host: env.REDIS_HOST || "",
-        port: parseInt(env.REDIS_PORT) || undefined
     }
 };

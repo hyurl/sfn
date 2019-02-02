@@ -1,5 +1,5 @@
 import { WebSocket } from "../tools/interfaces";
-import { User } from "../bootstrap/UserLoader";
+import { User } from "../bootstrap/load-user";
 
 export default async function (socket: WebSocket, next: (err?: Error) => void) {
     socket.user = null;

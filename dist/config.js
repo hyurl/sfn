@@ -7,13 +7,10 @@ const init_1 = require("./init");
 const FileStore = sessionFileStore(Session);
 const env = process.env;
 exports.config = {
-    env: env.NODE_ENV || "dev",
     lang: env.LANG || "en-US",
-    enableDocRoute: false,
-    awaitGenerator: false,
-    statics: [init_1.SRC_PATH + "/assets"],
+    statics: ["assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
-    hotReloading: false,
+    hotReloading: true,
     server: {
         hostname: "localhost",
         timeout: 120000,
@@ -30,10 +27,6 @@ exports.config = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        },
-        error: {
-            show: true,
-            log: true,
         }
     },
     database: {
@@ -68,10 +61,6 @@ exports.config = {
             username: env.MAIL_USER || "",
             password: env.MAIL_PASS || ""
         }
-    },
-    redis: {
-        host: env.REDIS_HOST || "",
-        port: parseInt(env.REDIS_PORT) || undefined
     }
 };
 //# sourceMappingURL=config.js.map

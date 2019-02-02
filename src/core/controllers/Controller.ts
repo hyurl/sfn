@@ -1,5 +1,4 @@
 import { Service } from "../tools/Service";
-import { ControllerIntercepter } from '../tools/functions';
 
 /**
  * The Controller give you a common API to return data to the underlying 
@@ -12,17 +11,6 @@ export abstract class Controller extends Service {
      * automatically by the framework when the controller is imported.
      */
     static filename: string;
-
-    /** Sets what methods that require authentication. */
-    static RequireAuth: string[] = [];
-
-    static BeforeIntercepters: {
-        [method: string]: Array<ControllerIntercepter>
-    } = {};
-
-    static AfterIntercepters: {
-        [method: string]: Array<ControllerIntercepter>
-    } = {};
 
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;

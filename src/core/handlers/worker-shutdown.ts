@@ -2,6 +2,7 @@ import { Queue } from "dynamic-queue";
 import { http } from "../bootstrap/index";
 import { DB } from "modelar";
 import { DevHotReloader } from '../tools/DevHotReloader';
+import { Service } from "../tools/Service";
 
 // gracefully reboot the worker
 process.on("SIGINT", shutdown);
@@ -47,6 +48,13 @@ export function closeServersInQueue(queue: Queue, timeout: number) {
         // close hot-reloader watchers
         for (let dirname in DevHotReloader.watchers) {
             DevHotReloader.watchers[dirname].close();
+        }
+        next();
+    });
+
+    queue.push(async (next) => {
+        for (let filename in Service.Caches) {
+            await Service.Caches[filename].close();
         }
         next();
     });

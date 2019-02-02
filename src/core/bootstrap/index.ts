@@ -6,10 +6,11 @@ import { Http2SecureServer } from "http2";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
-import { APP_PATH, isCli } from "../../init";
-import { config, isDevMode } from "./ConfigLoader";
+import { APP_PATH, isCli, isDevMode } from "../../init";
+import { config, baseUrl } from "./load-config";
 import { DevHotReloader } from "../tools/DevHotReloader";
-import { red, green } from "../tools/functions-inner";
+import { red, green, moduleExists, createImport } from "../tools/functions-inner";
+import { Service } from '../tools/Service';
 
 /** (worker only) The App instance created by **webium** framework. */
 export var app: App = null;
@@ -18,6 +19,7 @@ export var http: HttpServer | HttpsServer | Http2SecureServer = null;
 /** (worker only) The WebSocket server created by **SocketIO**. */
 export var ws: SocketIO.Server = null;
 
+const tryImport = createImport(require);
 let hostnames = config.server.hostname,
     httpServer = config.server.http,
     httpPort = httpServer.port,
@@ -44,22 +46,13 @@ export function startServer() {
     require("../handlers/http-auth");
 
     // Load user-defined bootstrap procedures.
-    let httpBootstrap = APP_PATH + "/bootstrap/http.js";
-    fs.existsSync(httpBootstrap) && require(httpBootstrap);
-
-    // load controllers
-    require("../bootstrap/ControllerLoader");
-
-    // load HTTP route handler
-    // require("../handlers/http-route");
+    let httpBootstrap = APP_PATH + "/bootstrap/http";
+    moduleExists(httpBootstrap) && tryImport(httpBootstrap);
 
     if (WS.enabled) {
-        // load WebSocket event handler
-        require("../handlers/websocket-event");
-
         // Load user-defined bootstrap procedures.
-        let wsBootstrap = APP_PATH + "/bootstrap/websocket.js";
-        fs.existsSync(wsBootstrap) && require(wsBootstrap);
+        let wsBootstrap = APP_PATH + "/bootstrap/websocket";
+        moduleExists(wsBootstrap) && tryImport(wsBootstrap);
     }
 
     // Start HTTP server.
@@ -72,19 +65,20 @@ export function startServer() {
         if (err.message.includes("listen")) {
             process.exit(1);
         }
-    }).listen(httpPort, () => {
+    }).listen(httpPort, async () => {
+        try {
+            // try to sync any cached data hosted by the default cache service.
+            await (new Service).cache.sync();
+        } catch (e) { }
+
+        // load controllers
+        require("../bootstrap/load-controller");
+
         if (typeof process.send == "function") {
             // notify PM2 that the service is available.
             process.send("ready");
         } else {
-            let hostname = Array.isArray(hostnames) ? hostnames[0] : hostnames,
-                port = http.address()["port"] || httpPort,
-                host = hostname + (port == 80 || port == 443 ? "" : ":" + port),
-                type = config.server.http.type,
-                link = (type == "http2" ? "https" : type) + "://" + host,
-                msg = green`HTTP Server running at ${chalk.yellow(link)}.`;
-
-            console.log(msg);
+            console.log(green`HTTP Server running at ${chalk.yellow(baseUrl)}.`);
         }
     });
 }
@@ -103,7 +97,10 @@ if (!isCli) {
             http = createServer(httpServer.options, app.listener);
             break;
         case "http2":
-            http = require("http2").createSecureServer(httpServer.options, app.listener);
+            http = require("http2").createSecureServer(
+                httpServer.options,
+                app.listener
+            );
             break;
     }
 
@@ -119,8 +116,8 @@ if (!isCli) {
     require("../handlers/worker-shutdown");
 
     // Load user-defined bootstrap procedures.
-    let workerBootstrap = APP_PATH + "/bootstrap/worker.js";
-    fs.existsSync(workerBootstrap) && require(workerBootstrap);
+    let workerBootstrap = APP_PATH + "/bootstrap/worker";
+    moduleExists(workerBootstrap) && tryImport(workerBootstrap);
 
     // If auto-start enabled, start the server immediately.
     if (config.server.autoStart) {

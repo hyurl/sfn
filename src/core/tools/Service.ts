@@ -1,16 +1,15 @@
 import * as util from "util";
+import * as path from "path";
 import { EventEmitter } from "events";
-import Cache  = require("sfn-cache");
+import { Storage, StoreOptions } from "cluster-storage";
 import * as Logger from "sfn-logger";
 import { DB } from "modelar";
 import { injectable, injected } from "injectable-ts";
 import HideProtectedProperties = require("hide-protected-properties");
 import { ROOT_PATH } from "../../init";
-import { config } from "../bootstrap/ConfigLoader";
+import { config } from "../bootstrap/load-config";
 import { LocaleMap } from "./LocaleMap";
 
-// make Cache and DB injectable
-injectable(Cache);
 injectable(DB);
 
 export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
@@ -19,6 +18,16 @@ export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
     fileSize: 1024 * 1024 * 2,
     trace: true
 });
+
+export interface CacheOptions extends StoreOptions {
+    name: string
+}
+
+export const CacheOptions: CacheOptions = {
+    name: "sfn",
+    path: ROOT_PATH + "/cache",
+    gcInterval: 120000
+};
 
 /**
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
@@ -32,8 +41,11 @@ export class Service extends EventEmitter {
     lang: string = config.lang;
     /** Configurations for the logger in this instance. */
     logOptions: Logger.Options = Object.assign({}, LogOptions);
+    /** Configurations for the logger in this instance. */
+    cacheOptions: CacheOptions = Object.assign({}, CacheOptions);
 
     static readonly Loggers: { [filename: string]: Logger } = {};
+    static readonly Caches: { [filename: string]: Storage } = {};
 
     /**
      * Gets a locale text according to i18n. 
@@ -64,16 +76,26 @@ export class Service extends EventEmitter {
     /** Gets a logger instance. */
     get logger(): Logger {
         let filename = this.logOptions.filename || LogOptions.filename;
+
         if (!Service.Loggers[filename]) {
             let options = Object.assign({}, LogOptions, this.logOptions);
             Service.Loggers[filename] = new Logger(options);
         }
+
         return Service.Loggers[filename];
     }
 
-    /** Gets/Sets a cache instance. */
-    @injected([config.redis])
-    cache: Cache;
+    /** Gets a cache instance. */
+    get cache(): Storage {
+        let { path: dirname, name } = this.cacheOptions;
+        let filename = path.resolve(dirname, name + ".db");
+
+        if (!Service.Caches[filename]) {
+            Service.Caches[filename] = new Storage(name, this.cacheOptions);
+        }
+
+        return Service.Caches[filename];
+    }
 
     /** Gets/Sets a DB instance. */
     @injected([config.database])

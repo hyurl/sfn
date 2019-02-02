@@ -1,6 +1,6 @@
 import { app } from "../bootstrap/index";
 import { Request, Response } from "../tools/interfaces";
-import { User } from "../bootstrap/UserLoader";
+import { User } from "../bootstrap/load-user";
 
 app.use(async (req: Request, res: Response, next) => {
     req.user = null;

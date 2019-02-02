@@ -1,6 +1,6 @@
-# Service Framework for Node.js
+# Service Framework for NodeJS
 
-**A Service Framework for Node.js.**
+**A Service Framework for NodeJS.**
 
 For documentation, please visit [sfnjs.com](https://sfnjs.com).
 
@@ -17,62 +17,20 @@ npm init
 to initiate your project, assume you have some knowledge of 
 [NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
-### Install TypeScript
+### Install TypeScript Compiler And Runtime
 
 **SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
-own code should be as well, but it's not necessary, we will talk about that 
-later.
+own code should be as well.
+
+*The runtime [ts-node](https://github.com/TypeStrong/ts-node) is optional, only*
+*needed if you want to run your program without compiling.*
 
 ```sh
 npm i -g typescript
+npm i -g ts-node
 ```
 
-If you're not familiar with TypeScript, you may need to learn it first, but 
-if you're not going to use it, this procedure is optional.
-
-### Turn On TypeScript Support
-
-To turn on TypeScript support of your project, just add a new file named 
-[tsconfig.json](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
-in your project directory, it's contents should be like these:
-
-```json
-{
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2017",
-        "preserveConstEnums": true,
-        "rootDir": "src/",
-        "outDir": "dist/",
-        "newLine": "LF",
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "sourceMap": true,
-        "importHelpers": true,
-        "pretty": true,
-        "removeComments": true
-    },
-    "files": [
-        "src/index.ts",
-        "src/config.ts"
-    ],
-    "include": [
-        "src/controllers/*.ts",
-        "src/controllers/*/*.ts",
-        "src/bootstrap/*.ts",
-        "src/locales/*.ts",
-        "src/models/*.ts"
-    ],
-    "exclude": [
-        "node_modules/*"
-    ]
-}
-```
-
-Just copy this example, and it will be fine for most cases. If `tsconfig.json`
-is missing, the framework will run in pure JavaScript mode.
-
-### Install PM2
+### Install PM2 (Optional)
 
 Since version 0.3.x, SFN uses [PM2](https://pm2.io) as its application manager 
 and load-balancer, so to better deploy your application, you'd also install PM2
@@ -105,15 +63,20 @@ sfn init
 ### Start Demo Server
 
 **SFN** provides a demo, so you can now start server and see what will happen.
-firstly, compile the source code with the command: `tsc` (only with 
-TypeScript), then type the command:
+
+If you have installed **ts-node**, use this command to start the project.
+
+```sh
+ts-node src
+```
+
+Otherwise, compile the source code with command: `tsc`, then run the command:
 
 ```sh
 node dist
 ```
 
-And the server should be started in few seconds (If you're not coding TypeScript,
-the command should be `node src`).
+And the server should be started in few seconds.
 
 If you have PM2 installed, you can use the following command to start the 
 application, and auto-scale according to the CPU numbers.
@@ -158,6 +121,10 @@ For such a goal, **SFN** provides many features, etc. **shared session**,
 don't need to worry how the framework does those jobs, just focus on your own 
 design.
 
+Additionally, SFN is written in TypeScript, the strong-typed language instead of 
+pure JavaScript, it's way more safer than just using JavaScript for a strong and
+featured web program.
+
 ## License
 
 **SFN** is licensed under [MIT](./LICENSE), you're free to use.
@@ -172,7 +139,7 @@ documentation website.
 ```sh
 git clone https://github.com/hyurl/sfn
 mkdir ./node_modules
-ln -s ./sfn ./node_modules/sfn # sfn is required to be in node_modules
+ln -s ./sfn ./node_modules/sfn # some modules require sfn in node_modules
 cd sfn
 npm i
 node dist

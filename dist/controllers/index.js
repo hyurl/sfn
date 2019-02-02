@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const sfn_1 = require("sfn");
+sfn_1.HttpController.viewExtname = ".ejs";
 class default_1 extends sfn_1.HttpController {
     constructor() {
         super(...arguments);
-        this.viewExtname = ".ejs";
         this.isZh = this.lang.includes("zh");
         this.indexVars = {
             title: "Service Framework for Node.js",
@@ -17,11 +17,9 @@ class default_1 extends sfn_1.HttpController {
             version: sfn_1.version
         };
     }
-    index() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            let data = yield this.view(this.isZh ? "index.zh" : "index", this.indexVars);
-            this.res.send(data);
-        });
+    async index() {
+        let ver = this.isZh ? "index.zh" : "index.en";
+        return !sfn_1.isDevMode && this.cache.get(ver) || this.cache.set(ver, await this.view(ver, this.indexVars));
     }
 }
 tslib_1.__decorate([
