@@ -78,7 +78,7 @@
         "express-session": "^1.15.6",
         "fron": "^0.1.2",
         "fs-extra": "^6.0.1",
-        "function-intercepter": "^0.2.2",
+        "function-intercepter": "^0.2.3",
         "hide-protected-properties": "^0.1.1",
         "highlightjs": "^9.12.0",
         "ideal-filename": "^0.1.2",
