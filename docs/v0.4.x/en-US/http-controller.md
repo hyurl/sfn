@@ -310,13 +310,13 @@ the error view handler by rewriting the static method
 
 ```typescript
 // src/bootstrap/http.ts
-import { HttpController, date } from "sfn";
+import { HttpController } from "sfn";
 
 HttpController.httpErrorView = function (err, instance) {
     let vars = {
         err,
         title: err.toString(),
-        copyRight: "&copy; " + date("Y") + " My Website.",
+        copyRight: "&copy; " + (new Date).getFullYear() + " My Website.",
         // ...
     };
     return instance.view(String(err.code), vars);
