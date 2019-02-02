@@ -1,20 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const cookieParser = require("cookie-parser");
 const load_config_1 = require("../bootstrap/load-config");
 const parser = cookieParser(load_config_1.config.session.secret);
-function default_1(socket, next) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        parser(socket.handshake, {}, next);
-    });
+async function default_1(socket, next) {
+    parser(socket.handshake, {}, next);
 }
 exports.default = default_1;
-function handler2(socket, next) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        socket.cookies = socket.handshake["cookies"];
-        yield next();
-    });
+async function handler2(socket, next) {
+    socket.cookies = socket.handshake["cookies"];
+    await next();
 }
 exports.handler2 = handler2;
 //# sourceMappingURL=websocket-cookie.js.map

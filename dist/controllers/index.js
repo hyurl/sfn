@@ -17,15 +17,16 @@ class default_1 extends sfn_1.HttpController {
             version: sfn_1.version
         };
     }
-    index() {
-        return this.view(this.isZh ? "index.zh" : "index", this.indexVars);
+    async index() {
+        let ver = this.isZh ? "index.zh" : "index.en";
+        return !sfn_1.isDevMode && this.cache.get(ver) || this.cache.set(ver, await this.view(ver, this.indexVars));
     }
 }
 tslib_1.__decorate([
     sfn_1.route.get("/"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", []),
-    tslib_1.__metadata("design:returntype", void 0)
+    tslib_1.__metadata("design:returntype", Promise)
 ], default_1.prototype, "index", null);
 exports.default = default_1;
 //# sourceMappingURL=index.js.map

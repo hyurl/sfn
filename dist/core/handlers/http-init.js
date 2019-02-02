@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const SSE = require("sfn-sse");
 const chalk_1 = require("chalk");
 const index_1 = require("../bootstrap/index");
@@ -8,7 +7,7 @@ const init_1 = require("../../init");
 const functions_inner_1 = require("../tools/functions-inner");
 const truncate = require("lodash/truncate");
 const reqLogged = Symbol("reqLogged");
-index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+index_1.app.use(async (req, res, next) => {
     req["originalUrl"] = req.url;
     req.shortUrl = truncate(req.url, { length: 32 });
     req.isEventSource = SSE.isEventSource(req);
@@ -17,8 +16,8 @@ index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, func
     res.gzip = false;
     let logger = getDevLogger(req, res);
     res.on("finish", logger).on("close", logger);
-    yield next();
-}));
+    await next();
+});
 function logRequest(reqTime, type, code, url) {
     if (init_1.isDevMode) {
         var cost = Date.now() - reqTime, codeStr = code.toString(), level = "log", color = functions_inner_1.grey;

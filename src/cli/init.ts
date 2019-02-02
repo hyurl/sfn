@@ -74,8 +74,6 @@ try {
     if (!fs.existsSync(indexFile))
         fs.copySync(`${tplDir}/index.ts`, indexFile);
 
-
-
     // expose vscode debug configurations
     let dir = `${ROOT_PATH}/.vscode/`,
         file = `${dir}/launch.json`;

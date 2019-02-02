@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const BodyParser = require("body-parser");
 const xml2js_1 = require("xml2js");
 const util_1 = require("util");
@@ -10,12 +9,12 @@ const xmlType = /(text|application)\/xml\b/;
 const parseStringAsync = util_1.promisify(xml2js_1.parseString);
 index_1.app.use(BodyParser.text({
     type: parsingType
-})).use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+})).use(async (req, res, next) => {
     res.xml = xml;
     let type = req.type;
     if (type == "application/xml" || type == "text/xml") {
         try {
-            req.body = yield parseStringAsync(req.body, {
+            req.body = await parseStringAsync(req.body, {
                 ignoreAttrs: true,
                 async: true,
                 explicitArray: false,
@@ -25,8 +24,8 @@ index_1.app.use(BodyParser.text({
             req.body = null;
         }
     }
-    yield next();
-}));
+    await next();
+});
 function parsingType(req) {
     let type = req.headers['content-type'];
     return plainType.test(type) || xmlType.test(type);

@@ -10,6 +10,7 @@ import { APP_PATH, isCli, isDevMode } from "../../init";
 import { config, baseUrl } from "./load-config";
 import { DevHotReloader } from "../tools/DevHotReloader";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
+import { Service } from '../tools/Service';
 
 /** (worker only) The App instance created by **webium** framework. */
 export var app: App = null;
@@ -65,6 +66,10 @@ export function startServer() {
             process.exit(1);
         }
     }).listen(httpPort, async () => {
+        try {
+            await (new Service).cache.sync();
+        } catch (e) { }
+
         // load controllers
         require("../bootstrap/load-controller");
 
@@ -91,7 +96,10 @@ if (!isCli) {
             http = createServer(httpServer.options, app.listener);
             break;
         case "http2":
-            http = require("http2").createSecureServer(httpServer.options, app.listener);
+            http = require("http2").createSecureServer(
+                httpServer.options,
+                app.listener
+            );
             break;
     }
 

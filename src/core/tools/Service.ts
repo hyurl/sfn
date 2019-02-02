@@ -25,7 +25,7 @@ export interface CacheOptions extends StoreOptions {
 
 export const CacheOptions: CacheOptions = {
     name: "sfn",
-    path: ROOT_PATH,
+    path: ROOT_PATH + "/cache",
     gcInterval: 120000
 };
 

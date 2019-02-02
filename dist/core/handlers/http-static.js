@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const serveStatic = require("serve-static");
 const load_config_1 = require("../bootstrap/load-config");
 const index_1 = require("../bootstrap/index");
@@ -15,7 +14,7 @@ if (Array.isArray(load_config_1.config.statics)) {
 else {
     for (let path in load_config_1.config.statics) {
         let options = load_config_1.config.statics[path], _path = path_1.resolve(init_1.SRC_PATH, path), handle = serveStatic(_path, options);
-        index_1.app.use((req, res, next) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        index_1.app.use(async (req, res, next) => {
             if (options.prefix) {
                 let prefix = typeof options.prefix == "string"
                     ? options.prefix
@@ -34,7 +33,7 @@ else {
             else {
                 handle(req, res, next);
             }
-        }));
+        });
     }
 }
 //# sourceMappingURL=http-static.js.map

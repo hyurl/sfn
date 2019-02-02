@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const fs = require("fs");
 const path = require("path");
 const http_1 = require("http");
@@ -12,6 +11,7 @@ const init_1 = require("../../init");
 const load_config_1 = require("./load-config");
 const DevHotReloader_1 = require("../tools/DevHotReloader");
 const functions_inner_1 = require("../tools/functions-inner");
+const Service_1 = require("../tools/Service");
 exports.app = null;
 exports.http = null;
 exports.ws = null;
@@ -43,7 +43,11 @@ function startServer() {
         if (err.message.includes("listen")) {
             process.exit(1);
         }
-    }).listen(httpPort, () => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    }).listen(httpPort, async () => {
+        try {
+            await (new Service_1.Service).cache.sync();
+        }
+        catch (e) { }
         require("../bootstrap/load-controller");
         if (typeof process.send == "function") {
             process.send("ready");
@@ -51,7 +55,7 @@ function startServer() {
         else {
             console.log(functions_inner_1.green `HTTP Server running at ${chalk_1.default.yellow(load_config_1.baseUrl)}.`);
         }
-    }));
+    });
 }
 exports.startServer = startServer;
 if (!init_1.isCli) {

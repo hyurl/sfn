@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const path_1 = require("path");
 const CallSiteRecord = require("callsite-record");
 const moment = require("moment");
@@ -34,34 +33,30 @@ function loadLanguagePack(filename) {
     return lang;
 }
 exports.loadLanguagePack = loadLanguagePack;
-function loadFile(filename, fromCache = false) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        if (fromCache && FileCache[filename] !== undefined) {
-            return FileCache[filename];
-        }
-        else {
-            let content = yield fs.readFile(filename, "utf8");
-            fromCache && (FileCache[filename] = content);
-            return content;
-        }
-    });
+async function loadFile(filename, fromCache = false) {
+    if (fromCache && FileCache[filename] !== undefined) {
+        return FileCache[filename];
+    }
+    else {
+        let content = await fs.readFile(filename, "utf8");
+        fromCache && (FileCache[filename] = content);
+        return content;
+    }
 }
 exports.loadFile = loadFile;
-function callsiteLog(err) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        var csr = CallSiteRecord({
-            forError: err,
-        });
-        if (csr) {
-            let str = yield csr.render({});
-            str = str.replace(/default_\d\./g, "default.");
-            console.log();
-            console.log(err.toString());
-            console.log();
-            console.log(str);
-            console.log();
-        }
+async function callsiteLog(err) {
+    var csr = CallSiteRecord({
+        forError: err,
     });
+    if (csr) {
+        let str = await csr.render({});
+        str = str.replace(/default_\d\./g, "default.");
+        console.log();
+        console.log(err.toString());
+        console.log();
+        console.log(str);
+        console.log();
+    }
 }
 exports.callsiteLog = callsiteLog;
 function createImport(require) {

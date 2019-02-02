@@ -1,4 +1,4 @@
-import { HttpController, route, version } from "sfn";
+import { HttpController, route, version, isDevMode } from "sfn";
 
 HttpController.viewExtname = ".ejs";
 
@@ -20,7 +20,12 @@ export default class extends HttpController {
     };
 
     @route.get("/")
-    index() {
-        return this.view(this.isZh ? "index.zh" : "index", this.indexVars);
+    async index() {
+        let ver = this.isZh ? "index.zh" : "index.en";
+
+        return !isDevMode && this.cache.get(ver) || this.cache.set(
+            ver,
+            await this.view(ver, this.indexVars)
+        );
     }
 }

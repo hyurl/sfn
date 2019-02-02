@@ -22,7 +22,7 @@ exports.LogOptions = Object.assign({}, Logger.Options, {
 });
 exports.CacheOptions = {
     name: "sfn",
-    path: init_1.ROOT_PATH,
+    path: init_1.ROOT_PATH + "/cache",
     gcInterval: 120000
 };
 let Service = Service_1 = class Service extends events_1.EventEmitter {

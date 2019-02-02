@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
 const zlib = require("zlib");
 const cors = require("sfn-cors");
 const modelar_1 = require("modelar");
@@ -35,7 +34,7 @@ index_1.app.onerror = function onerror(err, req, res) {
     handleError(err, ctrl, req.method + " " + req.url);
 };
 function getRouteHandler(route) {
-    return (req, res) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return async (req, res) => {
         let { Class, method } = RouteMap_1.RouteMap[route], ctrl = null;
         res.on("error", (err) => {
             handleLog(err, ctrl, method);
@@ -49,21 +48,21 @@ function getRouteHandler(route) {
                 res.end();
             }
             handleCsrfToken(ctrl);
-            if (res.sent || false === (yield ctrl.before()))
+            if (res.sent || false === (await ctrl.before()))
                 return;
             res.gzip = req.encoding == "gzip" && ctrl.gzip;
             if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
                 res.jsonp = req.query[ctrl.jsonp];
             }
-            let result = yield ctrl[method](...yield getArguments(ctrl, method));
-            yield handleResponse(ctrl, result);
-            yield ctrl.after();
+            let result = await ctrl[method](...await getArguments(ctrl, method));
+            await handleResponse(ctrl, result);
+            await ctrl.after();
         }
         catch (err) {
             ctrl = ctrl || new HttpController_1.HttpController(req, res);
             handleError(err, ctrl, method);
         }
-    });
+    };
 }
 exports.getRouteHandler = getRouteHandler;
 function handleLog(err, ctrl, method) {
@@ -92,127 +91,119 @@ function handleFinish(err, ctrl, method) {
     handleLog(err, ctrl, method);
     finish(ctrl);
 }
-function handleError(err, ctrl, method) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let { req, res } = ctrl;
-        if (res.sent)
-            return handleFinish(err, ctrl, method);
-        let _err;
-        if (err instanceof HttpError_1.HttpError) {
-            _err = err.code == 405 && req.isEventSource ? new HttpError_1.HttpError(204) : err;
+async function handleError(err, ctrl, method) {
+    let { req, res } = ctrl;
+    if (res.sent)
+        return handleFinish(err, ctrl, method);
+    let _err;
+    if (err instanceof HttpError_1.HttpError) {
+        _err = err.code == 405 && req.isEventSource ? new HttpError_1.HttpError(204) : err;
+    }
+    else if (err instanceof Error && init_1.isDevMode) {
+        _err = new HttpError_1.HttpError(500, err.message);
+    }
+    else {
+        _err = new HttpError_1.HttpError(500);
+    }
+    if (req.accept == "application/json" || res.jsonp) {
+        res.send(ctrl.error(_err.message, _err.code));
+    }
+    else {
+        res.status = _err.code;
+        try {
+            let content = await ctrl.Class.httpErrorView(_err, ctrl);
+            res.type = "text/html";
+            res.send(content);
         }
-        else if (err instanceof Error && init_1.isDevMode) {
-            _err = new HttpError_1.HttpError(500, err.message);
+        catch (err) {
+            res.type = "text/plain";
+            res.send(err.message);
         }
-        else {
-            _err = new HttpError_1.HttpError(500);
-        }
-        if (req.accept == "application/json" || res.jsonp) {
-            res.send(ctrl.error(_err.message, _err.code));
-        }
-        else {
-            res.status = _err.code;
-            try {
-                let content = yield ctrl.Class.httpErrorView(_err, ctrl);
-                res.type = "text/html";
-                res.send(content);
-            }
-            catch (err) {
-                res.type = "text/plain";
-                res.send(err.message);
-            }
-        }
-        handleFinish(err, ctrl, method);
-    });
+    }
+    handleFinish(err, ctrl, method);
 }
-function getArguments(ctrl, method) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let { req, res } = ctrl, data = values(req.params), args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), reqParams = ["request", "req"], resParams = ["response", "res"];
-        let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
-        for (let i = 0; i < meta.length; i++) {
-            if (meta[i] == Number) {
-                args[i] = parseInt(data.shift());
-            }
-            else if (meta[i] == Boolean) {
-                let val = data.shift();
-                args[i] = val == "false" || val == "0" ? false : true;
-            }
-            else if (meta[i] == Object) {
-                if (reqParams.includes(fnParams[i]))
-                    args[i] = req;
-                else if (resParams.includes(fnParams[i]))
-                    args[i] = res;
-                else
-                    args[i] = data.shift();
-            }
-            else if (meta[i].prototype instanceof modelar_1.Model) {
-                if (req.method == "POST" && req.params.id === undefined) {
-                    args[i] = (new meta[i]).use(req.db);
-                }
-                else {
-                    try {
-                        let id = parseInt(req.params.id);
-                        if (!id || isNaN(id))
-                            throw new HttpError_1.HttpError(400);
-                        args[i] = yield meta[i].use(req.db).get(id);
-                    }
-                    catch (e) {
-                        args[i] = null;
-                        throw e;
-                    }
-                }
+async function getArguments(ctrl, method) {
+    let { req, res } = ctrl, data = values(req.params), args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), reqParams = ["request", "req"], resParams = ["response", "res"];
+    let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
+    for (let i = 0; i < meta.length; i++) {
+        if (meta[i] == Number) {
+            args[i] = parseInt(data.shift());
+        }
+        else if (meta[i] == Boolean) {
+            let val = data.shift();
+            args[i] = val == "false" || val == "0" ? false : true;
+        }
+        else if (meta[i] == Object) {
+            if (reqParams.includes(fnParams[i]))
+                args[i] = req;
+            else if (resParams.includes(fnParams[i]))
+                args[i] = res;
+            else
+                args[i] = data.shift();
+        }
+        else if (meta[i].prototype instanceof modelar_1.Model) {
+            if (req.method == "POST" && req.params.id === undefined) {
+                args[i] = (new meta[i]).use(req.db);
             }
             else {
-                args[i] = data.shift();
-            }
-        }
-        return args;
-    });
-}
-function handleResponse(ctrl, data) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let { req, res } = ctrl;
-        if (!res.sent) {
-            if (req.isEventSource) {
-                if (data !== null && data !== undefined)
-                    ctrl.sse.send(data);
-            }
-            else if (req.method === "HEAD") {
-                res.end();
-            }
-            else if (data !== undefined) {
-                let xml = /(text|application)\/xml\b/;
-                let type = res.getHeader("Content-Type");
-                if (data === null) {
-                    res.end("");
+                try {
+                    let id = parseInt(req.params.id);
+                    if (!id || isNaN(id))
+                        throw new HttpError_1.HttpError(400);
+                    args[i] = await meta[i].use(req.db).get(id);
                 }
-                else if (typeof data === "object" && type && xml.test(type)) {
-                    res.xml(data);
-                }
-                else if (data instanceof Buffer) {
-                    res.send(data);
-                }
-                else if (typeof data === "string" && res.gzip) {
-                    yield handleGzip(ctrl, data);
-                }
-                else {
-                    res.send(data);
+                catch (e) {
+                    args[i] = null;
+                    throw e;
                 }
             }
         }
-        return finish(ctrl);
-    });
+        else {
+            args[i] = data.shift();
+        }
+    }
+    return args;
 }
-function handleGzip(ctrl, data) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let { res } = ctrl;
-        data = yield new Promise((resolve, reject) => {
-            zlib.gzip(data, (err, data) => err ? reject(err) : resolve(data));
-        });
-        res.headers["content-encoding"] = "gzip";
-        res.type = "text/html";
-        res.end(data);
+async function handleResponse(ctrl, data) {
+    let { req, res } = ctrl;
+    if (!res.sent) {
+        if (req.isEventSource) {
+            if (data !== null && data !== undefined)
+                ctrl.sse.send(data);
+        }
+        else if (req.method === "HEAD") {
+            res.end();
+        }
+        else if (data !== undefined) {
+            let xml = /(text|application)\/xml\b/;
+            let type = res.getHeader("Content-Type");
+            if (data === null) {
+                res.end("");
+            }
+            else if (typeof data === "object" && type && xml.test(type)) {
+                res.xml(data);
+            }
+            else if (data instanceof Buffer) {
+                res.send(data);
+            }
+            else if (typeof data === "string" && res.gzip) {
+                await handleGzip(ctrl, data);
+            }
+            else {
+                res.send(data);
+            }
+        }
+    }
+    return finish(ctrl);
+}
+async function handleGzip(ctrl, data) {
+    let { res } = ctrl;
+    data = await new Promise((resolve, reject) => {
+        zlib.gzip(data, (err, data) => err ? reject(err) : resolve(data));
     });
+    res.headers["content-encoding"] = "gzip";
+    res.type = "text/html";
+    res.end(data);
 }
 function finish(ctrl) {
     ctrl.emit("finish", ctrl.req, ctrl.res);

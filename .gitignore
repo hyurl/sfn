@@ -1,5 +1,6 @@
 .vscode/settings.json
 node_modules/
 logs/
+cache/
 sessions/
 *.db
