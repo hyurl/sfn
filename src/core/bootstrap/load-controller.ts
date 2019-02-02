@@ -7,7 +7,7 @@ import { WebSocketController } from "../controllers/WebSocketController";
 import { createImport } from '../tools/functions-inner';
 
 let WS = config.server.websocket;
-let ext = isTsNode ? ".ts" : ".js";
+let Ext = isTsNode ? ".ts" : ".js";
 const tryImport = createImport(require);
 
 function isController(m): boolean {
@@ -22,9 +22,9 @@ async function loadControllers(controllerPath: string) {
         let filename = controllerPath + "/" + file;
         let stat = await fs.stat(filename);
 
-        if (stat.isFile() && path.extname(file) == ext) {
+        if (stat.isFile() && path.extname(file) == Ext) {
             let _module = tryImport(filename),
-                basename: string = path.basename(filename, ext),
+                basename: string = path.basename(filename, Ext),
                 Class: typeof HttpController | typeof WebSocketController;
 
             if (isController(_module.default)) {

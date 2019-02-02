@@ -8,7 +8,7 @@ const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const functions_inner_1 = require("../tools/functions-inner");
 let WS = load_config_1.config.server.websocket;
-let ext = init_1.isTsNode ? ".ts" : ".js";
+let Ext = init_1.isTsNode ? ".ts" : ".js";
 const tryImport = functions_inner_1.createImport(require);
 function isController(m) {
     return m && (m.prototype instanceof HttpController_1.HttpController
@@ -19,8 +19,8 @@ async function loadControllers(controllerPath) {
     for (let file of files) {
         let filename = controllerPath + "/" + file;
         let stat = await fs.stat(filename);
-        if (stat.isFile() && path.extname(file) == ext) {
-            let _module = tryImport(filename), basename = path.basename(filename, ext), Class;
+        if (stat.isFile() && path.extname(file) == Ext) {
+            let _module = tryImport(filename), basename = path.basename(filename, Ext), Class;
             if (isController(_module.default)) {
                 Class = _module.default;
             }

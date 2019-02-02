@@ -9,6 +9,7 @@ const kebabCase = require("lodash/kebabCase");
 const init_1 = require("../init");
 const load_config_1 = require("../core/bootstrap/load-config");
 const functions_inner_1 = require("../core/tools/functions-inner");
+const tryImport = functions_inner_1.createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
 program.description("create new controllers, models. etc.")
@@ -25,8 +26,8 @@ program.description("create new controllers, models. etc.")
     console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
     console.log("");
 });
-let cliBootstrap = init_1.APP_PATH + "/bootstrap/cli.js";
-fs.existsSync(cliBootstrap) && require(cliBootstrap);
+let cliBootstrap = init_1.APP_PATH + "/bootstrap/cli";
+functions_inner_1.moduleExists(cliBootstrap) && tryImport(cliBootstrap);
 program.parse(process.argv);
 function outputFile(filename, data, type) {
     filename = path.normalize(filename);
@@ -70,18 +71,14 @@ try {
     else if (program.language) {
         let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
         let contents;
-        let file1 = `${init_1.APP_PATH}/locales/${load_config_1.config.lang}.js`;
-        let file2 = `${init_1.SRC_PATH}/locales/${load_config_1.config.lang}.json`;
-        let file3 = `${init_1.SRC_PATH}/locales/${load_config_1.config.lang}.js`;
+        let langJson = `${init_1.SRC_PATH}/locales/${load_config_1.config.lang}.json`;
+        let langMod = `${init_1.APP_PATH}/locales/${load_config_1.config.lang}`;
         let lang;
-        if (fs.existsSync(file1)) {
-            lang = functions_inner_1.loadLanguagePack(file1);
+        if (fs.existsSync(langJson)) {
+            lang = functions_inner_1.loadLanguagePack(langJson);
         }
-        else if (fs.existsSync(file2)) {
-            lang = functions_inner_1.loadLanguagePack(file2);
-        }
-        else if (file3 !== file1 && fs.existsSync(file3)) {
-            lang = functions_inner_1.loadLanguagePack(file3);
+        else if (functions_inner_1.moduleExists(langMod)) {
+            lang = functions_inner_1.loadLanguagePack(langMod);
         }
         else {
             lang = {};

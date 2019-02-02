@@ -4,10 +4,17 @@ import * as path from "path";
 import * as program from "commander";
 import pluralize = require("pluralize");
 import kebabCase = require("lodash/kebabCase");
-import { version, APP_PATH, SRC_PATH } from "../init";
+import { version, APP_PATH, SRC_PATH, isTsNode } from "../init";
 import { config } from "../core/bootstrap/load-config";
-import { loadLanguagePack, green, red } from "../core/tools/functions-inner";
+import {
+    loadLanguagePack,
+    green,
+    red,
+    moduleExists,
+    createImport
+} from "../core/tools/functions-inner";
 
+const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
 
@@ -27,8 +34,8 @@ program.description("create new controllers, models. etc.")
     });
 
 // Load user-defined bootstrap procedures.
-let cliBootstrap = APP_PATH + "/bootstrap/cli.js";
-fs.existsSync(cliBootstrap) && require(cliBootstrap);
+let cliBootstrap = APP_PATH + "/bootstrap/cli";
+moduleExists(cliBootstrap) && tryImport(cliBootstrap);
 
 program.parse(process.argv);
 
@@ -64,44 +71,41 @@ try {
         let type = program.type == "websocket" ? "WebSocket" : "Http",
             input = `${tplDir}/${type}Controller.ts`,
             output = `${SRC_PATH}/controllers/${filename}.ts`;
-    
+
         checkSource(input);
-    
+
         let route = kebabCase(program.controller);
         let contents = fs.readFileSync(input, "utf8").replace(/\{name\}/g, route);
-    
+
         outputFile(output, contents, "controller");
     } else if (program.model) { // create model.
         var input = `${tplDir}/Model.ts`,
             output = `${SRC_PATH}/models/${program.model}.ts`,
             ModelName = path.basename(program.model),
             table = pluralize(kebabCase(ModelName));
-    
+
         checkSource(input);
-    
+
         var contents = fs.readFileSync(input, "utf8")
             .replace(/__Model__/g, ModelName)
             .replace(/__table__/g, table);
-    
+
         outputFile(output, contents, "Model");
     } else if (program.language) { // create language pack.
         let output: string = `${SRC_PATH}/locales/${program.language}.json`;
         let contents: string;
-        let file1 = `${APP_PATH}/locales/${config.lang}.js`;
-        let file2 = `${SRC_PATH}/locales/${config.lang}.json`;
-        let file3 = `${SRC_PATH}/locales/${config.lang}.js`;
+        let langJson = `${SRC_PATH}/locales/${config.lang}.json`;
+        let langMod = `${APP_PATH}/locales/${config.lang}`;
         let lang: any;
-    
-        if (fs.existsSync(file1)) {
-            lang = loadLanguagePack(file1);
-        } else if (fs.existsSync(file2)) {
-            lang = loadLanguagePack(file2);
-        } else if (file3 !== file1 && fs.existsSync(file3)) {
-            lang = loadLanguagePack(file3);
+
+        if (fs.existsSync(langJson)) {
+            lang = loadLanguagePack(langJson);
+        } else if (moduleExists(langMod)) {
+            lang = loadLanguagePack(langMod);
         } else {
             lang = {};
         }
-    
+
         contents = JSON.stringify(lang, null, "  ");
         outputFile(output, contents, "Language pack");
     } else if (process.argv.length <= 2) {

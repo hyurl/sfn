@@ -22,8 +22,8 @@ try {
         modelDir = `${SRC_PATH}/models`,
         scheduleDir = `${SRC_PATH}/schedules`,
         serviceDir = `${SRC_PATH}/services`,
-        configFile = `${SRC_PATH}/config.js`,
-        indexFile = `${SRC_PATH}/index.js`,
+        configFile = `${SRC_PATH}/config.ts`,
+        indexFile = `${SRC_PATH}/index.ts`,
         envFile = `${ROOT_PATH}/.env`,
         tsconfig = `${SRC_PATH}/tsconfig.json`;
 

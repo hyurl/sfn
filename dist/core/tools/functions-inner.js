@@ -13,11 +13,8 @@ function moduleExists(name) {
 }
 exports.moduleExists = moduleExists;
 function loadLanguagePack(filename) {
-    let ext = path_1.extname(filename), name = path_1.basename(filename, ext).replace(/\-/g, ""), _module = require(filename), lang;
-    if (typeof _module[name] === "object") {
-        lang = _module[name];
-    }
-    else if (typeof _module.default === "object") {
+    let ext = path_1.extname(filename), _module = require(filename), lang;
+    if (typeof _module.default === "object") {
         lang = _module.default;
     }
     else {

@@ -17,13 +17,10 @@ export function moduleExists(name: string): boolean {
 
 export function loadLanguagePack(filename: string): Locale {
     let ext = extname(filename),
-        name = basename(filename, ext).replace(/\-/g, ""),
         _module = require(filename),
         lang: Locale;
 
-    if (typeof _module[name] === "object") {
-        lang = _module[name];
-    } else if (typeof _module.default === "object") {
+    if (typeof _module.default === "object") {
         lang = _module.default;
     } else {
         lang = _module;
