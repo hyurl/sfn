@@ -45,13 +45,13 @@ export class MyService extends Service {
         let user: User = null;
 
         try {
-            let data = await this.getFromCache(id);
+            let data = this.cache.get(`user[${id}]`);
 
             if (data) {
                 user = (new User).assign(data);
             } else {
                 user = <User>await User.use(this.db).get(id);
-                await this.cache.set(`user:${id}`, user.data);
+                this.cache.set(`user.${id}`, user.data);
             }
 
             this.logger.log(`Getting user (id: ${id}, name: ${user.name}) succeed.`);
@@ -60,16 +60,6 @@ export class MyService extends Service {
         }
 
         return user;
-    }
-
-    async getFromCache(id: number): object {
-        let data: object = null;
-
-        try {
-            data = await this.cache.get(`user:${id}`);
-        } catch (err) { }
-
-        return data;
     }
 }
 

@@ -67,6 +67,7 @@ export function startServer() {
         }
     }).listen(httpPort, async () => {
         try {
+            // try to sync any cached data hosted by the default cache service.
             await (new Service).cache.sync();
         } catch (e) { }
 

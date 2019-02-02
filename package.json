@@ -30,7 +30,6 @@
         "socket.io",
         "webium",
         "logger",
-        "redis",
         "cache",
         "multi-processing",
         "dependency injection",

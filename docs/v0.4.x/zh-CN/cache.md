@@ -1,23 +1,24 @@
 <!-- title: 缓存; order: 12 -->
 # 基本概念
 
-[sfn-cache](https://github.com/hyurl/sfn-cache) 是一个非常简单的基于 Redis 的
-缓存工具。
+自 0.4 版本起，SFN 使用 [cluster-storage](https://github.com/hyurl/cluster-storage)
+来进行数据缓存，它是一个能够在 NodeJS 集群中共享和自动同步数据的存储工具，并且支持数据备份和 
+PM2 进程管理器，其数据存储于本地内存，无须等待异步操作。
 
 # 如何使用？
 
 ## 配置
 
-首先你需要连接到一个 Redis 服务器，修改 `config.ts` 中的配置，就像这样：
+默认地，你无须进行任何配置并可使用缓存，但如果确实需要配置，或者增加更多的缓存实例，则只需要在
+服务类中配置 `cacheOptions` 属性即可，下面的配置是默认的：
 
 ```typescript
-export const config: SFNConfig = {
-    // ...
-    redis: {
-        host: "localhost",
-        port: 6379
+class Service {
+    cacheOptions = {
+        name: "sfn",
+        path: ROOT_PATH + "/cache",
+        gcInterval: 120000
     }
-    // ...
 }
 ```
 
@@ -37,13 +38,13 @@ export class MyService extends Service {
         let user: User = null;
 
         try {
-            let data = await this.getFromCache(id);
+            let data = this.cache.get(`user[${id}]`);
 
             if (data) {
                 user = (new User).assign(data);
             } else {
                 user = <User>await User.use(this.db).get(id);
-                await this.cache.set(`user:${id}`, user.data);
+                this.cache.set(`user.${id}`, user.data);
             }
 
             this.logger.log(`Getting user (id: ${id}, name: ${user.name}) succeed.`);
@@ -52,16 +53,6 @@ export class MyService extends Service {
         }
 
         return user;
-    }
-
-    async getFromCache(id: number): object {
-        let data: object = null;
-
-        try {
-            data = await this.cache.get(`user:${id}`);
-        } catch (err) { }
-
-        return data;
     }
 }
 
@@ -73,5 +64,9 @@ let srv = new MyService;
 })();
 ```
 
-更多关于 **sfn-cache** 的细节，例如配置和 API，请
+更多关于 **cluster-storage** 的细节，例如配置和 API，可以
 [在 GitHub 上查阅它](https://github.com/hyurl/sfn-cache)。
+
+但如其文档所指出的，cluster-storage 仅适合缓存数据量不大的情况，对于缓存数据大的情景，最好
+还是搭配 Redis 比较合适，为此，SFN 也专门提供了一个简单的 Redis 缓存封装
+[sfn-cache](https://github.com/hyurl/sfn-cache)。

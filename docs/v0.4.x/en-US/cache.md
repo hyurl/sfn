@@ -1,31 +1,35 @@
 <!-- title: Cache; order: 12 -->
 # Concept
 
-[sfn-cache](https://github.com/hyurl/sfn-cache) is a very simple cache tool 
-based on Redis.
+Since version 0.4, SFN uses
+[cluster-storage](https://github.com/hyurl/cluster-storage) to store cache data,
+which is a tool that can share and auto-sync data in NodeJS cluster, and with 
+support of data backup and PM2 process management, it stores data in local 
+memory, and no need to wait async operations.
 
 # How To Use?
 
 ## Configuration
 
-First you need to connect to a Redis server, modify the configurations in the 
-`config.ts`, just like this:
+By default, you don't have to do any configuration before using the cache, but 
+if you need, or you want to create more cache instance, you just need to set the
+property `cacheOptions` in the service class. The following example shows the 
+default config.
 
 ```typescript
-export const conifg: SFNConfig = {
-    // ...
-    redis: {
-        host: "localhost",
-        port: 6379
+class Service {
+    cacheOptions = {
+        name: "sfn",
+        path: ROOT_PATH + "/cache",
+        gcInterval: 120000
     }
-    // ...
 }
 ```
 
 ## Example
 
-Then you can use the `cache` object in a service. You may have seen the 
-example in the [Service](./service) page, here I will show it again.
+You can, whenever you want, use the `cache` object in a service. You may have 
+seen the example in the [Service](./service) page, here I will show it again.
 
 ```typescript
 import { Service } from "sfn";
@@ -37,13 +41,13 @@ export class MyService extends Service {
         let user: User = null;
 
         try {
-            let data = await this.getFromCache(id);
+            let data = this.cache.get(`user[${id}]`);
 
             if (data) {
                 user = (new User).assign(data);
             } else {
                 user = <User>await User.use(this.db).get(id);
-                await this.cache.set(`user:${id}`, user.data);
+                this.cache.set(`user.${id}`, user.data);
             }
 
             this.logger.log(`Getting user (id: ${id}, name: ${user.name}) succeed.`);
@@ -52,16 +56,6 @@ export class MyService extends Service {
         }
 
         return user;
-    }
-
-    async getFromCache(id: number): object {
-        let data: object = null;
-
-        try {
-            data = await this.cache.get(`user:${id}`);
-        } catch (err) { }
-
-        return data;
     }
 }
 
@@ -73,5 +67,10 @@ let srv = new MyService;
 })();
 ```
 
-More details about the **sfn-cache**, e.g. configuration and API, please 
-[view it on GitHub](https://github.com/hyurl/sfn-cache).
+For more details about **cluster-storage**, like configurations and API, you can
+[view it on GitHub](https://github.com/hyurl/sfn-cache)。
+
+And as what it has suggested, cluster-storage is only for situations with small 
+amount of data, for large amount of data, it's better company with Redis, and 
+for that, SFN also provides a simple Redis cache wrapper, 
+[sfn-cache](https://github.com/hyurl/sfn-cache)。

@@ -5,11 +5,10 @@ import { Stats } from "fs";
 import serveStatic = require("serve-static");
 import * as Mail from "sfn-mail";
 import { DBConfig } from "modelar";
-import { ClientOpts } from "redis";
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { SRC_PATH, ROOT_PATH } from "./init";
+import { ROOT_PATH } from "./init";
 
 /**
  * @see https://www.npmjs.com/package/serve-static
@@ -120,7 +119,7 @@ export const config: SFNConfig = {
     lang: env.LANG || "en-US",
     statics: ["assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
-    hotReloading: false,
+    hotReloading: true,
     server: {
         hostname: "localhost",
         timeout: 120000, // 2 min.

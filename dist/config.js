@@ -10,7 +10,7 @@ exports.config = {
     lang: env.LANG || "en-US",
     statics: ["assets"],
     controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
-    hotReloading: false,
+    hotReloading: true,
     server: {
         hostname: "localhost",
         timeout: 120000,

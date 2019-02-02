@@ -32,36 +32,6 @@ export default class extends WebSocketController {
 一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被自动地以合适
 的形式返回给客户端。
 
-### 兼容 JavaScript
-
-如果你正在使用纯 JavaScript 来编程，它并不支持装饰器（尚未支持），但框架提供了一种
-兼容的方式能够让你使用相似的特性，通过使用 **jsdoc** 注释块配合 `@event` 标签。你
-必须先在 `config.js` 中打开 `enableDocRoute` 选项才能使用这个特性。下面这个示例和
-上面的效果是一样的。
-
-```javascript
-// config.js
-exports.default = {
-    // ...
-    enableDocRoute: true,
-    // ...
-};
-```
-
-```javascript
-// src/controllers/Demo.js
-const { WebSocketController } = require("sfn");
-
-exports.default = class extends WebSocketController {
-    /**
-     * @event /demo
-     */
-    index() {
-        return "Hello, World!";
-    }
-}
-```
-
 ### 设置命名空间
 
 默认地，WebSocket 事件被绑定到根命名空间 `/`，你可以设置静态属性 `nsp` 来修改为其他的
@@ -146,12 +116,6 @@ if (obj instanceof WebSocket) {
 }
 ```
 
-接口（和类型）在 JavaScript 中是不导出的，因此下面的代码是不正确的。
-
-```javascript
-const { WebSocket } = require("sfn"); // WebSocket would be undefined.
-```
-
 ### 在控制器中抛出 SocketError
 
 `SocketError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到
@@ -204,3 +168,9 @@ ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 
 一个控制器实际上就是一个服务，你可以在一个控制器中使用任何在 [Service](./service) 
 中有效的特性。
+
+
+## 热重载
+
+SFN 支持在控制器程序文件被改变时自动热重载，并且现在已经默认开启了。然而这依旧只是一个实验性的
+特性，并仅在开发模式中起作用。

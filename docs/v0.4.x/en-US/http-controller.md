@@ -45,37 +45,6 @@ for corresponding HTTP request method.
 - `route.post(path: string)`
 - `route.put(path: string)`
 
-### Compatible for JavaScript
-
-If you're programming in pure JavaScript, there is no decorators (not yet). 
-But the framework supports a compatible way of doing this, by using a **jsdoc**
-block with a `@route` tag. You must turn on `enableDocRoute` in `config.js` 
-first before using this feature. The following example works the same as the 
-above one.
-
-```javascript
-// config.js
-exports.default = {
-    // ...
-    enableDocRoute: true,
-    // ...
-};
-```
-
-```javascript
-// src/controllers/Demo.js
-const { HttpController } = require("sfn");
-
-exports.default = class extends HttpController {
-    /**
-     * @route GET /demo
-     */
-    index() {
-        return "Hello, World!";
-    }
-}
-```
-
 ### Route Formats
 
 The framework uses [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 
@@ -162,26 +131,6 @@ From the above example you see I passed a `req: Request` to the methods that
 bound to routes. Actually, you can do more, please have a look at
 [Dependency Injection](./di#Auto-Injection-in-Controllers).
 
-### In JavaScript
-
-Since JavaScript doesn't support type assignment, so you can't set arguments 
-upon the method (actually you can, but only works partially). so instead of 
-passing these parameters, you can get them from `this` in the method.
-
-```javascript
-const { HttpController } = require("sfn");
-
-exports.default = class extends HttpController {
-    /**
-     * @route GET /
-     */
-    index() {
-        let { req, res } = this;
-        // ...
-    }
-}
-```
-
 ## Handle Asynchronous Operations
 
 When dealing with asynchronous operations, you can define the method with 
@@ -194,39 +143,6 @@ export default class extends HttpController {
     @route.get("/")
     async index(req: Request, res: Response) {
         // you can use `await` here
-    }
-}
-```
-
-### In JavaScript
-
-Either you're coding in TypeScript or JavaScript, if only you NodeJS version 
-is higher than `7.6`, you can always use the `async/await` modifiers. But if 
-you're coding in JavaScript and NodeJS version is lower than `7.6`, you can 
-use another compatible approach to do so.
-
-Edit your `config.js` file, set `config.awaitGenerator` to `true`, and then 
-you can use the `GeneratorFunction` with `yield` to handle asynchronous 
-actions, just like this:
-
-```javascript
-// config.js
-exports.default = {
-    // ...
-    awaitGenerator: true,
-    // ...
-};
-```
-
-```javascript
-const { HttpController } = require("sfn");
-
-exports.default = class extends HttpController {
-    /**
-     * @route GET /
-     */
-    * index() {
-        // you can use `yield` here
     }
 }
 ```
@@ -325,7 +241,7 @@ import { HttpController, Request, Response } from "sfn";
 export default class extends HttpController {
     constructor(req: Request, res: Response) {
         super(req, res);
-        
+
         // your stuffs...
     }
 }
@@ -346,13 +262,6 @@ var obj = new Request;
 if (obj instanceof Request) {
     // ...
 }
-```
-
-Interfaces (and types) are not exported in JavaScript as well, so this code is
-also incorrect.
-
-```javascript
-const { Request } = require("sfn"); // Request would be undefined.
 ```
 
 ## Throw HttpError In the Controller
@@ -449,3 +358,9 @@ export default class extends HttpController {
 
 A controller is actually a service, you can use any features that works in 
 [Service](./service) in a controller.
+
+## Hot Reloading
+
+SFN supports hot-reloading when a controller file is modified, and it's now 
+turned on by default. However this feature is still experimental and will only
+work in dev mode.

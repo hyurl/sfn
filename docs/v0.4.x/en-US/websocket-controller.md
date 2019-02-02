@@ -37,37 +37,6 @@ socket.io event. When a client emits data to this event, the method will be
 automatically called, and the returning value will be sent back to the client 
 with proper forms.
 
-### Compatible In JavaScript
-
-If you're programming in pure JavaScript, there is no decorators (not yet). 
-But the framework support a compatible way of doing this, by using a **jsdoc**
-block with an `@event` tag. You must turn on `enableDocRoute` in `config.js` 
-first before using this feature. The following example works the same as the 
-above one.
-
-```javascript
-// config.js
-exports.default = {
-    // ...
-    enableDocRoute: true,
-    // ...
-};
-```
-
-```javascript
-// src/controllers/Demo.js
-const { WebSocketController } = require("sfn");
-
-exports.default = class extends WebSocketController {
-    /**
-     * @event /demo
-     */
-    index() {
-        return "Hello, World!";
-    }
-}
-```
-
 ### Set Up Namespace
 
 By default, WebSocket events are bound to root namespace `/`, you can set static
@@ -154,13 +123,6 @@ if (obj instanceof WebSocket) {
 }
 ```
 
-Interfaces (and types) are not exported in JavaScript as well, so this code is
-also incorrect.
-
-```javascript
-const { WebSocket } = require("sfn"); // WebSocket would be undefined.
-```
-
 ### Throw SocketError In the Controller
 
 `SocketError` is a customized error class that safe to use when you're going 
@@ -215,3 +177,9 @@ ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 
 A controller is actually a service, you can use any features that works in 
 [Service](./service) in a controller.
+
+## Hot Reloading
+
+SFN supports hot-reloading when a controller file is modified, and it's now 
+turned on by default. However this feature is still experimental and will only
+work in dev mode.
