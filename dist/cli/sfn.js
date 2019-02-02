@@ -26,6 +26,12 @@ program.description("create new controllers, models. etc.")
     console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
     console.log("");
 });
+program.command("init")
+    .description("initiate a new project")
+    .action(() => {
+    require("./init");
+    process.exit();
+});
 let cliBootstrap = init_1.APP_PATH + "/bootstrap/cli";
 functions_inner_1.moduleExists(cliBootstrap) && tryImport(cliBootstrap);
 program.parse(process.argv);

@@ -33,6 +33,14 @@ program.description("create new controllers, models. etc.")
         console.log("");
     });
 
+// Command `sfn init` is used to initiate the project.
+program.command("init")
+    .description("initiate a new project")
+    .action(() => {
+        require("./init");
+        process.exit();
+    });
+
 // Load user-defined bootstrap procedures.
 let cliBootstrap = APP_PATH + "/bootstrap/cli";
 moduleExists(cliBootstrap) && tryImport(cliBootstrap);
