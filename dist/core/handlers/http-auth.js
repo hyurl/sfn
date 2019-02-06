@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("../bootstrap/index");
 const load_user_1 = require("../bootstrap/load-user");
-index_1.app.use(async (req, res, next) => {
+index_1.router.use(async (req, res, next) => {
     req.user = null;
     if (req.session && req.session.uid) {
         try {

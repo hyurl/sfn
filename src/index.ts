@@ -33,3 +33,11 @@ export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
 export * from "./core/tools/functions";
 export * from "./core/tools/upload";
+
+// import { ModuleProxy } from "alar";
+
+// global["app"] = {
+//     controllers: new ModuleProxy("controllers", APP_PATH + "/controllers"),
+//     models: new ModuleProxy("models", APP_PATH + "/models"),
+//     services: new ModuleProxy("services", APP_PATH + "/services")
+// };

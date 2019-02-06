@@ -3,6 +3,7 @@ import { config as configEnv } from "dotenv";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as FRON from "fron";
+import { ModuleProxy, RpcOptions, RpcChannel, FSWatcher } from "alar";
 
 /** The version of framework. */
 export const version: string = require("../package.json").version;
@@ -60,3 +61,32 @@ if (isDevMode && !isDebugMode && !isCli) {
     console.log("For help, see "
         + chalk.yellow("https://sfnjs.com/docs/v0.3.x/debug"));
 }
+
+declare global {
+    namespace app {
+        namespace controllers {
+            function resolve(path: string): string;
+            function serve(config: string | RpcOptions): RpcChannel;
+            function connect(config: string | RpcOptions): RpcChannel;
+            function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
+        }
+        namespace models {
+            function resolve(path: string): string;
+            function serve(config: string | RpcOptions): RpcChannel;
+            function connect(config: string | RpcOptions): RpcChannel;
+            function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
+        }
+        namespace services {
+            function resolve(path: string): string;
+            function serve(config: string | RpcOptions): RpcChannel;
+            function connect(config: string | RpcOptions): RpcChannel;
+            function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
+        }
+    }
+}
+
+global["app"] = {
+    controllers: new ModuleProxy("controllers", APP_PATH + "/controllers"),
+    models: new ModuleProxy("models", APP_PATH + "/models"),
+    services: new ModuleProxy("services", APP_PATH + "/services")
+};

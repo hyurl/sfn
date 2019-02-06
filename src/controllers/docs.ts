@@ -6,6 +6,14 @@ import { Section, constructMarkdown, renderHtml } from "outlining";
 import trim = require("lodash/trim");
 import meta from "comment-meta";
 
+declare global {
+    namespace app {
+        namespace controllers {
+            const docs: ModuleProxy<DocController>;
+        }
+    }
+}
+
 export default class DocController extends HttpController {
     @route.get("/docs")
     @route.get("/docs/")

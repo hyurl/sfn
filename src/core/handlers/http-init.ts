@@ -1,6 +1,6 @@
 import SSE = require("sfn-sse");
 import chalk from "chalk";
-import { app } from "../bootstrap/index";
+import { router } from "../bootstrap/index";
 import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { grey, red } from "../tools/functions-inner";
@@ -8,7 +8,7 @@ import truncate = require("lodash/truncate");
 
 const reqLogged = Symbol("reqLogged");
 
-app.use(async (req: Request, res: Response, next) => {
+router.use(async (req: Request, res: Response, next) => {
     req["originalUrl"] = req.url; // compatible with Express framework.
     req.shortUrl = truncate(req.url, { length: 32 });
     req.isEventSource = SSE.isEventSource(req);

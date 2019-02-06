@@ -1,9 +1,9 @@
 import * as zlib from "zlib";
 import * as cors from "sfn-cors";
-import { Model } from 'modelar';
 import values = require("lodash/values");
+import { Model } from 'modelar';
 import { RouteHandler } from "webium";
-import { app } from "../bootstrap/index";
+import { router } from "../bootstrap/index";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
@@ -21,7 +21,7 @@ const EFFECT_METHODS: string[] = [
     "PUT"
 ];
 
-app.onerror = function onerror(err: any, req: Request, res: Response) {
+router.onerror = function onerror(err: any, req: Request, res: Response) {
     res.keepAlive = false;
     let ctrl = new HttpController(req, res)
 

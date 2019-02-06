@@ -1,8 +1,8 @@
-import { app } from "../bootstrap/index";
+import { router } from "../bootstrap/index";
 import { Request, Response } from "../tools/interfaces";
 import { User } from "../bootstrap/load-user";
 
-app.use(async (req: Request, res: Response, next) => {
+router.use(async (req: Request, res: Response, next) => {
     req.user = null;
     if (req.session && req.session.uid) {
         try {

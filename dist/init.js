@@ -5,6 +5,7 @@ const dotenv_1 = require("dotenv");
 const chalk_1 = require("chalk");
 const fs = require("fs");
 const FRON = require("fron");
+const alar_1 = require("alar");
 exports.version = require("../package.json").version;
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
@@ -36,4 +37,9 @@ if (exports.isDevMode && !exports.isDebugMode && !exports.isCli) {
     console.log("For help, see "
         + chalk_1.default.yellow("https://sfnjs.com/docs/v0.3.x/debug"));
 }
+global["app"] = {
+    controllers: new alar_1.ModuleProxy("controllers", exports.APP_PATH + "/controllers"),
+    models: new alar_1.ModuleProxy("models", exports.APP_PATH + "/models"),
+    services: new alar_1.ModuleProxy("services", exports.APP_PATH + "/services")
+};
 //# sourceMappingURL=init.js.map

@@ -36,6 +36,7 @@ export function tryImport(nsp: string) {
         .use(authHandler)
         .on("connection", (socket: WebSocket) => {
             for (let event in EventMap[nsp]) {
+                socket.removeAllListeners(event);
                 socket.on(event, (...data) => {
                     handleEvent(socket, nsp, event, data);
                 });

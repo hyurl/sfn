@@ -30,6 +30,7 @@ function tryImport(nsp) {
         .use(websocket_auth_1.default)
         .on("connection", (socket) => {
         for (let event in EventMap_1.EventMap[nsp]) {
+            socket.removeAllListeners(event);
             socket.on(event, (...data) => {
                 handleEvent(socket, nsp, event, data);
             });

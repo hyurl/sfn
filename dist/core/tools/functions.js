@@ -42,7 +42,7 @@ exports.requireAuth = function_intercepter_1.interceptAsync().before(function ()
         }
     }
 });
-let app, handle, tryImport;
+let router, handle, tryImport;
 function event(name, Class, method) {
     if (arguments.length === 1) {
         return (proto, prop) => {
@@ -72,11 +72,11 @@ function _route(...args) {
                 method: prop
             };
             let __route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : __route[0], path = (proto.Class.baseURI || "") + __route[1];
-            if (!app || !handle) {
-                app = require("../bootstrap/index").app;
+            if (!router || !handle) {
+                router = require("../bootstrap/index").router;
                 handle = require("../handlers/http-route").getRouteHandler;
             }
-            app.method(method, path, handle(route), true);
+            router.method(method, path, handle(route), true);
         };
     }
     else {

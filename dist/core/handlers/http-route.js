@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const zlib = require("zlib");
 const cors = require("sfn-cors");
-const modelar_1 = require("modelar");
 const values = require("lodash/values");
+const modelar_1 = require("modelar");
 const index_1 = require("../bootstrap/index");
 const HttpController_1 = require("../controllers/HttpController");
 const HttpError_1 = require("../tools/HttpError");
@@ -18,7 +18,7 @@ const EFFECT_METHODS = [
     "POST",
     "PUT"
 ];
-index_1.app.onerror = function onerror(err, req, res) {
+index_1.router.onerror = function onerror(err, req, res) {
     res.keepAlive = false;
     let ctrl = new HttpController_1.HttpController(req, res);
     if (res.statusCode === 404)

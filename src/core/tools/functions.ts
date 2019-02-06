@@ -62,7 +62,7 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(function
     }
 });
 
-let app: App,
+let router: App,
     handle: (route: string) => RouteHandler,
     tryImport: (nsp: string) => void;
 
@@ -103,12 +103,12 @@ function _route(...args) {
                 method = _route[0] === "SSE" ? "GET" : __route[0],
                 path = (proto.Class.baseURI || "") + __route[1];
 
-            if (!app || !handle) {
-                app = require("../bootstrap/index").app;
+            if (!router || !handle) {
+                router = require("../bootstrap/index").router;
                 handle = require("../handlers/http-route").getRouteHandler;
             }
 
-            app.method(method, path, handle(route), true);
+            router.method(method, path, handle(route), true);
         };
     } else {
         let proto = (args.length == 4 ? args[2] : args[1]).prototype,

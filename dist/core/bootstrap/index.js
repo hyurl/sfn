@@ -12,7 +12,7 @@ const load_config_1 = require("./load-config");
 const DevHotReloader_1 = require("../tools/DevHotReloader");
 const functions_inner_1 = require("../tools/functions-inner");
 const Service_1 = require("../tools/Service");
-exports.app = null;
+exports.router = null;
 exports.http = null;
 exports.ws = null;
 const tryImport = functions_inner_1.createImport(require);
@@ -59,19 +59,19 @@ function startServer() {
 }
 exports.startServer = startServer;
 if (!init_1.isCli) {
-    exports.app = new webium_1.App({
+    exports.router = new webium_1.App({
         cookieSecret: load_config_1.config.session.secret,
         domain: hostnames
     });
     switch (httpServer.type) {
         case "http":
-            exports.http = new http_1.Server(exports.app.listener);
+            exports.http = new http_1.Server(exports.router.listener);
             break;
         case "https":
-            exports.http = https_1.createServer(httpServer.options, exports.app.listener);
+            exports.http = https_1.createServer(httpServer.options, exports.router.listener);
             break;
         case "http2":
-            exports.http = require("http2").createSecureServer(httpServer.options, exports.app.listener);
+            exports.http = require("http2").createSecureServer(httpServer.options, exports.router.listener);
             break;
     }
     if (WS.enabled) {

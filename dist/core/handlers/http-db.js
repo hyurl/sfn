@@ -4,7 +4,7 @@ const modelar_1 = require("modelar");
 const index_1 = require("../bootstrap/index");
 const load_config_1 = require("../bootstrap/load-config");
 const symbols_1 = require("../tools/symbols");
-index_1.app.use(async (req, res, next) => {
+index_1.router.use(async (req, res, next) => {
     Object.defineProperty(req, "db", {
         get() {
             if (req[symbols_1.realDB] === undefined) {

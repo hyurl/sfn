@@ -11,12 +11,13 @@ import { config, baseUrl } from "./load-config";
 import { DevHotReloader } from "../tools/DevHotReloader";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
 import { Service } from '../tools/Service';
+import get = require("lodash/get");
 
-/** (worker only) The App instance created by **webium** framework. */
-export var app: App = null;
-/** (worker only) The HTTP server. */
+/** The basic HTTP router created by **webium** framework. */
+export var router: App = null;
+/** The HTTP server. */
 export var http: HttpServer | HttpsServer | Http2SecureServer = null;
-/** (worker only) The WebSocket server created by **SocketIO**. */
+/** The WebSocket server created by **SocketIO** framework. */
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
@@ -27,7 +28,7 @@ let hostnames = config.server.hostname,
     serverStarted = false;
 
 /**
- * (worker only) Starts HTTP server and socket server (if enabled).
+ * Starts HTTP server and socket server (if enabled).
  */
 export function startServer() {
     if (serverStarted) {
@@ -84,22 +85,22 @@ export function startServer() {
 }
 
 if (!isCli) {
-    app = new App({
+    router = new App({
         cookieSecret: <string>config.session.secret,
         domain: hostnames
     });
 
     switch (httpServer.type) {
         case "http":
-            http = new HttpServer(app.listener);
+            http = new HttpServer(router.listener);
             break;
         case "https":
-            http = createServer(httpServer.options, app.listener);
+            http = createServer(httpServer.options, router.listener);
             break;
         case "http2":
             http = require("http2").createSecureServer(
                 httpServer.options,
-                app.listener
+                router.listener
             );
             break;
     }
