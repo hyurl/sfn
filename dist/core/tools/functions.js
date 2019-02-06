@@ -2,11 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const random = require("lodash/random");
 const HttpController_1 = require("../controllers/HttpController");
-const RouteMap_1 = require("./RouteMap");
-const EventMap_1 = require("./EventMap");
 const function_intercepter_1 = require("function-intercepter");
 const HttpError_1 = require("./HttpError");
 const SocketError_1 = require("./SocketError");
+const RouteMap_1 = require("./RouteMap");
 function randStr(length = 5, chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") {
     var str = "", max = chars.length - 1;
     for (let i = 0; i < length; i++) {
@@ -47,15 +46,19 @@ function event(name, Class, method) {
     if (arguments.length === 1) {
         return (proto, prop) => {
             let nsp = proto.Class.nsp || "/";
-            if (!EventMap_1.EventMap[nsp])
-                EventMap_1.EventMap[nsp] = {};
+            let data = {
+                prefix: nsp,
+                route: name,
+                ctor: proto.Class
+            };
+            let key = RouteMap_1.eventMap.keyof(data);
+            RouteMap_1.eventMap.add(key, prop);
             if (!tryImport)
                 tryImport = require("../handlers/websocket-event").tryImport;
-            tryImport(nsp);
-            EventMap_1.EventMap[nsp][name] = {
-                Class: proto.Class,
-                method: prop
-            };
+            if (!RouteMap_1.eventMap.isLocked(key)) {
+                RouteMap_1.eventMap.lock(key);
+                tryImport(nsp);
+            }
         };
     }
     else {
@@ -67,16 +70,24 @@ function _route(...args) {
     let route = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
     if (args.length <= 2) {
         return (proto, prop) => {
-            RouteMap_1.RouteMap[route] = {
-                Class: proto.Class,
-                method: prop
+            let __route = route.split(/\s+/);
+            let method = _route[0] === "SSE" ? "GET" : __route[0];
+            let path = (proto.Class.baseURI || "") + __route[1];
+            let data = {
+                prefix: method,
+                route: path,
+                ctor: proto.Class
             };
-            let __route = route.split(/\s+/), method = _route[0] === "SSE" ? "GET" : __route[0], path = (proto.Class.baseURI || "") + __route[1];
+            let key = RouteMap_1.routeMap.keyof(data);
+            RouteMap_1.routeMap.add(key, prop);
             if (!router || !handle) {
                 router = require("../bootstrap/index").router;
                 handle = require("../handlers/http-route").getRouteHandler;
             }
-            router.method(method, path, handle(route), true);
+            if (!RouteMap_1.routeMap.isLocked(key)) {
+                RouteMap_1.routeMap.lock(key);
+                router.method(method, path, handle(key));
+            }
         };
     }
     else {

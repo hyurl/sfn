@@ -32,20 +32,20 @@ export interface SFNConfig {
      * @see https://www.npmjs.com/package/serve-static
      */
     statics?: string[] | { [path: string]: StaticOptions };
-    /** The directories that contain controllers. */
-    controllers?: string[];
     /**
-     * Hot-reloading is an experimental feature and only supports controllers, 
-     * it will watch file changes in the directories set in `controllers`.
+     * When any module file has been modified, rather than restart the whole 
+     * server, the program will try to refresh the memory cache instead.
+     * The hot-reloading feature if powered by **Alar** framework, and make sure
+     * you **DON'T** import the module statically in anywhere, otherwise it may 
+     * not be reload as expected.
      * 
-     * When any controller file has been modified, rather than reload the whole 
-     * server, the system will try to reload the route in memory instead. Make 
-     * sure in your own scripts, **DON'T**, in any where, import any controllers
-     * yourself, otherwise the hot-reloading may not work as expected.
+     * Currently, only `controllers`, `models` and `services` can be 
+     * hot-reloaded.
+     * @see https://github.com/hyurl/alar
      */
     hotReloading?: boolean;
     server: {
-        /** Host name(s), used for calculating the subdomain. */
+        /** Host name(s), used for calculating the sub-domain. */
         hostname?: string | string[];
         /** HTTP request timeout, default value is `120000`. */
         timeout?: number;
@@ -118,7 +118,6 @@ const env = process.env;
 export const config: SFNConfig = {
     lang: env.LANG || "en-US",
     statics: ["assets"],
-    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: true,
     server: {
         hostname: "localhost",

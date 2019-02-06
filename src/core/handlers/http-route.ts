@@ -8,11 +8,11 @@ import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
-import { getFuncParams, callsiteLog } from "../tools/functions-inner";
+import { getFuncParams, callsiteLog, isOwnMethod } from "../tools/functions-inner";
 import { Request, Response } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
-import { RouteMap } from "../tools/RouteMap";
 import { isDevMode } from '../../init';
+import { routeMap } from '../tools/RouteMap';
 
 const EFFECT_METHODS: string[] = [
     "DELETE",
@@ -39,50 +39,62 @@ router.onerror = function onerror(err: any, req: Request, res: Response) {
     handleError(err, ctrl, req.method + " " + req.url);
 }
 
-export function getRouteHandler(route: string): RouteHandler {
+export function getRouteHandler(key: string): RouteHandler {
     return async (req: Request, res: Response) => {
-        let { Class, method } = RouteMap[route],
-            ctrl: HttpController = null;
+        let module = routeMap.resolve(key),
+            methods = routeMap.methods(key),
+            ctrl: HttpController = null,
+            initiated = false;
 
         res.on("error", (err) => {
-            handleLog(err, ctrl, method);
+            handleLog(err, ctrl);
         });
 
         try {
-            ctrl = new Class(req, res);
+            ctrl = module.create(req, res);
 
-            // Handle CORS.
-            if (!cors(<any>ctrl.cors, req, res)) {
-                throw new HttpError(410);
-            } else if (req.method === "OPTIONS") {
-                // cors will set proper headers for OPTIONS
-                res.end();
+            for (let method of methods) {
+                if (!isOwnMethod(ctrl, method)) {
+                    routeMap.del(key, method);
+                    continue;
+                } else if (!initiated) {
+                    initiated = true;
+
+                    // Handle CORS.
+                    if (!cors(<any>ctrl.cors, req, res)) {
+                        throw new HttpError(410);
+                    } else if (req.method === "OPTIONS") {
+                        // cors will set proper headers for OPTIONS
+                        res.end();
+                    }
+
+                    // Handle CSRF token.
+                    handleCsrfToken(ctrl);
+
+                    if (false === (await ctrl.before())) return;
+
+                    // Handle GZip.
+                    res.gzip = req.encoding == "gzip" && ctrl.gzip;
+
+                    // Handle jsonp.
+                    if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
+                        res.jsonp = req.query[ctrl.jsonp];
+                    }
+                }
+
+                let result = await ctrl[method](...await getArguments(ctrl, method));
+
+                await handleResponse(ctrl, result);
             }
 
-            // Handle CSRF token.
-            handleCsrfToken(ctrl);
-
-            // if the response has been sent before calling the actual method, 
-            // return immediately without running any checking procedure, and 
-            // don't call the method.
-            if (res.sent || false === (await ctrl.before())) return;
-
-            // Handle GZip.
-            res.gzip = req.encoding == "gzip" && ctrl.gzip;
-
-            // Handle jsonp.
-            if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
-                res.jsonp = req.query[ctrl.jsonp];
+            if (initiated) {
+                await ctrl.after();
+                finish(ctrl);
             }
-
-            let result = await ctrl[method](...await getArguments(ctrl, method));
-
-            await handleResponse(ctrl, result);
-            await ctrl.after();
         } catch (err) {
             ctrl = ctrl || new HttpController(req, res);
 
-            handleError(err, ctrl, method);
+            handleError(err, ctrl);
         }
     }
 }
@@ -245,8 +257,6 @@ async function handleResponse(ctrl: HttpController, data: any) {
             }
         }
     }
-
-    return finish(ctrl);
 }
 
 async function handleGzip(ctrl: HttpController, data: any): Promise<any> {

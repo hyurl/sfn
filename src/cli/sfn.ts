@@ -4,7 +4,7 @@ import * as path from "path";
 import * as program from "commander";
 import pluralize = require("pluralize");
 import kebabCase = require("lodash/kebabCase");
-import { version, APP_PATH, SRC_PATH, isTsNode } from "../init";
+import { version, APP_PATH, SRC_PATH } from "../init";
 import { config } from "../core/bootstrap/load-config";
 import {
     loadLanguagePack,

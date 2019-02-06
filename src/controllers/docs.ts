@@ -15,6 +15,8 @@ declare global {
 }
 
 export default class DocController extends HttpController {
+    static filename = __filename;
+
     @route.get("/docs")
     @route.get("/docs/")
     async docs() {

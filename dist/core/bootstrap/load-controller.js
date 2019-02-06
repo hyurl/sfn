@@ -3,50 +3,42 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs-extra");
 const path = require("path");
 const init_1 = require("../../init");
-const load_config_1 = require("./load-config");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const functions_inner_1 = require("../tools/functions-inner");
-let WS = load_config_1.config.server.websocket;
-let Ext = init_1.isTsNode ? ".ts" : ".js";
+const Service_1 = require("../tools/Service");
 const tryImport = functions_inner_1.createImport(require);
-function isController(m) {
-    return m && (m.prototype instanceof HttpController_1.HttpController
-        || m.prototype instanceof WebSocketController_1.WebSocketController);
+const Ext = init_1.isTsNode ? ".ts" : ".js";
+function checkFilename(ctor, filename) {
+    filename = filename.slice(0, -3) + ".ts";
+    if (!ctor.filename) {
+        throw new TypeError(`The controller in ${filename} must define 'filename' explicitly.`);
+    }
 }
 async function loadControllers(controllerPath) {
     var files = await fs.readdir(controllerPath);
     for (let file of files) {
-        let filename = controllerPath + "/" + file;
+        let filename = path.resolve(controllerPath, file);
         let stat = await fs.stat(filename);
         if (stat.isFile() && path.extname(file) == Ext) {
-            let _module = tryImport(filename), basename = path.basename(filename, Ext), Class;
-            if (isController(_module.default)) {
-                Class = _module.default;
-            }
-            else if (isController(_module[basename])) {
-                Class = _module[basename];
-            }
-            else if (isController(_module)) {
-                Class = _module;
-            }
-            else {
-                continue;
-            }
-            if (init_1.SRC_PATH !== init_1.APP_PATH) {
-                let _filename = filename.substring(init_1.APP_PATH.length, filename.length - 3);
-                _filename = path.normalize(init_1.SRC_PATH + _filename + ".ts");
-                if (await fs.pathExists(_filename)) {
-                    filename = _filename;
+            let ctor = tryImport(filename).default;
+            if (ctor) {
+                try {
+                    if (ctor.prototype instanceof WebSocketController_1.WebSocketController) {
+                        checkFilename(ctor, filename);
+                    }
+                    else if (ctor.prototype instanceof HttpController_1.HttpController) {
+                        checkFilename(ctor, filename);
+                    }
                 }
-            }
-            if (Class.prototype instanceof HttpController_1.HttpController) {
-                let _class = Class;
-                _class.filename = filename;
-            }
-            else if (WS.enabled && Class.prototype instanceof WebSocketController_1.WebSocketController) {
-                let _class = Class;
-                _class.filename = filename;
+                catch (err) {
+                    if (init_1.isDevMode) {
+                        functions_inner_1.callsiteLog(err);
+                    }
+                    else {
+                        Service_1.default.logger.error(err.message);
+                    }
+                }
             }
         }
         else if (stat.isDirectory()) {
@@ -54,7 +46,5 @@ async function loadControllers(controllerPath) {
         }
     }
 }
-for (let dir of load_config_1.config.controllers) {
-    loadControllers(`${init_1.APP_PATH}/${dir}`);
-}
+loadControllers(app.controllers.path);
 //# sourceMappingURL=load-controller.js.map

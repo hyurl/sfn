@@ -4,7 +4,6 @@ const index_1 = require("../bootstrap/index");
 const SocketError_1 = require("../tools/SocketError");
 const symbols_1 = require("../tools/symbols");
 const WebSocketController_1 = require("../controllers/WebSocketController");
-const EventMap_1 = require("../tools/EventMap");
 const http_route_1 = require("./http-route");
 const http_init_1 = require("./http-init");
 const websocket_init_1 = require("./websocket-init");
@@ -15,6 +14,7 @@ const websocket_auth_1 = require("./websocket-auth");
 const functions_inner_1 = require("../tools/functions-inner");
 const last = require("lodash/last");
 const init_1 = require("../../init");
+const RouteMap_1 = require("../tools/RouteMap");
 let importedNamesapces = [];
 function tryImport(nsp) {
     if (!importedNamesapces.includes(nsp))
@@ -29,10 +29,9 @@ function tryImport(nsp) {
         .use(websocket_db_1.default)
         .use(websocket_auth_1.default)
         .on("connection", (socket) => {
-        for (let event in EventMap_1.EventMap[nsp]) {
-            socket.removeAllListeners(event);
-            socket.on(event, (...data) => {
-                handleEvent(socket, nsp, event, data);
+        for (let item of RouteMap_1.eventMap.values()) {
+            socket.on(item.route, (...data) => {
+                handleEvent(RouteMap_1.eventMap.keyof(item), socket, data);
             });
         }
         socket.on("error", (err) => {
@@ -46,26 +45,32 @@ function tryImport(nsp) {
     });
 }
 exports.tryImport = tryImport;
-async function handleEvent(socket, nsp, event, data) {
-    let { Class, method } = EventMap_1.EventMap[nsp][event], ctrl = null, info = {
-        time: Date.now(),
-        event,
-        code: 200
-    };
+async function handleEvent(key, socket, data) {
+    let module = RouteMap_1.eventMap.resolve(key), methods = RouteMap_1.eventMap.methods(key), { prefix: nsp, route: event } = RouteMap_1.eventMap.get(key), ctrl = null, initiated = false, info = { time: Date.now(), event, code: 200 };
     try {
         socket[symbols_1.activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
-        ctrl = new Class(socket);
-        ctrl.event;
-        if (socket.disconnected || false === (await ctrl.before()))
-            return;
-        let _data = await ctrl[method](...getArguments(ctrl, method, data));
-        _data === undefined || socket.emit(event, _data);
-        finish(ctrl, info);
-        await ctrl.after();
+        ctrl = module.create(socket);
+        for (let method of methods) {
+            if (!functions_inner_1.isOwnMethod(ctrl, method)) {
+                RouteMap_1.eventMap.del(key, method);
+                continue;
+            }
+            else if (!initiated) {
+                ctrl.event;
+                if (socket.disconnected || false === (await ctrl.before()))
+                    return;
+            }
+            let _data = await ctrl[method](...getArguments(ctrl, method, data));
+            _data === undefined || socket.emit(event, _data);
+        }
+        if (initiated) {
+            await ctrl.after();
+            finish(ctrl, info);
+        }
     }
     catch (err) {
         ctrl = ctrl || new WebSocketController_1.WebSocketController(socket);
-        await handleError(err, info, ctrl, method);
+        await handleError(err, info, ctrl);
     }
 }
 function getArguments(ctrl, method, data) {

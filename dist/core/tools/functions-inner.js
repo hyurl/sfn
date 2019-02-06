@@ -1,19 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
 const CallSiteRecord = require("callsite-record");
 const moment = require("moment");
 const fs = require("fs-extra");
 const chalk_1 = require("chalk");
 const init_1 = require("../../init");
-let logService;
+const Service_1 = require("./Service");
 const FileCache = {};
+function isOwnMethod(obj, method) {
+    return typeof obj[method] === "function" &&
+        obj.constructor.prototype.hasOwnProperty(method);
+}
+exports.isOwnMethod = isOwnMethod;
 function moduleExists(name) {
     return fs.existsSync(name + (init_1.isTsNode ? ".ts" : ".js"));
 }
 exports.moduleExists = moduleExists;
 function loadLanguagePack(filename) {
-    let ext = path_1.extname(filename), _module = require(filename), lang;
+    let _module = require(filename), lang;
     if (typeof _module.default === "object") {
         lang = _module.default;
     }
@@ -70,11 +74,8 @@ function createImport(require) {
                 stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
                 stack = stack.replace("_1", "").slice(3);
                 process.nextTick(() => {
-                    if (!logService) {
-                        logService = new (require("./Service").Service);
-                    }
-                    logService.logger.hackTrace(stack);
-                    logService.logger.error(msg);
+                    Service_1.default.logger.hackTrace(stack);
+                    Service_1.default.logger.error(msg);
                 });
             }
             return {};

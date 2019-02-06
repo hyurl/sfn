@@ -65,18 +65,24 @@ if (isDevMode && !isDebugMode && !isCli) {
 declare global {
     namespace app {
         namespace controllers {
+            const name: string;
+            const path: string;
             function resolve(path: string): string;
             function serve(config: string | RpcOptions): RpcChannel;
             function connect(config: string | RpcOptions): RpcChannel;
             function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
         }
         namespace models {
+            const name: string;
+            const path: string;
             function resolve(path: string): string;
             function serve(config: string | RpcOptions): RpcChannel;
             function connect(config: string | RpcOptions): RpcChannel;
             function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
         }
         namespace services {
+            const name: string;
+            const path: string;
             function resolve(path: string): string;
             function serve(config: string | RpcOptions): RpcChannel;
             function connect(config: string | RpcOptions): RpcChannel;

@@ -1,60 +1,48 @@
 import * as fs from "fs-extra";
 import * as path from "path";
-import { APP_PATH, SRC_PATH, isTsNode } from "../../init";
-import { config } from "./load-config";
+import { isTsNode, isDevMode } from "../../init";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { createImport } from '../tools/functions-inner';
+import { createImport, callsiteLog } from '../tools/functions-inner';
+import { ControllerContructor } from '../controllers/Controller';
+import service from '../tools/Service';
 
-let WS = config.server.websocket;
-let Ext = isTsNode ? ".ts" : ".js";
 const tryImport = createImport(require);
+const Ext = isTsNode ? ".ts" : ".js";
 
-function isController(m): boolean {
-    return m && (m.prototype instanceof HttpController
-        || m.prototype instanceof WebSocketController);
+function checkFilename(ctor: ControllerContructor, filename: string) {
+    filename = filename.slice(0, -3) + ".ts";
+    if (!ctor.filename) {
+        throw new TypeError(
+            `The controller in ${filename} must define 'filename' explicitly.`
+        );
+    }
 }
 
 async function loadControllers(controllerPath: string) {
     var files = await fs.readdir(controllerPath);
 
     for (let file of files) {
-        let filename = controllerPath + "/" + file;
+        let filename = path.resolve(controllerPath, file);
         let stat = await fs.stat(filename);
 
         if (stat.isFile() && path.extname(file) == Ext) {
-            let _module = tryImport(filename),
-                basename: string = path.basename(filename, Ext),
-                Class: typeof HttpController | typeof WebSocketController;
+            let ctor = tryImport(filename).default;
 
-            if (isController(_module.default)) {
-                // export default class Controller { }
-                Class = _module.default;
-            } else if (isController(_module[basename])) {
-                // export class Controller { }
-                Class = _module[basename];
-            } else if (isController(_module)) {
-                // export = Controller
-                Class = _module;
-            } else {
-                continue;
-            }
-
-            if (SRC_PATH !== APP_PATH) {
-                let _filename = filename.substring(APP_PATH.length, filename.length - 3);
-                _filename = path.normalize(SRC_PATH + _filename + ".ts");
-
-                if (await fs.pathExists(_filename)) {
-                    filename = _filename;
+            if (ctor) {
+                try {
+                    if (ctor.prototype instanceof WebSocketController) {
+                        checkFilename(ctor, filename);
+                    } else if (ctor.prototype instanceof HttpController) {
+                        checkFilename(ctor, filename);
+                    }
+                } catch (err) {
+                    if (isDevMode) {
+                        callsiteLog(err);
+                    } else {
+                        service.logger.error(err.message);
+                    }
                 }
-            }
-
-            if (Class.prototype instanceof HttpController) {
-                let _class = <typeof HttpController>Class;
-                _class.filename = filename;
-            } else if (WS.enabled && Class.prototype instanceof WebSocketController) {
-                let _class = <typeof WebSocketController>Class;
-                _class.filename = filename;
             }
         } else if (stat.isDirectory()) {
             // load files recursively.
@@ -63,6 +51,4 @@ async function loadControllers(controllerPath: string) {
     }
 }
 
-for (let dir of config.controllers) {
-    loadControllers(`${APP_PATH}/${dir}`);
-}
+loadControllers(app.controllers.path);

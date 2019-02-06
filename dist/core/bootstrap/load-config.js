@@ -17,9 +17,6 @@ if (!startsWith(__filename, init_1.APP_PATH) && functions_inner_1.moduleExists(m
     else if (typeof m.default == "object") {
         merge(config_1.config, m.default);
     }
-    else if (typeof m.server == "object") {
-        merge(config_1.config, m);
-    }
 }
 let { server: { hostname, http: { port, type } } } = config_1.config, host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
 exports.baseUrl = (type == "http2" ? "https" : type) + "://" + host;

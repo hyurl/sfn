@@ -1,7 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = require("fs");
-const path = require("path");
 const http_1 = require("http");
 const https_1 = require("https");
 const webium_1 = require("webium");
@@ -9,7 +7,6 @@ const SocketIO = require("socket.io");
 const chalk_1 = require("chalk");
 const init_1 = require("../../init");
 const load_config_1 = require("./load-config");
-const DevHotReloader_1 = require("../tools/DevHotReloader");
 const functions_inner_1 = require("../tools/functions-inner");
 const Service_1 = require("../tools/Service");
 exports.router = null;
@@ -45,7 +42,7 @@ function startServer() {
         }
     }).listen(httpPort, async () => {
         try {
-            await (new Service_1.Service).cache.sync();
+            await Service_1.default.cache.sync();
         }
         catch (e) { }
         require("../bootstrap/load-controller");
@@ -86,14 +83,14 @@ if (!init_1.isCli) {
     if (load_config_1.config.server.autoStart) {
         startServer();
     }
-    if (init_1.isDevMode && load_config_1.config.hotReloading) {
-        for (let dirname of load_config_1.config.controllers) {
-            dirname = path.resolve(init_1.APP_PATH, dirname);
-            fs.exists(dirname, exists => {
-                if (exists)
-                    new DevHotReloader_1.DevHotReloader(dirname);
-            });
-        }
+    if (load_config_1.config.hotReloading) {
+        app.models.watch();
+        app.services.watch();
+        app.controllers.watch((event, filename) => {
+            if (event === "change") {
+                require(filename);
+            }
+        });
     }
 }
 //# sourceMappingURL=index.js.map

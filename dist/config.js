@@ -9,7 +9,6 @@ const env = process.env;
 exports.config = {
     lang: env.LANG || "en-US",
     statics: ["assets"],
-    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: true,
     server: {
         hostname: "localhost",

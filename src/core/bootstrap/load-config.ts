@@ -18,8 +18,6 @@ if (!startsWith(__filename, APP_PATH) && moduleExists(moduleName)) {
         merge(config, m.config);
     } else if (typeof m.default == "object") {
         merge(config, m.default);
-    } else if (typeof m.server == "object") {
-        merge(config, m);
     }
 }
 

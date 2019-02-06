@@ -20,8 +20,6 @@ export * from "./core/tools/interfaces";
 export * from "./core/tools/HttpError";
 export * from "./core/tools/SocketError";
 export * from "./core/tools/MarkdownParser";
-export * from "./core/tools/EventMap";
-export * from "./core/tools/RouteMap";
 
 // load user config before loading subsequent modules
 export * from "./core/bootstrap/load-config";
@@ -33,11 +31,3 @@ export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
 export * from "./core/tools/functions";
 export * from "./core/tools/upload";
-
-// import { ModuleProxy } from "alar";
-
-// global["app"] = {
-//     controllers: new ModuleProxy("controllers", APP_PATH + "/controllers"),
-//     models: new ModuleProxy("models", APP_PATH + "/models"),
-//     services: new ModuleProxy("services", APP_PATH + "/services")
-// };

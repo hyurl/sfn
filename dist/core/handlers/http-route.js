@@ -10,8 +10,8 @@ const HttpError_1 = require("../tools/HttpError");
 const functions_1 = require("../tools/functions");
 const functions_inner_1 = require("../tools/functions-inner");
 const symbols_1 = require("../tools/symbols");
-const RouteMap_1 = require("../tools/RouteMap");
 const init_1 = require("../../init");
+const RouteMap_1 = require("../tools/RouteMap");
 const EFFECT_METHODS = [
     "DELETE",
     "PATCH",
@@ -33,34 +33,46 @@ index_1.router.onerror = function onerror(err, req, res) {
         err = new HttpError_1.HttpError(500);
     handleError(err, ctrl, req.method + " " + req.url);
 };
-function getRouteHandler(route) {
+function getRouteHandler(key) {
     return async (req, res) => {
-        let { Class, method } = RouteMap_1.RouteMap[route], ctrl = null;
+        let module = RouteMap_1.routeMap.resolve(key), methods = RouteMap_1.routeMap.methods(key), ctrl = null, initiated = false;
         res.on("error", (err) => {
-            handleLog(err, ctrl, method);
+            handleLog(err, ctrl);
         });
         try {
-            ctrl = new Class(req, res);
-            if (!cors(ctrl.cors, req, res)) {
-                throw new HttpError_1.HttpError(410);
+            ctrl = module.create(req, res);
+            for (let method of methods) {
+                if (!functions_inner_1.isOwnMethod(ctrl, method)) {
+                    RouteMap_1.routeMap.del(key, method);
+                    continue;
+                }
+                else if (!initiated) {
+                    initiated = true;
+                    if (!cors(ctrl.cors, req, res)) {
+                        throw new HttpError_1.HttpError(410);
+                    }
+                    else if (req.method === "OPTIONS") {
+                        res.end();
+                    }
+                    handleCsrfToken(ctrl);
+                    if (false === (await ctrl.before()))
+                        return;
+                    res.gzip = req.encoding == "gzip" && ctrl.gzip;
+                    if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
+                        res.jsonp = req.query[ctrl.jsonp];
+                    }
+                }
+                let result = await ctrl[method](...await getArguments(ctrl, method));
+                await handleResponse(ctrl, result);
             }
-            else if (req.method === "OPTIONS") {
-                res.end();
+            if (initiated) {
+                await ctrl.after();
+                finish(ctrl);
             }
-            handleCsrfToken(ctrl);
-            if (res.sent || false === (await ctrl.before()))
-                return;
-            res.gzip = req.encoding == "gzip" && ctrl.gzip;
-            if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
-                res.jsonp = req.query[ctrl.jsonp];
-            }
-            let result = await ctrl[method](...await getArguments(ctrl, method));
-            await handleResponse(ctrl, result);
-            await ctrl.after();
         }
         catch (err) {
             ctrl = ctrl || new HttpController_1.HttpController(req, res);
-            handleError(err, ctrl, method);
+            handleError(err, ctrl);
         }
     };
 }
@@ -194,7 +206,6 @@ async function handleResponse(ctrl, data) {
             }
         }
     }
-    return finish(ctrl);
 }
 async function handleGzip(ctrl, data) {
     let { res } = ctrl;

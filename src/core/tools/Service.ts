@@ -101,3 +101,6 @@ export class Service extends EventEmitter {
     @injected([config.database])
     db: DB;
 }
+
+const service = new Service();
+export default service;

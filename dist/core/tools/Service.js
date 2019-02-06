@@ -70,4 +70,6 @@ Service = Service_1 = tslib_1.__decorate([
     HideProtectedProperties
 ], Service);
 exports.Service = Service;
+const service = new Service();
+exports.default = service;
 //# sourceMappingURL=Service.js.map

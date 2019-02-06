@@ -1,5 +1,4 @@
 import * as path from "path";
-import * as fs from "fs-extra";
 import { DB, User } from "modelar";
 import { EjsEngine } from "sfn-ejs-engine";
 import * as SSE from "sfn-sse";

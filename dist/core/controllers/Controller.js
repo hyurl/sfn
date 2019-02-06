@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Service_1 = require("../tools/Service");
+;
 class Controller extends Service_1.Service {
     constructor() {
         super(...arguments);

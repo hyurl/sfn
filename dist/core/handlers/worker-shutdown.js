@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dynamic_queue_1 = require("dynamic-queue");
 const index_1 = require("../bootstrap/index");
 const modelar_1 = require("modelar");
-const DevHotReloader_1 = require("../tools/DevHotReloader");
 const Service_1 = require("../tools/Service");
 process.on("SIGINT", shutdown);
 process.on("message", msg => {
@@ -35,12 +34,6 @@ function closeServersInQueue(queue, timeout) {
         setTimeout(() => {
             next();
         }, 200);
-    });
-    queue.push(next => {
-        for (let dirname in DevHotReloader_1.DevHotReloader.watchers) {
-            DevHotReloader_1.DevHotReloader.watchers[dirname].close();
-        }
-        next();
     });
     queue.push(async (next) => {
         for (let filename in Service_1.Service.Caches) {

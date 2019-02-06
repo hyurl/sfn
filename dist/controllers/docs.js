@@ -68,6 +68,7 @@ class DocController extends index_1.default {
         return categoryTree.sort((a, b) => a.order - b.order);
     }
 }
+DocController.filename = __filename;
 tslib_1.__decorate([
     sfn_1.route.get("/docs"),
     sfn_1.route.get("/docs/"),

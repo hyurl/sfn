@@ -1,5 +1,10 @@
 import { Service } from "../tools/Service";
 
+export interface ControllerContructor<T = any> {
+    new(...args: any[]): T;
+    filename: string
+};
+
 /**
  * The Controller give you a common API to return data to the underlying 
  * response context, all controllers will be automatically handled by the 

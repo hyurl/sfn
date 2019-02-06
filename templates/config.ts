@@ -8,7 +8,6 @@ const env = process.env;
 export const config: SFNConfig = {
     lang: env.LANG || "en-US",
     statics: ["assets"],
-    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: true,
     server: {
         hostname: "localhost",

@@ -1,17 +1,13 @@
-import * as fs from "fs";
-import * as path from "path";
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
-import { APP_PATH, isCli, isDevMode } from "../../init";
+import { APP_PATH, isCli } from "../../init";
 import { config, baseUrl } from "./load-config";
-import { DevHotReloader } from "../tools/DevHotReloader";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
-import { Service } from '../tools/Service';
-import get = require("lodash/get");
+import service from '../tools/Service';
 
 /** The basic HTTP router created by **webium** framework. */
 export var router: App = null;
@@ -69,7 +65,7 @@ export function startServer() {
     }).listen(httpPort, async () => {
         try {
             // try to sync any cached data hosted by the default cache service.
-            await (new Service).cache.sync();
+            await service.cache.sync();
         } catch (e) { }
 
         // load controllers
@@ -125,12 +121,13 @@ if (!isCli) {
         startServer();
     }
 
-    if (isDevMode && config.hotReloading) {
-        for (let dirname of config.controllers) {
-            dirname = path.resolve(APP_PATH, dirname);
-            fs.exists(dirname, exists => {
-                if (exists) new DevHotReloader(dirname);
-            });
-        }
+    if (config.hotReloading) {
+        app.models.watch();
+        app.services.watch();
+        app.controllers.watch((event, filename) => {
+            if (event === "change") {
+                require(filename); // reload the module immediately.
+            }
+        });
     }
 }

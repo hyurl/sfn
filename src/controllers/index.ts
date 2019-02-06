@@ -2,12 +2,21 @@ import { HttpController, route, version, isDevMode } from "sfn";
 
 HttpController.viewExtname = ".ejs";
 
+declare global {
+    namespace app {
+        namespace controllers {
+            const index: ModuleProxy<IndexController>;
+        }
+    }
+}
+
 /**
  * The Home controller is a special controller, it handles requests which 
  * visit the home page of the website through `GET /`.
  */
-export default class extends HttpController {
-    // viewExtname = ".ejs";
+export default class IndexController extends HttpController {
+    static filename = __filename;
+
     isZh = this.lang.includes("zh");
     indexVars = {
         title: "Service Framework for Node.js",

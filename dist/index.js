@@ -22,8 +22,6 @@ tslib_1.__exportStar(require("./config"), exports);
 tslib_1.__exportStar(require("./core/tools/HttpError"), exports);
 tslib_1.__exportStar(require("./core/tools/SocketError"), exports);
 tslib_1.__exportStar(require("./core/tools/MarkdownParser"), exports);
-tslib_1.__exportStar(require("./core/tools/EventMap"), exports);
-tslib_1.__exportStar(require("./core/tools/RouteMap"), exports);
 tslib_1.__exportStar(require("./core/bootstrap/load-config"), exports);
 tslib_1.__exportStar(require("./core/tools/Service"), exports);
 tslib_1.__exportStar(require("./core/tools/TemplateEngine"), exports);
