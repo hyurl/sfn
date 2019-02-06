@@ -12,11 +12,11 @@ import { DevHotReloader } from "../tools/DevHotReloader";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
 import { Service } from '../tools/Service';
 
-/** (worker only) The App instance created by **webium** framework. */
+/** The App instance created by **webium** framework. */
 export var app: App = null;
-/** (worker only) The HTTP server. */
+/** The HTTP server. */
 export var http: HttpServer | HttpsServer | Http2SecureServer = null;
-/** (worker only) The WebSocket server created by **SocketIO**. */
+/** The WebSocket server created by **SocketIO**. */
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
@@ -27,7 +27,7 @@ let hostnames = config.server.hostname,
     serverStarted = false;
 
 /**
- * (worker only) Starts HTTP server and socket server (if enabled).
+ * Starts HTTP server and socket server (if enabled).
  */
 export function startServer() {
     if (serverStarted) {
