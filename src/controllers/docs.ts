@@ -1,5 +1,5 @@
 import { route, HttpError, ROOT_PATH } from "sfn";
-import HttpController from "./index";
+import IndexController from "./index";
 import { readdir } from 'fs-extra';
 
 declare global {
@@ -10,7 +10,7 @@ declare global {
     }
 }
 
-export default class DocController extends HttpController {
+export default class DocController extends IndexController {
     static filename = __filename;
 
     @route.get("/docs")
