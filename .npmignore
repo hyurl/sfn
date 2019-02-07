@@ -7,5 +7,6 @@ docs/
 src/assets/
 src/controllers/
 src/locales/
+src/services/
 src/views/
 *.db

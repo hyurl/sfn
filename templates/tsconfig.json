@@ -17,14 +17,12 @@
     },
     "include": [
         "src/*.ts",
-        "src/bootstrap/*.ts",
         "src/controllers/*.ts",
-        "src/controllers/*/*.ts",
+        "src/bootstrap/*.ts",
+        "src/schedules/*.ts",
+        "src/services/*.ts",
         "src/locales/*.ts",
-        "src/core/*/*.ts",
-        "src/core/*/*/*.ts",
-        "src/cli/*.ts",
-        "src/cli/commands/*.ts"
+        "src/models/*.ts"
     ],
     "exclude": [
         "./node_modules/*"

@@ -1,7 +1,5 @@
 import { HttpController, route, version, isDevMode } from "sfn";
 
-HttpController.viewExtname = ".ejs";
-
 declare global {
     namespace app {
         namespace controllers {

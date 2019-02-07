@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const sfn_1 = require("sfn");
-sfn_1.HttpController.viewExtname = ".ejs";
 class IndexController extends sfn_1.HttpController {
     constructor() {
         super(...arguments);
