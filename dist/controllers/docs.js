@@ -27,7 +27,6 @@ class DocController extends index_1.default {
         }
     }
 }
-DocController.filename = __filename;
 tslib_1.__decorate([
     sfn_1.route.get("/docs"),
     sfn_1.route.get("/docs/"),

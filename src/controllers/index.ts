@@ -13,8 +13,6 @@ declare global {
  * visit the home page of the website through `GET /`.
  */
 export default class IndexController extends HttpController {
-    static filename = __filename;
-
     isZh = this.lang.includes("zh");
     indexVars = {
         title: "Service Framework for Node.js",

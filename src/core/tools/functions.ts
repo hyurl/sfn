@@ -11,6 +11,7 @@ import {
     WebSocketEventDecorator,
     HttpRoute
 } from './interfaces';
+import { ControllerContructor } from '../controllers/Controller';
 
 /** 
  * Generates a random string.
@@ -71,23 +72,27 @@ export function event(name: string, Class: typeof WebSocketController, method: s
 export function event(name: string, Class?: typeof WebSocketController, method?: string) {
     if (arguments.length === 1) {
         return (proto: WebSocketController, prop: string) => {
-            let nsp: string = proto.Class.nsp || "/";
-            let data = {
-                prefix: nsp,
-                route: name,
-                ctor: proto.Class
-            };
-            let key = eventMap.keyof(data);
+            (async () => {
+                await proto.Class.finishLoad();
 
-            eventMap.add(key, prop);
+                let nsp: string = proto.Class.nsp || "/";
+                let data = {
+                    prefix: nsp,
+                    route: name,
+                    ctor: proto.Class
+                };
+                let key = eventMap.keyof(data);
 
-            if (!tryImport)
-                tryImport = require("../handlers/websocket-event").tryImport;
+                eventMap.add(key, prop);
 
-            if (!eventMap.isLocked(key)) {
-                eventMap.lock(key);
-                tryImport(nsp);
-            }
+                if (!tryImport)
+                    tryImport = require("../handlers/websocket-event").tryImport;
+
+                if (!eventMap.isLocked(key)) {
+                    eventMap.lock(key);
+                    tryImport(nsp);
+                }
+            })();
         };
     } else {
         return event(name)(Class.prototype, method);
@@ -99,27 +104,31 @@ function _route(...args) {
 
     if (args.length <= 2) {
         return (proto: HttpController, prop: string) => {
-            let __route = route.split(/\s+/);
-            let method = _route[0] === "SSE" ? "GET" : __route[0];
-            let path = (proto.Class.baseURI || "") + __route[1];
-            let data = {
-                prefix: method,
-                route: path,
-                ctor: proto.Class
-            };
-            let key = routeMap.keyof(data);
+            (async () => {
+                await proto.Class.finishLoad();
 
-            routeMap.add(key, prop);
+                let __route = route.split(/\s+/);
+                let method = _route[0] === "SSE" ? "GET" : __route[0];
+                let path = (proto.Class.baseURI || "") + __route[1];
+                let data = {
+                    prefix: method,
+                    route: path,
+                    ctor: proto.Class
+                };
+                let key = routeMap.keyof(data);
 
-            if (!router || !handle) {
-                router = require("../bootstrap/index").router;
-                handle = require("../handlers/http-route").getRouteHandler;
-            }
+                routeMap.add(key, prop);
 
-            if (!routeMap.isLocked(key)) {
-                routeMap.lock(key);
-                router.method(method, path, handle(key));
-            }
+                if (!router || !handle) {
+                    router = require("../bootstrap/index").router;
+                    handle = require("../handlers/http-route").getRouteHandler;
+                }
+
+                if (!routeMap.isLocked(key)) {
+                    routeMap.lock(key);
+                    router.method(method, path, handle(key));
+                }
+            })();
         };
     } else {
         let proto = (args.length == 4 ? args[2] : args[1]).prototype,

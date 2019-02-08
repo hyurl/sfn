@@ -21,7 +21,6 @@ class IndexController extends sfn_1.HttpController {
         return !sfn_1.isDevMode && this.cache.get(ver) || this.cache.set(ver, await this.view(ver, this.indexVars));
     }
 }
-IndexController.filename = __filename;
 tslib_1.__decorate([
     sfn_1.route.get("/"),
     tslib_1.__metadata("design:type", Function),

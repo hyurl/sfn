@@ -1,4 +1,5 @@
 import { Service } from "../tools/Service";
+import { EventEmitter } from 'events';
 
 export interface ControllerContructor<T = any> {
     new(...args: any[]): T;
@@ -16,6 +17,7 @@ export abstract class Controller extends Service {
      * automatically by the framework when the controller is imported.
      */
     static filename: string;
+    static events: EventEmitter;
 
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
@@ -47,4 +49,28 @@ export abstract class Controller extends Service {
 
     /** This method will be auto-called after calling the actual method. */
     after(): void | false | Promise<void | false> { }
+
+    /** @protected */
+    static assign(props: any) {
+        Object.assign(this, props);
+
+        if (this.hasOwnProperty("events")) {
+            this.events.emit("finishLoad");
+        }
+    }
+
+    /** @protected */
+    static finishLoad(): Promise<void> {
+        return new Promise((resolve) => {
+            if (this.filename) {
+                resolve();
+            } else {
+                if (!this.hasOwnProperty("events")) {
+                    this.events = new EventEmitter();
+                }
+
+                this.events.once("finishLoad", resolve);
+            }
+        });
+    }
 }

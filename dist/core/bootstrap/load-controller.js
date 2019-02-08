@@ -9,12 +9,6 @@ const functions_inner_1 = require("../tools/functions-inner");
 const Service_1 = require("../tools/Service");
 const tryImport = functions_inner_1.createImport(require);
 const Ext = init_1.isTsNode ? ".ts" : ".js";
-function checkFilename(ctor, filename) {
-    filename = filename.slice(0, -3) + ".ts";
-    if (!ctor.filename) {
-        throw new TypeError(`The controller in ${filename} must define 'filename' explicitly.`);
-    }
-}
 async function loadControllers(controllerPath) {
     var files = await fs.readdir(controllerPath);
     for (let file of files) {
@@ -25,10 +19,10 @@ async function loadControllers(controllerPath) {
             if (ctor) {
                 try {
                     if (ctor.prototype instanceof WebSocketController_1.WebSocketController) {
-                        checkFilename(ctor, filename);
+                        ctor.assign({ filename });
                     }
                     else if (ctor.prototype instanceof HttpController_1.HttpController) {
-                        checkFilename(ctor, filename);
+                        ctor.assign({ filename });
                     }
                 }
                 catch (err) {

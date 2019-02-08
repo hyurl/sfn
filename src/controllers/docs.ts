@@ -11,8 +11,6 @@ declare global {
 }
 
 export default class DocController extends IndexController {
-    static filename = __filename;
-
     @route.get("/docs")
     @route.get("/docs/")
     async docs() {
