@@ -1,12 +1,12 @@
 import get = require('lodash/get');
-import { ControllerContructor } from "../controllers/Controller";
+import { ControllerConstructor } from "../controllers/Controller";
 import { HttpController } from '../controllers/HttpController';
 import { WebSocketController } from '../controllers/WebSocketController';
 
 export type RouteMapData<T> = {
     prefix: string,
     route: string,
-    ctor: ControllerContructor<T>,
+    ctor: ControllerConstructor<T>,
 }
 
 export class RouteMap<T> {

@@ -1,7 +1,7 @@
 import { Service } from "../tools/Service";
 import { EventEmitter } from 'events';
 
-export interface ControllerContructor<T = any> {
+export interface ControllerConstructor<T = any> {
     new(...args: any[]): T;
     filename: string
 };

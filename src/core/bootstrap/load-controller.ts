@@ -4,7 +4,7 @@ import { isTsNode, isDevMode } from "../../init";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { createImport, callsiteLog } from '../tools/functions-inner';
-import { ControllerContructor, Controller } from '../controllers/Controller';
+import { Controller } from '../controllers/Controller';
 import service from '../tools/Service';
 
 const tryImport = createImport(require);

@@ -11,7 +11,6 @@ import {
     WebSocketEventDecorator,
     HttpRoute
 } from './interfaces';
-import { ControllerContructor } from '../controllers/Controller';
 
 /** 
  * Generates a random string.
