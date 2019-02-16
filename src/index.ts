@@ -31,3 +31,7 @@ export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
 export * from "./core/tools/functions";
 export * from "./core/tools/upload";
+
+if (process.mainModule.filename === __filename) {
+    app.serve();
+}

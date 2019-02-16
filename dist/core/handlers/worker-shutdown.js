@@ -7,12 +7,24 @@ const Service_1 = require("../tools/Service");
 process.on("SIGINT", shutdown);
 process.on("message", msg => {
     if (msg == "shutdown") {
-        shutdown();
+        process.emit("SIGINT", "SIGINT");
     }
 });
 function shutdown() {
     let queue = new dynamic_queue_1.Queue();
     closeServersInQueue(queue, 500);
+    queue.push(next => {
+        modelar_1.DB.close();
+        setTimeout(() => {
+            next();
+        }, 200);
+    });
+    queue.push(async (next) => {
+        for (let filename in Service_1.Service.Caches) {
+            await Service_1.Service.Caches[filename].close();
+        }
+        next();
+    });
     queue.push(() => {
         process.exit();
     });
@@ -29,18 +41,5 @@ function closeServersInQueue(queue, timeout) {
             });
         });
     }
-    queue.push(next => {
-        modelar_1.DB.close();
-        setTimeout(() => {
-            next();
-        }, 200);
-    });
-    queue.push(async (next) => {
-        for (let filename in Service_1.Service.Caches) {
-            await Service_1.Service.Caches[filename].close();
-        }
-        next();
-    });
 }
-exports.closeServersInQueue = closeServersInQueue;
 //# sourceMappingURL=worker-shutdown.js.map

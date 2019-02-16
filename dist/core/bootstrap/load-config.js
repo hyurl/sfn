@@ -10,15 +10,16 @@ const functions_inner_1 = require("../tools/functions-inner");
 let moduleName = init_1.APP_PATH + "/config";
 let tryImport = functions_inner_1.createImport(require);
 if (!startsWith(__filename, init_1.APP_PATH) && functions_inner_1.moduleExists(moduleName)) {
-    let m = tryImport(moduleName);
-    if (typeof m.config == "object") {
-        merge(config_1.config, m.config);
+    let mod = tryImport(moduleName);
+    if (typeof mod.config == "object") {
+        merge(config_1.config, mod.config);
     }
-    else if (typeof m.default == "object") {
-        merge(config_1.config, m.default);
+    else if (typeof mod.default == "object") {
+        merge(config_1.config, mod.default);
     }
 }
 let { server: { hostname, http: { port, type } } } = config_1.config, host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
 exports.baseUrl = (type == "http2" ? "https" : type) + "://" + host;
 Mail.init(config_1.config.mail);
+global["app"]["config"] = config_1.config;
 //# sourceMappingURL=load-config.js.map

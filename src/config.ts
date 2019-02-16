@@ -9,6 +9,7 @@ import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
 import { ROOT_PATH } from "./init";
+import { RpcOptions } from 'alar';
 
 /**
  * @see https://www.npmjs.com/package/serve-static
@@ -47,13 +48,6 @@ export interface SFNConfig {
     server: {
         /** Host name(s), used for calculating the sub-domain. */
         hostname?: string | string[];
-        /** HTTP request timeout, default value is `120000`. */
-        timeout?: number;
-        /**
-         * Auto-start server when worker is online, if `false`, you must call 
-         * `startServer()` manually.
-         */
-        autoStart?: boolean;
         /**
          * Since SFN 0.2.0, when HTTPS or HTTP2 is enabled, will always force 
          * HTTP request to redirect to the new protocol, and setting port for 
@@ -66,6 +60,8 @@ export interface SFNConfig {
             type?: "http" | "https" | "http2";
             /** Default value is `80`. */
             port?: number;
+            /** HTTP request timeout, default value is `120000`. */
+            timeout?: number;
             /**
              * These options are mainly for type `http` and type `http2`.
              * @see https://nodejs.org/dist/latest-v10.x/docs/api/https.html#https_https_createserver_options_requestlistener
@@ -89,6 +85,11 @@ export interface SFNConfig {
              */
             options?: ServerOptions;
         };
+        /**
+         * Configurations for RPC services.
+         * @see https://github.com/hyurl/alar
+         */
+        rpc?: { [name: string]: RpcOptions & { modules: ModuleProxy<any>[] } };
     };
     /**
      * Configurations for Modelar ORM.
@@ -121,11 +122,10 @@ export const config: SFNConfig = {
     hotReloading: true,
     server: {
         hostname: "localhost",
-        timeout: 120000, // 2 min.
-        autoStart: true,
         http: {
             type: <SFNConfig["server"]["http"]["type"]>env.HTTP_TYPE || "http",
             port: parseInt(env.HTTP_PORT) || 80,
+            timeout: 120000, // 2 min.
             options: null
         },
         websocket: {

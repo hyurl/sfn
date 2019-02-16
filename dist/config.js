@@ -12,11 +12,10 @@ exports.config = {
     hotReloading: true,
     server: {
         hostname: "localhost",
-        timeout: 120000,
-        autoStart: true,
         http: {
             type: env.HTTP_TYPE || "http",
             port: parseInt(env.HTTP_PORT) || 80,
+            timeout: 120000,
             options: null
         },
         websocket: {

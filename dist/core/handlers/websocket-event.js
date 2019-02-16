@@ -46,10 +46,10 @@ function tryImport(nsp) {
 }
 exports.tryImport = tryImport;
 async function handleEvent(key, socket, data) {
-    let module = RouteMap_1.eventMap.resolve(key), methods = RouteMap_1.eventMap.methods(key), { prefix: nsp, route: event } = RouteMap_1.eventMap.get(key), ctrl = null, initiated = false, info = { time: Date.now(), event, code: 200 };
+    let mod = RouteMap_1.eventMap.resolve(key), methods = RouteMap_1.eventMap.methods(key), { prefix: nsp, route: event } = RouteMap_1.eventMap.get(key), ctrl = null, initiated = false, info = { time: Date.now(), event, code: 200 };
     try {
         socket[symbols_1.activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
-        ctrl = module.create(socket);
+        ctrl = mod.create(socket);
         for (let method of methods) {
             if (!functions_inner_1.isOwnMethod(ctrl, method)) {
                 RouteMap_1.eventMap.del(key, method);

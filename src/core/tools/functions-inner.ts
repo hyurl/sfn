@@ -19,13 +19,13 @@ export function moduleExists(name: string): boolean {
 }
 
 export function loadLanguagePack(filename: string): Locale {
-    let _module = require(filename),
+    let mod = require(filename),
         lang: Locale;
 
-    if (typeof _module.default === "object") {
-        lang = _module.default;
+    if (typeof mod.default === "object") {
+        lang = mod.default;
     } else {
-        lang = _module;
+        lang = mod;
     }
 
     if (lang instanceof Array) {

@@ -35,12 +35,12 @@ index_1.router.onerror = function onerror(err, req, res) {
 };
 function getRouteHandler(key) {
     return async (req, res) => {
-        let module = RouteMap_1.routeMap.resolve(key), methods = RouteMap_1.routeMap.methods(key), ctrl = null, initiated = false;
+        let mod = RouteMap_1.routeMap.resolve(key), methods = RouteMap_1.routeMap.methods(key), ctrl = null, initiated = false;
         res.on("error", (err) => {
             handleLog(err, ctrl);
         });
         try {
-            ctrl = module.create(req, res);
+            ctrl = mod.create(req, res);
             for (let method of methods) {
                 if (!functions_inner_1.isOwnMethod(ctrl, method)) {
                     RouteMap_1.routeMap.del(key, method);

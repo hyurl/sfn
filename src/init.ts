@@ -68,25 +68,25 @@ declare global {
             const name: string;
             const path: string;
             function resolve(path: string): string;
-            function serve(config: string | RpcOptions): RpcChannel;
-            function connect(config: string | RpcOptions): RpcChannel;
-            function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
+            function serve(config: string | RpcOptions): Promise<RpcChannel>;
+            function connect(config: string | RpcOptions): Promise<RpcChannel>;
+            function watch(): FSWatcher;
         }
         namespace models {
             const name: string;
             const path: string;
             function resolve(path: string): string;
-            function serve(config: string | RpcOptions): RpcChannel;
-            function connect(config: string | RpcOptions): RpcChannel;
-            function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
+            function serve(config: string | RpcOptions): Promise<RpcChannel>;
+            function connect(config: string | RpcOptions): Promise<RpcChannel>;
+            function watch(): FSWatcher;
         }
         namespace services {
             const name: string;
             const path: string;
             function resolve(path: string): string;
-            function serve(config: string | RpcOptions): RpcChannel;
-            function connect(config: string | RpcOptions): RpcChannel;
-            function watch(listener?: (event: "change" | "unlink", filename: string) => void): FSWatcher;
+            function serve(config: string | RpcOptions): Promise<RpcChannel>;
+            function connect(config: string | RpcOptions): Promise<RpcChannel>;
+            function watch(): FSWatcher;
         }
     }
 }

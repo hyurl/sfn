@@ -17,12 +17,12 @@ function moduleExists(name) {
 }
 exports.moduleExists = moduleExists;
 function loadLanguagePack(filename) {
-    let _module = require(filename), lang;
-    if (typeof _module.default === "object") {
-        lang = _module.default;
+    let mod = require(filename), lang;
+    if (typeof mod.default === "object") {
+        lang = mod.default;
     }
     else {
-        lang = _module;
+        lang = mod;
     }
     if (lang instanceof Array) {
         let _lang = {};

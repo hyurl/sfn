@@ -11,11 +11,10 @@ export const config: SFNConfig = {
     hotReloading: true,
     server: {
         hostname: "localhost",
-        timeout: 120000, // 2 min.
-        autoStart: true,
         http: {
             type: <SFNConfig["server"]["http"]["type"]>env.HTTP_TYPE || "http",
             port: parseInt(env.HTTP_PORT) || 80,
+            timeout: 120000, // 2 min.
             options: null
         },
         websocket: {

@@ -9,7 +9,7 @@ process.on("SIGINT", shutdown);
 // compatible with Windows
 process.on("message", msg => {
     if (msg == "shutdown") {
-        shutdown();
+        process.emit("SIGINT", "SIGINT");
     }
 });
 
@@ -17,24 +17,6 @@ function shutdown() {
     let queue = new Queue();
 
     closeServersInQueue(queue, 500);
-
-    queue.push(() => {
-        process.exit();
-    });
-}
-
-export function closeServersInQueue(queue: Queue, timeout: number) {
-    if (http) {
-        queue.push(next => {
-            let timer = setTimeout(() => {
-                http.emit("close");
-            }, timeout);
-            http.close(() => {
-                clearTimeout(timer);
-                next();
-            });
-        });
-    }
 
     queue.push(next => {
         DB.close(); // try to close all database connections
@@ -49,4 +31,22 @@ export function closeServersInQueue(queue: Queue, timeout: number) {
         }
         next();
     });
+
+    queue.push(() => {
+        process.exit();
+    });
+}
+
+function closeServersInQueue(queue: Queue, timeout: number) {
+    if (http) {
+        queue.push(next => {
+            let timer = setTimeout(() => {
+                http.emit("close");
+            }, timeout);
+            http.close(() => {
+                clearTimeout(timer);
+                next();
+            });
+        });
+    }
 }

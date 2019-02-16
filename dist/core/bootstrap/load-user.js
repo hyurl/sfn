@@ -4,22 +4,22 @@ const modelar = require("modelar");
 const init_1 = require("../../init");
 const functions_inner_1 = require("../tools/functions-inner");
 const tryImport = functions_inner_1.createImport(require);
-var UserClass = null;
+var UserCtor = null;
 function isUser(m) {
     return m && m.prototype instanceof modelar.User;
 }
 let moduleName = init_1.APP_PATH + "/models/User";
 if (functions_inner_1.moduleExists(moduleName)) {
-    let module = tryImport(moduleName);
-    if (isUser(module.default)) {
-        UserClass = module.default;
+    let mod = tryImport(moduleName);
+    if (isUser(mod.default)) {
+        UserCtor = mod.default;
     }
-    else if (isUser(module.User)) {
-        UserClass = module.User;
+    else if (isUser(mod.User)) {
+        UserCtor = mod.User;
     }
 }
 else {
-    UserClass = modelar.User;
+    UserCtor = modelar.User;
 }
-exports.User = UserClass;
+exports.User = UserCtor;
 //# sourceMappingURL=load-user.js.map

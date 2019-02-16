@@ -3,7 +3,7 @@ import { APP_PATH } from '../../init';
 import { moduleExists, createImport } from '../tools/functions-inner';
 
 const tryImport = createImport(require);
-var UserClass: typeof modelar.User = null;
+var UserCtor: typeof modelar.User = null;
 
 function isUser(m): boolean {
     return m && m.prototype instanceof modelar.User;
@@ -11,15 +11,15 @@ function isUser(m): boolean {
 
 let moduleName = APP_PATH + "/models/User";
 if (moduleExists(moduleName)) {
-    let module = tryImport(moduleName);
+    let mod = tryImport(moduleName);
 
-    if (isUser(module.default)) {
-        UserClass = module.default;
-    } else if (isUser(module.User)) {
-        UserClass = module.User;
+    if (isUser(mod.default)) {
+        UserCtor = mod.default;
+    } else if (isUser(mod.User)) {
+        UserCtor = mod.User;
     }
 } else {
-    UserClass = modelar.User;
+    UserCtor = modelar.User;
 }
 
-export const User = UserClass;
+export const User = UserCtor;

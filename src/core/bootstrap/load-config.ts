@@ -1,7 +1,7 @@
 import merge = require("lodash/merge");
 import startsWith = require("lodash/startsWith");
 import { APP_PATH } from "../../init";
-import { config } from "../../config";
+import { config, SFNConfig } from "../../config";
 import * as Mail from "sfn-mail";
 import { moduleExists, createImport } from '../tools/functions-inner';
 
@@ -12,12 +12,12 @@ let tryImport = createImport(require);
 
 if (!startsWith(__filename, APP_PATH) && moduleExists(moduleName)) {
     // Load user-defined configurations.
-    let m = tryImport(moduleName);
+    let mod = tryImport(moduleName);
 
-    if (typeof m.config == "object") {
-        merge(config, m.config);
-    } else if (typeof m.default == "object") {
-        merge(config, m.default);
+    if (typeof mod.config == "object") {
+        merge(config, mod.config);
+    } else if (typeof mod.default == "object") {
+        merge(config, mod.default);
     }
 }
 
@@ -28,3 +28,11 @@ let { server: { hostname, http: { port, type } } } = config,
 export const baseUrl = (type == "http2" ? "https" : type) + "://" + host;
 
 Mail.init(config.mail); // initiate mail configurations
+
+declare global {
+    namespace app {
+        const config: SFNConfig;
+    }
+}
+
+global["app"]["config"] = config;
