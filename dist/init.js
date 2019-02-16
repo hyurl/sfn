@@ -6,14 +6,13 @@ const chalk_1 = require("chalk");
 const fs = require("fs");
 const FRON = require("fron");
 const alar_1 = require("alar");
-exports.version = require("../package.json").version;
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
+exports.version = require("../package.json").version;
 exports.isDebugMode = argv.includes("inspect") || argv.includes("debug");
 exports.isTsNode = argv.includes("ts-node");
-exports.isCli = appPath == __dirname + path.sep + "cli";
-if (exports.isCli)
-    appPath = process.cwd() + path.sep + "dist";
+exports.isCli = appPath == path.resolve(__dirname, "cli");
+exports.isCli && (appPath = path.resolve(process.cwd(), "dist"));
 exports.ROOT_PATH = path.normalize(appPath + "/..");
 var srcPath = appPath;
 try {
@@ -35,9 +34,16 @@ if (exports.isDevMode && !exports.isDebugMode && !exports.isCli) {
     console.log("You program is running in development mode without "
         + "'--inspect' flag, please consider changing to debug environment.");
     console.log("For help, see "
-        + chalk_1.default.yellow("https://sfnjs.com/docs/v0.3.x/debug"));
+        + chalk_1.default.yellow("https://sfnjs.com/docs/v0.5.x/debug"));
 }
 global["app"] = {
+    ROOT_PATH: exports.ROOT_PATH,
+    SRC_PATH: exports.SRC_PATH,
+    APP_PATH: exports.APP_PATH,
+    isDebugMode: exports.isDebugMode,
+    isDevMode: exports.isDevMode,
+    isTsNode: exports.isTsNode,
+    isCli: exports.isCli,
     controllers: new alar_1.ModuleProxy("controllers", exports.APP_PATH + "/controllers"),
     models: new alar_1.ModuleProxy("models", exports.APP_PATH + "/models"),
     services: new alar_1.ModuleProxy("services", exports.APP_PATH + "/services")

@@ -88,6 +88,15 @@ Be aware, the **User** class has special meaning in **SFN**, it is internally
 used by the auto-authorization system of the framework, which gives you the 
 ability to accept or reject requests from a client.
 
+### `sfn -s <name>`
+
+Creates a new service according to the specified name.
+```sh
+sfn -s Tool
+```
+
+This command should create a file named `Tool.ts` in `src/services/` directory.
+
 ### `sfn -l <name>`
 
 Creates a language pack according to the specified name. Language packs are 

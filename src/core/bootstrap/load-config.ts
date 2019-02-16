@@ -7,6 +7,14 @@ import { moduleExists, createImport } from '../tools/functions-inner';
 
 export { config };
 
+declare global {
+    namespace app {
+        var config: SFNConfig;
+    }
+}
+
+app.config = config;
+
 let moduleName = APP_PATH + "/config";
 let tryImport = createImport(require);
 
@@ -28,11 +36,3 @@ let { server: { hostname, http: { port, type } } } = config,
 export const baseUrl = (type == "http2" ? "https" : type) + "://" + host;
 
 Mail.init(config.mail); // initiate mail configurations
-
-declare global {
-    namespace app {
-        const config: SFNConfig;
-    }
-}
-
-global["app"]["config"] = config;

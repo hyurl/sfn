@@ -8,8 +8,15 @@
             "type": "node",
             "request": "launch",
             "protocol": "auto",
-            "name": "Start Server",
+            "name": "Start Web Server",
             "program": "${workspaceFolder}/dist/index"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "protocol": "auto",
+            "name": "Start Doc Server",
+            "program": "${workspaceFolder}/dist/doc-server"
         }
     ]
 }

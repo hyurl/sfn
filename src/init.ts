@@ -5,11 +5,48 @@ import * as fs from "fs";
 import * as FRON from "fron";
 import { ModuleProxy, RpcOptions, RpcChannel, FSWatcher } from "alar";
 
-/** The version of framework. */
-export const version: string = require("../package.json").version;
+declare global {
+    namespace app {
+        const ROOT_PATH: string;
+        const SRC_PATH: string;
+        const APP_PATH: string;
+        const isDebugMode: boolean;
+        const isDevMode: boolean;
+        const isTsNode: boolean;
+        const isCli: boolean;
+
+        namespace controllers {
+            const name: string;
+            const path: string;
+            function resolve(path: string): string;
+            function serve(config: string | RpcOptions): Promise<RpcChannel>;
+            function connect(config: string | RpcOptions): Promise<RpcChannel>;
+            function watch(): FSWatcher;
+        }
+        namespace models {
+            const name: string;
+            const path: string;
+            function resolve(path: string): string;
+            function serve(config: string | RpcOptions): Promise<RpcChannel>;
+            function connect(config: string | RpcOptions): Promise<RpcChannel>;
+            function watch(): FSWatcher;
+        }
+        namespace services {
+            const name: string;
+            const path: string;
+            function resolve(path: string): string;
+            function serve(config: string | RpcOptions): Promise<RpcChannel>;
+            function connect(config: string | RpcOptions): Promise<RpcChannel>;
+            function watch(): FSWatcher;
+        }
+    }
+}
 
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
+
+/** The version of framework. */
+export const version: string = require("../package.json").version;
 
 /** Whether the current process is running in debug/inspect mode. */
 export const isDebugMode = argv.includes("inspect") || argv.includes("debug");
@@ -18,10 +55,9 @@ export const isDebugMode = argv.includes("inspect") || argv.includes("debug");
 export const isTsNode = argv.includes("ts-node");
 
 /** Whether the current process is running in command line. */
-export const isCli = appPath == __dirname + path.sep + "cli";
+export const isCli = appPath == path.resolve(__dirname, "cli");
 
-if (isCli)
-    appPath = process.cwd() + path.sep + "dist";
+isCli && (appPath = path.resolve(process.cwd(), "dist"));
 
 /** The root path of the project. */
 export const ROOT_PATH = path.normalize(appPath + "/..");
@@ -59,39 +95,17 @@ if (isDevMode && !isDebugMode && !isCli) {
     console.log("You program is running in development mode without "
         + "'--inspect' flag, please consider changing to debug environment.");
     console.log("For help, see "
-        + chalk.yellow("https://sfnjs.com/docs/v0.3.x/debug"));
-}
-
-declare global {
-    namespace app {
-        namespace controllers {
-            const name: string;
-            const path: string;
-            function resolve(path: string): string;
-            function serve(config: string | RpcOptions): Promise<RpcChannel>;
-            function connect(config: string | RpcOptions): Promise<RpcChannel>;
-            function watch(): FSWatcher;
-        }
-        namespace models {
-            const name: string;
-            const path: string;
-            function resolve(path: string): string;
-            function serve(config: string | RpcOptions): Promise<RpcChannel>;
-            function connect(config: string | RpcOptions): Promise<RpcChannel>;
-            function watch(): FSWatcher;
-        }
-        namespace services {
-            const name: string;
-            const path: string;
-            function resolve(path: string): string;
-            function serve(config: string | RpcOptions): Promise<RpcChannel>;
-            function connect(config: string | RpcOptions): Promise<RpcChannel>;
-            function watch(): FSWatcher;
-        }
-    }
+        + chalk.yellow("https://sfnjs.com/docs/v0.5.x/debug"));
 }
 
 global["app"] = {
+    ROOT_PATH,
+    SRC_PATH,
+    APP_PATH,
+    isDebugMode,
+    isDevMode,
+    isTsNode,
+    isCli,
     controllers: new ModuleProxy("controllers", APP_PATH + "/controllers"),
     models: new ModuleProxy("models", APP_PATH + "/models"),
     services: new ModuleProxy("services", APP_PATH + "/services")

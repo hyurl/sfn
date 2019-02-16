@@ -2,6 +2,8 @@
 process.env.FORCE_COLOR = "10";
 
 let isTsNode = process.execArgv.join(" ").includes("ts-node");
+let isMain = process.mainModule.filename === __filename;
+
 !isTsNode && require("source-map-support/register");
 
 import "reflect-metadata";
@@ -22,7 +24,9 @@ export * from "./core/tools/SocketError";
 export * from "./core/tools/MarkdownParser";
 
 // load user config before loading subsequent modules
-export * from "./core/bootstrap/load-config";
+export { config } from "./core/bootstrap/load-config";
+
+isMain && require("./bootstrap/rpc-config");
 
 export * from "./core/tools/Service";
 export * from "./core/tools/TemplateEngine";
@@ -32,6 +36,4 @@ export * from "./core/bootstrap/index";
 export * from "./core/tools/functions";
 export * from "./core/tools/upload";
 
-if (process.mainModule.filename === __filename) {
-    app.serve();
-}
+isMain && app.serve();

@@ -7,7 +7,7 @@ body {
 
 pre,
 code {
-  font-family: monospace, consolas;
+  font-family: consolas;
   border-radius: 4px;
   overflow: auto;
 }

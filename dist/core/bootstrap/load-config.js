@@ -7,6 +7,7 @@ const config_1 = require("../../config");
 exports.config = config_1.config;
 const Mail = require("sfn-mail");
 const functions_inner_1 = require("../tools/functions-inner");
+app.config = config_1.config;
 let moduleName = init_1.APP_PATH + "/config";
 let tryImport = functions_inner_1.createImport(require);
 if (!startsWith(__filename, init_1.APP_PATH) && functions_inner_1.moduleExists(moduleName)) {
@@ -21,5 +22,4 @@ if (!startsWith(__filename, init_1.APP_PATH) && functions_inner_1.moduleExists(m
 let { server: { hostname, http: { port, type } } } = config_1.config, host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
 exports.baseUrl = (type == "http2" ? "https" : type) + "://" + host;
 Mail.init(config_1.config.mail);
-global["app"]["config"] = config_1.config;
 //# sourceMappingURL=load-config.js.map

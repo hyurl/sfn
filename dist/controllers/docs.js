@@ -16,8 +16,8 @@ class DocController extends index_1.default {
     }
     async showContents(version, name) {
         try {
-            let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
-            let content = await app.services.docs.instance().getContent(version, this.lang, name);
+            let sideMenu = await app.services.docs.remote().getSideMenu(version, this.lang);
+            let content = await app.services.docs.remote().getContent(version, this.lang, name);
             return this.req.xhr ? content : this.view("docs", Object.assign({}, this.indexVars, { sideMenu,
                 content }));
         }

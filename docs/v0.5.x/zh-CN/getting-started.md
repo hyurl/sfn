@@ -1,7 +1,7 @@
 <!-- title: 起步; order: 1 -->
 
->这份文档仅适合 SFN 0.4.x 版本，如果想要查阅旧版本 SFN 的文档，请
->[点击这里](/docs/v0.3.x/getting-started)。
+>这份文档仅适合 SFN 0.5.x 版本，如果想要查阅旧版本 SFN 的文档，请
+>[点击这里](/docs/v0.4.x/getting-started)。
 
 ### 初始化你的项目
 

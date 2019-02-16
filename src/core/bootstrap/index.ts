@@ -7,8 +7,18 @@ import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
 import { config, baseUrl } from "./load-config";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
-import service from '../tools/Service';
-import { userInfo } from 'os';
+import service, { Service } from '../tools/Service';
+import { connectRPC } from './rpc-support';
+
+declare global {
+    namespace app {
+        var router: App;
+        var http: HttpServer | HttpsServer | Http2SecureServer;
+        var ws: SocketIO.Server;
+        var service: Service;
+        function serve(port?: number): void;
+    }
+}
 
 /** The basic HTTP router created by **webium** framework. */
 export var router: App = null;
@@ -22,6 +32,52 @@ let hostnames = config.server.hostname,
     httpServer = config.server.http,
     httpPort = httpServer.port,
     WS = config.server.websocket;
+
+/**
+ * Starts HTTP server and socket server (if enabled).
+ */
+app.serve = function serve(port?: number) {
+    // load HTTP middleware
+    require("../handlers/https-redirector");
+    require("../handlers/http-init");
+    require("../handlers/http-static");
+    require("../handlers/http-xml");
+    require("../handlers/http-session");
+    require("../handlers/http-db");
+    require("../handlers/http-auth");
+
+    // Load user-defined bootstrap procedures.
+    let httpBootstrap = APP_PATH + "/bootstrap/http";
+    moduleExists(httpBootstrap) && tryImport(httpBootstrap);
+
+    if (WS.enabled) {
+        // Load user-defined bootstrap procedures.
+        let wsBootstrap = APP_PATH + "/bootstrap/websocket";
+        moduleExists(wsBootstrap) && tryImport(wsBootstrap);
+    }
+
+    // Start HTTP server.
+    if (typeof http["setTimeout"] == "function") {
+        http["setTimeout"](config.server.http.timeout);
+    }
+
+    http.on("error", (err: Error) => {
+        console.log(red`${err.toString()}`);
+        if (err.message.includes("listen")) {
+            process.exit(1);
+        }
+    }).listen(port || httpPort, () => {
+        // load controllers
+        require("../bootstrap/load-controller");
+
+        if (typeof process.send == "function") {
+            // notify PM2 that the service is available.
+            process.send("ready");
+        } else {
+            console.log(green`HTTP server running at ${chalk.yellow(baseUrl)}.`);
+        }
+    });
+}
 
 if (!isCli) {
     router = new App({
@@ -58,107 +114,29 @@ if (!isCli) {
     // load worker message handlers
     require("../handlers/worker-shutdown");
 
-    if (config.hotReloading) {
-        app.models.watch();
-        app.services.watch();
-        app.controllers.watch().on("add", tryImport).on("change", tryImport);
-    }
-}
-
-/**
- * Starts HTTP server and socket server (if enabled).
- */
-export function startServer(port?: number) {
-    // load HTTP middleware
-    require("../handlers/https-redirector");
-    require("../handlers/http-init");
-    require("../handlers/http-static");
-    require("../handlers/http-xml");
-    require("../handlers/http-session");
-    require("../handlers/http-db");
-    require("../handlers/http-auth");
-
-    // Load user-defined bootstrap procedures.
-    let httpBootstrap = APP_PATH + "/bootstrap/http";
-    moduleExists(httpBootstrap) && tryImport(httpBootstrap);
-
-    if (WS.enabled) {
-        // Load user-defined bootstrap procedures.
-        let wsBootstrap = APP_PATH + "/bootstrap/websocket";
-        moduleExists(wsBootstrap) && tryImport(wsBootstrap);
-    }
-
-    // Start HTTP server.
-    if (typeof http["setTimeout"] == "function") {
-        http["setTimeout"](config.server.http.timeout);
-    }
-
-    http.on("error", (err: Error) => {
-        console.log(red`${err.toString()}`);
-        if (err.message.includes("listen")) {
-            process.exit(1);
-        }
-    }).listen(port || httpPort, async () => {
+    (async () => {
         try {
             // try to sync any cached data hosted by the default cache service.
             await service.cache.sync();
-
-            if (config.server.rpc && Object.keys(config.server.rpc).length) {
-                for (let name in config.server.rpc) {
-                    await connectRPC(name);
-                }
-            }
         } catch (e) { }
 
-        // load controllers
-        require("../bootstrap/load-controller");
-
-        if (typeof process.send == "function") {
-            // notify PM2 that the service is available.
-            process.send("ready");
-        } else {
-            console.log(green`HTTP server running at ${chalk.yellow(baseUrl)}.`);
+        // hot-reloading
+        if (config.hotReloading) {
+            app.models.watch();
+            app.services.watch();
+            app.controllers.watch().on("add", tryImport).on("change", tryImport);
         }
-    });
+
+        // connect RPC services
+        if (config.server.rpc && Object.keys(config.server.rpc).length) {
+            for (let name in config.server.rpc) {
+                await connectRPC(name);
+            }
+        }
+    })();
 }
 
-export async function serveRPC(name: string) {
-    let { modules, ...options } = config.server.rpc[name];
-    let service = await app.services.serve(options);
-
-    for (let mod of modules) {
-        service.register(mod);
-    }
-
-    console.log(green`RPC server [${name}] started.`);
-}
-
-export async function connectRPC(name: string) {
-    let { modules, ...options } = config.server.rpc[name];
-    let service = await app.services.connect(options);
-
-    for (let mod of modules) {
-        service.register(mod);
-    }
-
-    console.log(green`RPC server [${name}] connected.`);
-}
-
-export async function useRPC(name: string) {
-    await serveRPC(name);
-    await connectRPC(name);
-}
-
-declare global {
-    namespace app {
-        function serve(port?: number): void;
-        function serveRPC(name: string): Promise<void>;
-        function connectRPC(name: string): Promise<void>;
-        function useRPC(name: string): Promise<void>;
-    }
-}
-
-app.serve = startServer;
-app.serveRPC = serveRPC;
-app.connectRPC = connectRPC;
-app.useRPC = useRPC;
+app.router = router;
+app.http = http;
+app.ws = ws;
+app.service = service;

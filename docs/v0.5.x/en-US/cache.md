@@ -36,7 +36,6 @@ import { Service } from "sfn";
 import { User } from "modelar";
 
 export class MyService extends Service {
-
     async getUser(id: number): User {
         let user: User = null;
 

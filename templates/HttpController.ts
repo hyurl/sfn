@@ -1,6 +1,14 @@
 import { HttpController, Request, Response, route } from "sfn";
 
-export default class extends HttpController {
+declare global {
+    namespace app {
+        namespace controllers {
+            const __mod__: ModuleProxy<__Controller__, Request, Response>;
+        }
+    }
+}
+
+export default class __Controller__ extends HttpController {
 
     @route.get("/{name}/")
     index(req: Request, res: Response) {

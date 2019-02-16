@@ -71,9 +71,15 @@ sfn -c ArticleSocket -t websocket
 sfn -m User
 ```
 
-这个命令将会创建一个名为 `User.ts` 的文件并存储在 `src/models/` 目录下。请注意，
-**User** 类在 **SFN** 框架中具有特殊意义，它被框架内部用于自动授权检查，从而能够使你
-接受或者拒绝来自客户端的请求。
+### `sfn -s <name>`
+
+根据给定的名称创建一个新的服务。
+
+```sh
+sfn -s Tool
+```
+
+这个命令将会创建一个名为 `Tool.ts` 的文件并存储在 `src/services/` 目录下。
 
 ### `sfn -l <name>`
 

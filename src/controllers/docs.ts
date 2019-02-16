@@ -28,8 +28,8 @@ export default class DocController extends IndexController {
     @route.get("/docs/:version/:name")
     async showContents(version: string, name: string) {
         try {
-            let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
-            let content = await app.services.docs.instance().getContent(version, this.lang, name);
+            let sideMenu = await app.services.docs.remote().getSideMenu(version, this.lang);
+            let content = await app.services.docs.remote().getContent(version, this.lang, name);
 
             return this.req.xhr ? content : this.view("docs", {
                 ...this.indexVars,

@@ -85,7 +85,7 @@ try {
                     type: "node",
                     request: "launch",
                     protocol: "auto",
-                    name: "Start Server",
+                    name: "Start Web Server",
                     program: "${workspaceFolder}/dist/index"
                 }
             ]
