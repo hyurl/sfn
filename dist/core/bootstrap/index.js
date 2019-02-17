@@ -69,8 +69,8 @@ if (!init_1.isCli) {
         else
             exports.ws = SocketIO(WS.port, WS.options);
     }
-    let workerBootstrap = init_1.APP_PATH + "/bootstrap/worker";
-    functions_inner_1.moduleExists(workerBootstrap) && tryImport(workerBootstrap);
+    let bootstrap = init_1.APP_PATH + "/bootstrap/index";
+    functions_inner_1.moduleExists(bootstrap) && tryImport(bootstrap);
     require("../handlers/worker-shutdown");
     (async () => {
         try {

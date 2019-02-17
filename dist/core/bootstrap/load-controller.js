@@ -6,7 +6,6 @@ const init_1 = require("../../init");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const functions_inner_1 = require("../tools/functions-inner");
-const Service_1 = require("../tools/Service");
 const tryImport = functions_inner_1.createImport(require);
 const Ext = init_1.isTsNode ? ".ts" : ".js";
 async function loadControllers(controllerPath) {
@@ -16,23 +15,9 @@ async function loadControllers(controllerPath) {
         let stat = await fs.stat(filename);
         if (stat.isFile() && path.extname(file) == Ext) {
             let ctor = tryImport(filename).default;
-            if (ctor) {
-                try {
-                    if (ctor.prototype instanceof WebSocketController_1.WebSocketController) {
-                        ctor.assign({ filename });
-                    }
-                    else if (ctor.prototype instanceof HttpController_1.HttpController) {
-                        ctor.assign({ filename });
-                    }
-                }
-                catch (err) {
-                    if (init_1.isDevMode) {
-                        functions_inner_1.callsiteLog(err);
-                    }
-                    else {
-                        Service_1.default.logger.error(err.message);
-                    }
-                }
+            if (ctor && ((ctor.prototype instanceof WebSocketController_1.WebSocketController) ||
+                (ctor.prototype instanceof HttpController_1.HttpController))) {
+                ctor.assign({ filename });
             }
         }
         else if (stat.isDirectory()) {

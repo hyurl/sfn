@@ -182,8 +182,8 @@ async function getArguments(ctrl: HttpController, method: string) {
         resParams = ["response", "res"];
 
     // Dependency Injection
-    // try to convert parameters to proper types according to 
-    // the definition of the method.
+    // try to convert parameters to proper types according to the definition of 
+    // the method.
     let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
     for (let i = 0; i < meta.length; i++) {

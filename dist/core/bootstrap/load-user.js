@@ -1,25 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const get = require("lodash/get");
 const modelar = require("modelar");
-const init_1 = require("../../init");
-const functions_inner_1 = require("../tools/functions-inner");
-const tryImport = functions_inner_1.createImport(require);
-var UserCtor = null;
-function isUser(m) {
-    return m && m.prototype instanceof modelar.User;
-}
-let moduleName = init_1.APP_PATH + "/models/User";
-if (functions_inner_1.moduleExists(moduleName)) {
-    let mod = tryImport(moduleName);
-    if (isUser(mod.default)) {
-        UserCtor = mod.default;
+function loadUser() {
+    let ctor;
+    try {
+        ctor = get(app, "models.user").ctor;
+        if (!(ctor.prototype instanceof modelar.User)) {
+            ctor = modelar.User;
+        }
     }
-    else if (isUser(mod.User)) {
-        UserCtor = mod.User;
+    catch (err) {
+        ctor = modelar.User;
     }
+    return ctor;
 }
-else {
-    UserCtor = modelar.User;
-}
-exports.User = UserCtor;
+exports.loadUser = loadUser;
 //# sourceMappingURL=load-user.js.map

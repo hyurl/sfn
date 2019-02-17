@@ -22,10 +22,10 @@ if (!startsWith(__filename, APP_PATH) && moduleExists(moduleName)) {
     // Load user-defined configurations.
     let mod = tryImport(moduleName);
 
-    if (typeof mod.config == "object") {
-        merge(config, mod.config);
-    } else if (typeof mod.default == "object") {
+    if (typeof mod.default == "object") {
         merge(config, mod.default);
+    } else if (typeof mod.config == "object") {
+        merge(config, mod.config);
     }
 }
 

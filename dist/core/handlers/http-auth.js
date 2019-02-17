@@ -6,7 +6,7 @@ index_1.router.use(async (req, res, next) => {
     req.user = null;
     if (req.session && req.session.uid) {
         try {
-            req.user = await load_user_1.User.use(req.db).get(req.session.uid);
+            req.user = await load_user_1.loadUser().use(req.db).get(req.session.uid);
         }
         catch (e) { }
     }

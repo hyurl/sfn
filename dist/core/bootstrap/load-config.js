@@ -12,11 +12,11 @@ let moduleName = init_1.APP_PATH + "/config";
 let tryImport = functions_inner_1.createImport(require);
 if (!startsWith(__filename, init_1.APP_PATH) && functions_inner_1.moduleExists(moduleName)) {
     let mod = tryImport(moduleName);
-    if (typeof mod.config == "object") {
-        merge(config_1.config, mod.config);
-    }
-    else if (typeof mod.default == "object") {
+    if (typeof mod.default == "object") {
         merge(config_1.config, mod.default);
+    }
+    else if (typeof mod.config == "object") {
+        merge(config_1.config, mod.config);
     }
 }
 let { server: { hostname, http: { port, type } } } = config_1.config, host = hostname + (port == 80 || port == 443 ? "" : ":" + port);

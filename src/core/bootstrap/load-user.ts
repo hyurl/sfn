@@ -1,25 +1,18 @@
+import get = require("lodash/get");
 import * as modelar from "modelar";
-import { APP_PATH } from '../../init';
-import { moduleExists, createImport } from '../tools/functions-inner';
 
-const tryImport = createImport(require);
-var UserCtor: typeof modelar.User = null;
+export function loadUser() {
+    let ctor: typeof modelar.User;
 
-function isUser(m): boolean {
-    return m && m.prototype instanceof modelar.User;
-}
+    try {
+        ctor = get(app, "models.user").ctor;
 
-let moduleName = APP_PATH + "/models/User";
-if (moduleExists(moduleName)) {
-    let mod = tryImport(moduleName);
-
-    if (isUser(mod.default)) {
-        UserCtor = mod.default;
-    } else if (isUser(mod.User)) {
-        UserCtor = mod.User;
+        if (!(ctor.prototype instanceof modelar.User)) {
+            ctor = modelar.User;
+        }
+    } catch (err) {
+        ctor = modelar.User;
     }
-} else {
-    UserCtor = modelar.User;
-}
 
-export const User = UserCtor;
+    return ctor;
+}

@@ -5,7 +5,7 @@ async function default_1(socket, next) {
     socket.user = null;
     if (socket.session && socket.session.uid) {
         try {
-            socket.user = await load_user_1.User.use(socket.db).get(socket.session.uid);
+            socket.user = await load_user_1.loadUser().use(socket.db).get(socket.session.uid);
         }
         catch (e) { }
     }

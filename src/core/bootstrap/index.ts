@@ -108,8 +108,8 @@ if (!isCli) {
     }
 
     // Load user-defined bootstrap procedures.
-    let workerBootstrap = APP_PATH + "/bootstrap/worker";
-    moduleExists(workerBootstrap) && tryImport(workerBootstrap);
+    let bootstrap = APP_PATH + "/bootstrap/index";
+    moduleExists(bootstrap) && tryImport(bootstrap);
 
     // load worker message handlers
     require("../handlers/worker-shutdown");
