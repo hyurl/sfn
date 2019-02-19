@@ -37,6 +37,13 @@ socket.io event. When a client emits data to this event, the method will be
 automatically called, and the returning value will be sent back to the client 
 with proper forms.
 
+If several methods are bound to the same event, these methods will be called 
+accordingly, and all returning values will be sent to the client. Even multiple 
+methods are bound, a controller will only be instantiated once, `before()` and 
+`after()` methods will also be called only once. However, if an event is bound 
+to multiple controllers, they will all be instantiated accordingly, and their 
+`before()` and `after()` methods will be called as expected.
+
 ### Set Up Namespace
 
 By default, WebSocket events are bound to root namespace `/`, you can set static
@@ -106,23 +113,6 @@ export default class extends WebSocketController {
 }
 ```
 
-### A Tip of WebSocket
-
-`WebSocekt` is a TypeScript interface, actually there are a lot of interfaces 
-(and alias `type`s) in **SFN**, they are not class, so can't be instantiated, or 
-check `instanceof`, if you have any of these code in your application, you 
-just got yourself troubles.
-
-```typescript
-// This example is wrong and should be avoid.
-
-var obj = new WebSocket;
-
-if (obj instanceof WebSocket) {
-    // ...
-}
-```
-
 ### Throw SocketError In the Controller
 
 `SocketError` is a customized error class that safe to use when you're going 
@@ -177,9 +167,3 @@ ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 
 A controller is actually a service, you can use any features that works in 
 [Service](./service) in a controller.
-
-## Hot Reloading
-
-SFN supports hot-reloading when a controller file is modified, and it's now 
-turned on by default. However this feature is still experimental and will only
-work in dev mode.

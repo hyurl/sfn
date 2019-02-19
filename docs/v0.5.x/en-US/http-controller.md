@@ -44,6 +44,16 @@ for corresponding HTTP request method.
 - `route.patch(path: string)`
 - `route.post(path: string)`
 - `route.put(path: string)`
+- `route.sse(path: string)` SSE uses GET approach, and implemented by client 
+    EventSource.
+
+If several methods are bound to the same route, these methods will be called 
+accordingly. Except SSE, with other request modes, only the first valid 
+(non-`undefined`) value will be sent to the client. Even multiple methods are
+bound, a controller will only be instantiated once, `before()` and `after()` 
+methods will also be called only once. However, if a route is bound to multiple 
+controllers, they will all be instantiated accordingly, and their `before()` and
+`after()` methods will be called as expected.
 
 ### Route Formats
 
@@ -247,23 +257,6 @@ export default class extends HttpController {
 }
 ```
 
-### A Tip of Request and Response
-
-`Request` and `Response` are TypeScript interfaces, actually there are a lot 
-of interfaces (and alias `type`s) in **SFN**, they are not class, so can't be 
-instantiated, or check `instanceof`, if you have any of these code in your 
-application, you just got yourself troubles.
-
-```typescript
-// This example is wrong and should be avoid.
-
-var obj = new Request;
-
-if (obj instanceof Request) {
-    // ...
-}
-```
-
 ## Throw HttpError In the Controller
 
 `HttpError` is a customized error class that safe to use when you're going to 
@@ -358,9 +351,3 @@ export default class extends HttpController {
 
 A controller is actually a service, you can use any features that works in 
 [Service](./service) in a controller.
-
-## Hot Reloading
-
-SFN supports hot-reloading when a controller file is modified, and it's now 
-turned on by default. However this feature is still experimental and will only
-work in dev mode.

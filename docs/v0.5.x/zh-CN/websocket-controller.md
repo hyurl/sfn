@@ -32,6 +32,11 @@ export default class extends WebSocketController {
 一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被自动地以合适
 的形式返回给客户端。
 
+如果多个方法被绑定到了同一个事件上，那么这些方法将会按照其定义的顺序被依次调用，其返回值也会被
+依次发送给客户端。即使绑定了多个方法，一个控制器也只会被实例化一次，`before()` and `after()`
+方法也只会被调用一次，但如果事件绑定在了多个控制器内，那么这些控制器都会被依次实例化，并且调用
+其 `before()` 和 `after()` 方法。
+
 ### 设置命名空间
 
 默认地，WebSocket 事件被绑定到根命名空间 `/`，你可以设置静态属性 `nsp` 来修改为其他的
@@ -100,22 +105,6 @@ export default class extends WebSocketController {
 }
 ```
 
-### 关于 WebSocket 的提示
-
-`WebSocekt` 是一个 TypeScript 接口，实际上在 **SFN** 框架中存在着很多的接口（和 
-别名类型）。它们并不是类，因此也不能被实例化，或者使用 `instanceof` 来检测，如果
-你在代码中有任何这样的代码，那只会给你自己造成麻烦。
-
-```typescript
-// This example is wrong and should be avoid.
-
-var obj = new WebSocket;
-
-if (obj instanceof WebSocket) {
-    // ...
-}
-```
-
 ### 在控制器中抛出 SocketError
 
 `SocketError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到
@@ -168,9 +157,3 @@ ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 
 一个控制器实际上就是一个服务，你可以在一个控制器中使用任何在 [Service](./service) 
 中有效的特性。
-
-
-## 热重载
-
-SFN 支持在控制器程序文件被改变时自动热重载，并且现在已经默认开启了。然而这依旧只是一个实验性的
-特性，并仅在开发模式中起作用。

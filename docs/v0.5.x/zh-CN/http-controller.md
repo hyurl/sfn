@@ -39,6 +39,12 @@ URL 地址时，这个方法就会被自动地调用，其返回值将会以合�
 - `route.patch(path: string)`
 - `route.post(path: string)`
 - `route.put(path: string)`
+- `route.sse(path: string)` SSE 使用的是 GET 方式，并由客户端的 EventSource 来实现。
+
+如果多个方法被绑定到了同一个路由上，那么这些方法将会按照其定义的顺序被依次调用，除了 SSE，其他
+请求模式下， 只有第一个有效的返回值（不为 `undefined`）会被发送给客户端。即使绑定了多个方法，
+一个控制器也只会被实例化一次，`before()` and `after()`方法也只会被调用一次，但如果路由绑定
+在了多个控制器内，那么这些控制器都会被依次实例化，并且调用其 `before()` 和 `after()` 方法。
 
 ### 路由格式
 
@@ -231,22 +237,6 @@ export default class extends HttpController {
 }
 ```
 
-### 关于 Request 和 Response 的提示
-
-`Request` 和 `Response` 是 TypeScript 接口，实际上在 **SFN** 框架中存在着很多的接口（和
-别名类型）。它们并不是类，因此也不能被实例化，或者使用 `instanceof` 来检测，如果你在代码中有
-任何这样的代码，那只会给你自己造成麻烦。
-
-```typescript
-// This example is wrong and should be avoid.
-
-var obj = new Request;
-
-if (obj instanceof Request) {
-    // ...
-}
-```
-
 ## 在控制器中抛出 HttpError
 
 `HttpError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到客户端时
@@ -335,8 +325,3 @@ export default class extends HttpController {
 
 一个控制器实际上就是一个服务，你可以在一个控制器中使用任何在 [Service](./service) 中有效的
 特性。
-
-## 热重载
-
-SFN 支持在控制器程序文件被改变时自动热重载，并且现在已经默认开启了。然而这依旧只是一个实验性的
-特性，并仅在开发模式中起作用。

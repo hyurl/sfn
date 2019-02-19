@@ -244,8 +244,6 @@ async function handleResponse(ctrl: HttpController, data: any) {
                 res.end("");
             } else if (typeof data === "object" && type && xml.test(type)) {
                 res.xml(data);
-            } else if (data instanceof Buffer) {
-                res.send(data);
             } else if (typeof data === "string" && res.gzip) {
                 await handleGzip(ctrl, data);
             } else {
