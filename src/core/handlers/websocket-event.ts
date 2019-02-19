@@ -82,12 +82,14 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 // procedure, and don't call the method.
                 if (socket.disconnected || false === (await ctrl.before()))
                     return;
+
+                initiated = true;
             }
 
-            let _data = await ctrl[method](...getArguments(ctrl, method, data));
+            let res = await ctrl[method](...getArguments(ctrl, method, data));
 
             // Send data to the client.
-            _data === undefined || socket.emit(event, _data);
+            (res === undefined) || socket.emit(event, res);
 
         }
 

@@ -152,4 +152,6 @@ export interface HttpRoute extends Function {
     patch(path: string, Class: typeof HttpController, method: string): void;
     put(path: string): HttpRouteDecorator;
     put(path: string, Class: typeof HttpController, method: string): void;
+    sse(path: string): HttpRouteDecorator;
+    sse(path: string, Class: typeof HttpController, method: string): void;
 }

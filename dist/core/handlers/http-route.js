@@ -49,7 +49,6 @@ function getRouteHandler(key) {
                     continue;
                 }
                 else if (!initiated) {
-                    initiated = true;
                     if (!cors(ctrl.cors, req, res)) {
                         throw new HttpError_1.HttpError(410);
                     }
@@ -59,6 +58,7 @@ function getRouteHandler(key) {
                     handleCsrfToken(ctrl);
                     if (false === (await ctrl.before()))
                         return;
+                    initiated = true;
                     res.gzip = req.encoding == "gzip" && ctrl.gzip;
                     if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
                         res.jsonp = req.query[ctrl.jsonp];
@@ -180,12 +180,12 @@ async function getArguments(ctrl, method) {
 }
 async function handleResponse(ctrl, data) {
     let { req, res } = ctrl;
-    if (!res.sent) {
-        if (req.isEventSource) {
-            if (data !== null && data !== undefined)
-                ctrl.sse.send(data);
-        }
-        else if (req.method === "HEAD") {
+    if (req.isEventSource) {
+        if (data !== undefined)
+            ctrl.sse.send(data);
+    }
+    else if (!res.sent) {
+        if (req.method === "HEAD") {
             res.end();
         }
         else if (data !== undefined) {

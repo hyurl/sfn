@@ -60,9 +60,10 @@ async function handleEvent(key, socket, data) {
                 ctrl.event;
                 if (socket.disconnected || false === (await ctrl.before()))
                     return;
+                initiated = true;
             }
-            let _data = await ctrl[method](...getArguments(ctrl, method, data));
-            _data === undefined || socket.emit(event, _data);
+            let res = await ctrl[method](...getArguments(ctrl, method, data));
+            (res === undefined) || socket.emit(event, res);
         }
         if (initiated) {
             await ctrl.after();

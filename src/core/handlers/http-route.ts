@@ -59,8 +59,6 @@ export function getRouteHandler(key: string): RouteHandler {
                     routeMap.del(key, method);
                     continue;
                 } else if (!initiated) {
-                    initiated = true;
-
                     // Handle CORS.
                     if (!cors(<any>ctrl.cors, req, res)) {
                         throw new HttpError(410);
@@ -73,6 +71,8 @@ export function getRouteHandler(key: string): RouteHandler {
                     handleCsrfToken(ctrl);
 
                     if (false === (await ctrl.before())) return;
+
+                    initiated = true;
 
                     // Handle GZip.
                     res.gzip = req.encoding == "gzip" && ctrl.gzip;
@@ -229,11 +229,11 @@ async function getArguments(ctrl: HttpController, method: string) {
 async function handleResponse(ctrl: HttpController, data: any) {
     let { req, res } = ctrl;
 
-    if (!res.sent) {
-        if (req.isEventSource) {
-            if (data !== null && data !== undefined)
-                ctrl.sse.send(data);
-        } else if (req.method === "HEAD") {
+    if (req.isEventSource) {
+        if (data !== undefined)
+            ctrl.sse.send(data);
+    } else if (!res.sent) {
+        if (req.method === "HEAD") {
             res.end();
         } else if (data !== undefined) {
             // Send data to the client.

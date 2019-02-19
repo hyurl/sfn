@@ -120,4 +120,7 @@ exports.route.post = function (...args) {
 exports.route.put = function (...args) {
     return _route("PUT", ...args);
 };
+exports.route.sse = function (...args) {
+    return _route("SSE", ...args);
+};
 //# sourceMappingURL=functions.js.map

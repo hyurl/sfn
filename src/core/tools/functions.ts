@@ -98,7 +98,7 @@ export function event(name: string, Class?: typeof WebSocketController, method?:
     }
 }
 
-function _route(...args) {
+function _route(...args: any[]) {
     let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
 
     if (args.length <= 2) {
@@ -140,26 +140,30 @@ function _route(...args) {
 /** Sets HTTP routes. */
 export const route: HttpRoute = <any>_route;
 
-route.delete = function (...args) {
+route.delete = function (...args: any[]) {
     return _route("DELETE", ...args);
 };
 
-route.get = function (...args) {
+route.get = function (...args: any[]) {
     return _route("GET", ...args);
 }
 
-route.head = function (...args) {
+route.head = function (...args: any[]) {
     return _route("HEAD", ...args);
 };
 
-route.patch = function (...args) {
+route.patch = function (...args: any[]) {
     return _route("PATCH", ...args);
 };
 
-route.post = function (...args) {
+route.post = function (...args: any[]) {
     return _route("POST", ...args);
 };
 
-route.put = function (...args) {
+route.put = function (...args: any[]) {
     return _route("PUT", ...args);
 };
+
+route.sse = function (...args: any[]) {
+    return _route("SSE", ...args);
+}
