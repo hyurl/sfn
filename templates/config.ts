@@ -1,11 +1,11 @@
-import { SFNConfig, SRC_PATH, ROOT_PATH } from "sfn";
+import { SFNConfig, ROOT_PATH } from "sfn";
 import * as Session from "express-session";
 import * as sessionFileStore from "session-file-store";
 
 const FileStore = sessionFileStore(Session);
 const env = process.env;
 
-export const config: SFNConfig = {
+export default <SFNConfig>{
     lang: env.LANG || "en-US",
     statics: ["assets"],
     hotReloading: true,

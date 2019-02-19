@@ -94,7 +94,7 @@ you just need to do some simple configurations.
 
 ```typescript
 // src/config.ts
-export const config: SFNConfig = {
+export default <SFNConfig>{
     server: {
         rpc: {
             "rpc-server-1": {

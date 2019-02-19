@@ -24,8 +24,6 @@ if (!startsWith(__filename, APP_PATH) && moduleExists(moduleName)) {
 
     if (typeof mod.default == "object") {
         merge(config, mod.default);
-    } else if (typeof mod.config == "object") {
-        merge(config, mod.config);
     }
 }
 

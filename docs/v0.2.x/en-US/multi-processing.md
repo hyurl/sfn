@@ -12,7 +12,7 @@ set `workers` an array that carries several names, e.g. `["A", "B", "C"]`, which
 will start three workers, A, B and C.
 
 ```typescript
-export const config: SFNConifg = {
+export default <SFNConfig>{
     // ...
     workers: ["A", "B", "C"],
     //...

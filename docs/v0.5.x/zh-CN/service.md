@@ -89,7 +89,7 @@ SFN 所使用的 [Alar](https://github.com/hyurl/alar) 框架允许将服务分�
 
 ```typescript
 // src/config.ts
-export const config: SFNConfig = {
+export default <SFNConfig>{
     server: {
         rpc: {
             "rpc-server-1": {

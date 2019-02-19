@@ -11,7 +11,7 @@
 首先你需要连接到一个 Redis 服务器，修改 `config.ts` 中的配置，就像这样：
 
 ```typescript
-export const config: SFNConfig = {
+export default <SFNConfig>{
     // ...
     redis: {
         host: "localhost",

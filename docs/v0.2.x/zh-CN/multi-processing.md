@@ -11,7 +11,7 @@
 进程：A、B 和 C。
 
 ```typescript
-export const config: SFNConifg = {
+export default <SFNConfig>{
     // ...
     workers: ["A", "B", "C"],
     //...

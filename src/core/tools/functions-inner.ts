@@ -1,12 +1,15 @@
 import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
 import * as fs from "fs-extra";
+import * as path from "path";
 import chalk from "chalk";
 import { Locale } from "./interfaces";
 import { isTsNode, isDevMode } from "../../init";
 import service from './Service';
+import zipObject = require("lodash/zipObject");
 
 const FileCache: { [filename: string]: string } = {};
+const tryImport = createImport(require);
 
 export function isOwnMethod(obj: any, method: string): boolean {
     return typeof obj[method] === "function" &&
@@ -18,22 +21,16 @@ export function moduleExists(name: string): boolean {
 }
 
 export function loadLanguagePack(filename: string): Locale {
-    let mod = require(filename),
-        lang: Locale;
+    let mod = tryImport(filename),
+        lang: Locale = null;
 
     if (typeof mod.default === "object") {
         lang = mod.default;
-    } else {
+    } else if (path.extname(filename) === ".json") {
         lang = mod;
     }
 
-    if (lang instanceof Array) {
-        let _lang: Locale = {};
-        for (let v of lang) {
-            _lang[v] = v;
-        }
-        lang = _lang;
-    }
+    Array.isArray(lang) && (lang = zipObject(lang, lang));
 
     return lang;
 }

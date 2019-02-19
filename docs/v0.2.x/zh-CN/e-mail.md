@@ -13,7 +13,7 @@
 JavaScript 的 `config.js`），设置合适的主机名和端口，以及用户名、密码等等。
 
 ```typescript
-export const config: SFNConfig = {
+export default <SFNConfig>{
     // ...
     mail: {
         pool: true,

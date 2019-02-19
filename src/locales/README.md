@@ -1,12 +1,12 @@
 This folder stores language packages, each package are named in RFC1766 
-standard, both ts and json files are supported.
+standard, both TS and JSON files are supported.
 
 TypeScript (zh-CN.ts):
 
 ```typescript
 import { Locale } from "sfn";
 
-export const zhCN: Locale = {
+export default <Locale>{
     "Hello, World!": "你好，世界！"
 }
 ```

@@ -122,7 +122,7 @@ In **SFN** framework, you should always modify the configuration file
 `config.ts` to set configurations.
 
 ```typescript
-export const conifg: SFNConfig = {
+export default <SFNConfig>{
     // ...
     database: {
         type: "mysql",

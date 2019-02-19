@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { APP_PATH, SRC_PATH, isTsNode } from "../../init";
+import { APP_PATH, isTsNode } from "../../init";
 import { Locale } from "../tools/interfaces";
 import { loadLanguagePack } from "../tools/functions-inner";
 
@@ -26,8 +26,4 @@ function loadLocales(dir: string): void {
     }
 }
 
-loadLocales(SRC_PATH + "/locales");
-
-if (SRC_PATH !== APP_PATH) {
-    loadLocales(APP_PATH + "/locales");
-}
+loadLocales(APP_PATH + "/locales");

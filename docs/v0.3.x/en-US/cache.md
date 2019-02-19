@@ -12,7 +12,7 @@ First you need to connect to a Redis server, modify the configurations in the
 `config.ts`, just like this:
 
 ```typescript
-export const conifg: SFNConfig = {
+export default <SFNConfig>{
     // ...
     redis: {
         host: "localhost",

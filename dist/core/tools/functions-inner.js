@@ -3,10 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const CallSiteRecord = require("callsite-record");
 const moment = require("moment");
 const fs = require("fs-extra");
+const path = require("path");
 const chalk_1 = require("chalk");
 const init_1 = require("../../init");
 const Service_1 = require("./Service");
+const zipObject = require("lodash/zipObject");
 const FileCache = {};
+const tryImport = createImport(require);
 function isOwnMethod(obj, method) {
     return typeof obj[method] === "function" &&
         obj.constructor.prototype.hasOwnProperty(method);
@@ -17,20 +20,14 @@ function moduleExists(name) {
 }
 exports.moduleExists = moduleExists;
 function loadLanguagePack(filename) {
-    let mod = require(filename), lang;
+    let mod = tryImport(filename), lang = null;
     if (typeof mod.default === "object") {
         lang = mod.default;
     }
-    else {
+    else if (path.extname(filename) === ".json") {
         lang = mod;
     }
-    if (lang instanceof Array) {
-        let _lang = {};
-        for (let v of lang) {
-            _lang[v] = v;
-        }
-        lang = _lang;
-    }
+    Array.isArray(lang) && (lang = zipObject(lang, lang));
     return lang;
 }
 exports.loadLanguagePack = loadLanguagePack;

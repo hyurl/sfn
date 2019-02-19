@@ -14,7 +14,7 @@ your configuration file `config.ts`, set a proper host and port, username,
 password, etc.
 
 ```typescript
-export const conifg: SFNConfig = {
+export default <SFNConfig>{
     // ...
     mail: {
         pool: true,

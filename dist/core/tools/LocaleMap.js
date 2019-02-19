@@ -18,8 +18,5 @@ function loadLocales(dir) {
         }
     }
 }
-loadLocales(init_1.SRC_PATH + "/locales");
-if (init_1.SRC_PATH !== init_1.APP_PATH) {
-    loadLocales(init_1.APP_PATH + "/locales");
-}
+loadLocales(init_1.APP_PATH + "/locales");
 //# sourceMappingURL=LocaleMap.js.map
