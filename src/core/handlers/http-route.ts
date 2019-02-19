@@ -8,11 +8,12 @@ import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { HttpError } from "../tools/HttpError";
 import { randStr } from "../tools/functions";
-import { getFuncParams, callsiteLog, isOwnMethod } from "../tools/functions-inner";
-import { Request, Response } from "../tools/interfaces";
+import { callsiteLog, isOwnMethod } from "../tools/functions-inner";
+import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { isDevMode } from '../../init';
 import { routeMap } from '../tools/RouteMap';
+import { number } from 'literal-toolkit';
 
 const EFFECT_METHODS: string[] = [
     "DELETE",
@@ -176,54 +177,49 @@ async function handleError(err: Error, ctrl: HttpController, method?: string) {
 async function getArguments(ctrl: HttpController, method: string) {
     let { req, res } = ctrl,
         data: string[] = values(req.params),
-        args: any[] = [],
-        fnParams = getFuncParams(ctrl[method]),
-        reqParams = ["request", "req"],
-        resParams = ["response", "res"];
+        args: any[] = [];
 
     // Dependency Injection
     // try to convert parameters to proper types according to the definition of 
     // the method.
     let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
-    for (let i = 0; i < meta.length; i++) {
-        if (meta[i] == Number) { // inject number
-            args[i] = parseInt(data.shift());
-        } else if (meta[i] == Boolean) { // inject boolean
+    for (let type of meta) {
+        if (type === Number) { // inject number
+            args.push(number.parse(data.shift()));
+        } else if (type === Boolean) { // inject boolean
             let val = data.shift();
-            args[i] = val == "false" || val == "0" ? false : true;
-        } else if (meta[i] == Object) {
-            if (reqParams.includes(fnParams[i])) // Inject Request
-                args[i] = req;
-            else if (resParams.includes(fnParams[i])) // Inject Response
-                args[i] = res;
-            else
-                args[i] = data.shift();
-        } else if (meta[i].prototype instanceof Model) { // inject user-defined Model
+            args.push(val == "false" || val == "0" ? false : true);
+        } else if (type === Request) { // inject Request
+            args.push(req);
+        } else if (type === Response) { // inject Response
+            args.push(res);
+        } else if (type === Session) { // inject Session
+            args.push(req.session);
+        } else if (type.prototype instanceof Model) { // inject user-defined Model
             if (req.method == "POST" && req.params.id === undefined) {
                 // POST request means creating a new model.
                 // If a POST request with an ID, which means the 
                 // request isn't a RESTful request, DO NOT 
                 // create new model.
-                args[i] = (new (<typeof Model>meta[i])).use(req.db);
+                args.push((new (<typeof Model>type)).use(req.db));
             } else {
                 // Other type of requests, such as GET, DELETE, 
                 // PATCH, PUT, all need to retrieve an existing 
                 // model.
                 try {
-                    let id = parseInt(req.params.id);
+                    let id = <number>number.parse(req.params.id);
 
                     if (!id || isNaN(id))
                         throw new HttpError(400);
 
-                    args[i] = await (<typeof Model>meta[i]).use(req.db).get(id);
+                    args.push(await (<typeof Model>type).use(req.db).get(id));
                 } catch (e) {
-                    args[i] = null;
-                    throw e;
+                    args.push(null);
                 }
             }
         } else {
-            args[i] = data.shift();
+            args.push(data.shift());
         }
     }
 

@@ -9,9 +9,11 @@ const HttpController_1 = require("../controllers/HttpController");
 const HttpError_1 = require("../tools/HttpError");
 const functions_1 = require("../tools/functions");
 const functions_inner_1 = require("../tools/functions-inner");
+const interfaces_1 = require("../tools/interfaces");
 const symbols_1 = require("../tools/symbols");
 const init_1 = require("../../init");
 const RouteMap_1 = require("../tools/RouteMap");
+const literal_toolkit_1 = require("literal-toolkit");
 const EFFECT_METHODS = [
     "DELETE",
     "PATCH",
@@ -135,43 +137,43 @@ async function handleError(err, ctrl, method) {
     handleFinish(err, ctrl, method);
 }
 async function getArguments(ctrl, method) {
-    let { req, res } = ctrl, data = values(req.params), args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), reqParams = ["request", "req"], resParams = ["response", "res"];
+    let { req, res } = ctrl, data = values(req.params), args = [];
     let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
-    for (let i = 0; i < meta.length; i++) {
-        if (meta[i] == Number) {
-            args[i] = parseInt(data.shift());
+    for (let type of meta) {
+        if (type === Number) {
+            args.push(literal_toolkit_1.number.parse(data.shift()));
         }
-        else if (meta[i] == Boolean) {
+        else if (type === Boolean) {
             let val = data.shift();
-            args[i] = val == "false" || val == "0" ? false : true;
+            args.push(val == "false" || val == "0" ? false : true);
         }
-        else if (meta[i] == Object) {
-            if (reqParams.includes(fnParams[i]))
-                args[i] = req;
-            else if (resParams.includes(fnParams[i]))
-                args[i] = res;
-            else
-                args[i] = data.shift();
+        else if (type === interfaces_1.Request) {
+            args.push(req);
         }
-        else if (meta[i].prototype instanceof modelar_1.Model) {
+        else if (type === interfaces_1.Response) {
+            args.push(res);
+        }
+        else if (type === interfaces_1.Session) {
+            args.push(req.session);
+        }
+        else if (type.prototype instanceof modelar_1.Model) {
             if (req.method == "POST" && req.params.id === undefined) {
-                args[i] = (new meta[i]).use(req.db);
+                args.push((new type).use(req.db));
             }
             else {
                 try {
-                    let id = parseInt(req.params.id);
+                    let id = literal_toolkit_1.number.parse(req.params.id);
                     if (!id || isNaN(id))
                         throw new HttpError_1.HttpError(400);
-                    args[i] = await meta[i].use(req.db).get(id);
+                    args.push(await type.use(req.db).get(id));
                 }
                 catch (e) {
-                    args[i] = null;
-                    throw e;
+                    args.push(null);
                 }
             }
         }
         else {
-            args[i] = data.shift();
+            args.push(data.shift());
         }
     }
     return args;

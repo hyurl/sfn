@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("../bootstrap/index");
 const SocketError_1 = require("../tools/SocketError");
+const interfaces_1 = require("../tools/interfaces");
 const symbols_1 = require("../tools/symbols");
 const WebSocketController_1 = require("../controllers/WebSocketController");
 const http_route_1 = require("./http-route");
@@ -74,13 +75,18 @@ async function handleEvent(key, socket, data) {
     }
 }
 function getArguments(ctrl, method, data) {
-    let args = [], fnParams = functions_inner_1.getFuncParams(ctrl[method]), socketParams = ["websocket", "socket", "sock", "webSocket"];
+    let args = [];
     let meta = Reflect.getMetadata("design:paramtypes", ctrl, method);
-    for (let i = 0; i < meta.length; i++) {
-        if (meta[i] == Object && socketParams.includes(fnParams[i]))
-            args[i] = ctrl.socket;
-        else
-            args[i] = data.shift();
+    for (let type of meta) {
+        if (type === interfaces_1.WebSocket) {
+            args.push(ctrl.socket);
+        }
+        else if (type === interfaces_1.Session) {
+            args.push(ctrl.socket.session);
+        }
+        else {
+            args.push(data.shift());
+        }
     }
     return args;
 }

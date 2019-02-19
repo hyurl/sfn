@@ -83,13 +83,6 @@ function createImport(require) {
     };
 }
 exports.createImport = createImport;
-function getFuncParams(fn) {
-    let fnStr = fn.toString(), start = fnStr.indexOf("("), end = fnStr.indexOf(")"), paramStr = fnStr.slice(start + 1, end).trim(), params = paramStr.split(",").map(param => {
-        return param.replace(/\s/g, "").split("=")[0];
-    });
-    return params;
-}
-exports.getFuncParams = getFuncParams;
 function color(color, callSite, bindings) {
     let msg = callSite.map((str, i) => {
         return i > 0 ? bindings[i - 1] + str : str;

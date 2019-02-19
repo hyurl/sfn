@@ -1,4 +1,3 @@
-import { __awaiter } from 'tslib';
 import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
 import * as fs from "fs-extra";
@@ -97,18 +96,6 @@ export function createImport(require: Function): (id: string) => {
             return {};
         }
     };
-}
-
-export function getFuncParams(fn: Function) {
-    let fnStr = fn.toString(),
-        start = fnStr.indexOf("("),
-        end = fnStr.indexOf(")"),
-        paramStr = fnStr.slice(start + 1, end).trim(),
-        params = paramStr.split(",").map(param => {
-            return param.replace(/\s/g, "").split("=")[0];
-        });
-
-    return params;
 }
 
 function color(color: string, callSite: TemplateStringsArray, bindings: any[]): string {

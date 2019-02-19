@@ -1,6 +1,6 @@
 import { ws } from "../bootstrap/index";
 import { SocketError } from "../tools/SocketError";
-import { WebSocket } from "../tools/interfaces";
+import { WebSocket, Session } from "../tools/interfaces";
 import { realDB, activeEvent } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { handleLog } from "./http-route";
@@ -10,7 +10,7 @@ import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
 import dbHandler from "./websocket-db";
 import authHandler from "./websocket-auth";
-import { getFuncParams, isOwnMethod } from "../tools/functions-inner";
+import { isOwnMethod } from "../tools/functions-inner";
 import last = require("lodash/last");
 import { isDevMode } from '../../init';
 import { eventMap } from '../tools/RouteMap';
@@ -103,20 +103,21 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
 }
 
 function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
-    let args: any[] = [],
-        fnParams = getFuncParams(ctrl[method]),
-        socketParams = ["websocket", "socket", "sock", "webSocket"];
+    let args: any[] = [];
 
     // Dependency Injection
     // try to convert parameters to proper types according to the definition of 
     // the method.
     let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
-    for (let i = 0; i < meta.length; i++) {
-        if (meta[i] == Object && socketParams.includes(fnParams[i]))
-            args[i] = ctrl.socket;
-        else
-            args[i] = data.shift();
+    for (let type of meta) {
+        if (type === WebSocket) {
+            args.push(ctrl.socket);
+        } else if (type === Session) {
+            args.push(ctrl.socket.session);
+        } else {
+            args.push(data.shift());
+        }
     }
 
     return args;

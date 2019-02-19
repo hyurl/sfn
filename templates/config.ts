@@ -24,7 +24,8 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        }
+        },
+        rpc: {}
     },
     database: {
         type: env.DB_TYPE || "mysql",

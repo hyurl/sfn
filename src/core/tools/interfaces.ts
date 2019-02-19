@@ -1,6 +1,8 @@
+import * as http from "http";
 import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import * as modelar from "modelar";
+import * as ExpressSession from "express-session";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
@@ -14,6 +16,12 @@ export interface Session extends Express.Session {
     uid: number;
 }
 
+export abstract class Session {
+    static [Symbol.hasInstance](ins: any) {
+        return ins instanceof ExpressSession["Session"];
+    }
+}
+
 export interface Request extends webium.Request {
     /** Gets a DB instance for `modelar`. */
     db: modelar.DB;
@@ -23,7 +31,7 @@ export interface Request extends webium.Request {
     isEventSource: boolean;
     /** Gets the CSRF token if available. */
     csrfToken?: string;
-    /** In a sfn app, the session is shared between HTTP and WebSocket. */
+    /** In an sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** 
      * A short-version url, when the url contains more than 64 characters,
@@ -36,6 +44,13 @@ export interface Request extends webium.Request {
      * stored in disk.
      */
     files?: { [field: string]: UploadedFile[] };
+}
+
+export abstract class Request {
+    static [Symbol.hasInstance](ins: any) {
+        return (ins instanceof http.IncomingMessage)
+            || (ins instanceof require("http2").Http2ServerRequest);
+    }
 }
 
 export interface Response extends webium.Response {
@@ -54,6 +69,13 @@ export interface Response extends webium.Response {
     sent: boolean;
 }
 
+export abstract class Response {
+    static [Symbol.hasInstance](ins: any) {
+        return (ins instanceof http.ServerResponse)
+            || (ins instanceof require("http2").Http2ServerResponse);
+    }
+}
+
 export interface WebSocket extends SocketIO.Socket {
     /** The domain name of the handshake. */
     domainName?: string;
@@ -63,7 +85,7 @@ export interface WebSocket extends SocketIO.Socket {
     db: modelar.DB;
     /** The logged-in user of the socket. */
     user?: modelar.User;
-    /** In a sfn app, the session is shared between HTTP and WebSocket. */
+    /** In an sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** * The cookies of handshake. */
     cookies: { [name: string]: any };
@@ -88,6 +110,12 @@ export interface WebSocket extends SocketIO.Socket {
     langs: string[];
     /** `true` if the protocol is `wss`, `false` otherwise. */
     secure: boolean;
+}
+
+export abstract class WebSocket {
+    static [Symbol.hasInstance](ins: SocketIO.Socket) {
+        return app.ws && ins.server === app.ws;
+    }
 }
 
 export interface ControllerDecorator extends Function {
