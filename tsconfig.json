@@ -14,6 +14,7 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "emitDecoratorMetadata": true,
+        "diagnostics": true
     },
     "include": [
         "src/*.ts",

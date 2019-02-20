@@ -1,4 +1,4 @@
-import { route, HttpError, ROOT_PATH, Request, Response, Session } from "sfn";
+import { route, HttpError, ROOT_PATH, Request, Response } from "sfn";
 import IndexController from "./index";
 import { readdir } from 'fs-extra';
 

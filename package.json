@@ -76,7 +76,7 @@
         "dotenv": "^6.2.0",
         "dynamic-queue": "^0.1.6",
         "express-session": "^1.15.6",
-        "fron": "^0.1.2",
+        "fron": "^0.1.3",
         "fs-extra": "^6.0.1",
         "function-intercepter": "^0.2.3",
         "hide-protected-properties": "^0.1.1",
@@ -111,6 +111,8 @@
     "devDependencies": {
         "@types/cookie-parser": "^1.4.1",
         "@types/serve-static": "^1.13.2",
-        "outlining": "^0.1.2"
+        "outlining": "^0.1.2",
+        "ts-node": "^6.2.0",
+        "typescript": "^3.3.3"
     }
 }
