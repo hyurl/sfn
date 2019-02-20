@@ -8,7 +8,8 @@ import { injectable, injected } from "injectable-ts";
 import HideProtectedProperties = require("hide-protected-properties");
 import { ROOT_PATH } from "../../init";
 import { config } from "../bootstrap/load-config";
-import { LocaleMap } from "./LocaleMap";
+import get = require('lodash/get');
+import { Locale } from './interfaces';
 
 injectable(DB);
 
@@ -60,17 +61,24 @@ export class Service extends EventEmitter {
      * @param replacements Values that replaces %s, %i, etc. in the `text`.
      */
     i18n(text: string, ...replacements: string[]): string {
-        var locale = LocaleMap,
-            lang = this.lang.toLowerCase(),
-            _lang = config.lang.toLowerCase();
+        let mod: ModuleProxy<Locale> = get(app.locales, this.lang);
+        let defMod: ModuleProxy<Locale> = get(app.locales, config.lang);
+        let locale: Locale = null;
+        let stmt: string;
 
-        if (locale[lang] && locale[lang][text]) {
-            text = locale[lang][text];
-        } else if (locale[_lang] && locale[_lang][text]) {
-            text = locale[_lang][text];
+        if (mod && mod.proto) {
+            locale = mod.instance();
+            locale[text] && (stmt = locale[text]);
         }
 
-        return util.format(text, ...replacements);
+        if (stmt === undefined && defMod && defMod.proto) {
+            locale = defMod.instance();
+            locale[text] && (stmt = locale[text]);
+        }
+
+        (stmt === undefined) && (stmt = text);
+
+        return util.format(stmt, ...replacements);
     }
 
     /** Gets a logger instance. */

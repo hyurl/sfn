@@ -126,7 +126,7 @@ export class HttpController extends Controller {
 
         // i18n support for the template.
         if (!("i18n" in vars)) {
-            vars.i18n = function i18n(text, ...replacements) {
+            vars.i18n = (text: string, ...replacements: string[]) => {
                 return this.i18n(text, ...replacements);
             };
         }

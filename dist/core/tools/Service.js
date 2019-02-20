@@ -12,7 +12,7 @@ const injectable_ts_1 = require("injectable-ts");
 const HideProtectedProperties = require("hide-protected-properties");
 const init_1 = require("../../init");
 const load_config_1 = require("../bootstrap/load-config");
-const LocaleMap_1 = require("./LocaleMap");
+const get = require("lodash/get");
 injectable_ts_1.injectable(modelar_1.DB);
 exports.LogOptions = Object.assign({}, Logger.Options, {
     ttl: 1000,
@@ -33,14 +33,20 @@ let Service = Service_1 = class Service extends events_1.EventEmitter {
         this.cacheOptions = Object.assign({}, exports.CacheOptions);
     }
     i18n(text, ...replacements) {
-        var locale = LocaleMap_1.LocaleMap, lang = this.lang.toLowerCase(), _lang = load_config_1.config.lang.toLowerCase();
-        if (locale[lang] && locale[lang][text]) {
-            text = locale[lang][text];
+        let mod = get(app.locales, this.lang);
+        let defMod = get(app.locales, load_config_1.config.lang);
+        let locale = null;
+        let stmt;
+        if (mod && mod.proto) {
+            locale = mod.instance();
+            locale[text] && (stmt = locale[text]);
         }
-        else if (locale[_lang] && locale[_lang][text]) {
-            text = locale[_lang][text];
+        if (stmt === undefined && defMod && defMod.proto) {
+            locale = defMod.instance();
+            locale[text] && (stmt = locale[text]);
         }
-        return util.format(text, ...replacements);
+        (stmt === undefined) && (stmt = text);
+        return util.format(stmt, ...replacements);
     }
     get logger() {
         let filename = this.logOptions.filename || exports.LogOptions.filename;

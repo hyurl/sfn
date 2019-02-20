@@ -7,12 +7,8 @@ class IndexController extends sfn_1.HttpController {
         super(...arguments);
         this.isZh = this.lang.includes("zh");
         this.indexVars = {
-            title: "Service Framework for Node.js",
             anotherLang: this.isZh ? "en-US" : "zh-CN",
             changeLang: this.isZh ? "English (US)" : "中文 (简体)",
-            home: this.isZh ? "主页" : "Home",
-            docs: this.isZh ? "文档" : "Documentation",
-            sourceCode: this.isZh ? "源代码" : "Source Code",
             version: sfn_1.version
         };
     }

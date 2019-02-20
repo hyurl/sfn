@@ -4,10 +4,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs-extra");
 const path = require("path");
 const program = require("commander");
+const FRON = require("fron");
 const pluralize = require("pluralize");
 const kebabCase = require("lodash/kebabCase");
 const camelCase = require("lodash/camelCase");
 const upperFirst = require("lodash/upperFirst");
+const cloneDeep = require("lodash/cloneDeep");
+const get = require("lodash/get");
 const init_1 = require("../init");
 const load_config_1 = require("../core/bootstrap/load-config");
 const functions_inner_1 = require("../core/tools/functions-inner");
@@ -90,21 +93,20 @@ try {
         outputFile(output, contents, "Service");
     }
     else if (program.language) {
-        let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
-        let contents;
-        let langJson = `${init_1.SRC_PATH}/locales/${load_config_1.config.lang}.json`;
-        let langMod = `${init_1.APP_PATH}/locales/${load_config_1.config.lang}`;
+        let output = `${init_1.SRC_PATH}/locales/${program.language}.ts`;
+        let contents = `import { Locale } from "sfn";\n\nexport default <Locale>`;
+        let mod = get(app.locales, load_config_1.config.lang);
         let lang;
-        if (fs.existsSync(langJson)) {
-            lang = functions_inner_1.loadLanguagePack(langJson);
-        }
-        else if (functions_inner_1.moduleExists(langMod)) {
-            lang = functions_inner_1.loadLanguagePack(langMod);
+        if (mod && mod.proto) {
+            lang = cloneDeep(mod.instance());
+            for (let x in lang) {
+                lang[x] = "";
+            }
         }
         else {
             lang = {};
         }
-        contents = JSON.stringify(lang, null, "  ");
+        contents += FRON.stringify(lang, "    ") + ";";
         outputFile(output, contents, "Language pack");
     }
     else if (process.argv.length <= 2) {

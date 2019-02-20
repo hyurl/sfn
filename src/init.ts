@@ -39,6 +39,14 @@ declare global {
             function connect(config: string | RpcOptions): Promise<RpcChannel>;
             function watch(): FSWatcher;
         }
+        namespace locales {
+            const name: string;
+            const path: string;
+            function resolve(path: string): string;
+            function serve(config: string | RpcOptions): Promise<RpcChannel>;
+            function connect(config: string | RpcOptions): Promise<RpcChannel>;
+            function watch(): FSWatcher;
+        }
     }
 }
 
@@ -108,5 +116,6 @@ global["app"] = {
     isCli,
     controllers: new ModuleProxy("controllers", APP_PATH + "/controllers"),
     models: new ModuleProxy("models", APP_PATH + "/models"),
-    services: new ModuleProxy("services", APP_PATH + "/services")
+    services: new ModuleProxy("services", APP_PATH + "/services"),
+    locales: new ModuleProxy("locales", APP_PATH + "/locales")
 };

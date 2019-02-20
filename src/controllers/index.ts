@@ -15,12 +15,8 @@ declare global {
 export default class IndexController extends HttpController {
     isZh = this.lang.includes("zh");
     indexVars = {
-        title: "Service Framework for Node.js",
         anotherLang: this.isZh ? "en-US" : "zh-CN",
         changeLang: this.isZh ? "English (US)" : "中文 (简体)",
-        home: this.isZh ? "主页" : "Home",
-        docs: this.isZh ? "文档" : "Documentation",
-        sourceCode: this.isZh ? "源代码" : "Source Code",
         version
     };
 

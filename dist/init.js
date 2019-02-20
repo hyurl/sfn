@@ -46,6 +46,7 @@ global["app"] = {
     isCli: exports.isCli,
     controllers: new alar_1.ModuleProxy("controllers", exports.APP_PATH + "/controllers"),
     models: new alar_1.ModuleProxy("models", exports.APP_PATH + "/models"),
-    services: new alar_1.ModuleProxy("services", exports.APP_PATH + "/services")
+    services: new alar_1.ModuleProxy("services", exports.APP_PATH + "/services"),
+    locales: new alar_1.ModuleProxy("locales", exports.APP_PATH + "/locales")
 };
 //# sourceMappingURL=init.js.map

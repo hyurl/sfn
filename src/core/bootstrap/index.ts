@@ -124,6 +124,7 @@ if (!isCli) {
         if (config.hotReloading) {
             app.models.watch();
             app.services.watch();
+            app.locales.watch();
             app.controllers.watch().on("add", tryImport).on("change", tryImport);
         }
 

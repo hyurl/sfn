@@ -80,6 +80,7 @@ if (!init_1.isCli) {
         if (load_config_1.config.hotReloading) {
             app.models.watch();
             app.services.watch();
+            app.locales.watch();
             app.controllers.watch().on("add", tryImport).on("change", tryImport);
         }
         if (load_config_1.config.server.rpc && Object.keys(load_config_1.config.server.rpc).length) {
