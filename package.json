@@ -1,8 +1,8 @@
 {
     "name": "sfn",
-    "version": "0.4.3",
+    "version": "0.4.4",
     "description": "A Service Framework for Node.js.",
-    "main": "dist/index.js",
+    "main": "index.js",
     "types": "src/index.ts",
     "bin": "dist/cli/sfn.js",
     "scripts": {
@@ -110,6 +110,8 @@
     "devDependencies": {
         "@types/cookie-parser": "^1.4.1",
         "@types/serve-static": "^1.13.2",
-        "outlining": "^0.1.2"
+        "outlining": "^0.1.2",
+        "ts-node": "^8.0.2",
+        "typescript": "^3.3.3"
     }
 }
