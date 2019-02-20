@@ -44,7 +44,7 @@ class HttpController extends Controller_1.Controller {
         filename = this.getAbsFilename(filename);
         this.res.type = ext;
         if (!("i18n" in vars)) {
-            vars.i18n = function i18n(text, ...replacements) {
+            vars.i18n = (text, ...replacements) => {
                 return this.i18n(text, ...replacements);
             };
         }
