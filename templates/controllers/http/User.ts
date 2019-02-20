@@ -3,7 +3,7 @@ import { User } from "modelar";
 
 export default class extends HttpController {
 
-    @route("POST", "/user/create")
+    @route.post("/user/create")
     async create(req: Request, user: User) {
         try {
             return await user.insert(req.body);
@@ -15,7 +15,7 @@ export default class extends HttpController {
     /**
      * @example GET /user/1
      */
-    @route("GET", "/user/:id")
+    @route.get("/user/:id")
     get(req: Request, user: User) {
         if (user) {
             return user;
@@ -27,7 +27,7 @@ export default class extends HttpController {
     /**
      * @example PATCH /user/1/update
      */
-    @route("PATCH", "/user/:id/update")
+    @route.patch("/user/:id/update")
     async update(req: Request, user: User) {
         try {
             user = this.get(req, user);
@@ -44,13 +44,13 @@ export default class extends HttpController {
     /** 
      * @example DELETE /user/1
      */
-    @route("DELETE", "/user/:id")
+    @route.delete("/user/:id")
     delete(req: Request, user: User) {
         user = this.get(req, user);
         return user.delete();
     }
 
-    @route("POST", "/user/login")
+    @route.post("/user/login")
     login(req: Request) {
         let options = {
             user: req.body.username,
@@ -62,7 +62,7 @@ export default class extends HttpController {
         });
     }
 
-    @route("POST", "/user/logout")
+    @route.head("/user/logout")
     logout(req) {
         delete req.session.uid;
         return req.user;

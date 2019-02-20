@@ -117,7 +117,7 @@ const env = process.env;
  * supported options on their official websites.
  */
 export const config: SFNConfig = {
-    lang: env.LANG || "en-US",
+    lang: "en-US",
     statics: ["assets"],
     hotReloading: true,
     server: {

@@ -16,7 +16,8 @@ export default class extends WebSocketController {
     }
 
     /**
-     * @example socket.emit("/user/get", {id: 1})
+     * @example
+     *  socket.emit("/user/get", {id: 1})
      */
     @event("/user/get")
     async get(data: { id: number }, socket: WebSocket) {
@@ -40,17 +41,18 @@ export default class extends WebSocketController {
      *  });
      */
     @event("/user/update")
-    update(data, socket: WebSocket) {
+    update(data: { id: number, [prop: string]: any }, socket: WebSocket) {
         return this.get(data, socket).then(user => {
             return user.update(data);
         });
     }
 
     /** 
-     * @example socket.emit("/user/delete", {id: 1})
+     * @example
+     *  socket.emit("/user/delete", {id: 1})
      */
     @event("/user/delate")
-    delete(data, socket: WebSocket) {
+    delete(data: { id: number }, socket: WebSocket) {
         return this.get(data, socket).then(user => {
             return user.delete();
         });
@@ -59,12 +61,12 @@ export default class extends WebSocketController {
     /**
      * @example
      *  socket.emit("/user/login", {
-     *      name: "tester"
+     *      username: "tester"
      *      password: 12345",
      *  });
      */
     @event("/user/login")
-    login(data, socket: WebSocket) {
+    login(data: { username: string, password: string }, socket: WebSocket) {
         let options = {
             user: data.username,
             password: data.password

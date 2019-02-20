@@ -3,7 +3,8 @@ import { WebSocketController, event } from "sfn";
 export default class extends WebSocketController {
 
     /**
-     * @example socket.emit('/index')
+     * @example
+     *  socket.emit('/index')
      */
     @event("/index")
     index() {
@@ -14,10 +15,11 @@ export default class extends WebSocketController {
     }
 
     /**
-     * @example socket.emit('/repeat-what-I-said', 'Hello, World!')
+     * @example
+     *  socket.emit('/repeat-what-I-said', 'Hello, World!')
      */
     @event("/repeat-what-I-said")
-    repeatWhatISaid(data) {
+    repeatWhatISaid(data: string) {
         return data;
     }
 }

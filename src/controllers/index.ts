@@ -1,4 +1,4 @@
-import { HttpController, route, version, isDevMode } from "sfn";
+import { HttpController, route, version } from "sfn";
 
 declare global {
     namespace app {
@@ -22,11 +22,6 @@ export default class IndexController extends HttpController {
 
     @route.get("/")
     async index() {
-        let ver = this.isZh ? "index.zh" : "index.en";
-
-        return !isDevMode && this.cache.get(ver) || this.cache.set(
-            ver,
-            await this.view(ver, this.indexVars)
-        );
+        return this.view("index", this.indexVars);
     }
 }

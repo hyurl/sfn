@@ -7,7 +7,7 @@ const init_1 = require("./init");
 const FileStore = sessionFileStore(Session);
 const env = process.env;
 exports.config = {
-    lang: env.LANG || "en-US",
+    lang: "en-US",
     statics: ["assets"],
     hotReloading: true,
     server: {

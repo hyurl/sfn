@@ -6,7 +6,7 @@ const FileStore = sessionFileStore(Session);
 const env = process.env;
 
 export default <SFNConfig>{
-    lang: env.LANG || "en-US",
+    lang: "en-US",
     statics: ["assets"],
     hotReloading: true,
     server: {

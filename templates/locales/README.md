@@ -1,28 +1,11 @@
-This folder stores language packages, each package are named in RFC1766 
-standard, both js and json files are supported.
-
-JavaScript (zh-CN.ts):
+This folder stores language packages, each package are named in RFC1766 standard,
+and exports a default object.
 
 ```typescript
+// SRC_PATH/locales/zh-CN.ts
 import { Locale } from "sfn";
 
-export const zhCN: Locale = {
+export default <Locale>{
     "Hello, World!": "你好，世界！"
 }
-```
-
-JSON (zh-CN.json):
-
-```json
-{
-    "Hello, World!": "你好，世界！"
-}
-```
-
-Short-hand for default language:
-
-```json
-[
-    "hello, World!"
-]
 ```

@@ -13,8 +13,7 @@ class IndexController extends sfn_1.HttpController {
         };
     }
     async index() {
-        let ver = this.isZh ? "index.zh" : "index.en";
-        return !sfn_1.isDevMode && this.cache.get(ver) || this.cache.set(ver, await this.view(ver, this.indexVars));
+        return this.view("index", this.indexVars);
     }
 }
 tslib_1.__decorate([
