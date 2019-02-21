@@ -1,18 +1,17 @@
 import * as path from "path";
 import { DB, User } from "modelar";
-import { EjsEngine } from "sfn-ejs-engine";
 import * as SSE from "sfn-sse";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH, isDevMode } from "../../init";
 import { config } from "../bootstrap/load-config";
 import { Controller } from "./Controller";
-import { TemplateEngine } from "../tools/TemplateEngine";
 import { MarkdownParser } from "../tools/MarkdownParser";
 import { Request, Response, Session } from "../tools/interfaces";
 import { HttpError } from "../tools/HttpError";
 import { realSSE } from "../tools/symbols";
 import { UploadOptions } from "../tools/upload";
 import { loadFile } from '../tools/functions-inner';
+import { loadView, View } from '../tools/view';
 
 export { CorsOptions };
 
@@ -40,16 +39,13 @@ export { CorsOptions };
  * or `res.end()` to do so, no more data will be sent after sending one.
  */
 export class HttpController extends Controller {
-    static viewPath: string = SRC_PATH + "/views";
+    // static viewPath: string = SRC_PATH + "/views";
     static viewExtname: string = ".html";
-    static engine: TemplateEngine = new EjsEngine();
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
 
-    viewPath = this.Class.viewPath;
+    // viewPath = this.Class.viewPath;
     viewExtname = this.Class.viewExtname;
-    /** Sets a specified template engine for the controller. */
-    engine = this.Class.engine;
 
     /** If set, when unauthorized, fallback to the given URL. */
     fallbackTo: string;
@@ -93,7 +89,7 @@ export class HttpController extends Controller {
     /** Gets the absolute view filename if the given one is relative. */
     protected getAbsFilename(filename: string): string {
         if (!path.isAbsolute(filename))
-            filename = `${this.viewPath}/${filename}`;
+            filename = path.resolve(SRC_PATH, "views", filename);
         return filename;
     }
 
@@ -105,12 +101,9 @@ export class HttpController extends Controller {
      *  in `views/`.
      * @param vars Local variables passed to the template.
      */
-    view(filename: string, vars: { [name: string]: any } = {}): Promise<string> {
-        let ext = path.extname(filename);
-        if (ext != this.viewExtname) {
-            ext = this.viewExtname;
-            filename += ext;
-        }
+    view(filename: string, vars: { [name: string]: any } = {}) {
+        let ext = path.extname(filename) || this.viewExtname;
+
         filename = this.getAbsFilename(filename);
 
         // Set response type.
@@ -123,7 +116,15 @@ export class HttpController extends Controller {
             };
         }
 
-        return this.engine.renderFile(filename, vars);
+        try {
+            let view = <ModuleProxy<View>>loadView(ext.slice(1), filename);
+            return view.instance().render(vars);
+        } catch (err) {
+            if (err instanceof TypeError)
+                throw new HttpError(404);
+            else
+                throw err;
+        }
     }
 
     /**
@@ -219,7 +220,7 @@ export class HttpController extends Controller {
      * suitable for complicated needs. For such a reason, the framework allows
      * you to customize the error view handler by rewriting this method.
      */
-    static httpErrorView(err: HttpError, instance: HttpController): Promise<string> {
+    static httpErrorView(err: HttpError, instance: HttpController): string {
         return instance.view(instance.res.code.toString(), { err });
     }
 }

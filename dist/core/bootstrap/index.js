@@ -80,6 +80,10 @@ if (!init_1.isCli) {
             app.controllers.resolve(filename) && tryImport(filename);
         };
         app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
+        for (let type in app.views) {
+            if (type !== "register")
+                app.views[type].watch();
+        }
     }
     (async () => {
         try {

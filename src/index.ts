@@ -29,11 +29,11 @@ export { config } from "./core/bootstrap/load-config";
 isMain && require("./bootstrap/rpc-config");
 
 export * from "./core/tools/Service";
-export * from "./core/tools/TemplateEngine";
 export * from "./core/controllers/HttpController";
 export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
 export * from "./core/tools/functions";
 export * from "./core/tools/upload";
+export * from "./core/tools/view";
 
 isMain && app.serve();

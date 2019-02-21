@@ -17,7 +17,9 @@
         "diagnostics": true,
         "baseUrl": ".",
         "paths": {
-            "sfn": ["."]
+            "sfn": [
+                "."
+            ]
         }
     },
     "include": [

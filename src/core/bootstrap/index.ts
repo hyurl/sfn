@@ -1,6 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
+import { ModuleProxy } from "alar";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
@@ -125,6 +126,11 @@ if (!isCli) {
         };
 
         app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
+
+        for (let type in app.views) {
+            if (type !== "register")
+                (<ModuleProxy>app.views[type]).watch();
+        }
     }
 
     (async () => {

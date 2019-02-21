@@ -28,11 +28,11 @@ var load_config_1 = require("./core/bootstrap/load-config");
 exports.config = load_config_1.config;
 isMain && require("./bootstrap/rpc-config");
 tslib_1.__exportStar(require("./core/tools/Service"), exports);
-tslib_1.__exportStar(require("./core/tools/TemplateEngine"), exports);
 tslib_1.__exportStar(require("./core/controllers/HttpController"), exports);
 tslib_1.__exportStar(require("./core/controllers/WebSocketController"), exports);
 tslib_1.__exportStar(require("./core/bootstrap/index"), exports);
 tslib_1.__exportStar(require("./core/tools/functions"), exports);
 tslib_1.__exportStar(require("./core/tools/upload"), exports);
+tslib_1.__exportStar(require("./core/tools/view"), exports);
 isMain && app.serve();
 //# sourceMappingURL=index.js.map

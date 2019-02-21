@@ -1,21 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
-const sfn_ejs_engine_1 = require("sfn-ejs-engine");
 const SSE = require("sfn-sse");
 const init_1 = require("../../init");
 const load_config_1 = require("../bootstrap/load-config");
 const Controller_1 = require("./Controller");
 const MarkdownParser_1 = require("../tools/MarkdownParser");
+const HttpError_1 = require("../tools/HttpError");
 const symbols_1 = require("../tools/symbols");
 const upload_1 = require("../tools/upload");
 const functions_inner_1 = require("../tools/functions-inner");
+const view_1 = require("../tools/view");
 class HttpController extends Controller_1.Controller {
     constructor(req, res) {
         super();
-        this.viewPath = this.Class.viewPath;
         this.viewExtname = this.Class.viewExtname;
-        this.engine = this.Class.engine;
         this.gzip = true;
         this.jsonp = false;
         this.csrfProtection = false;
@@ -31,15 +30,11 @@ class HttpController extends Controller_1.Controller {
     }
     getAbsFilename(filename) {
         if (!path.isAbsolute(filename))
-            filename = `${this.viewPath}/${filename}`;
+            filename = path.resolve(init_1.SRC_PATH, "views", filename);
         return filename;
     }
     view(filename, vars = {}) {
-        let ext = path.extname(filename);
-        if (ext != this.viewExtname) {
-            ext = this.viewExtname;
-            filename += ext;
-        }
+        let ext = path.extname(filename) || this.viewExtname;
         filename = this.getAbsFilename(filename);
         this.res.type = ext;
         if (!("i18n" in vars)) {
@@ -47,7 +42,16 @@ class HttpController extends Controller_1.Controller {
                 return this.i18n(text, ...replacements);
             };
         }
-        return this.engine.renderFile(filename, vars);
+        try {
+            let view = view_1.loadView(ext.slice(1), filename);
+            return view.instance().render(vars);
+        }
+        catch (err) {
+            if (err instanceof TypeError)
+                throw new HttpError_1.HttpError(404);
+            else
+                throw err;
+        }
     }
     viewRaw(filename, cache = !init_1.isDevMode) {
         filename = this.getAbsFilename(filename);
@@ -98,8 +102,6 @@ class HttpController extends Controller_1.Controller {
         return instance.view(instance.res.code.toString(), { err });
     }
 }
-HttpController.viewPath = init_1.SRC_PATH + "/views";
 HttpController.viewExtname = ".html";
-HttpController.engine = new sfn_ejs_engine_1.EjsEngine();
 exports.HttpController = HttpController;
 //# sourceMappingURL=HttpController.js.map
