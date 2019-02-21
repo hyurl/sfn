@@ -12,6 +12,10 @@ export interface Locale {
     [statement: string]: string;
 }
 
+export interface View {
+    render(data: { [name: string]: any }): string;
+}
+
 export interface Session extends Express.Session {
     uid: number;
 }

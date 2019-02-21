@@ -33,6 +33,5 @@ tslib_1.__exportStar(require("./core/controllers/WebSocketController"), exports)
 tslib_1.__exportStar(require("./core/bootstrap/index"), exports);
 tslib_1.__exportStar(require("./core/tools/functions"), exports);
 tslib_1.__exportStar(require("./core/tools/upload"), exports);
-tslib_1.__exportStar(require("./core/tools/view"), exports);
 isMain && app.serve();
 //# sourceMappingURL=index.js.map

@@ -1,15 +1,7 @@
 import { route, HttpController, HttpError, ROOT_PATH, Request, Response } from "sfn";
 import { readdir } from 'fs-extra';
 
-declare global {
-    namespace app {
-        namespace controllers {
-            const docs: ModuleProxy<DocController>;
-        }
-    }
-}
-
-export default class DocController extends HttpController {
+export default class extends HttpController {
     @route.get("/docs")
     @route.get("/docs/")
     async docs(req: Request, res: Response) {
@@ -32,7 +24,8 @@ export default class DocController extends HttpController {
 
             return req.xhr ? content : this.view("docs", {
                 sideMenu,
-                content
+                content,
+                port: app.config.server.http.port
             });
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;

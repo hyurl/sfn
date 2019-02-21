@@ -5,16 +5,13 @@ const SSE = require("sfn-sse");
 const init_1 = require("../../init");
 const load_config_1 = require("../bootstrap/load-config");
 const Controller_1 = require("./Controller");
-const MarkdownParser_1 = require("../tools/MarkdownParser");
 const HttpError_1 = require("../tools/HttpError");
 const symbols_1 = require("../tools/symbols");
 const upload_1 = require("../tools/upload");
-const functions_inner_1 = require("../tools/functions-inner");
-const view_1 = require("../tools/view");
+const get = require("lodash/get");
 class HttpController extends Controller_1.Controller {
     constructor(req, res) {
         super();
-        this.viewExtname = this.Class.viewExtname;
         this.gzip = true;
         this.jsonp = false;
         this.csrfProtection = false;
@@ -34,16 +31,15 @@ class HttpController extends Controller_1.Controller {
         return filename;
     }
     view(filename, vars = {}) {
-        let ext = path.extname(filename) || this.viewExtname;
         filename = this.getAbsFilename(filename);
-        this.res.type = ext;
         if (!("i18n" in vars)) {
             vars.i18n = (text, ...replacements) => {
                 return this.i18n(text, ...replacements);
             };
         }
         try {
-            let view = view_1.loadView(ext.slice(1), filename);
+            let view = get(app, app.views.resolve(filename));
+            this.res.type = "text/html";
             return view.instance().render(vars);
         }
         catch (err) {
@@ -52,15 +48,6 @@ class HttpController extends Controller_1.Controller {
             else
                 throw err;
         }
-    }
-    viewRaw(filename, cache = !init_1.isDevMode) {
-        filename = this.getAbsFilename(filename);
-        this.res.type = path.extname(filename);
-        return functions_inner_1.loadFile(filename, cache);
-    }
-    viewMarkdown(filename, cache = !init_1.isDevMode) {
-        path.extname(filename) != ".md" && (filename += ".md");
-        return this.viewRaw(filename, cache).then(MarkdownParser_1.MarkdownParser.parse);
     }
     send(data) {
         return this.res.send(data);
@@ -102,6 +89,5 @@ class HttpController extends Controller_1.Controller {
         return instance.view(instance.res.code.toString(), { err });
     }
 }
-HttpController.viewExtname = ".html";
 exports.HttpController = HttpController;
 //# sourceMappingURL=HttpController.js.map

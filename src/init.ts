@@ -3,7 +3,9 @@ import { config as configEnv } from "dotenv";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as FRON from "fron";
-import { ModuleProxy, RpcOptions, RpcChannel, FSWatcher } from "alar";
+import * as alar from "alar";
+import { Locale, View } from './core/tools/interfaces';
+import { Controller } from './core/controllers/Controller';
 
 declare global {
     namespace app {
@@ -14,38 +16,25 @@ declare global {
         const isDevMode: boolean;
         const isTsNode: boolean;
         const isCli: boolean;
+        const controllers: alar.ModuleProxy & { [x: string]: ModuleProxy<Controller> };
+        const locales: alar.ModuleProxy & { [x: string]: ModuleProxy<Locale> };
+        const views: alar.ModuleProxy & { [x: string]: ModuleProxy<View> };
 
-        namespace controllers {
-            const name: string;
-            const path: string;
-            function resolve(path: string): string;
-            function serve(config: string | RpcOptions): Promise<RpcChannel>;
-            function connect(config: string | RpcOptions): Promise<RpcChannel>;
-            function watch(): FSWatcher;
-        }
         namespace models {
             const name: string;
             const path: string;
             function resolve(path: string): string;
-            function serve(config: string | RpcOptions): Promise<RpcChannel>;
-            function connect(config: string | RpcOptions): Promise<RpcChannel>;
-            function watch(): FSWatcher;
+            function serve(config: string | alar.RpcOptions): Promise<alar.RpcChannel>;
+            function connect(config: string | alar.RpcOptions): Promise<alar.RpcChannel>;
+            function watch(): alar.FSWatcher;
         }
         namespace services {
             const name: string;
             const path: string;
             function resolve(path: string): string;
-            function serve(config: string | RpcOptions): Promise<RpcChannel>;
-            function connect(config: string | RpcOptions): Promise<RpcChannel>;
-            function watch(): FSWatcher;
-        }
-        namespace locales {
-            const name: string;
-            const path: string;
-            function resolve(path: string): string;
-            function serve(config: string | RpcOptions): Promise<RpcChannel>;
-            function connect(config: string | RpcOptions): Promise<RpcChannel>;
-            function watch(): FSWatcher;
+            function serve(config: string | alar.RpcOptions): Promise<alar.RpcChannel>;
+            function connect(config: string | alar.RpcOptions): Promise<alar.RpcChannel>;
+            function watch(): alar.FSWatcher;
         }
     }
 }
@@ -114,8 +103,44 @@ global["app"] = {
     isDevMode,
     isTsNode,
     isCli,
-    controllers: new ModuleProxy("controllers", APP_PATH + "/controllers"),
-    models: new ModuleProxy("models", APP_PATH + "/models"),
-    services: new ModuleProxy("services", APP_PATH + "/services"),
-    locales: new ModuleProxy("locales", APP_PATH + "/locales")
+    controllers: new alar.ModuleProxy("controllers", APP_PATH + "/controllers"),
+    models: new alar.ModuleProxy("models", APP_PATH + "/models"),
+    services: new alar.ModuleProxy("services", APP_PATH + "/services"),
+    locales: new alar.ModuleProxy("locales", SRC_PATH + "/locales"),
+    views: new alar.ModuleProxy("views", SRC_PATH + "/views")
 };
+
+app.locales.setLoader(<any>{
+    cache: {},
+    extesion: ".json",
+    load(path: string) {
+        if (!this.cache[path]) {
+            let file = path + this.extesion;
+            this.cache[path] = FRON.parse(fs.readFileSync(file, "utf8"), file);
+        }
+
+        return this.cache[path];
+    },
+    unload(path: string) {
+        delete this.cache[path];
+    }
+});
+
+app.views.setLoader(<any>{
+    cache: {},
+    extesion: ".html",
+    load(path: string) {
+        if (!this.cache[path]) {
+            this.cache[path] = {
+                render: () => {
+                    return fs.readFileSync(path + this.extesion, "utf8");
+                }
+            }
+        }
+
+        return this.cache[path];
+    },
+    unload(path: string) {
+        delete this.cache[path];
+    }
+});

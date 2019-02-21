@@ -6,12 +6,11 @@ import { SRC_PATH, isDevMode } from "../../init";
 import { config } from "../bootstrap/load-config";
 import { Controller } from "./Controller";
 import { MarkdownParser } from "../tools/MarkdownParser";
-import { Request, Response, Session } from "../tools/interfaces";
+import { Request, Response, Session, View } from "../tools/interfaces";
 import { HttpError } from "../tools/HttpError";
 import { realSSE } from "../tools/symbols";
 import { UploadOptions } from "../tools/upload";
-import { loadFile } from '../tools/functions-inner';
-import { loadView, View } from '../tools/view';
+import get = require('lodash/get');
 
 export { CorsOptions };
 
@@ -40,12 +39,12 @@ export { CorsOptions };
  */
 export class HttpController extends Controller {
     // static viewPath: string = SRC_PATH + "/views";
-    static viewExtname: string = ".html";
+    // static viewExtname: string = ".html";
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
 
     // viewPath = this.Class.viewPath;
-    viewExtname = this.Class.viewExtname;
+    // viewExtname = this.Class.viewExtname;
 
     /** If set, when unauthorized, fallback to the given URL. */
     fallbackTo: string;
@@ -102,12 +101,7 @@ export class HttpController extends Controller {
      * @param vars Local variables passed to the template.
      */
     view(filename: string, vars: { [name: string]: any } = {}) {
-        let ext = path.extname(filename) || this.viewExtname;
-
         filename = this.getAbsFilename(filename);
-
-        // Set response type.
-        this.res.type = ext;
 
         // i18n support for the template.
         if (!("i18n" in vars)) {
@@ -117,7 +111,10 @@ export class HttpController extends Controller {
         }
 
         try {
-            let view = <ModuleProxy<View>>loadView(ext.slice(1), filename);
+            let view: ModuleProxy<View> = get(app, app.views.resolve(filename));
+
+            this.res.type = "text/html";
+
             return view.instance().render(vars);
         } catch (err) {
             if (err instanceof TypeError)
@@ -125,34 +122,6 @@ export class HttpController extends Controller {
             else
                 throw err;
         }
-    }
-
-    /**
-     * Sends a view file with raw contents to the response context.
-     * 
-     * @param filename The template file, stored in `views/` by default.
-     * @param fromCache Try retrieving contents from cache first.
-     */
-    viewRaw(filename: string, cache = !isDevMode): Promise<string> {
-        filename = this.getAbsFilename(filename);
-        this.res.type = path.extname(filename);
-        return loadFile(filename, cache);
-    }
-
-    /**
-     * Sends a view file to the response context, and parse it as a markdown 
-     * file.
-     * 
-     * This method relies on the module `highlightjs`, so when displaying code 
-     * snippets, you need to include CSS files to the HTML page manually.
-     * 
-     * @param filename The template filename, if no extension presented, then 
-     *  `.md` will be used. Template files are by default stored in `views/`.
-     * @param fromCache Try retrieving contents from cache first.
-     */
-    viewMarkdown(filename: string, cache = !isDevMode): Promise<string> {
-        path.extname(filename) != ".md" && (filename += ".md");
-        return this.viewRaw(filename, cache).then(MarkdownParser.parse);
     }
 
     /** Alias of `res.send()`. */

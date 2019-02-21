@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>
-        <%=title%>
+        SFN Web
     </title>
 </head>
 
@@ -17,7 +17,7 @@
 
     <script src="/js/socket.io.js"></script>
     <script>
-        var socket = io.connect("<%=protocol%>://<%=host%>");
+        var socket = io.connect("localhost:80");
         socket.on("/index", function(data) {
             console.log("Socket:", data);
         }).on("/repeat-what-I-said", function(data) {

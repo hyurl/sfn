@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs-extra");
 const path = require("path");
 const program = require("commander");
-const FRON = require("fron");
 const pluralize = require("pluralize");
 const kebabCase = require("lodash/kebabCase");
 const camelCase = require("lodash/camelCase");
@@ -93,10 +92,10 @@ try {
         outputFile(output, contents, "Service");
     }
     else if (program.language) {
-        let output = `${init_1.SRC_PATH}/locales/${program.language}.ts`;
-        let contents = `import { Locale } from "sfn";\n\nexport default <Locale>`;
+        let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
         let mod = get(app.locales, load_config_1.config.lang);
         let lang;
+        let contents;
         if (mod && mod.proto) {
             lang = cloneDeep(mod.instance());
             for (let x in lang) {
@@ -106,7 +105,7 @@ try {
         else {
             lang = {};
         }
-        contents += FRON.stringify(lang, "    ") + ";";
+        contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
     }
     else if (process.argv.length <= 2) {

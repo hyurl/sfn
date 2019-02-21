@@ -16,18 +16,6 @@ export function moduleExists(name: string): boolean {
     return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
 }
 
-export async function loadFile(filename, fromCache = false): Promise<string> {
-    if (fromCache && FileCache[filename] !== undefined) {
-        return FileCache[filename];
-    } else {
-        let content = await fs.readFile(filename, "utf8");
-
-        fromCache && (FileCache[filename] = content);
-
-        return content;
-    }
-}
-
 export async function callsiteLog(err: Error) {
     var csr = CallSiteRecord({
         forError: err,

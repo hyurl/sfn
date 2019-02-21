@@ -1,6 +1,3 @@
-import { HttpController } from "sfn";
-import { EjsLoader } from "sfn-ejs-loader";
+import { EjsLoader } from "alar-ejs-loader";
 
-HttpController.viewExtname = ".ejs";
-
-app.views.register(new EjsLoader());
+app.views.setLoader(new EjsLoader());

@@ -120,17 +120,13 @@ if (!isCli) {
         app.models.watch();
         app.services.watch();
         app.locales.watch();
+        app.views.watch();
 
         let autoLoad = (filename: string) => {
             app.controllers.resolve(filename) && tryImport(filename);
         };
 
         app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
-
-        for (let type in app.views) {
-            if (type !== "register")
-                (<ModuleProxy>app.views[type]).watch();
-        }
     }
 
     (async () => {

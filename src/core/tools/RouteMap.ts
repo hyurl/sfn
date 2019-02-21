@@ -55,10 +55,10 @@ export class RouteMap<T> {
         return this.dataMap.get(key);
     }
 
-    resolve(key: string): ModuleProxy<T> {
+    resolve(key: string) {
         let data = this.get(key);
         let { ctor: { filename } } = data;
-        let mod = null;
+        let mod: ModuleProxy<T> = null;
 
         if (filename) {
             mod = get(app, app.controllers.resolve(filename));

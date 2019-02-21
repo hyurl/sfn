@@ -1,11 +1,9 @@
 This folder stores language packages, each package are named in RFC1766 standard,
-and exports a default object.
+and JSONC (JSON with Comments) is supported.
 
-```typescript
-// SRC_PATH/locales/zh-CN.ts
-import { Locale } from "sfn";
-
-export default <Locale>{
+```jsonc
+// zh-CN.json
+{
     "Hello, World!": "你好，世界！"
 }
 ```

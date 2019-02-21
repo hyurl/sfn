@@ -1,7 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const sfn_1 = require("sfn");
-const sfn_ejs_loader_1 = require("sfn-ejs-loader");
-sfn_1.HttpController.viewExtname = ".ejs";
-app.views.register(new sfn_ejs_loader_1.EjsLoader());
+const alar_ejs_loader_1 = require("alar-ejs-loader");
+app.views.setLoader(new alar_ejs_loader_1.EjsLoader());
 //# sourceMappingURL=http.js.map

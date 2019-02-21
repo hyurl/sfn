@@ -18,7 +18,7 @@ const init_1 = require("../../init");
 const RouteMap_1 = require("../tools/RouteMap");
 let importedNamesapces = [];
 function tryImport(nsp) {
-    if (!importedNamesapces.includes(nsp))
+    if (importedNamesapces.includes(nsp))
         return;
     importedNamesapces.push(nsp);
     index_1.ws.of(nsp)

@@ -2,7 +2,6 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as program from "commander";
-import * as FRON from "fron";
 import pluralize = require("pluralize");
 import kebabCase = require("lodash/kebabCase");
 import camelCase = require("lodash/camelCase");
@@ -18,6 +17,7 @@ import {
     createImport
 } from "../core/tools/functions-inner";
 import { Locale } from '../core/tools/interfaces';
+
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
@@ -127,10 +127,10 @@ try {
 
         outputFile(output, contents, "Service");
     } else if (program.language) { // create language pack.
-        let output: string = `${SRC_PATH}/locales/${program.language}.ts`;
-        let contents: string = `import { Locale } from "sfn";\n\nexport default <Locale>`;
+        let output: string = `${SRC_PATH}/locales/${program.language}.json`;
         let mod: ModuleProxy<Locale> = get(app.locales, config.lang);
-        let lang: any;
+        let lang: Locale;
+        let contents: string;
 
         if (mod && mod.proto) {
             lang = cloneDeep(mod.instance());
@@ -142,7 +142,7 @@ try {
             lang = {};
         }
 
-        contents += FRON.stringify(lang, "    ") + ";";
+        contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
     } else if (process.argv.length <= 2) {
         program.help();
