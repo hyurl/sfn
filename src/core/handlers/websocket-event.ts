@@ -23,7 +23,7 @@ type SocketEventInfo = {
 };
 
 export function tryImport(nsp: string) {
-    if (!importedNamesapces.includes(nsp)) return;
+    if (importedNamesapces.includes(nsp)) return;
 
     importedNamesapces.push(nsp);
     ws.of(nsp)
