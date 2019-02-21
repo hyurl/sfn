@@ -1,5 +1,4 @@
-import { route, HttpError, ROOT_PATH, Request, Response } from "sfn";
-import IndexController from "./index";
+import { route, HttpController, HttpError, ROOT_PATH, Request, Response } from "sfn";
 import { readdir } from 'fs-extra';
 
 declare global {
@@ -10,7 +9,7 @@ declare global {
     }
 }
 
-export default class DocController extends IndexController {
+export default class DocController extends HttpController {
     @route.get("/docs")
     @route.get("/docs/")
     async docs(req: Request, res: Response) {
@@ -32,7 +31,6 @@ export default class DocController extends IndexController {
             let content = await app.services.docs.remote().getContent(version, this.lang, name);
 
             return req.xhr ? content : this.view("docs", {
-                ...this.indexVars,
                 sideMenu,
                 content
             });

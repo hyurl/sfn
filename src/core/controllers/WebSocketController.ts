@@ -28,12 +28,6 @@ import { activeEvent } from "../tools/symbols";
  * If you want to send a response manually, you can just call the 
  * `socket.emit()` to do so, the WebSocket support continuous message 
  * transmissions.
- * 
- * The decorator function `@event()` is used to set socket events. But when 
- * you're coding in JavaScript, there is not decorators, the framework 
- * support another compatible way to allow you doing such things by using the 
- * **jsdoc** block with an `@event` tag, but you need to set 
- * `config.enableDocRoute` to `true`.
  */
 export class WebSocketController extends Controller {
     /** Reference to the corresponding socket context. */

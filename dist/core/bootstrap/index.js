@@ -72,17 +72,20 @@ if (!init_1.isCli) {
     let bootstrap = init_1.APP_PATH + "/bootstrap/index";
     functions_inner_1.moduleExists(bootstrap) && tryImport(bootstrap);
     require("../handlers/worker-shutdown");
+    if (load_config_1.config.hotReloading) {
+        app.models.watch();
+        app.services.watch();
+        app.locales.watch();
+        let autoLoad = (filename) => {
+            app.controllers.resolve(filename) && tryImport(filename);
+        };
+        app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
+    }
     (async () => {
         try {
             await Service_1.default.cache.sync();
         }
         catch (e) { }
-        if (load_config_1.config.hotReloading) {
-            app.models.watch();
-            app.services.watch();
-            app.locales.watch();
-            app.controllers.watch().on("add", tryImport).on("change", tryImport);
-        }
         if (load_config_1.config.server.rpc && Object.keys(load_config_1.config.server.rpc).length) {
             for (let name in load_config_1.config.server.rpc) {
                 await rpc_support_1.connectRPC(name);

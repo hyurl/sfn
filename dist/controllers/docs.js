@@ -2,9 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const sfn_1 = require("sfn");
-const index_1 = require("./index");
 const fs_extra_1 = require("fs-extra");
-class DocController extends index_1.default {
+class DocController extends sfn_1.HttpController {
     async docs(req, res) {
         let folders = (await fs_extra_1.readdir(sfn_1.ROOT_PATH + "/docs")).sort((a, b) => {
             return parseFloat(b.slice(1)) - parseFloat(a.slice(1));
@@ -18,8 +17,10 @@ class DocController extends index_1.default {
         try {
             let sideMenu = await app.services.docs.remote().getSideMenu(version, this.lang);
             let content = await app.services.docs.remote().getContent(version, this.lang, name);
-            return req.xhr ? content : this.view("docs", Object.assign({}, this.indexVars, { sideMenu,
-                content }));
+            return req.xhr ? content : this.view("docs", {
+                sideMenu,
+                content
+            });
         }
         catch (e) {
             let code = e.message.includes("no such file") ? 404 : 500;

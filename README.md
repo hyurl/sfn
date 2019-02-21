@@ -22,13 +22,13 @@ to initiate your project, assume you have some knowledge of
 **SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
 own code should be as well.
 
-*The runtime [ts-node](https://github.com/TypeStrong/ts-node) is optional, only*
-*needed if you want to run your program without compiling.*
-
 ```sh
-npm i -g typescript
-npm i -g ts-node
+npm i -D typescript
 ```
+
+*History versions of SFN once support **ts-node** runtime, however, due to its*
+*limitations, e.g. doesn't support of `includes`, since 0.5.x, SFN no longer*
+*support ts-node.*
 
 ### Install PM2 (Optional)
 
@@ -64,15 +64,8 @@ sfn init
 
 **SFN** provides a demo, so you can now start server and see what will happen.
 
-If you have installed **ts-node**, use this command to start the project.
-
 ```sh
-ts-node src
-```
-
-Otherwise, compile the source code with command: `tsc`, then run the command:
-
-```sh
+tsc
 node dist
 ```
 
@@ -142,6 +135,13 @@ mkdir ./node_modules
 ln -s ./sfn ./node_modules/sfn # some modules require sfn in node_modules
 cd sfn
 npm i
+tsc
+node dist/doc-server # SFN 0.5.x uses separeated documentation service
+```
+
+And open a new terminal, use the following command to start the web server.
+
+```sh
 node dist
 ```
 

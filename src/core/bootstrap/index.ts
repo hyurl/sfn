@@ -114,19 +114,24 @@ if (!isCli) {
     // load worker message handlers
     require("../handlers/worker-shutdown");
 
+    // hot-reloading
+    if (config.hotReloading) {
+        app.models.watch();
+        app.services.watch();
+        app.locales.watch();
+
+        let autoLoad = (filename: string) => {
+            app.controllers.resolve(filename) && tryImport(filename);
+        };
+
+        app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
+    }
+
     (async () => {
         try {
             // try to sync any cached data hosted by the default cache service.
             await service.cache.sync();
         } catch (e) { }
-
-        // hot-reloading
-        if (config.hotReloading) {
-            app.models.watch();
-            app.services.watch();
-            app.locales.watch();
-            app.controllers.watch().on("add", tryImport).on("change", tryImport);
-        }
 
         // connect RPC services
         if (config.server.rpc && Object.keys(config.server.rpc).length) {

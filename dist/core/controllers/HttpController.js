@@ -10,7 +10,6 @@ const MarkdownParser_1 = require("../tools/MarkdownParser");
 const symbols_1 = require("../tools/symbols");
 const upload_1 = require("../tools/upload");
 const functions_inner_1 = require("../tools/functions-inner");
-const Engine = new sfn_ejs_engine_1.EjsEngine();
 class HttpController extends Controller_1.Controller {
     constructor(req, res) {
         super();
@@ -101,6 +100,6 @@ class HttpController extends Controller_1.Controller {
 }
 HttpController.viewPath = init_1.SRC_PATH + "/views";
 HttpController.viewExtname = ".html";
-HttpController.engine = Engine;
+HttpController.engine = new sfn_ejs_engine_1.EjsEngine();
 exports.HttpController = HttpController;
 //# sourceMappingURL=HttpController.js.map

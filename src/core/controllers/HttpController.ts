@@ -16,8 +16,6 @@ import { loadFile } from '../tools/functions-inner';
 
 export { CorsOptions };
 
-const Engine = new EjsEngine();
-
 /**
  * HttpController manages requests come from an HTTP client.
  * 
@@ -40,17 +38,11 @@ const Engine = new EjsEngine();
  * 
  * If you want to send a response manually, you can just call the `res.send()`
  * or `res.end()` to do so, no more data will be sent after sending one.
- * 
- * The decorator function `@route()` is used to set routes. But when you're 
- * coding in JavaScript, there is not decorators, the framework support 
- * another compatible way to allow you doing such things by using the 
- * **jsdoc** block with a `@route` tag, but you need to set 
- * `config.enableDocRoute` to `true`.
  */
 export class HttpController extends Controller {
     static viewPath: string = SRC_PATH + "/views";
     static viewExtname: string = ".html";
-    static engine: TemplateEngine = Engine;
+    static engine: TemplateEngine = new EjsEngine();
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
 

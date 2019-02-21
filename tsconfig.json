@@ -14,7 +14,11 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "emitDecoratorMetadata": true,
-        "diagnostics": true
+        "diagnostics": true,
+        "baseUrl": ".",
+        "paths": {
+            "sfn": ["."]
+        }
     },
     "include": [
         "src/*.ts",
@@ -26,7 +30,7 @@
         "src/models/*.ts",
         "src/core/*/*.ts",
         "src/core/*/*/*.ts",
-        "src/cli/*.ts",
+        "src/cli/*.ts"
     ],
     "exclude": [
         "./node_modules/*"
