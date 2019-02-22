@@ -9,19 +9,16 @@ let isMain = process.mainModule.filename === __filename;
 import "reflect-metadata";
 import * as Mail from "sfn-mail";
 import * as Logger from "sfn-logger";
-import * as Validator from "sfn-validator";
 import * as SSE from "sfn-sse";
 
-export { Mail, Logger, Validator, SSE };
+export { Mail, Logger, SSE };
 export { Cookie, CookieOptions } from "sfn-cookie";
-export * from "sfn-scheduler";
 export * from "sfn-xss";
 export * from "./init";
 export * from "./config";
 export * from "./core/tools/interfaces";
 export * from "./core/tools/HttpError";
 export * from "./core/tools/SocketError";
-export * from "./core/tools/MarkdownParser";
 
 // load user config before loading subsequent modules
 export { config } from "./core/bootstrap/load-config";

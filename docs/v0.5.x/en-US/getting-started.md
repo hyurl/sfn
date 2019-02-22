@@ -14,13 +14,14 @@ npm init
 to initiate your project, assume you have some knowledge of 
 [NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
-### Install TypeScript Compiler And Runtime
+### Prepare TypeScript Environment
 
 **SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
 own code should be as well.
 
 ```sh
 npm i -D typescript
+npm i -D @types/node
 ```
 
 *History versions of SFN once support **ts-node** runtime, however, due to its*

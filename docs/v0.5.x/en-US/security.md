@@ -302,8 +302,9 @@ can learn more information about it on GitHub.
 ### Example
 
 ```typescript
-import { HttpController, Request, Validator, route } from "sfn";
-import { User, NotFoundError } from "modelar"
+import { HttpController, Request, route } from "sfn";
+import { User, NotFoundError } from "modelar";
+import { Validator } from "sfn-validator";
 
 let validator = new Validator({
     email: {

@@ -13,13 +13,14 @@ npm init
 来初始化你的项目，假设你已经对 [NPM](https://www.npmjs.com/) 有了一定的理解并安装了
 [NodeJS](https://nodejs.org) 环境。
 
-### 安装 TypeScript 编译器
+### 准备 TypeScript 环境
 
 **SFN** 是使用 [TypeScript](https://www.typescriptlang.org) 编写的，因此你也应该
 使用它来编写你的代码。
 
 ```sh
 npm i -D typescript
+npm i -D @types/node
 ```
 
 *SFN 的历史版本曾支持 **ts-node** 运行时，然而由于其包含了诸多限制（如不支持*

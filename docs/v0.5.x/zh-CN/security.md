@@ -279,8 +279,9 @@ XSS 过滤函数在某些时候可能会不尽人意，因此你还有另外的�
 ### 示例
 
 ```typescript
-import { HttpController, Request, Validator, route } from "sfn";
-import { User, NotFoundError } from "modelar"
+import { HttpController, Request, route } from "sfn";
+import { User, NotFoundError } from "modelar";
+import { Validator } from "sfn-validator";
 
 let validator = new Validator({
     email: {

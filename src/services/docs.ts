@@ -1,9 +1,10 @@
-import { Service, isDevMode, ROOT_PATH, MarkdownParser } from "sfn";
+import { Service, isDevMode, ROOT_PATH } from "sfn";
 import { readdir, readFile } from 'fs-extra';
 import { resolve as resolvePath } from "path";
 import { Section, constructMarkdown, renderHtml } from "outlining";
 import trim = require("lodash/trim");
 import meta from "comment-meta";
+import MarkdownParser from "sfn-markdown-parser";
 
 declare global {
     namespace app {
