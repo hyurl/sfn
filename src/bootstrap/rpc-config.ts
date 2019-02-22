@@ -1,4 +1,5 @@
 import { config } from "../core/bootstrap/load-config";
+import "../core/bootstrap/load-service";
 
 config.server.rpc = {
     "doc-server": {

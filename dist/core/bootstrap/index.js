@@ -6,10 +6,15 @@ const webium_1 = require("webium");
 const SocketIO = require("socket.io");
 const chalk_1 = require("chalk");
 const init_1 = require("../../init");
-const load_config_1 = require("./load-config");
 const functions_inner_1 = require("../tools/functions-inner");
 const Service_1 = require("../tools/Service");
+const load_config_1 = require("./load-config");
+const load_controller_1 = require("./load-controller");
 const rpc_support_1 = require("./rpc-support");
+require("./load-locale");
+require("./load-model");
+require("./load-service");
+require("./load-view");
 exports.router = null;
 exports.http = null;
 exports.ws = null;
@@ -38,7 +43,7 @@ app.serve = function serve(port) {
             process.exit(1);
         }
     }).listen(port || httpPort, () => {
-        require("../bootstrap/load-controller");
+        load_controller_1.loadControllers(app.controllers.path);
         if (typeof process.send == "function") {
             process.send("ready");
         }

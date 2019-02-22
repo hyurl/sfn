@@ -7,7 +7,7 @@ export function loadUser() {
     try {
         ctor = get(app, "models.user").ctor;
 
-        if (!(ctor.prototype instanceof modelar.User)) {
+        if (!ctor || !(ctor.prototype instanceof modelar.User)) {
             ctor = modelar.User;
         }
     } catch (err) {

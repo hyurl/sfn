@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const load_config_1 = require("../core/bootstrap/load-config");
+require("../core/bootstrap/load-service");
 load_config_1.config.server.rpc = {
     "doc-server": {
         host: "127.0.0.1",

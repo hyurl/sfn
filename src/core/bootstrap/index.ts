@@ -1,15 +1,19 @@
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
-import { ModuleProxy } from "alar";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
-import { config, baseUrl } from "./load-config";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
 import service, { Service } from '../tools/Service';
+import { config, baseUrl } from "./load-config";
+import { loadControllers } from "./load-controller";
 import { connectRPC } from './rpc-support';
+import "./load-locale";
+import "./load-model";
+import "./load-service";
+import "./load-view";
 
 declare global {
     namespace app {
@@ -69,7 +73,7 @@ app.serve = function serve(port?: number) {
         }
     }).listen(port || httpPort, () => {
         // load controllers
-        require("../bootstrap/load-controller");
+        loadControllers(app.controllers.path);
 
         if (typeof process.send == "function") {
             // notify PM2 that the service is available.

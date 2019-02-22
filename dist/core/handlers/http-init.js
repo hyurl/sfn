@@ -14,6 +14,7 @@ index_1.router.use(async (req, res, next) => {
     res.headers["server"] = `NodeJS/${process.version}`;
     res.headers["x-powered-by"] = `sfn/${init_1.version}`;
     res.gzip = false;
+    res.charset = "UTF-8";
     let logger = getDevLogger(req, res);
     res.on("finish", logger).on("close", logger);
     await next();

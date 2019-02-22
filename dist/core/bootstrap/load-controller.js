@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs-extra");
 const path = require("path");
+const alar = require("alar");
 const init_1 = require("../../init");
 const HttpController_1 = require("../controllers/HttpController");
 const WebSocketController_1 = require("../controllers/WebSocketController");
@@ -25,5 +26,6 @@ async function loadControllers(controllerPath) {
         }
     }
 }
-loadControllers(app.controllers.path);
+exports.loadControllers = loadControllers;
+global["app"].controllers = new alar.ModuleProxy("controllers", init_1.APP_PATH + "/controllers");
 //# sourceMappingURL=load-controller.js.map

@@ -5,7 +5,6 @@ const dotenv_1 = require("dotenv");
 const chalk_1 = require("chalk");
 const fs = require("fs");
 const FRON = require("fron");
-const alar = require("alar");
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
 exports.version = require("../package.json").version;
@@ -43,42 +42,6 @@ global["app"] = {
     isDebugMode: exports.isDebugMode,
     isDevMode: exports.isDevMode,
     isTsNode: exports.isTsNode,
-    isCli: exports.isCli,
-    controllers: new alar.ModuleProxy("controllers", exports.APP_PATH + "/controllers"),
-    models: new alar.ModuleProxy("models", exports.APP_PATH + "/models"),
-    services: new alar.ModuleProxy("services", exports.APP_PATH + "/services"),
-    locales: new alar.ModuleProxy("locales", exports.SRC_PATH + "/locales"),
-    views: new alar.ModuleProxy("views", exports.SRC_PATH + "/views")
+    isCli: exports.isCli
 };
-app.locales.setLoader({
-    cache: {},
-    extesion: ".json",
-    load(path) {
-        if (!this.cache[path]) {
-            let file = path + this.extesion;
-            this.cache[path] = FRON.parse(fs.readFileSync(file, "utf8"), file);
-        }
-        return this.cache[path];
-    },
-    unload(path) {
-        delete this.cache[path];
-    }
-});
-app.views.setLoader({
-    cache: {},
-    extesion: ".html",
-    load(path) {
-        if (!this.cache[path]) {
-            this.cache[path] = {
-                render: () => {
-                    return fs.readFileSync(path + this.extesion, "utf8");
-                }
-            };
-        }
-        return this.cache[path];
-    },
-    unload(path) {
-        delete this.cache[path];
-    }
-});
 //# sourceMappingURL=init.js.map
