@@ -14,7 +14,7 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "emitDecoratorMetadata": true,
-        "diagnostics": true,
+        // "diagnostics": true,
         "baseUrl": ".",
         "paths": {
             "sfn": [

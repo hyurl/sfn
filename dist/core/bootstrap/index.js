@@ -44,6 +44,10 @@ app.serve = function serve(port) {
         }
     }).listen(port || httpPort, () => {
         load_controller_1.loadControllers(app.controllers.path);
+        let autoLoad = (filename) => {
+            app.controllers.resolve(filename) && tryImport(filename);
+        };
+        app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
         if (typeof process.send == "function") {
             process.send("ready");
         }
@@ -82,10 +86,6 @@ if (!init_1.isCli) {
         app.services.watch();
         app.locales.watch();
         app.views.watch();
-        let autoLoad = (filename) => {
-            app.controllers.resolve(filename) && tryImport(filename);
-        };
-        app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
     }
     (async () => {
         try {

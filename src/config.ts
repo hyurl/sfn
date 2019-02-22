@@ -44,6 +44,10 @@ export interface SFNConfig {
      * - `services`
      * - `locales`
      * - `views`
+     * 
+     * During development, when hot-reloading is enabled, you should start 
+     * typescript compiler in watch mode (`tsc --watch`).
+     * 
      * @see https://github.com/hyurl/alar
      */
     hotReloading?: boolean;

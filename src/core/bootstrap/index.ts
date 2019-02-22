@@ -75,6 +75,13 @@ app.serve = function serve(port?: number) {
         // load controllers
         loadControllers(app.controllers.path);
 
+        // hot-reload controllers
+        let autoLoad = (filename: string) => {
+            app.controllers.resolve(filename) && tryImport(filename);
+        };
+
+        app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
+
         if (typeof process.send == "function") {
             // notify PM2 that the service is available.
             process.send("ready");
@@ -125,12 +132,6 @@ if (!isCli) {
         app.services.watch();
         app.locales.watch();
         app.views.watch();
-
-        let autoLoad = (filename: string) => {
-            app.controllers.resolve(filename) && tryImport(filename);
-        };
-
-        app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
     }
 
     (async () => {

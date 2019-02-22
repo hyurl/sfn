@@ -4,14 +4,14 @@
 Session is enabled by default in **SFN** framework, and shared between HTTP 
 and WebSocket. the framework uses 
 [express-session](https://www.npmjs.com/package/express-session) to back 
-session support, and uses 
-[session-file-store](https://www.npmjs.com/package/session-file-store) as the 
-default storage engine.
+session support.
 
 ## Configuration
 
 You can modify `config.ts` to set proper configurations for your own session
-needs, the following is what the framework does.
+needs, the following example shows how to configure 
+[session-file-store](https://www.npmjs.com/package/session-file-store) as the 
+storage engine.
 
 ```typescript
 import * as Session from "express-session";
