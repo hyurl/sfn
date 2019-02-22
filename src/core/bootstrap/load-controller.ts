@@ -28,8 +28,8 @@ export async function loadControllers(controllerPath: string) {
 
             if (ctor && (
                 (ctor.prototype instanceof WebSocketController) ||
-                (ctor.prototype instanceof HttpController))
-            ) {
+                (ctor.prototype instanceof HttpController)
+            )) {
                 ctor.assign({ filename });
             }
         } else if (stat.isDirectory()) {
