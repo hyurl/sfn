@@ -65,7 +65,7 @@ export default class extends WebSocketController {
     @event("/example")
     index(socket: WebSocket) {
         socket.session.data = "something";
-        socket.session.save(() => null);
+        socket.session.save(null);
         return "anything";
     }
 }
