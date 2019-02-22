@@ -1,14 +1,6 @@
 import { WebSocketController, WebSocket, event } from "sfn";
 
-declare global {
-    namespace app {
-        namespace controllers {
-            const __mod__: ModuleProxy<__Controller__, WebSocket>;
-        }
-    }
-}
-
-export default class __Controller__ extends WebSocketController {
+export default class extends WebSocketController {
     @event("/{name}/create")
     create(data: any, socket: WebSocket) {
         // ...
