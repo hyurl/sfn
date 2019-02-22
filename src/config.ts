@@ -7,7 +7,6 @@ import { DBConfig } from "modelar";
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { ROOT_PATH } from "./init";
 import { RpcOptions } from 'alar';
 
 /**
