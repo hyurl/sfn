@@ -37,7 +37,7 @@ export function tryImport(nsp: string) {
         .on("connection", (socket: WebSocket) => {
             for (let item of eventMap.values()) {
                 socket.on(item.route, (...data) => {
-                    handleEvent(eventMap.keyof(item), socket, data);
+                    handleEvent(eventMap.keyFor(item), socket, data);
                 });
             }
 

@@ -80,7 +80,7 @@ export function event(name: string, Class?: typeof WebSocketController, method?:
                     route: name,
                     ctor: proto.Class
                 };
-                let key = eventMap.keyof(data);
+                let key = eventMap.keyFor(data);
 
                 eventMap.add(key, prop);
 
@@ -114,7 +114,7 @@ function _route(...args: any[]) {
                     route: path,
                     ctor: proto.Class
                 };
-                let key = routeMap.keyof(data);
+                let key = routeMap.keyFor(data);
 
                 routeMap.add(key, prop);
 

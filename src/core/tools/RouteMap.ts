@@ -14,7 +14,7 @@ export class RouteMap<T> {
     private dataMap = new Map<string, RouteMapData<T>>();
     private methodMap = new Map<string, string[]>();
 
-    keyof(data: RouteMapData<T>) {
+    keyFor(data: RouteMapData<T>) {
         let { prefix, route, ctor } = data;
         let name = app.controllers.resolve(ctor.filename);
         let key = prefix + " " + route + " " + name;

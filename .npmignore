@@ -4,7 +4,10 @@ logs/
 cache/
 sessions/
 docs/
+dist/bootstrap/
+dist/services/
 src/assets/
+src/bootstrap/
 src/controllers/
 src/locales/
 src/services/

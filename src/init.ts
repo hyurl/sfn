@@ -1,8 +1,7 @@
 import * as path from "path";
-import { config as configEnv } from "dotenv";
-import chalk from "chalk";
 import * as fs from "fs";
 import * as FRON from "fron";
+import { config as configEnv } from "dotenv";
 
 declare global {
     namespace app {

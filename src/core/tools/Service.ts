@@ -110,5 +110,4 @@ export class Service extends EventEmitter {
     db: DB;
 }
 
-const service = new Service();
-export default service;
+export default new Service();

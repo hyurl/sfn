@@ -5,8 +5,6 @@ import chalk from "chalk";
 import { isTsNode, isDevMode } from "../../init";
 import service from './Service';
 
-const FileCache: { [filename: string]: string } = {};
-
 export function isOwnMethod(obj: any, method: string): boolean {
     return typeof obj[method] === "function" &&
         (<Object>obj.constructor.prototype).hasOwnProperty(method);
