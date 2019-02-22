@@ -137,7 +137,7 @@ export default class extends HttpController {
 
 ## Signature of Methods
 
-From the above example you see I passed a `req: Request` to the methods that 
+From the above example you see I passed a `uid: number` to the methods that 
 bound to routes. Actually, you can do more, please have a look at
 [Dependency Injection](./di#Auto-Injection-in-Controllers).
 
@@ -243,7 +243,7 @@ export default class extends HttpController {
 
 Some times you may want to do something before the actual method is called, 
 you want to initiate some configurations before the class is instantiated, you
-want to customize the `constructor` of the class. So this is how:
+want to customize the `constructor` of the class, just like this:
 
 ```typescript
 import { HttpController, Request, Response } from "sfn";

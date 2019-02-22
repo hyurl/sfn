@@ -107,10 +107,37 @@ var table = new Table(new Article);
 })();
 ```
 
-## 在 sfn 中
+## 在 SFN 中
 
-在一个 **SFN** 应用程序中，你应该将你的模型文件都存储在 `src/models/` 目录中，然后
-在任何你想要的地方导入它们。
+自 SFN 0.5.x 版本起，请始终使用 Alar 的模块解决方案来定义模型，以便利用其自动加载和
+热重载特性。
+
+```typescript
+// src/models/article.ts
+import { Model, field, primary, searchable } from "modelar";
+
+declare global {
+    namespace app {
+        namespace models {
+            const user: ModuleProxy<User>;
+        }
+    }
+}
+
+export default class Article extends Model {
+    table = "articles";
+
+    @field
+    @primary
+    id: number;
+
+    @field("varchar", 255)
+    title: string
+
+    @field("text")
+    content: string;
+}
+```
 
 关于数据库连接配置，虽然这儿我已经为你展示了如何初始化 **DB** 构造器对象，但这并不是
 我们将要在框架中使用的方式。
@@ -154,10 +181,18 @@ export default class extends HttpController {
 它显然不适合你地项目，因此你应该定义一个新的类来替换它。
 
 ```typescript
-// src/models/User.ts
+// src/models/user.ts
 import * as modelar from "modelar";
 
-export class User extends modelar.User {
+declare global {
+    namespace app {
+        namespace models {
+            const user: ModuleProxy<User>;
+        }
+    }
+}
+
+export default class User extends modelar.User {
     // ...
 }
 ```

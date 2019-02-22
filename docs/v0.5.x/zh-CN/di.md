@@ -1,44 +1,8 @@
 <!-- title: 依赖注入; order: 18 -->
 # 基本概念
 
-要使你的应用更加强劲，SFN 引入了 **依赖注入** 的概念，一如既往地，它非常简单。
-
-要使用这个技术，你将需要安装一个额外的模块，
-[injectable-ts](https://github.com/hyurl/injectable-ts)。
-
-## 示例
-
-```typescript
-// <SRC_PATH>/services/MyService.ts
-import { Service } from "sfn";
-import { injectable } from "injectable-ts";
-
-@injectable
-export class MyService extends Service {
-    // ...
-}
-```
-
-```typescript
-// <SRC_PATH>/services/MyController.ts
-import { HttpController } from "sfn";
-import { injected } from "injectable-ts";
-import { MyService } from "../services/MyService";
-
-export class MyController extends HttpController {
-    @injected
-    service: MyService;
-
-    async index() {
-        // actually, `service.cache` is auto-injected as well.
-        await this.service.cache.set("name", "Some Name");
-        // ...
-    }
-}
-```
-
-这个例子展示了一点点 [injectable-ts](https://github.com/hyurl/injectable-ts) 的
-知识，它能做的不止这些，例如，传递参数等，请前往 GitHub 并学习更多关于它的知识。
+由于 SFN 0.5.x 引入了 Alar 框架来自动加载和热重载模块，传统的依赖注入诸如已经不再建议
+使用，因此这里只列出控制器中的依赖注入。
 
 ## 在控制器中自动注入
 

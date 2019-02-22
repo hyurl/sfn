@@ -126,7 +126,7 @@ export default class extends HttpController {
 
 ## 方法的签名
 
-从上面的例子中，你可以看到我传递了一个 `req: Request` 到绑定到路由的方法中。实际上，
+从上面的例子中，你可以看到我传递了一个 `uid: number` 到绑定到路由的方法中。实际上，
 你可以做得更多，请查看章节 [依赖注入](./di#在控制器中自动注入).
 
 ## 处理异步操作
@@ -224,7 +224,7 @@ export default class extends HttpController {
 ## 构造函数
 
 有些时候你可能想要在真正的方法被调用前做一些事情，你可能想要进行一些额外的配置，在类被实例化前，
-你想要自定义类的 `constructor`。就像下面这样：
+你想要自定义类的 `constructor`，就像下面这样：
 
 ```typescript
 import { HttpController, Request, Response } from "sfn";

@@ -1,46 +1,9 @@
 <!-- title: Dependency Injection; order: 18 -->
 # Concept
 
-To make your application even more stronger, SFN adopted the mechanism of 
-**Dependency Injection**, and as usual, it is very easy to use.
-
-To use this mechanism, you'll have to install another package named
-[injectable-ts](https://github.com/hyurl/injectable-ts).
-
-## Example
-
-```typescript
-// <SRC_PATH>/services/MyService.ts
-import { Service } from "sfn";
-import { injectable } from "injectable-ts";
-
-@injectable
-export class MyService extends Service {
-    // ...
-}
-```
-
-```typescript
-// <SRC_PATH>/services/MyController.ts
-import { HttpController } from "sfn";
-import { injected } from "injectable-ts";
-import { MyService } from "../services/MyService";
-
-export class MyController extends HttpController {
-    @injected
-    service: MyService;
-
-    async index() {
-        // actually, `service.cache` is auto-injected as well.
-        await this.service.cache.set("name", "Some Name");
-        // ...
-    }
-}
-```
-
-This example just shows you a little bit of 
-[injectable-ts](https://github.com/hyurl/injectable-ts), it does more than that,
-e.g. passing parameters, please go to GitHub and learn a little more about it.
+Since SFN 0.5.x introduce Alar framework to auto-load and hot-reload modules, 
+traditional DI support is no longer suggested, so here only list out controller
+DI support.
 
 ## Auto-Injection in Controllers
 

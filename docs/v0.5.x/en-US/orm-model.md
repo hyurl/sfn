@@ -111,8 +111,35 @@ var table = new Table(new Article);
 
 ## In SFN
 
-In an **SFN** application, you should put your model files in `src/models/`, 
-and import them wherever you want.
+Since SFN 0.5.x, please always define models according to the Alar module 
+solution, so that take the benefits of auto-loading and hot-reloading.
+
+```typescript
+// src/models/article.ts
+import { Model, field, primary, searchable } from "modelar";
+
+declare global {
+    namespace app {
+        namespace models {
+            const article: ModuleProxy<Article>;
+        }
+    }
+}
+
+export default class Article extends Model {
+    table = "articles";
+
+    @field
+    @primary
+    id: number;
+
+    @field("varchar", 255)
+    title: string
+
+    @field("text")
+    content: string;
+}
+```
 
 About the database connection configuration, although here I've shown you how 
 to initiate the **DB** constructor, but it's not what we are going to do in 
@@ -160,10 +187,18 @@ authorization and other stuffs, but its obvious not suitable for your project,
 so you should define a new class to replace it.
 
 ```typescript
-// src/models/User.ts
+// src/models/user.ts
 import * as modelar from "modelar";
 
-export class User extends modelar.User {
+declare global {
+    namespace app {
+        namespace models {
+            const user: ModuleProxy<User>;
+        }
+    }
+}
+
+export default class User extends modelar.User {
     // ...
 }
 ```
