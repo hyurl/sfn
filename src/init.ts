@@ -65,13 +65,6 @@ export const isDevMode = isDebugMode || !process.send;
 // support .env configuration file
 configEnv({ path: ROOT_PATH + "/.env" });
 
-if (isDevMode && !isDebugMode && !isCli) {
-    console.log("You program is running in development mode without "
-        + "'--inspect' flag, please consider changing to debug environment.");
-    console.log("For help, see "
-        + chalk.yellow("https://sfnjs.com/docs/v0.5.x/debug"));
-}
-
 global["app"] = {
     ROOT_PATH,
     SRC_PATH,

@@ -1,5 +1,4 @@
 import * as Session from "express-session";
-import * as sessionFileStore from "session-file-store";
 import { ServerResponse } from "http";
 import { Stats } from "fs";
 import serveStatic = require("serve-static");
@@ -35,13 +34,16 @@ export interface SFNConfig {
     statics?: string[] | { [path: string]: StaticOptions };
     /**
      * When any module file has been modified, rather than restart the whole 
-     * server, the program will try to refresh the memory cache instead.
-     * The hot-reloading feature if powered by **Alar** framework, and make sure
-     * you **DON'T** import the module statically in anywhere, otherwise it may 
-     * not be reload as expected.
+     * server, try to refresh the memory cache instead. NOTE: **DO NOT** import 
+     * the module statically in anywhere, otherwise it may not be reloaded as 
+     * expected.
      * 
-     * Currently, only `controllers`, `models` and `services` can be 
-     * hot-reloaded.
+     * Currently, these entities can be hot-reloaded:
+     * - `controllers`
+     * - `models`
+     * - `services`
+     * - `locales`
+     * - `views`
      * @see https://github.com/hyurl/alar
      */
     hotReloading?: boolean;
@@ -108,7 +110,6 @@ export interface SFNConfig {
     mail?: Mail.Options & Mail.Message;
 }
 
-const FileStore = sessionFileStore(Session);
 const env = process.env;
 
 /**
@@ -151,10 +152,6 @@ export const config: SFNConfig = {
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new FileStore({
-            path: ROOT_PATH + "/sessions",
-            ttl: 3600 * 24 // 24 hours (in seconds)
-        }),
         cookie: {
             maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
         }

@@ -14,17 +14,17 @@ global["app"].views = new alar.ModuleProxy("views", SRC_PATH + "/views");
 app.views.setLoader({
     cache: {},
     extesion: ".html",
-    load(path: string) {
-        if (!this.cache[path]) {
-            let contents = fs.readFileSync(path + this.extesion, "utf8");
-            this.cache[path] = {
+    load(file: string) {
+        if (!this.cache[file]) {
+            let contents = fs.readFileSync(file, "utf8");
+            this.cache[file] = {
                 render: () => {
                     return contents;
                 }
             }
         }
 
-        return this.cache[path];
+        return this.cache[file];
     },
     unload(path: string) {
         delete this.cache[path];

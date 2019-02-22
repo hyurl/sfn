@@ -15,15 +15,14 @@ global["app"].locales = new alar.ModuleProxy("locales", SRC_PATH + "/locales");
 app.locales.setLoader({
     cache: {},
     extesion: ".json",
-    load(path: string) {
-        if (!this.cache[path]) {
-            let file = path + this.extesion;
-            this.cache[path] = FRON.parse(fs.readFileSync(file, "utf8"), file);
+    load(file: string) {
+        if (!this.cache[file]) {
+            this.cache[file] = FRON.parse(fs.readFileSync(file, "utf8"), file);
         }
 
-        return this.cache[path];
+        return this.cache[file];
     },
-    unload(path: string) {
-        delete this.cache[path];
+    unload(file: string) {
+        delete this.cache[file];
     }
 });

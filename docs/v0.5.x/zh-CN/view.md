@@ -1,13 +1,13 @@
 <!-- title: 视图; order: 6 -->
 # 基本概念
 
-在一个 **SFN** 应用程序中，视图系统是绑定到 `HttpController` 中的。
+自 0.5.x 版本起，SFN 启用了新的试图系统，并通过 [Alar](https://github.com/hyurl/alar)
+框架来将模板作为动态模块以便实现自动加载和热重载。
 
 # 如何使用？
 
-在一个 HttpController 中，你可以使用方法 `view()` 来展示模板。默认地，框架使用 
-[Ejs](https://www.npmjs.com/package/ejs) 作为其模板引擎，我们将会在这份文档的后面
-介绍其它引擎。
+在一个 HttpController 中，你可以使用 `view()` 方法来展示模板。（默认地，框架不使用模板
+引擎，仅将搜寻到的 HTML 文件直接导入。）
 
 ## 示例
 
@@ -20,165 +20,97 @@ export default class extends HttpController {
     index() {
         return this.view("index"); // the extension name will be .html.
     }
-
-    @route.get("/with-extname")
-    withExtname() {
-        return this.view("index.ejs");
-    }
-
-    @route.get("/with-locals")
-    withLocals() {
-        // You can use these local variables in the template.
-        let locals = {
-            title: "My first sfn application.",
-            author: "Luna"
-        };
-
-        return this.view("index", locals);
-    }
 }
 ```
 
-## 模板路径
+## 模板引擎加载器
 
-默认地，模板文件保存在 `src/views/` 目录中，你可以修改成任何路径，只需要设置属性
-`viewPath` 为一个不同的值即可。
+由于现代化 Web 开发中模板引擎已经不再重要，因此自 0.5.x 版本起，SFN 仅提供了两个基于
+Alar 框架的模板引擎加载器。
 
-```typescript
-import { HttpController, route, SRC_PATH } from "sfn";
+- [alar-ejs-loader](https://github.com/Hyurl/alar-ejs-loader)
+- [alar-pug-loader](https://github.com/Hyurl/alar-ejs-loader)
 
-export default class extends HttpController {
-    viewPath: SRC_PATH + "/views/my-views/"; // => src/views/my-views/
-
-    // ...
-}
-```
-
-## 模板引擎
-
-默认地，框架使用 [Ejs](https://www.npmjs.com/package/ejs) 作为其模板引擎，但是你
-可以选择其他地引擎，如果你想要这么做。这里列举了几个可用的引擎：
-
-- [sfn-ejs-engine](https://github.com/Hyurl/sfn-ejs-engine)
-- [sfn-pug-engine](https://github.com/Hyurl/sfn-pug-engine)
-- [sfn-nunjucks-engine](https://github.com/Hyurl/sfn-nunjuncks-engine)
-- [sfn-sdopx-engine](https://github.com/Hyurl/sfn-sdopx-engine)
-- [sfn-whatstpl-engine](https://github.com/Hyurl/sfn-whatstpl-engine)
+这些加载器所返回的模块包含了一个 `render(data: { [name: string]: any }): string`
+方法，当调用 `view()` 方法时，SFN 会自动调用 `render()` 方法来渲染模板。
 
 你必须自己去学习这些模板引擎，这份文档将不会介绍任何关于它们的细节。
 
-### 使用 pug 引擎的示例
+### 使用 Ejs 引擎的示例
 
 ```typescript
-// you need install sfn-pug-engine first.
-import { HttpController, route } from "sfn";
-import { PugEngine } from "sfn-pug-engine";
+// src/bootstrap/http.ts
+import { EjsLoader } from "alar-ejs-loader";
 
-var engine = new PugEngine();
-
-export default class extends HttpController {
-    engine: PugEngine = engine;
-    viewExtname = ".pug"; // set the default extension name of view files.
-
-    @route.get("/pug-test")
-    index() {
-        return this.view("pug-test");
-    }
-}
+app.views.setLoader(new EjsLoader());
 ```
+
+更多细节请查看各加载器对应的说明。
 
 ### 适配你自己的引擎
 
-如果你自己编写了一套模板引擎，或者想要使用那些已经存在但还没有适配到 **SFN** 的模板
-引擎，你可以自己进行适配，这并不复杂。
-
-你所需要做的，就是定义一个新的类，来扩展抽象类 `TemplateEngine`，并实现 
-`renderFile()` 方法即可，请看这个示例：
+如果你自己编写了一套模板引擎，或者想要使用其他的模板引擎，你可以自己实现一个加载器，这
+非常简单。例如，alar-ejs-loader 是这么做的：
 
 ```typescript
-import { TemplateEngine, TemplateOptions } from "sfn";
+import * as fs from "fs";
+import * as ejs from "ejs";
+import { ModuleLoader } from "alar";
 
-export interface MyEngineOptions extends TemplateOptions {
-    // TemplateOptions has two properties:
-    // `cache: boolean` indicates wheter turn on cache, so your template should
-    //     support caches.
-    // `encoding: string` uses a specified encoding to load the file.
-    // ...
+export namespace EjsLoader {
+    export interface View {
+        render(data: { [name: string]: any }): string;
+    }
+
+    export interface Options {
+        /**
+         * Specifies encoding for loading the template (default: `utf8`).
+         */
+        encoding?: string;
+        /** When `false` no debug instrumentation is compiled. */
+        compileDebug?: boolean;
+        /** Character to use with angle brackets for open/close. */
+        delimiter?: string;
+        /** Outputs generated function body. */
+        debug?: boolean;
+        /** When `true`, generated function is in strict mode. */
+        strict?: boolean;
+        /** 
+         * Removes all safe-to-remove whitespace, including leading and trailing 
+         * whitespace.
+         */
+        rmWhitespace?: boolean;
+    }
 }
 
-export class MyEngine extends TemplateEngine {
-    options: MyEngineOptions;
+export class EjsLoader implements ModuleLoader {
+    extesion = ".ejs";
+    cache: { [filename: string]: EjsLoader.View } = {};
 
-    /**
-     * renderFile must accept two parameters, a filename and local variabls 
-     * passed to the template, and returns a promise, you can use 
-     * AsyncFunction as well.
-     */
-    renderFile(filename: string, vars: {
-        [name: string]: any
-    } = {}): Promise<string> {
-        // ...
+    constructor(private options: EjsLoader.Options = {}) { }
+
+    load(filename: string) {
+        if (this.cache[filename]) {
+            return this.cache[filename];
+        }
+
+        let tpl = fs.readFileSync(filename, this.options.encoding || "utf8");
+
+        return this.cache[filename] = {
+            render: ejs.compile(tpl, {
+                ...this.options,
+                filename,
+                cache: false,
+                async: false
+            })
+        };
+    }
+
+    unload(filename: string) {
+        delete this.cache[filename];
     }
 }
 ```
 
-如果你想要更多的细节，你可以看一下
-[sfn-ejs-engine](https://github.com/Hyurl/sfn-ejs-engine)、
-[sfn-pug-engine](https://github.com/Hyurl/sfn-pug-engine)、 
-[sfn-nunjucks-engine](https://github.com/Hyurl/sfn-nunjuncks-engine) 和 
-[sfn-sdopx-engine](https://github.com/Hyurl/sfn-sdopx-engine)，看它们在
-适配器中到底做了什么。
-
-### 附录：在 EJS 模板中使用布局（或者叫“模板继承”）
-
-默认地，EJS 并不支持模板布局（也叫“模板继承”），但这个引擎为你提供了这个能力。
-
-如果你想要在目标模板中使用布局模板，只需要加上一句注释，格式为 
-`<!-- layout: filename -->` ，到目标模板的第一行第一列，就像这样：
-
-```html
-<!-- layout: ./layout -->
-<p>
-    This is the target template.
-</p>
-```
-
-而在布局模板中，使用变量 `$LayoutContents` 来附上目标模板渲染的内容，就像这样（使用
-标签 `<%-` 而不是 `<%=`）：
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-    <%- $LayoutContents %>
-</body>
-</html>
-```
-
-然后当目标模板被渲染时，他就会输出像下面这样的内容：
-
-```html
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-    <p>
-        This is contents in a layout.
-    </p>
-</body>
-</html>
-```
-
-记住，这只是 **SFN** 框架提供的一个小技巧，如果你使用其它的框架，它将会毫无作用，但
-你依旧可以使用 `include()` 语句来加载相关的模板，它已经适合了大多数情况。
+更多关于 Alar 模块加载器的细节，
+请查看 [Alar ModuleLoader](https://github.com/hyurl/alar/blob/master/api.md#moduleloader)。

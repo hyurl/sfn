@@ -1,10 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Session = require("express-session");
-const sessionFileStore = require("session-file-store");
-const init_1 = require("./init");
 ;
-const FileStore = sessionFileStore(Session);
 const env = process.env;
 exports.config = {
     lang: "en-US",
@@ -41,10 +37,6 @@ exports.config = {
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new FileStore({
-            path: init_1.ROOT_PATH + "/sessions",
-            ttl: 3600 * 24
-        }),
         cookie: {
             maxAge: 3600 * 24 * 1000
         }

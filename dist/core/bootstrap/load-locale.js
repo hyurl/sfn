@@ -8,15 +8,14 @@ global["app"].locales = new alar.ModuleProxy("locales", init_1.SRC_PATH + "/loca
 app.locales.setLoader({
     cache: {},
     extesion: ".json",
-    load(path) {
-        if (!this.cache[path]) {
-            let file = path + this.extesion;
-            this.cache[path] = FRON.parse(fs.readFileSync(file, "utf8"), file);
+    load(file) {
+        if (!this.cache[file]) {
+            this.cache[file] = FRON.parse(fs.readFileSync(file, "utf8"), file);
         }
-        return this.cache[path];
+        return this.cache[file];
     },
-    unload(path) {
-        delete this.cache[path];
+    unload(file) {
+        delete this.cache[file];
     }
 });
 //# sourceMappingURL=load-locale.js.map

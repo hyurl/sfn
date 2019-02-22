@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const dotenv_1 = require("dotenv");
-const chalk_1 = require("chalk");
 const fs = require("fs");
 const FRON = require("fron");
 var appPath = path.dirname(process.mainModule.filename);
@@ -29,12 +28,6 @@ exports.SRC_PATH = srcPath;
 exports.APP_PATH = exports.isTsNode ? exports.SRC_PATH : appPath;
 exports.isDevMode = exports.isDebugMode || !process.send;
 dotenv_1.config({ path: exports.ROOT_PATH + "/.env" });
-if (exports.isDevMode && !exports.isDebugMode && !exports.isCli) {
-    console.log("You program is running in development mode without "
-        + "'--inspect' flag, please consider changing to debug environment.");
-    console.log("For help, see "
-        + chalk_1.default.yellow("https://sfnjs.com/docs/v0.5.x/debug"));
-}
 global["app"] = {
     ROOT_PATH: exports.ROOT_PATH,
     SRC_PATH: exports.SRC_PATH,
