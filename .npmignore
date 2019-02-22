@@ -9,4 +9,10 @@ src/controllers/
 src/locales/
 src/services/
 src/views/
+src/doc-server*
+dist/doc-server*
 *.db
+*.tgz
+package-lock.json
+tsconfig.json
+.*
