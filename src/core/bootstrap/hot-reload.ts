@@ -9,22 +9,7 @@ if (!isCli && config.hotReloading) {
     app.models.watch();
     app.services.watch();
     app.locales.watch();
-
-    // reload plugins
-    app.plugins.watch().on("add", (filename: string) => {
-        app.plugins.resolve(filename) && tryImport(filename);
-    }).on("change", (filename: string) => {
-        let name = app.plugins.resolve(filename);
-
-        if (name) {
-            // remove previous plugins from the internal container
-            app.plugins.removeHandlers(name);
-            tryImport(filename);
-        }
-    }).on("unlink", (filename: string) => {
-        let name = app.plugins.resolve(filename);
-        name && app.plugins.removeHandlers(name);
-    });
+    app.plugins.watch();
 }
 
 export function watchWebModules() {

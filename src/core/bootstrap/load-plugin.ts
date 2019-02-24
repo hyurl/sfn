@@ -8,7 +8,6 @@ declare global {
             const path: string;
             function resolve(path: string): string;
             function watch(): FSWatcher;
-            function removeHandlers(name: string): boolean;
         }
     }
 }

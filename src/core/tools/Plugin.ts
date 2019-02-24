@@ -1,7 +1,9 @@
 import * as alar from "alar";
 import { applyMagic } from "js-magic";
 import { APP_PATH } from '../../init';
-import { resolveModulePath } from './functions-inner';
+import { resolveModulePath, createImport } from './functions-inner';
+
+const tryImport = createImport(require);
 
 @applyMagic
 export class Plugin<I = any, O = any> extends alar.ModuleProxy {
@@ -51,10 +53,6 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         return handlers;
     }
 
-    protected removeHandlers(name: string): boolean {
-        return (delete Plugin.Container[name]);
-    }
-
     /** DON'T call, plugin doesn't support remote service. */
     serve(): never {
         throw new ReferenceError("Plugin doesn't support remote service");
@@ -63,6 +61,27 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
     /** DON'T call, plugin doesn't support remote service. */
     connect(): never {
         return this.serve();
+    }
+
+    watch() {
+        return super.watch().on("add", (filename: string) => {
+            this.resolve(filename) && tryImport(filename);
+        }).on("change", (filename: string) => {
+            let name = this.resolve(filename);
+
+            if (name) {
+                // remove previous plugins from the internal container
+                delete Plugin.Container[name];
+                tryImport(filename);
+            }
+        }).on("unlink", (filename: string) => {
+            let name = this.resolve(filename);
+            name && (delete Plugin.Container[name]);
+        });
+    }
+
+    get exports() {
+        return {};
     }
 
     protected __get(prop: string) {
