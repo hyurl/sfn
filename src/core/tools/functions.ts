@@ -74,7 +74,7 @@ export function event(name: string): WebSocketDecorator {
         if (!modPath)
             return;
 
-        let nsp: string = proto.Class.nsp || "/";
+        let { nsp = "/" } = <typeof WebSocketController>proto.ctor;
         let data = {
             prefix: nsp,
             route: name,
@@ -106,8 +106,9 @@ export function route(method: string, path?: string): HttpDecorator {
 
         if (!path) {
             let parts = method.split(/\s+/);
+            let { baseURI = "" } = <typeof HttpController>proto.ctor;
             method = parts[0] === "SSE" ? "GET" : parts[0];
-            path = (proto.Class.baseURI || "") + parts[1];
+            path = baseURI + parts[1];
         }
 
         let data = {

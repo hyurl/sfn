@@ -37,13 +37,8 @@ export { CorsOptions };
  * or `res.end()` to do so, no more data will be sent after sending one.
  */
 export class HttpController extends Controller {
-    // static viewPath: string = SRC_PATH + "/views";
-    // static viewExtname: string = ".html";
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
-
-    // viewPath = this.Class.viewPath;
-    // viewExtname = this.Class.viewExtname;
 
     /** If set, when unauthorized, fallback to the given URL. */
     fallbackTo: string;
@@ -94,13 +89,11 @@ export class HttpController extends Controller {
     /**
      * Sends view contents to the response context.
      * 
-     * @param filename The template filename, if no extension presented, the 
-     *  `this.viewExtname` will be used. Template files are by default stored 
-     *  in `views/`.
+     * @param path The template path (without extension) related to `src/views`.
      * @param vars Local variables passed to the template.
      */
-    view(filename: string, vars: { [name: string]: any } = {}) {
-        filename = this.getAbsFilename(filename);
+    view(path: string, vars: { [name: string]: any } = {}) {
+        path = this.getAbsFilename(path);
 
         // i18n support for the template.
         if (!("i18n" in vars)) {
@@ -110,7 +103,7 @@ export class HttpController extends Controller {
         }
 
         try {
-            let view: ModuleProxy<View> = get(global, app.views.resolve(filename));
+            let view: ModuleProxy<View> = get(global, app.views.resolve(path));
 
             this.res.type = "text/html";
 
@@ -126,10 +119,6 @@ export class HttpController extends Controller {
     /** Alias of `res.send()`. */
     send(data: any): void {
         return this.res.send(data);
-    }
-
-    get Class(): typeof HttpController {
-        return <any>this.constructor;
     }
 
     /** Gets/Sets the DB instance. */

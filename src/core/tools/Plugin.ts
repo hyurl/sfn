@@ -1,17 +1,19 @@
 import * as alar from "alar";
-import { applyMagic } from "js-magic";
 import { APP_PATH } from '../../init';
 import { resolveModulePath, createImport } from './functions-inner';
 
 const tryImport = createImport(require);
 
-@applyMagic
 export class Plugin<I = any, O = any> extends alar.ModuleProxy {
     protected paths: string[] = [];
     protected children: { [name: string]: Plugin } = {};
 
     constructor(readonly name: string) {
         super(name, APP_PATH + "/plugins");
+    }
+
+    get exports() {
+        return {};
     }
 
     bind(handler: (input?: I, output?: O) => Promise<void | O>) {
@@ -78,26 +80,6 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
             let name = this.resolve(filename);
             name && (delete Plugin.Container[name]);
         });
-    }
-
-    get exports() {
-        return {};
-    }
-
-    protected __get(prop: string) {
-        if (prop in this) {
-            return this[prop];
-        } else if (prop in this.children) {
-            return this.children[prop];
-        } else if (typeof prop != "symbol") {
-            return this.children[prop] = new Plugin(
-                this.name + "." + String(prop),
-            );
-        }
-    }
-
-    protected __has(prop: string) {
-        return (prop in this) || (prop in this.children);
     }
 }
 

@@ -30,10 +30,11 @@ import { activeEvent } from "../tools/symbols";
  * transmissions.
  */
 export class WebSocketController extends Controller {
+    /** Sets a specified namesapce for WebSocket channel (used by SocketIO). */
+    static nsp: string = "/";
+
     /** Reference to the corresponding socket context. */
     readonly socket: WebSocket;
-
-    static nsp: string = "/";
 
     constructor(socket: WebSocket) {
         super();
@@ -42,10 +43,6 @@ export class WebSocketController extends Controller {
         this.lang = (socket.cookies && socket.cookies.lang)
             || socket.lang
             || config.lang;
-    }
-
-    get Class(): typeof WebSocketController {
-        return <any>this.constructor;
     }
 
     /** Gets/Sets the DB instance. */

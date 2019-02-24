@@ -131,7 +131,7 @@ function handleFinish(err: Error, ctrl: HttpController, method: string) {
     finish(ctrl);
 }
 
-async function handleError(err: Error, ctrl: HttpController, method?: string) {
+function handleError(err: Error, ctrl: HttpController, method?: string) {
     let { req, res } = ctrl;
 
     // If the response is has already been sent, handle finish immediately.
@@ -161,7 +161,8 @@ async function handleError(err: Error, ctrl: HttpController, method?: string) {
         // Try to load the error page, if not present, then show the 
         // error message.
         try {
-            let content = await ctrl.Class.httpErrorView(_err, ctrl);
+            let { httpErrorView } = <typeof HttpController>ctrl.ctor;
+            let content = httpErrorView(_err, ctrl);
 
             res.type = "text/html";
             res.send(content);

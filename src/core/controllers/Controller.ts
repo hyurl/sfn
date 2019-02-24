@@ -14,8 +14,10 @@ export abstract class Controller extends Service {
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
 
-    /** A reference to the class object. */
-    abstract readonly Class;
+    /** A reference to the class constructor. */
+    get ctor(): new (...args: any[]) => this {
+        return <any>this.constructor;
+    };
 
     /** Sends successful action results to the response context. */
     success(data: any, code: number = 200) {

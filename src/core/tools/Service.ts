@@ -54,8 +54,7 @@ export class Service extends EventEmitter {
      * If is a HTTP request, check `req.query.lang` or `req.cookies.lang`, if 
      * is socket message, check `socket.cookies.lang`, if any appears, then 
      * always use the setting language, otherwise, check header 
-     * `Accept-Language` instead. Language files are stored in `Locales`, 
-     * could be json or js, and case insensitive.
+     * `Accept-Language` instead. Language files are stored in `src/locales/`.
      * 
      * @param text The original text, accept format with %s, %i, etc.
      * @param replacements Values that replaces %s, %i, etc. in the `text`.
