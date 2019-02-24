@@ -133,29 +133,3 @@ export interface HttpDecorator extends Function {
 export interface WebSocketDecorator extends Function {
     (proto: WebSocketController, prop: string): void;
 }
-
-export interface WebSocketEventDecorator extends WebSocketDecorator { }
-
-export interface HttpRouteDecorator extends HttpDecorator { }
-
-export interface HttpRoute extends Function {
-    /** Binds the method to a specified URL route. */
-    (route: string): HttpRouteDecorator;
-    (reqMethod: string, path: string): HttpRouteDecorator;
-    (route: string, Class: typeof HttpController, method: string): void
-    (reqMethod: string, path: string, Class: typeof HttpController, method: string): void;
-    delete(path: string): HttpRouteDecorator;
-    delete(path: string, Class: typeof HttpController, method: string): void;
-    get(path: string): HttpRouteDecorator;
-    get(path: string, Class: typeof HttpController, method: string): void;
-    head(path: string): HttpRouteDecorator;
-    head(path: string, Class: typeof HttpController, method: string): void;
-    post(path: string): HttpRouteDecorator;
-    post(path: string, Class: typeof HttpController, method: string): void;
-    patch(path: string): HttpRouteDecorator;
-    patch(path: string, Class: typeof HttpController, method: string): void;
-    put(path: string): HttpRouteDecorator;
-    put(path: string, Class: typeof HttpController, method: string): void;
-    sse(path: string): HttpRouteDecorator;
-    sse(path: string, Class: typeof HttpController, method: string): void;
-}

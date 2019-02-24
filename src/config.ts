@@ -43,6 +43,7 @@ export interface SFNConfig {
      * - `services`
      * - `locales`
      * - `views`
+     * - `plugins`
      * 
      * During development, when hot-reloading is enabled, you should start 
      * typescript compiler in watch mode (`tsc --watch`).

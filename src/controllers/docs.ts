@@ -19,6 +19,8 @@ export default class extends HttpController {
     @route.get("/docs/:version/:name")
     async showContents(req: Request, version: string, name: string) {
         try {
+            await app.plugins.web.onView.call(req);
+
             let sideMenu = await app.services.docs.remote().getSideMenu(version, this.lang);
             let content = await app.services.docs.remote().getContent(version, this.lang, name);
 

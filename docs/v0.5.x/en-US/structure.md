@@ -21,6 +21,7 @@ just recommended.
     - `controllers/`* The directory the stores all controller files.
     - `locales/`* The directory that stores all language packs.
     - `models/`* The directory that stores all models files.
+    - `plugins`* The directory that stores all plugin files. 
     - `schedules/` The directory that stores all schedule files.
     - `services/`* The directory that stores all service files.
     - `views/`* The directory that stores all view files.

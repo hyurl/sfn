@@ -1,9 +1,13 @@
 import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
 import * as fs from "fs-extra";
+import * as path from "path";
 import chalk from "chalk";
-import { isTsNode, isDevMode } from "../../init";
+import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
 import service from './Service';
+import startsWith = require('lodash/startsWith');
+
+const tryImport = createImport(require);
 
 export function isOwnMethod(obj: any, method: string): boolean {
     return typeof obj[method] === "function" &&
@@ -83,4 +87,57 @@ export function yellow(callSite: TemplateStringsArray, ...bindings: any[]) {
 
 export function red(callSite: TemplateStringsArray, ...bindings: any[]) {
     return color("red", callSite, bindings);
+}
+
+export function resolveModulePath(baseDir: string) {
+    let target = { stack: "" };
+
+    Error.captureStackTrace(target);
+
+    let lines = target.stack.split("\n").slice(1);
+    let re = /[\(\s](\S+):\d+:\d+?/;
+    let filename: string;
+    let ext: string;
+
+    for (let line of lines) {
+        let matches = re.exec(line);
+
+        if (matches) {
+            filename = matches[1][0] === "(" ? matches[1].slice(1) : matches[1];
+            filename = filename.replace(SRC_PATH, APP_PATH);
+
+            if (startsWith(filename, baseDir))
+                break;
+        }
+    }
+
+    if (!filename)
+        return;
+
+    if (ext = path.extname(filename)) {
+        filename = filename.slice(0, -ext.length);
+    }
+
+    return filename;
+}
+
+export async function importDirectory(dir: string) {
+    var ext = isTsNode ? ".ts" : ".js";
+    var files: string[]
+
+    try { files = await fs.readdir(dir); } catch (e) { }
+
+    if (!files) return;
+
+    for (let file of files) {
+        let filename = path.resolve(dir, file);
+        let stat = await fs.stat(filename);
+
+        if (stat.isFile() && path.extname(file) == ext) {
+            tryImport(filename);
+        } else if (stat.isDirectory()) {
+            // load files recursively.
+            importDirectory(filename);
+        }
+    }
 }

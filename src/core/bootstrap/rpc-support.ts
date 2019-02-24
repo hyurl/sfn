@@ -1,5 +1,6 @@
-import { green } from "../tools/functions-inner";
+import { isCli } from "../../init";
 import { config } from "./load-config";
+import { green } from "../tools/functions-inner";
 
 declare global {
     namespace app {
@@ -8,6 +9,8 @@ declare global {
 }
 
 app.serveRPC = serveRPC;
+
+const Connections: any[] = [];
 
 async function serveRPC(name: string) {
     let { modules, ...options } = config.server.rpc[name];
@@ -18,10 +21,15 @@ async function serveRPC(name: string) {
     }
 
     console.log(green`RPC server [${name}] started.`);
+
+    await connectRPC(name);
 }
 
-export async function connectRPC(name: string) {
+async function connectRPC(name: string) {
     let timer: NodeJS.Timer;
+
+    if (Connections.includes(config.server.rpc[name]))
+        return;
 
     try {
         let { modules, ...options } = config.server.rpc[name];
@@ -33,9 +41,22 @@ export async function connectRPC(name: string) {
 
         timer && clearTimeout(timer);
         console.log(green`RPC server [${name}] connected.`);
+
+        Connections.push(config.server.rpc[name]);
     } catch (err) {
         timer = setTimeout(() => {
             connectRPC(name);
         }, config.server.rpc[name].timeout || 5000);
     }
+}
+
+if (!isCli) {
+    (async () => {
+        // connect RPC services
+        if (config.server.rpc && Object.keys(config.server.rpc).length) {
+            for (let name in config.server.rpc) {
+                await connectRPC(name);
+            }
+        }
+    })();
 }

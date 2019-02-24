@@ -1,49 +1,68 @@
+import * as alar from "alar";
 import { applyMagic } from "js-magic";
-
-export const name = Symbol.for("name");
-
-export abstract class PluginHost {
-    get name() {
-        return this[name];
-    }
-
-    abstract init(): void;
-}
-
-export namespace PluginHost {
-    export const Container = new Map<string, Function[]>();
-}
+import { APP_PATH } from '../../init';
+import { resolveModulePath } from './functions-inner';
 
 @applyMagic
-export class Plugin<I = any, O = any> {
-    protected hosts: PluginHost[] = [];
+export class Plugin<I = any, O = any> extends alar.ModuleProxy {
+    protected paths: string[] = [];
     protected children: { [name: string]: Plugin } = {};
 
-    constructor(readonly name: string) { }
+    constructor(readonly name: string) {
+        super(name, APP_PATH + "/plugins");
+    }
 
-    bind(host: PluginHost, handler: (input: I, output: O) => Promise<void | O>) {
-        let handlers = PluginHost.Container.get(host.name) || [];
+    bind(handler: (input?: I, output?: O) => Promise<void | O>) {
+        let path = resolveModulePath(this.path);
+        let name = this.resolve(path);
 
-        PluginHost.Container.set(host.name, handlers.concat([handler]));
-        this.hosts.push(host.name);
+        if (!Plugin.Container[name]) {
+            Plugin.Container[name] = {};
+        }
+
+        if (!Plugin.Container[name][this.name]) {
+            Plugin.Container[name][this.name] = [];
+        }
+
+        Plugin.Container[name][this.name].push(handler);
+        this.paths.includes(name) || this.paths.push(name);
 
         return this;
     }
 
-    async call(caller: any, input: I, output: O): Promise<O> {
+    async call(input?: I, output?: O): Promise<O> {
         let result: O;
 
-        for (let host of this.hosts) {
-            let handlers = PluginHost.Container.get(host.name);
-
-            if (handlers) {
-                for (let handler of handlers) {
-                    result = await handler.call(caller, input, output);
-                }
-            }
+        for (let handler of this.getHandlers()) {
+            result = await handler(input, output);
         }
 
-        return result || output;
+        return result === undefined ? output : result;
+    }
+
+    getHandlers() {
+        let handlers: Function[] = [];
+
+        for (let name of this.paths) {
+            let container = Plugin.Container[name];
+            handlers = handlers.concat(container ? container[this.name] : []);
+        }
+
+        return handlers;
+    }
+
+    protected removeHandlers(name: string): boolean {
+        return (delete Plugin.Container[name]);
+    }
+
+    /** DON'T call, plugin doesn't support remote service. */
+    serve(): never {
+        throw new ReferenceError("Plugin doesn't support remote service");
+    }
+
+    /** DON'T call, plugin doesn't support remote service. */
+    connect(): never {
+        return this.serve();
     }
 
     protected __get(prop: string) {
@@ -61,4 +80,12 @@ export class Plugin<I = any, O = any> {
     protected __has(prop: string) {
         return (prop in this) || (prop in this.children);
     }
+}
+
+export namespace Plugin {
+    export const Container: {
+        [path: string]: {
+            [name: string]: Function[];
+        }
+    } = {};
 }

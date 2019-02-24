@@ -116,37 +116,42 @@ Plugin is another way to implement AOP in a software. By using plugins, one can
 easily write pluggable and extendable components to manipulate objects without 
 having to modify any source code.
 
-In SFN, to use plugins, you will need to install another package named
-[async-plugin](https://github.com/hyurl/). For convenience, you should create a 
-new folder `plugins/` inside `src/` directory to store all the plugins.
+Since version 0.5.x, SFN introduces new internal plugin support, and based on 
+Alar framework for hot-reloading and auto-loading. But unlike the modules Alar 
+proxified, plugins do not need to create instance, and all existing plugins will
+be loaded into the system when start up. All plugins should be located in path
+`src/plugins/`。
 
 ```typescript
 // src/plugins/user.ts
-import { User } from "modelar";
-import AsyncPlugin from "async-plugin";
+import { Plugin } from 'sfn';
 import Axios from "axios";
+import User from "../models/user";
 
-export namespace UserPlugins {
-    export const onAdd = new AsyncPlugin({}, User);
-    export const onGet = new AsyncPlugin({}, User);
-    export const onUpdate = new AsyncPlugin({}, User);
-    export const onDelete = new AsyncPlugin({}, User);
-    // ...
+declare global {
+    namespace app {
+        namespace plugins {
+            namespace user {
+                const onAdd: Plugin<object, User>;
+            }
+        }
+    }
 }
 
 // You can bind any number of handler functions to the corresponding plugin in 
 // order to achieve some goals. e.g.
 
 // assign user name
-UserPlugins.onAdd.bind((input, user) => {
+app.plugins.user.onAdd.bind(async (input, user) => {
     user.name = input.name || "Joe";
 });
 
 // check if email is available
-UserPlugin.onAdd.bind(async (input, user) => {
+app.plugins.user.onAdd.bind(async (input, user) => {
     if (input.email) {
         // check email via a remote service
-        let res = await Axios.get(`https://somewhere.com/email-test?email=${input.email}`);
+        let url = `https://somewhere.com/email-test?email=${input.email}`;
+        let res = await Axios.get(url);
         let ok = res.data.ok;
 
         if (!ok) {
@@ -156,8 +161,6 @@ UserPlugin.onAdd.bind(async (input, user) => {
         user.email = input.email;
     }
 });
-
-// ...
 ```
 
 You can apply the plugin in an HttpController (or anywhere you want).
@@ -165,8 +168,6 @@ You can apply the plugin in an HttpController (or anywhere you want).
 ```typescript
 // src/controllers/api/user.ts
 import { HttpController, Request, route } from "sfn";
-import { User } from "modelar";
-import { UserPlugins } from "../../../plugins/user.ts";
 
 export default class extends HttpController {
     static baseURI = "/api";
@@ -175,15 +176,20 @@ export default class extends HttpController {
     async add(req: Request) {
         // apply the plugin and handle data in the plugin instead of doing it 
         // in the controller.
-        let user = await UserPlugins.onAdd.apply(req.body || {}, new User);
+        let data = req.body || {};
+        let user app.models.user.create();
+
+        user = await app.plugins.user.onAdd.call(data, user);
+
         return user.save();
     }
 }
 ```
 
-Plugins are pluggable components, if you want to add a new function inside some 
-procedure, you just need to bind a new handler on the plugin interface, and if 
-you want to remove some function, you just need to remove that corresponding 
-handler from the plugin interface. By doing this, you're able to write highly 
-extendable software by just building a plugin system that covers all the entries
-of your program life cycle.
+Plugins are hot pluggable components, if you want to add a new function inside 
+some procedure, you just need to bind a new handler on the plugin interface, and
+if you want to remove some function, you just need to remove that corresponding 
+handler from the plugin interface, and take advantage of the hot-reloading 
+feature to automatically apply any changes. By doing this, you're able to write 
+highly extendable software by just building a plugin system that covers all the
+entries of your program life cycle.

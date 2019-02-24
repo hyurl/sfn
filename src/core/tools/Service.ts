@@ -17,7 +17,7 @@ export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
     ttl: 1000,
     filename: ROOT_PATH + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
-    trace: true
+    trace: false
 });
 
 export interface CacheOptions extends StoreOptions {

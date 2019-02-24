@@ -110,7 +110,7 @@ export class HttpController extends Controller {
         }
 
         try {
-            let view: ModuleProxy<View> = get(app, app.views.resolve(filename));
+            let view: ModuleProxy<View> = get(global, app.views.resolve(filename));
 
             this.res.type = "text/html";
 

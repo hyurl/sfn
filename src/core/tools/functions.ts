@@ -8,9 +8,10 @@ import { SocketError } from './SocketError';
 import { routeMap, eventMap } from './RouteMap';
 import {
     ControllerDecorator,
-    WebSocketEventDecorator,
-    HttpRoute
+    WebSocketDecorator,
+    HttpDecorator
 } from './interfaces';
+import { resolveModulePath } from './functions-inner';
 
 /** 
  * Generates a random string.
@@ -66,104 +67,94 @@ let router: App,
     tryImport: (nsp: string) => void;
 
 /** Binds the method to a specified socket event. */
-export function event(name: string): WebSocketEventDecorator;
-export function event(name: string, Class: typeof WebSocketController, method: string): void;
-export function event(name: string, Class?: typeof WebSocketController, method?: string) {
-    if (arguments.length === 1) {
-        return (proto: WebSocketController, prop: string) => {
-            (async () => {
-                await proto.Class.finishLoad();
+export function event(name: string): WebSocketDecorator {
+    return (proto: WebSocketController, prop: string) => {
+        let modPath = resolveModulePath(app.controllers.path);
 
-                let nsp: string = proto.Class.nsp || "/";
-                let data = {
-                    prefix: nsp,
-                    route: name,
-                    ctor: proto.Class
-                };
-                let key = eventMap.keyFor(data);
+        if (!modPath)
+            return;
 
-                eventMap.add(key, prop);
-
-                if (!tryImport)
-                    tryImport = require("../handlers/websocket-event").tryImport;
-
-                if (!eventMap.isLocked(key)) {
-                    eventMap.lock(key);
-                    tryImport(nsp);
-                }
-            })();
+        let nsp: string = proto.Class.nsp || "/";
+        let data = {
+            prefix: nsp,
+            route: name,
+            name: app.controllers.resolve(modPath),
         };
-    } else {
-        return event(name)(Class.prototype, method);
-    }
+        let key = eventMap.keyFor(data);
+
+        eventMap.add(key, prop);
+
+        if (!tryImport)
+            tryImport = require("../handlers/websocket-event").tryImport;
+
+        if (!eventMap.isLocked(key)) {
+            eventMap.lock(key);
+            tryImport(nsp);
+        }
+    };
 }
 
-function _route(...args: any[]) {
-    let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
+/** Binds the method to a specified URL route. */
+export function route(path: string): HttpDecorator;
+export function route(method: string, path: string): HttpDecorator;
+export function route(method: string, path?: string): HttpDecorator {
+    return (proto: HttpController, prop: string) => {
+        let modPath = resolveModulePath(app.controllers.path);
 
-    if (args.length <= 2) {
-        return (proto: HttpController, prop: string) => {
-            (async () => {
-                await proto.Class.finishLoad();
+        if (!modPath)
+            return;
 
-                let __route = route.split(/\s+/);
-                let method = _route[0] === "SSE" ? "GET" : __route[0];
-                let path = (proto.Class.baseURI || "") + __route[1];
-                let data = {
-                    prefix: method,
-                    route: path,
-                    ctor: proto.Class
-                };
-                let key = routeMap.keyFor(data);
+        if (!path) {
+            let parts = method.split(/\s+/);
+            method = parts[0] === "SSE" ? "GET" : parts[0];
+            path = (proto.Class.baseURI || "") + parts[1];
+        }
 
-                routeMap.add(key, prop);
-
-                if (!router || !handle) {
-                    router = require("../bootstrap/index").router;
-                    handle = require("../handlers/http-route").getRouteHandler;
-                }
-
-                if (!routeMap.isLocked(key)) {
-                    routeMap.lock(key);
-                    router.method(method, path, handle(key));
-                }
-            })();
+        let data = {
+            prefix: method,
+            route: path,
+            name: app.controllers.resolve(modPath),
         };
-    } else {
-        let proto = (args.length == 4 ? args[2] : args[1]).prototype,
-            method = args.length == 4 ? args[3] : args[2];
+        let key = routeMap.keyFor(data);
 
-        return _route(route)(proto, method);
-    }
+        routeMap.add(key, prop);
+
+        if (!router || !handle) {
+            router = require("../bootstrap/index").router;
+            handle = require("../handlers/http-route").getRouteHandler;
+        }
+
+        if (!routeMap.isLocked(key)) {
+            routeMap.lock(key);
+            router.method(method, path, handle(key));
+        }
+    };
 }
 
-/** Sets HTTP routes. */
-export const route: HttpRoute = <any>_route;
-
-route.delete = function (...args: any[]) {
-    return _route("DELETE", ...args);
+route.delete = function (path: string) {
+    return route("DELETE", path);
 };
 
-route.get = function (...args: any[]) {
-    return _route("GET", ...args);
+route.get = function (path: string) {
+    return route("GET", path);
 }
 
-route.head = function (...args: any[]) {
-    return _route("HEAD", ...args);
+route.head = function (path: string) {
+    return route("HEAD", path);
 };
 
-route.patch = function (...args: any[]) {
-    return _route("PATCH", ...args);
+route.patch = function (path: string) {
+    return route("PATCH", path);
 };
 
-route.post = function (...args: any[]) {
-    return _route("POST", ...args);
+route.post = function (path: string) {
+    return route("POST", path);
 };
 
-route.put = function (...args: any[]) {
-    return _route("PUT", ...args);
+route.put = function (path: string) {
+    return route("PUT", path);
 };
 
-route.sse = function (...args: any[]) {
-    return _route("SSE", ...args);
+route.sse = function (path: string) {
+    return route("SSE", path);
 }

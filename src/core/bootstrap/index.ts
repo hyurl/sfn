@@ -5,18 +5,23 @@ import { App } from "webium";
 import * as SocketIO from "socket.io";
 import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
-import { red, green, moduleExists, createImport } from "../tools/functions-inner";
-import service, { Service } from '../tools/Service';
-import { PluginHost } from '../tools/Plugin';
 import { config, baseUrl } from "./load-config";
-import { loadControllers } from "./load-controller";
-import { connectRPC } from './rpc-support';
-import { plugins } from "./loader-plugin";
-import get = require('lodash/get');
+import service, { Service } from '../tools/Service';
+import {
+    red,
+    green,
+    moduleExists,
+    createImport,
+    importDirectory
+} from "../tools/functions-inner";
+import "./load-controller";
 import "./load-locale";
 import "./load-model";
 import "./load-service";
 import "./load-view";
+import "./load-plugin";
+import "./rpc-support";
+import { watchWebModules } from "./hot-reload";
 
 declare global {
     namespace app {
@@ -76,14 +81,8 @@ app.serve = function serve(port?: number) {
         }
     }).listen(port || httpPort, () => {
         // load controllers
-        loadControllers(app.controllers.path);
-
-        // hot-reload controllers
-        let autoLoad = (filename: string) => {
-            app.controllers.resolve(filename) && tryImport(filename);
-        };
-
-        app.controllers.watch().on("add", autoLoad).on("change", autoLoad);
+        importDirectory(app.controllers.path);
+        watchWebModules();
 
         if (typeof process.send == "function") {
             // notify PM2 that the service is available.
@@ -129,48 +128,11 @@ if (!isCli) {
     // load worker message handlers
     require("../handlers/worker-shutdown");
 
-    // hot-reloading
-    if (config.hotReloading) {
-        app.models.watch();
-        app.services.watch();
-        app.locales.watch();
-        app.views.watch();
+    // load plugins
+    importDirectory(app.plugins.path);
 
-        // reload plugins
-        let handle = (filename: string) => {
-            let name = plugins.resolve(filename);
-
-            if (name) {
-                // delete previous plugins from the host container
-                PluginHost.Container.delete(name);
-                return name.split(".").slice(1).join(".");
-            }
-        }
-        plugins.watch().on("change", (filename: string) => {
-            let path = handle(filename);
-
-            if (path) {
-                let mod: ModuleProxy<PluginHost> = get(plugins, path);
-
-                mod.instance()[Symbol.for("name")] = mod.name;
-                mod.instance().init();
-            }
-        }).on("unlink", handle);
-    }
-
-    (async () => {
-        try {
-            // try to sync any cached data hosted by the default cache service.
-            await service.cache.sync();
-        } catch (e) { }
-
-        // connect RPC services
-        if (config.server.rpc && Object.keys(config.server.rpc).length) {
-            for (let name in config.server.rpc) {
-                await connectRPC(name);
-            }
-        }
-    })();
+    // try to sync any cached data hosted by the default cache service.
+    service.cache.sync().catch((err: Error) => service.logger.error(err.message));
 }
 
 app.router = router;

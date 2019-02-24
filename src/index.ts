@@ -25,6 +25,7 @@ export { config } from "./core/bootstrap/load-config";
 
 isMain && require("./bootstrap/rpc-config");
 
+export * from "./core/tools/Plugin";
 export * from "./core/tools/Service";
 export * from "./core/controllers/HttpController";
 export * from "./core/controllers/WebSocketController";

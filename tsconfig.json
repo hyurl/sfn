@@ -29,6 +29,7 @@
         "src/schedules/*.ts",
         "src/services/*.ts",
         "src/locales/*.ts",
+        "src/plugins/*.ts",
         "src/models/*.ts",
         "src/core/*/*.ts",
         "src/core/*/*/*.ts",

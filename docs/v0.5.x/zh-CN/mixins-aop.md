@@ -112,36 +112,40 @@ export class AnotherController extends HttpController {
 插件是另一种在软件中实现 AOP 编程的方式。通过使用插件，人们可以很容易地编写可插拔、可扩展的组件
 来处理对象，而不需要修改任何源代码。
 
-在 SFN 中，要使用插件，你需要安装另一个包名为 [async-plugin](https://github.com/hyurl/)
-的模块。为了方便，你应该在 `src/` 目录下新建一个名为 `plugins/` 的文件夹来存储所有的插件。
+自 0.5.x 版本起，SFN 引入了新的内置插件支持，并基于 Alar 框架实现热重载和动态加载支持。但与
+Alar 代理的模块不同，插件无须创建实例，并且会在软件启动时将现有插件全部加载到系统中。所有的插件
+都应存放在 `src/plugins/` 文件夹中。
 
 ```typescript
 // src/plugins/user.ts
-import { User } from "modelar";
-import AsyncPlugin from "async-plugin";
+import { Plugin } from 'sfn';
 import Axios from "axios";
+import User from "../models/user";
 
-export namespace UserPlugins {
-    export const onAdd = new AsyncPlugin({}, User);
-    export const onGet = new AsyncPlugin({}, User);
-    export const onUpdate = new AsyncPlugin({}, User);
-    export const onDelete = new AsyncPlugin({}, User);
-    // ...
+declare global {
+    namespace app {
+        namespace plugins {
+            namespace user {
+                const onAdd: Plugin<object, User>;
+            }
+        }
+    }
 }
 
 // You can bind any number of handler functions to the corresponding plugin in 
 // order to achieve some goals. e.g.
 
 // assign user name
-UserPlugins.onAdd.bind((input, user) => {
+app.plugins.user.onAdd.bind(async (input, user) => {
     user.name = input.name || "Joe";
 });
 
 // check if email is available
-UserPlugin.onAdd.bind(async (input, user) => {
+app.plugins.user.onAdd.bind(async (input, user) => {
     if (input.email) {
         // check email via a remote service
-        let res = await Axios.get(`https://somewhere.com/email-test?email=${input.email}`);
+        let url = `https://somewhere.com/email-test?email=${input.email}`;
+        let res = await Axios.get(url);
         let ok = res.data.ok;
 
         if (!ok) {
@@ -151,8 +155,6 @@ UserPlugin.onAdd.bind(async (input, user) => {
         user.email = input.email;
     }
 });
-
-// ...
 ```
 
 你可以将插件应用在一个 HTTP 控制器中（或者任何你想要的位置）。
@@ -160,8 +162,6 @@ UserPlugin.onAdd.bind(async (input, user) => {
 ```typescript
 // src/controllers/api/user.ts
 import { HttpController, Request, route } from "sfn";
-import { User } from "modelar";
-import { UserPlugins } from "../../../plugins/user.ts";
 
 export default class extends HttpController {
     static baseURI = "/api";
@@ -170,13 +170,17 @@ export default class extends HttpController {
     async add(req: Request) {
         // apply the plugin and handle data in the plugin instead of doing it 
         // in the controller.
-        let user = await UserPlugins.onAdd.apply(req.body || {}, new User);
+        let data = req.body || {};
+        let user app.models.user.create();
+
+        user = await app.plugins.user.onAdd.call(data, user);
+
         return user.save();
     }
 }
 ```
 
-插件是可插拔的组件，如果你想要在应用的某个过程中添加新功能，只需要绑定一个新的处理器函数到插件
-接口上，如果你想要移除某个功能，只需要从插件接口中移除对应的处理器函数即可。通过这种方式，你可以
-编写具有极高扩展性的应用软件，只需要建立一个插件系统，并将其覆盖到你的软件生命周期中的各个入口
-即可。
+插件是可热插拔的组件，如果你想要在应用的某个过程中添加新功能，只需要绑定一个新的处理器函数到插件
+接口上，如果你想要移除某个功能，只需要从插件接口中移除对应的处理器函数即可，并且利用系统的热重载
+特性将修改立即应用。通过这种方式，你可以编写具有极高扩展性的应用软件，只需要建立一个插件系统，并
+将其覆盖到你的软件生命周期中的各个入口即可。

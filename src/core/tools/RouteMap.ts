@@ -1,12 +1,11 @@
 import get = require('lodash/get');
-import { ControllerConstructor } from "../controllers/Controller";
 import { HttpController } from '../controllers/HttpController';
 import { WebSocketController } from '../controllers/WebSocketController';
 
 export type RouteMapData<T> = {
     prefix: string,
     route: string,
-    ctor: ControllerConstructor<T>,
+    name?: string
 }
 
 export class RouteMap<T> {
@@ -15,8 +14,7 @@ export class RouteMap<T> {
     private methodMap = new Map<string, string[]>();
 
     keyFor(data: RouteMapData<T>) {
-        let { prefix, route, ctor } = data;
-        let name = app.controllers.resolve(ctor.filename);
+        let { prefix, route, name } = data;
         let key = prefix + " " + route + " " + name;
 
         if (!this.dataMap.get(key)) {
@@ -57,14 +55,8 @@ export class RouteMap<T> {
 
     resolve(key: string) {
         let data = this.get(key);
-        let { ctor: { filename } } = data;
-        let mod: ModuleProxy<T> = null;
-
-        if (filename) {
-            mod = get(app, app.controllers.resolve(filename));
-        }
-
-        return mod;
+        let { name } = data;
+        return get(global, name) as ModuleProxy<T>;
     }
 
     lock(key: string): boolean {
