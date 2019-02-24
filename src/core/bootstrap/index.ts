@@ -7,9 +7,12 @@ import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
 import { red, green, moduleExists, createImport } from "../tools/functions-inner";
 import service, { Service } from '../tools/Service';
+import { PluginHost } from '../tools/Plugin';
 import { config, baseUrl } from "./load-config";
 import { loadControllers } from "./load-controller";
 import { connectRPC } from './rpc-support';
+import { plugins } from "./loader-plugin";
+import get = require('lodash/get');
 import "./load-locale";
 import "./load-model";
 import "./load-service";
@@ -132,6 +135,27 @@ if (!isCli) {
         app.services.watch();
         app.locales.watch();
         app.views.watch();
+
+        // reload plugins
+        let handle = (filename: string) => {
+            let name = plugins.resolve(filename);
+
+            if (name) {
+                // delete previous plugins from the host container
+                PluginHost.Container.delete(name);
+                return name.split(".").slice(1).join(".");
+            }
+        }
+        plugins.watch().on("change", (filename: string) => {
+            let path = handle(filename);
+
+            if (path) {
+                let mod: ModuleProxy<PluginHost> = get(plugins, path);
+
+                mod.instance()[Symbol.for("name")] = mod.name;
+                mod.instance().init();
+            }
+        }).on("unlink", handle);
     }
 
     (async () => {

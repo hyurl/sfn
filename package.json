@@ -75,6 +75,7 @@
         "hide-protected-properties": "^0.1.1",
         "ideal-filename": "^0.1.2",
         "injectable-ts": "^0.3.1",
+        "js-magic": "^1.0.0",
         "lodash": "^4.17.11",
         "modelar": "^3.2.3",
         "moment": "^2.24.0",
