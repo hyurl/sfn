@@ -111,7 +111,7 @@ import "sfn";
 app.serveRPC("rpc-server-1");
 ```
 
-然后使用命令 `ts-node src/rpc-server-1` 来启动这个独立的服务，之后并可以在项目中的任何地方
+编译并使用命令 `node dist/rpc-server-1` 来启动这个独立的服务，之后并可以在项目中的任何地方
 连接这个远程服务了。
 
 ```typescript

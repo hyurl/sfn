@@ -117,8 +117,8 @@ import "sfn";
 app.serveRPC("rpc-server-1");
 ```
 
-And use command `ts-node src/rpc-server-1` to start the individual service, then
-you're able to use this remote service anywhere in the project.
+Compile it and use command `node dist/rpc-server-1` to start the individual 
+service, then you're able to use this remote service anywhere in the project.
 
 ```typescript
 (async () => {
