@@ -33,4 +33,4 @@ export * from "./core/bootstrap/index";
 export * from "./core/tools/functions";
 export * from "./core/tools/upload";
 
-isMain && app.serve();
+isMain && app.serve().then(app.rpc.connectAll);

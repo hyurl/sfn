@@ -141,11 +141,7 @@ export function resolveModulePath(baseDir: string) {
 
 export async function importDirectory(dir: string) {
     var ext = isTsNode ? ".ts" : ".js";
-    var files: string[]
-
-    try { files = await fs.readdir(dir); } catch (e) { }
-
-    if (!files) return;
+    var files = await fs.readdir(dir);
 
     for (let file of files) {
         let filename = path.resolve(dir, file);
@@ -155,7 +151,7 @@ export async function importDirectory(dir: string) {
             tryImport(filename);
         } else if (stat.isDirectory()) {
             // load files recursively.
-            importDirectory(filename);
+            await importDirectory(filename);
         }
     }
 }

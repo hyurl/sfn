@@ -1,4 +1,4 @@
 import "./bootstrap/rpc-config";
 import "./index";
 
-app.serveRPC("doc-server");
+app.rpc.serve("doc-server");
