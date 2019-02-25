@@ -2,7 +2,7 @@ import get = require('lodash/get');
 import { HttpController } from '../controllers/HttpController';
 import { WebSocketController } from '../controllers/WebSocketController';
 
-export type RouteMapData<T> = {
+export type RouteMapData = {
     prefix: string,
     route: string,
     name?: string
@@ -10,10 +10,10 @@ export type RouteMapData<T> = {
 
 export class RouteMap<T> {
     private locks = new Map<string, boolean>();
-    private dataMap = new Map<string, RouteMapData<T>>();
+    private dataMap = new Map<string, RouteMapData>();
     private methodMap = new Map<string, string[]>();
 
-    keyFor(data: RouteMapData<T>) {
+    keyFor(data: RouteMapData) {
         let { prefix, route, name } = data;
         let key = prefix + " " + route + " " + name;
 

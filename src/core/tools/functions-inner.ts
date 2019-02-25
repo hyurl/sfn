@@ -4,10 +4,10 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import chalk from "chalk";
 import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
-import service from './Service';
 import startsWith = require('lodash/startsWith');
 import get = require("lodash/get");
 import * as modelar from "modelar";
+import service from "../bootstrap/load-services";
 
 const tryImport = createImport(require);
 

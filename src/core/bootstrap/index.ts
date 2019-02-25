@@ -6,7 +6,6 @@ import * as SocketIO from "socket.io";
 import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
 import { config, baseUrl } from "./load-config";
-import service, { Service } from '../tools/Service';
 import {
     red,
     green,
@@ -29,11 +28,7 @@ declare global {
         const router: App;
         const http: HttpServer | HttpsServer | Http2SecureServer;
         const ws: SocketIO.Server;
-        /**
-         * The default service instance used in the core, and can be used in 
-         * user project as well.
-         */
-        const service: Service;
+
         /** Starts the web server (both `http` and `ws`). */
         function serve(): void;
     }
@@ -135,10 +130,11 @@ if (!isCli) {
     importDirectory(app.plugins.path);
 
     // try to sync any cached data hosted by the default cache service.
-    service.cache.sync().catch((err: Error) => service.logger.error(err.message));
+    app.services.internal.cache.sync().catch((err: Error) => {
+        app.services.internal.logger.error(err.message);
+    });
 }
 
 global["app"].router = router;
 global["app"].http = http;
 global["app"].ws = ws;
-global["app"].service = service;
