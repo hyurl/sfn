@@ -177,9 +177,9 @@ export default class extends HttpController {
         // apply the plugin and handle data in the plugin instead of doing it 
         // in the controller.
         let data = req.body || {};
-        let user app.models.user.create();
+        let user = app.models.user.create();
 
-        user = await app.plugins.user.onAdd.call(data, user);
+        user = await app.plugins.user.onAdd.invoke(data, user);
 
         return user.save();
     }

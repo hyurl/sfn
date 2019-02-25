@@ -34,7 +34,7 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         return this;
     }
 
-    async call(input?: I, output?: O): Promise<O> {
+    async invoke(input?: I, output?: O): Promise<O> {
         let result: O;
 
         for (let handler of this.getHandlers()) {
