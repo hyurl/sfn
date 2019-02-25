@@ -131,7 +131,7 @@ function handleFinish(err: Error, ctrl: HttpController, method: string) {
     finish(ctrl);
 }
 
-function handleError(err: Error, ctrl: HttpController, method?: string) {
+function handleError(err: any, ctrl: HttpController, method?: string) {
     let { req, res } = ctrl;
 
     // If the response is has already been sent, handle finish immediately.
@@ -146,10 +146,10 @@ function handleError(err: Error, ctrl: HttpController, method?: string) {
     if (err instanceof HttpError) {
         // Be friendly to EventSource.
         _err = err.code == 405 && req.isEventSource ? new HttpError(204) : err;
-    } else if (err instanceof Error && isDevMode) {
-        _err = new HttpError(500, err.message);
+    } else if (err instanceof Error) {
+        _err = new HttpError(500, isDevMode ? err.message : null);
     } else {
-        _err = new HttpError(500);
+        _err = new HttpError(500, String(err));
     }
 
     if (req.accept == "application/json" || res.jsonp) {

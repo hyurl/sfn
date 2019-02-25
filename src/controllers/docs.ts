@@ -1,4 +1,4 @@
-import { route, HttpController, HttpError, ROOT_PATH, Request, Response } from "sfn";
+import { route, HttpController, HttpError, ROOT_PATH, Request, Response, isDevMode } from "sfn";
 import { readdir } from 'fs-extra';
 
 export default class extends HttpController {
@@ -31,7 +31,7 @@ export default class extends HttpController {
             });
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
-            throw new HttpError(code, e.message);
+            throw new HttpError(code, isDevMode ? e.message : null);
         }
     }
 }

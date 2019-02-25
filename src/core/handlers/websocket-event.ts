@@ -146,10 +146,10 @@ async function handleError(
 
     if (err instanceof SocketError) {
         _err = err;
-    } else if (err instanceof Error && isDevMode) {
-        _err = new SocketError(500, err.message);
+    } else if (err instanceof Error) {
+        _err = new SocketError(500, isDevMode ? err.message : null);
     } else {
-        _err = new SocketError(500);
+        _err = new SocketError(500, String(err));
     }
 
     info.code = _err.code;

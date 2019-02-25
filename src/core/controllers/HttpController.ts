@@ -173,9 +173,9 @@ export class HttpController extends Controller {
 
     /**
      * By default, the framework will send a view file according to the error 
-     * code, and only pass the `err` object to the template, it may not be 
-     * suitable for complicated needs. For such a reason, the framework allows
-     * you to customize the error view handler by rewriting this method.
+     * code, and only pass the `err: Error` object to the template, it may not 
+     * be suitable for complicated needs. For such a reason, the framework 
+     * allows you to customize the error view handler by rewriting this method.
      */
     static httpErrorView(err: HttpError, instance: HttpController): string {
         return instance.view(instance.res.code.toString(), { err });
