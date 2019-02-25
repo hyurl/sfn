@@ -1,0 +1,10 @@
+<%- include("./header") %>
+<div class="content">
+    <h1><%= err.toString() %></h1>
+    <% if (err.code === 404) { %>
+        <p><%= i18n("The page you are requested doesn't exist, please check the URL and try again.") %></p>
+    <% } else if (err.code === 500) { %>
+        <p><%= i18n("The page you are requested is not available currently, please try again later.") %></p>
+    <% } %>
+<div class="content">
+<%- include("./footer") %>

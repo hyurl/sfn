@@ -10,9 +10,11 @@ declare global {
 
 app.serveRPC = serveRPC;
 
-const Connections: any[] = [];
+const Servers: any[] = [];
 
 async function serveRPC(name: string) {
+    Servers.push(config.server.rpc[name]);
+
     let { modules, ...options } = config.server.rpc[name];
     let service = await app.services.serve(options);
 
@@ -22,13 +24,15 @@ async function serveRPC(name: string) {
 
     console.log(green`RPC server [${name}] started.`);
 
+    // Connect the service immediately after serving.
     await connectRPC(name);
 }
 
 async function connectRPC(name: string) {
     let timer: NodeJS.Timer;
 
-    if (Connections.includes(config.server.rpc[name]))
+    // If the currenct process serves the service, do not connect again.
+    if (Servers.includes(config.server.rpc[name]))
         return;
 
     try {
@@ -41,8 +45,6 @@ async function connectRPC(name: string) {
 
         timer && clearTimeout(timer);
         console.log(green`RPC server [${name}] connected.`);
-
-        Connections.push(config.server.rpc[name]);
     } catch (err) {
         timer = setTimeout(() => {
             connectRPC(name);
