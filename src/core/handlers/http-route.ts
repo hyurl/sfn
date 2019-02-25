@@ -131,7 +131,7 @@ function handleFinish(err: Error, ctrl: HttpController, method: string) {
     finish(ctrl);
 }
 
-function handleError(err: any, ctrl: HttpController, method?: string) {
+async function handleError(err: any, ctrl: HttpController, method?: string) {
     let { req, res } = ctrl;
 
     // If the response is has already been sent, handle finish immediately.
@@ -162,7 +162,7 @@ function handleError(err: any, ctrl: HttpController, method?: string) {
         // error message.
         try {
             let { httpErrorView } = <typeof HttpController>ctrl.ctor;
-            let content = httpErrorView(_err, ctrl);
+            let content = await httpErrorView(_err, ctrl);
 
             res.type = "text/html";
             res.send(content);
