@@ -6,6 +6,8 @@ import chalk from "chalk";
 import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
 import service from './Service';
 import startsWith = require('lodash/startsWith');
+import get = require("lodash/get");
+import * as modelar from "modelar";
 
 const tryImport = createImport(require);
 
@@ -16,6 +18,22 @@ export function isOwnMethod(obj: any, method: string): boolean {
 
 export function moduleExists(name: string): boolean {
     return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
+}
+
+export function importUser() {
+    let ctor: typeof modelar.User;
+
+    try {
+        ctor = get(app, "models.user").ctor;
+
+        if (!ctor || !(ctor.prototype instanceof modelar.User)) {
+            ctor = modelar.User;
+        }
+    } catch (err) {
+        ctor = modelar.User;
+    }
+
+    return ctor;
 }
 
 export async function callsiteLog(err: Error) {

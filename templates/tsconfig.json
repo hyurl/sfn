@@ -22,7 +22,9 @@
         "src/schedules/*.ts",
         "src/services/*.ts",
         "src/locales/*.ts",
-        "src/models/*.ts"
+        "src/plugins/*.ts",
+        "src/models/*.ts",
+        "src/utils/*.ts"
     ],
     "exclude": [
         "./node_modules/*"

@@ -4,15 +4,17 @@ import { green } from "../tools/functions-inner";
 
 declare global {
     namespace app {
+        /**
+         * Starts an RPC server according to the given `name`, which is set in 
+         * `config.server.rpc`.
+         */
         function serveRPC(name: string): Promise<void>;
     }
 }
 
-app.serveRPC = serveRPC;
-
 const Servers: any[] = [];
 
-async function serveRPC(name: string) {
+app.serveRPC = async function serveRPC(name: string) {
     Servers.push(config.server.rpc[name]);
 
     let { modules, ...options } = config.server.rpc[name];

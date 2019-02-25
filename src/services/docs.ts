@@ -4,7 +4,6 @@ import { resolve as resolvePath } from "path";
 import { Section, constructMarkdown, renderHtml } from "outlining";
 import trim = require("lodash/trim");
 import meta from "comment-meta";
-import MarkdownParser from "sfn-markdown-parser";
 
 declare global {
     namespace app {
@@ -35,7 +34,7 @@ export default class DocumentationService extends Service {
 
         if (isDevMode || !content) {
             content = await readFile(resolvePath(dir, name + ".md"), "utf8");
-            content = await MarkdownParser.parse(content);
+            content = await app.utils.markdown.instance().parse(content);
             this.cache.set(`doc.contents[${ver}][${name}]`, content);
         }
 

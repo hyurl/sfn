@@ -96,15 +96,17 @@
     },
     "devDependencies": {
         "@types/cookie-parser": "^1.4.1",
+        "@types/marked": "^0.6.1",
         "@types/node": "^11.9.4",
         "@types/pluralize": "0.0.28",
         "@types/serve-static": "^1.13.2",
         "@types/session-file-store": "^1.2.0",
         "alar-ejs-loader": "^1.1.0",
         "comment-meta": "^0.1.1",
+        "highlightjs": "^9.12.0",
+        "marked": "^0.6.1",
         "outlining": "^0.1.2",
         "session-file-store": "^1.2.0",
-        "sfn-markdown-parser": "^0.1.1",
         "typescript": "^3.3.3"
     }
 }

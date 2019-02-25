@@ -6,8 +6,9 @@ const tryImport = createImport(require);
 
 // hot-reloading
 if (!isCli && config.hotReloading) {
-    app.models.watch();
     app.services.watch();
+    app.models.watch();
+    app.utils.watch();
     app.locales.watch();
     app.plugins.watch();
 }

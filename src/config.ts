@@ -39,8 +39,9 @@ export interface SFNConfig {
      * 
      * Currently, these entities can be hot-reloaded:
      * - `controllers`
-     * - `models`
      * - `services`
+     * - `models`
+     * - `utils`
      * - `locales`
      * - `views`
      * - `plugins`

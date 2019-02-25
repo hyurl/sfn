@@ -14,22 +14,28 @@ import {
     createImport,
     importDirectory
 } from "../tools/functions-inner";
-import "./load-controller";
-import "./load-locale";
-import "./load-model";
-import "./load-service";
-import "./load-view";
-import "./load-plugin";
+import "./load-controllers";
+import "./load-services";
+import "./load-models";
+import "./load-utils";
+import "./load-views";
+import "./load-locales";
+import "./load-plugins";
 import "./rpc-support";
 import { watchWebModules } from "./hot-reload";
 
 declare global {
     namespace app {
-        var router: App;
-        var http: HttpServer | HttpsServer | Http2SecureServer;
-        var ws: SocketIO.Server;
-        var service: Service;
-        function serve(port?: number): void;
+        const router: App;
+        const http: HttpServer | HttpsServer | Http2SecureServer;
+        const ws: SocketIO.Server;
+        /**
+         * The default service instance used in the core, and can be used in 
+         * user project as well.
+         */
+        const service: Service;
+        /** Starts the web server (both `http` and `ws`). */
+        function serve(): void;
     }
 }
 
@@ -46,10 +52,7 @@ let hostnames = config.server.hostname,
     httpPort = httpServer.port,
     WS = config.server.websocket;
 
-/**
- * Starts HTTP server and socket server (if enabled).
- */
-app.serve = function serve(port?: number) {
+app.serve = function serve() {
     // load HTTP middleware
     require("../handlers/https-redirector");
     require("../handlers/http-init");
@@ -79,7 +82,7 @@ app.serve = function serve(port?: number) {
         if (err.message.includes("listen")) {
             process.exit(1);
         }
-    }).listen(port || httpPort, () => {
+    }).listen(httpPort, () => {
         // load controllers
         importDirectory(app.controllers.path);
         watchWebModules();
@@ -135,7 +138,7 @@ if (!isCli) {
     service.cache.sync().catch((err: Error) => service.logger.error(err.message));
 }
 
-app.router = router;
-app.http = http;
-app.ws = ws;
-app.service = service;
+global["app"].router = router;
+global["app"].http = http;
+global["app"].ws = ws;
+global["app"].service = service;

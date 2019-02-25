@@ -9,11 +9,11 @@ export { config };
 
 declare global {
     namespace app {
-        var config: SFNConfig;
+        const config: SFNConfig;
     }
 }
 
-app.config = config;
+global["app"].config = config;
 
 let moduleName = APP_PATH + "/config";
 let tryImport = createImport(require);

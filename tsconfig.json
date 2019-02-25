@@ -31,6 +31,7 @@
         "src/locales/*.ts",
         "src/plugins/*.ts",
         "src/models/*.ts",
+        "src/utils/*.ts",
         "src/core/*/*.ts",
         "src/core/*/*/*.ts",
         "src/cli/*.ts"
