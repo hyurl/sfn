@@ -177,7 +177,7 @@ export class HttpController extends Controller {
      * be suitable for complicated needs. For such a reason, the framework 
      * allows you to customize the error view handler by rewriting this method.
      */
-    static httpErrorView(err: HttpError, instance: HttpController): string {
+    static httpErrorView(err: HttpError, instance: HttpController): string | Promise<string> {
         return instance.view(instance.res.code.toString(), { err });
     }
 }
