@@ -16,7 +16,7 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         return {};
     }
 
-    bind(handler: (input?: I, output?: O) => Promise<void | O>) {
+    bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
         let path = resolveModulePath(this.path);
         let name = this.resolve(path);
 

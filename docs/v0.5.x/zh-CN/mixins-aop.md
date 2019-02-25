@@ -136,7 +136,7 @@ declare global {
 // order to achieve some goals. e.g.
 
 // assign user name
-app.plugins.user.onAdd.bind(async (input, user) => {
+app.plugins.user.onAdd.bind((input, user) => {
     user.name = input.name || "Joe";
 });
 
