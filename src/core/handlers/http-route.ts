@@ -101,7 +101,7 @@ export function getRouteHandler(key: string): RouteHandler {
 }
 
 export function handleLog(err: Error, ctrl: Controller, method?: string) {
-    // do not log http errors except they are server-side errors. 
+    // Do not log http errors except they are server-side errors. 
     if (err instanceof HttpError && err.code < 500) return;
 
     if (isDevMode) {
@@ -181,7 +181,7 @@ async function getArguments(ctrl: HttpController, method: string) {
         args: any[] = [];
 
     // Dependency Injection
-    // try to convert parameters to proper types according to the definition of 
+    // Try to convert parameters to proper types according to the definition of 
     // the method.
     let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 

@@ -107,18 +107,25 @@ export default <SFNConfig>{
 }
 ```
 
-Then create a new file and save it in `src/`, which named `rpc-server-1.ts`, the
-contents is much about this:
+Then create a new file named `rpc-server-1.ts` and save it in `src/`, the 
+contents would be like this:
 
 ```typescript
 // src/rpc-server-1.ts
 import "sfn";
 
-app.serveRPC("rpc-server-1");
+app.rpc.serve("rpc-server-1");
 ```
 
 Compile it and use command `node dist/rpc-server-1` to start the individual 
-service, then you're able to use this remote service anywhere in the project.
+service, and use the `connect()` method to connect to the RPC server:
+
+```typescript
+app.rpc.connect("rpc-server-1");
+```
+
+Then you're able to use this remote service anywhere in the project. (You can 
+also use `connectAll()` method to connect all the servers at once.)
 
 ```typescript
 (async () => {

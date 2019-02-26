@@ -4,10 +4,10 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import chalk from "chalk";
 import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
-import service from './Service';
 import startsWith = require('lodash/startsWith');
 import get = require("lodash/get");
 import * as modelar from "modelar";
+import service from "../bootstrap/load-services";
 
 const tryImport = createImport(require);
 
@@ -141,11 +141,7 @@ export function resolveModulePath(baseDir: string) {
 
 export async function importDirectory(dir: string) {
     var ext = isTsNode ? ".ts" : ".js";
-    var files: string[]
-
-    try { files = await fs.readdir(dir); } catch (e) { }
-
-    if (!files) return;
+    var files = await fs.readdir(dir);
 
     for (let file of files) {
         let filename = path.resolve(dir, file);
@@ -155,7 +151,7 @@ export async function importDirectory(dir: string) {
             tryImport(filename);
         } else if (stat.isDirectory()) {
             // load files recursively.
-            importDirectory(filename);
+            await importDirectory(filename);
         }
     }
 }

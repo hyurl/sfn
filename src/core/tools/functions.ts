@@ -13,6 +13,11 @@ import {
 } from './interfaces';
 import { resolveModulePath } from './functions-inner';
 
+/** Pauses the execution in an asynchronous operation. */
+export function sleep(timeout: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+}
+
 /** 
  * Generates a random string.
  * @param length The string length.

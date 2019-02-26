@@ -3,10 +3,8 @@ import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
-import chalk from "chalk";
 import { APP_PATH, isCli } from "../../init";
 import { config, baseUrl } from "./load-config";
-import service, { Service } from '../tools/Service';
 import {
     red,
     green,
@@ -21,21 +19,18 @@ import "./load-utils";
 import "./load-views";
 import "./load-locales";
 import "./load-plugins";
-import "./rpc-support";
+import "./load-rpc";
 import { watchWebModules } from "./hot-reload";
+import { pathExists } from 'fs-extra';
 
 declare global {
     namespace app {
         const router: App;
         const http: HttpServer | HttpsServer | Http2SecureServer;
         const ws: SocketIO.Server;
-        /**
-         * The default service instance used in the core, and can be used in 
-         * user project as well.
-         */
-        const service: Service;
+
         /** Starts the web server (both `http` and `ws`). */
-        function serve(): void;
+        function serve(): Promise<void>;
     }
 }
 
@@ -53,46 +48,60 @@ let hostnames = config.server.hostname,
     WS = config.server.websocket;
 
 app.serve = function serve() {
-    // load HTTP middleware
-    require("../handlers/https-redirector");
-    require("../handlers/http-init");
-    require("../handlers/http-static");
-    require("../handlers/http-xml");
-    require("../handlers/http-session");
-    require("../handlers/http-db");
-    require("../handlers/http-auth");
+    return new Promise((resolve, reject) => {
+        // load HTTP middleware
+        require("../handlers/https-redirector");
+        require("../handlers/http-init");
+        require("../handlers/http-static");
+        require("../handlers/http-xml");
+        require("../handlers/http-session");
+        require("../handlers/http-db");
+        require("../handlers/http-auth");
 
-    // Load user-defined bootstrap procedures.
-    let httpBootstrap = APP_PATH + "/bootstrap/http";
-    moduleExists(httpBootstrap) && tryImport(httpBootstrap);
-
-    if (WS.enabled) {
         // Load user-defined bootstrap procedures.
-        let wsBootstrap = APP_PATH + "/bootstrap/websocket";
-        moduleExists(wsBootstrap) && tryImport(wsBootstrap);
-    }
+        let httpBootstrap = APP_PATH + "/bootstrap/http";
+        moduleExists(httpBootstrap) && tryImport(httpBootstrap);
 
-    // Start HTTP server.
-    if (typeof http["setTimeout"] == "function") {
-        http["setTimeout"](config.server.http.timeout);
-    }
-
-    http.on("error", (err: Error) => {
-        console.log(red`${err.toString()}`);
-        if (err.message.includes("listen")) {
-            process.exit(1);
+        if (WS.enabled) {
+            // Load user-defined bootstrap procedures.
+            let wsBootstrap = APP_PATH + "/bootstrap/websocket";
+            moduleExists(wsBootstrap) && tryImport(wsBootstrap);
         }
-    }).listen(httpPort, () => {
-        // load controllers
-        importDirectory(app.controllers.path);
-        watchWebModules();
 
-        if (typeof process.send == "function") {
-            // notify PM2 that the service is available.
-            process.send("ready");
-        } else {
-            console.log(green`HTTP server running at ${chalk.yellow(baseUrl)}.`);
+        // Start HTTP server.
+        if (typeof http["setTimeout"] == "function") {
+            http["setTimeout"](config.server.http.timeout);
         }
+
+        http.on("error", (err: Error) => {
+            console.log(red`${err.toString()}`);
+
+            if (err.message.includes("listen")) {
+                process.exit(1);
+            } else {
+                reject(err);
+            }
+        }).listen(httpPort, async () => {
+            try {
+                // load controllers
+                if (await pathExists(app.controllers.path)) {
+                    await importDirectory(app.controllers.path);
+                }
+
+                watchWebModules();
+
+                if (typeof process.send == "function") {
+                    // notify PM2 that the service is available.
+                    process.send("ready");
+                } else {
+                    console.log(green`Web server [${baseUrl}] started.`);
+                }
+
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        });
     });
 }
 
@@ -132,13 +141,14 @@ if (!isCli) {
     require("../handlers/worker-shutdown");
 
     // load plugins
-    importDirectory(app.plugins.path);
+    pathExists(app.plugins.path).then(() => importDirectory(app.plugins.path));
 
     // try to sync any cached data hosted by the default cache service.
-    service.cache.sync().catch((err: Error) => service.logger.error(err.message));
+    app.services.internal.cache.sync().catch((err: Error) => {
+        app.services.internal.logger.error(err.message);
+    });
 }
 
 global["app"].router = router;
 global["app"].http = http;
 global["app"].ws = ws;
-global["app"].service = service;

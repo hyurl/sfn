@@ -36,10 +36,14 @@ export class WebSocketController extends Controller {
     /** Reference to the corresponding socket context. */
     readonly socket: WebSocket;
 
+    /** The current active event (namesapce included). */
+    readonly event: string;
+
     constructor(socket: WebSocket) {
         super();
         this.authorized = socket.user !== null;
         this.socket = socket;
+        this.event = this.socket[activeEvent];
         this.lang = (socket.cookies && socket.cookies.lang)
             || socket.lang
             || config.lang;
@@ -66,13 +70,5 @@ export class WebSocketController extends Controller {
 
     set user(v: User) {
         this.socket.user = v;
-    }
-
-    /**
-     * The active event (namesapce included) when the controller is instantiated.
-     */
-    get event(): string {
-        return this[activeEvent]
-            || (this[activeEvent] = this.socket[activeEvent]);
     }
 }

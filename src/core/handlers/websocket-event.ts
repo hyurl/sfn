@@ -69,15 +69,7 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 eventMap.del(key, method);
                 continue;
             } else if (!initiated) {
-                // HACK, because the activeEvent stored in the socket object 
-                // will be frequently changed time to time a new event activated,
-                // so when the first time access to `ctrl.event` properties, the
-                // active event will be copied to the controller instance, so 
-                // that no matter how it changed, the instance will always 
-                // access to the original event when it was emitted.
-                ctrl.event;
-
-                // if the socket has been disconnected before calling the actual
+                // If the socket has been disconnected before calling the actual
                 // method, return immediately without running any checking 
                 // procedure, and don't call the method.
                 if (socket.disconnected || false === (await ctrl.before()))
@@ -108,7 +100,7 @@ function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
     let args: any[] = [];
 
     // Dependency Injection
-    // try to convert parameters to proper types according to the definition of 
+    // Try to convert parameters to proper types according to the definition of 
     // the method.
     let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 

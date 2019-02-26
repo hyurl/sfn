@@ -108,11 +108,18 @@ export default <SFNConfig>{
 // src/rpc-server-1.ts
 import "sfn";
 
-app.serveRPC("rpc-server-1");
+app.rpc.serve("rpc-server-1");
 ```
 
-编译并使用命令 `node dist/rpc-server-1` 来启动这个独立的服务，之后并可以在项目中的任何地方
-连接这个远程服务了。
+编译并使用命令 `node dist/rpc-server-1` 来启动这个独立的服务，并使用 `connect()` 方法来
+连接这个远程服务器：
+
+```typescript
+app.rpc.connect("rpc-server-1");
+```
+
+之后并可以在项目中的任何地方连接这个远程服务了。（你也可以使用 `connectAll()` 方法来一次性
+连接所有的远程服务器。）
 
 ```typescript
 (async () => {
