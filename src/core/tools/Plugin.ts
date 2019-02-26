@@ -51,16 +51,6 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         return handlers;
     }
 
-    /** DON'T call, plugin doesn't support remote service. */
-    serve(): never {
-        throw new ReferenceError("Plugin doesn't support remote service");
-    }
-
-    /** DON'T call, plugin doesn't support remote service. */
-    connect(): never {
-        return this.serve();
-    }
-
     watch() {
         return super.watch().on("add", (filename: string) => {
             this.resolve(filename) && tryImport(filename);
@@ -84,14 +74,9 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         } else if (prop in this.children) {
             return this.children[prop];
         } else if (typeof prop != "symbol") {
-            let child = new Plugin(
+            return this.children[prop] = new Plugin(
                 this.name + "." + String(prop),
             );
-
-            child.singletons = this.singletons;
-            child.loader = this.loader;
-
-            return this.children[prop] = child;
         }
     }
 }
