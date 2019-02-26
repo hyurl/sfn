@@ -21,8 +21,8 @@ export default class extends HttpController {
         try {
             await app.plugins.web.onView.invoke(req);
 
-            let sideMenu = await app.services.docs.remote().getSideMenu(version, this.lang);
-            let content = await app.services.docs.remote().getContent(version, this.lang, name);
+            let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
+            let content = await app.services.docs.instance().getContent(version, this.lang, name);
 
             return req.xhr ? content : this.view("docs", {
                 sideMenu,

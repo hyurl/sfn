@@ -12,10 +12,6 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         super(name, APP_PATH + "/plugins");
     }
 
-    get exports() {
-        return {};
-    }
-
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
         let path = resolveModulePath(this.path);
         let name = this.resolve(path);
@@ -80,6 +76,23 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
             let name = this.resolve(filename);
             name && (delete Plugin.Container[name]);
         });
+    }
+
+    protected __get(prop: string) {
+        if (prop in this) {
+            return this[prop];
+        } else if (prop in this.children) {
+            return this.children[prop];
+        } else if (typeof prop != "symbol") {
+            let child = new Plugin(
+                this.name + "." + String(prop),
+            );
+
+            child.singletons = this.singletons;
+            child.loader = this.loader;
+
+            return this.children[prop] = child;
+        }
     }
 }
 
