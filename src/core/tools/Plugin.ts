@@ -1,4 +1,5 @@
 import * as alar from "alar";
+import { interceptAsync } from 'function-intercepter';
 import { APP_PATH } from '../../init';
 import { resolveModulePath, createImport } from './functions-inner';
 
@@ -12,6 +13,7 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         super(name, APP_PATH + "/plugins");
     }
 
+    /** Binds a handler to the plugin. */
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
         let path = resolveModulePath(this.path);
         let name = this.resolve(path);
@@ -30,14 +32,29 @@ export class Plugin<I = any, O = any> extends alar.ModuleProxy {
         return this;
     }
 
+    /** Invokes all handlers in the plugin. */
     async invoke(input?: I, output?: O): Promise<O> {
         let result: O;
 
         for (let handler of this.getHandlers()) {
-            result = await handler(input, output);
+            let res = await handler(input, output);
+            res === undefined || (result = res);
         }
 
         return result === undefined ? output : result;
+    }
+
+    /**
+     * Uses the plugin as a method decorator, when doing this, the arguments
+     * passed to the handlers will be the same ones passed to the method, and 
+     * any returning value form the handlers will be ignored.
+     */
+    decorate(): MethodDecorator {
+        return interceptAsync().before(async (...args) => {
+            for (let handler of this.getHandlers()) {
+                await handler(...args);
+            }
+        });
     }
 
     getHandlers() {
