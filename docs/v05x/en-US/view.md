@@ -87,7 +87,7 @@ export namespace EjsLoader {
 }
 
 export class EjsLoader implements ModuleLoader {
-    extesion = ".ejs";
+    extension = ".ejs";
     cache: { [filename: string]: EjsLoader.View } = {};
 
     constructor(private options: EjsLoader.Options = {}) { }

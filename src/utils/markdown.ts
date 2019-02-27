@@ -46,14 +46,8 @@ export default class MarkdownUtil {
     }
 
     /** Parses markdown contents to HTML. */
-    parse(contents: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            try {
-                resolve(marked(contents, { renderer: this.renderer }));
-            } catch (err) {
-                reject(err);
-            }
-        });
+    parse(contents: string): string {
+        return marked(contents, { renderer: this.renderer })
     }
 
     /** Parses a markdown file to HTML. */

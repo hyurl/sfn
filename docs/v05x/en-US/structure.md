@@ -35,3 +35,21 @@ Apart from these, you can create any files and folders you want, just make
 sure they'll be loaded properly.
 
 (NOTE: * indicates the files in the current item is hot-reloadable.)
+
+# Hot-reloading
+
+The hot-reloading feature was introduced since SFN 0.3, back then only 
+controllers that can be hot-reloaded. However, since version 0.5, SFN introduced
+a new hot-reloading model via [Alar](https://github.com/hyurl/alar) framework,
+now almost all facilities in a SFN project will be hot-reloadable.
+
+The switch to turn on hot-reloading feature is `config.hotReloading`, which is 
+now set to `true` by default, that means the moment you install SFN and run the
+program, your program will be watched and is waiting to hot-reload any source 
+file that may potentially be modified at runtime.
+
+But there are things need to be considered since your program will automatically
+reload the imported modules, which means any state, memory cache, variables, etc.
+will be wiped out once reloaded, you have to change your development habit and 
+design your program to be stateless. If doing so is hard for you, just turn off 
+hot-reloading, and it's fine.

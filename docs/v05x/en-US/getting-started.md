@@ -24,9 +24,12 @@ npm i -D typescript
 npm i -D @types/node
 ```
 
-*History versions of SFN once support **ts-node** runtime, however, due to its*
-*limitations, e.g. doesn't support of `includes`, since 0.5.x, SFN no longer*
-*support ts-node.*
+Optionally, you can install [ts-node](https://github.com/TypeStrong/ts-node) to
+run the program without compiling source code.
+
+```sh
+npm i -D ts-node
+```
 
 ### Install PM2 (Optional)
 
@@ -65,6 +68,12 @@ sfn init
 ```sh
 tsc
 node dist
+```
+
+If you wish to run the project via ts-node, use the following command instead:
+
+```sh
+ts-node --files src # --files flag must be provided
 ```
 
 And the server should be started in few seconds.

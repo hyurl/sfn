@@ -3,7 +3,8 @@ import "../core/bootstrap/load-services";
 
 config.server.rpc = {
     "doc-server": {
-        path: app.SRC_PATH + "/cache/app.sock",
+        host: "localhost",
+        port: 8000,
         modules: [app.services.docs]
     }
 };

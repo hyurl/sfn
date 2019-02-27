@@ -23,9 +23,12 @@ npm i -D typescript
 npm i -D @types/node
 ```
 
-*SFN 的历史版本曾支持 **ts-node** 运行时，然而由于其包含了诸多限制（如不支持*
-*`includes`），自 0.5.x 版本起，SFN 不再支持 ts-node。*
+可选的，你可以安装 [ts-node](https://github.com/TypeStrong/ts-node)，来实现不编译
+源码直接运行。
 
+```sh
+npm i -D ts-node
+```
 
 ### 安装 PM2（可选）
 
@@ -61,6 +64,12 @@ sfn init
 ```sh
 tsc
 node dist
+```
+
+如果你希望通过 ts-node 来启动项目，则需要使用下面的命令：
+
+```sh
+ts-node --files src # --files 参数必须提供给
 ```
 
 接着，服务器将会在几秒钟之内完成启动。

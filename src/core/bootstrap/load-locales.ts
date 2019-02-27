@@ -14,7 +14,7 @@ global["app"].locales = new alar.ModuleProxy("app.locales", SRC_PATH + "/locales
 
 app.locales.setLoader({
     cache: {},
-    extesion: ".json",
+    extension: ".json",
     load(file: string) {
         if (!this.cache[file]) {
             this.cache[file] = FRON.parse(fs.readFileSync(file, "utf8"), file);

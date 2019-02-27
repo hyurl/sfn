@@ -1,9 +1,10 @@
-import { Service, isDevMode, ROOT_PATH } from "sfn";
+import { Service, ROOT_PATH, View } from "sfn";
 import { readdir, readFile } from 'fs-extra';
 import { resolve as resolvePath } from "path";
 import { Section, constructMarkdown, renderHtml } from "outlining";
 import trim = require("lodash/trim");
-import meta from "comment-meta";
+import get = require("lodash/get");
+import meta from "comment-meta"; 
 
 declare global {
     namespace app {
@@ -15,42 +16,35 @@ declare global {
 
 export default class DocumentationService extends Service {
     async getSideMenu(version: string, lang: string) {
-        let ver = `[${version}][${lang}]`.replace(/\./g, "");
-        let sideMenu: string = this.cache.get(`doc.sideMenu[${ver}]`);
+        let path = `app.docs.sideMenu.${version.replace(/\./g, "")}.${lang}`;
+        let sideMenu: string = app.services.internal.cache.get(path);
 
-        if (isDevMode || !sideMenu) {
+        if (!sideMenu) {
             let categoryTree = await this.getCategoryTree(version, lang);
             sideMenu = renderHtml(categoryTree, "categories", "    ");
-            this.cache.set(`doc.sideMenu[${ver}]`, sideMenu);
+            app.services.internal.cache.set(path, sideMenu);
         }
 
         return sideMenu;
     }
 
     async getContent(version: string, lang: string, name: string) {
-        let ver = `[${version}][${lang}]`.replace(/\./g, "");
-        let dir = `${ROOT_PATH}/docs/${version}/${lang}`;
-        let content: string = this.cache.get(`doc.contents[${ver}][${name}]`);
+        let dir = `${ROOT_PATH}/docs/${version.replace(/\./g, "")}/${lang}`;
+        let filename = resolvePath(dir, name + ".md");
 
-        if (isDevMode || !content) {
-            content = await readFile(resolvePath(dir, name + ".md"), "utf8");
-            content = await app.utils.markdown.instance().parse(content);
-            this.cache.set(`doc.contents[${ver}][${name}]`, content);
-        }
-
-        return content;
+        return (<ModuleProxy<View>>get(global, app.docs.resolve(filename))).instance().render();
     }
 
     async getCategoryTree(version: string, lang: string) {
-        let dir = `${ROOT_PATH}/docs/${version}/${lang}`;
+        let dir = `${ROOT_PATH}/docs/${version.replace(/\./g, "")}/${lang}`;
         let files = await readdir(dir);
         let categoryTree: Array<{
-                order: number;
-                id: string;
-                level: number;
-                title: string;
-                children: Section[]
-            }> = [];
+            order: number;
+            id: string;
+            level: number;
+            title: string;
+            children: Section[]
+        }> = [];
 
         for (let file of files) {
             let _name = file.slice(0, -3),
