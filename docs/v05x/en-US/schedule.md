@@ -6,12 +6,7 @@ Running a schedule cyclically is supported by
 you a simple and friendly interface to set a schedule that runs it in a certain 
 time or period.
 
-## How To Use?
-
-As convenience, you should put your schedule files in the `src/schedules/` 
-directory, and load them from the bootstrap files.
-
-### Example
+## Example
 
 ```typescript
 // src/schedules/index.ts

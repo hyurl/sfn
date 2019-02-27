@@ -4,12 +4,7 @@
 循环地执行一个定时任务由 [sfn-scheduler](https://github.com/hyurl/sfn-scheduler)
 模块提供支持，它提供了你一个简单友好地接口来设置能够在特定时间或阶段执行的定时任务。
 
-## 如何使用？
-
-为了方便，你应该将定时任务文件存储在 `src/schedules/` 目录中，然后在启动自定义文件中
-加载它们。
-
-### 示例
+## 示例
 
 ```typescript
 // src/schedules/index.ts
