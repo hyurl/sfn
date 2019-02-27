@@ -20,6 +20,7 @@ import "./load-views";
 import "./load-locales";
 import "./load-plugins";
 import "./load-rpc";
+import "./life-cycle";
 import { watchWebModules } from "./hot-reload";
 import { pathExists } from 'fs-extra';
 
@@ -137,15 +138,10 @@ if (!isCli) {
     let bootstrap = APP_PATH + "/bootstrap/index";
     moduleExists(bootstrap) && tryImport(bootstrap);
 
-    // load worker message handlers
-    require("../handlers/worker-shutdown");
-
     // load plugins
-    pathExists(app.plugins.path).then(() => importDirectory(app.plugins.path));
-
-    // try to sync any cached data hosted by the default cache service.
-    app.services.internal.cache.sync().catch((err: Error) => {
-        app.services.internal.logger.error(err.message);
+    pathExists(app.plugins.path).then(async (exists) => {
+        exists && (await importDirectory(app.plugins.path));
+        await app.plugins.lifeCycle.startup.invoke();
     });
 }
 

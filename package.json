@@ -67,7 +67,6 @@
         "commander": "^2.19.0",
         "cookie-parser": "^1.4.4",
         "dotenv": "^6.2.0",
-        "dynamic-queue": "^0.1.6",
         "express-session": "^1.15.6",
         "fron": "^0.1.3",
         "fs-extra": "^6.0.1",
