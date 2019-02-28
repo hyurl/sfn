@@ -3,6 +3,7 @@ import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
+import channel from "ipchannel";
 import { APP_PATH, isCli } from "../../init";
 import { config, baseUrl } from "./load-config";
 import {
@@ -21,6 +22,7 @@ import "./load-locales";
 import "./load-plugins";
 import "./load-rpc";
 import "./life-cycle";
+import "./load-message";
 import { watchWebModules } from "./hot-reload";
 import { pathExists } from 'fs-extra';
 
@@ -89,16 +91,26 @@ app.serve = function serve() {
                     await importDirectory(app.controllers.path);
                 }
 
-                watchWebModules();
+                let finish = () => {
+                    watchWebModules();
 
-                if (typeof process.send == "function") {
-                    // notify PM2 that the service is available.
-                    process.send("ready");
-                } else {
-                    console.log(green`Web server [${baseUrl}] started.`);
+                    if (typeof process.send == "function") {
+                        // notify PM2 that the service is available.
+                        process.send("ready");
+                    } else {
+                        console.log(green`Web server [${baseUrl}] started.`);
+                    }
+
+                    // Set the server ID.
+                    app.serverId = "web-server-" + channel.pid;
+                    resolve();
                 }
 
-                resolve();
+                if (channel.pid) {
+                    finish();
+                } else {
+                    channel.on("connect", finish);
+                }
             } catch (err) {
                 reject(err);
             }

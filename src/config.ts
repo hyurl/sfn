@@ -53,7 +53,7 @@ export interface SFNConfig {
      */
     hotReloading?: boolean;
     server: {
-        /** Host name(s), used for calculating the sub-domain. */
+        /** Host name(s), used for calculating the sub-domain and display. */
         hostname?: string | string[];
         /**
          * Since SFN 0.2.0, when HTTPS or HTTP2 is enabled, will always force 
@@ -96,7 +96,9 @@ export interface SFNConfig {
          * Configurations for RPC services.
          * @see https://github.com/hyurl/alar
          */
-        rpc?: { [name: string]: RpcOptions & { modules: ModuleProxy<any>[] } };
+        rpc?: {
+            [serverId: string]: RpcOptions & { modules: ModuleProxy<any>[] }
+        };
     };
     /**
      * Configurations for Modelar ORM.
@@ -141,7 +143,8 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        }
+        },
+        rpc: {}
     },
     database: {
         type: env.DB_TYPE || "mysql",

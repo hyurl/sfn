@@ -28,25 +28,53 @@ process.on("SIGINT", async () => {
     }
 });
 
+// Subscribe an event listener so that when receives WebSocket message sent from
+// an RPC server, the message can be dilivered to the web client through a web
+// server.
+app.plugins.lifeCycle.startup.bind(() => {
+    app.message.subscribe(app.message.ws.name, (context: {
+        serverId?: string,
+        nsp?: string,
+        room?: string,
+        volatile?: boolean,
+        local?: boolean,
+        event: string,
+        data?: any[]
+    }) => {
+        if (context.serverId && app.serverId !== context.serverId)
+            return;
+
+        let ws = context.volatile ? app.ws.volatile : app.ws;
+
+        ws = context.local ? ws.local : ws;
+
+        let nsp = context.nsp ? ws.of(context.nsp) : ws;
+
+        context.room && (nsp = nsp.to(context.room));
+
+        nsp.emit(context.event, ...context.data);
+    });
+});
+
+// Try to sync any cached data hosted by the default cache service.
 app.plugins.lifeCycle.startup.bind(async () => {
-    // try to sync any cached data hosted by the default cache service.
     await app.services.internal.cache.sync();
 });
 
-// try to close all database connections
+// Try to close all database connections.
 app.plugins.lifeCycle.shutdown.bind(async () => {
     DB.close();
     await sleep(500);
 });
 
-// try to close all caches
+// Try to close all caches.
 app.plugins.lifeCycle.shutdown.bind(async () => {
     for (let filename in Service.Caches) {
         await Service.Caches[filename].close();
     }
 });
 
-// try to close http server
+// Try to close http server.
 app.plugins.lifeCycle.shutdown.bind(async () => {
     if (app.http) {
         await new Promise(resolve => {
@@ -60,7 +88,7 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
     }
 });
 
-// try to close ws server
+// Try to close ws server.
 app.plugins.lifeCycle.shutdown.bind(async () => {
     if (app.ws) {
         await new Promise(resolve => {

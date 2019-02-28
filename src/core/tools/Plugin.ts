@@ -5,7 +5,7 @@ import { resolveModulePath, createImport } from './functions-inner';
 
 const tryImport = createImport(require);
 
-export class Plugin<I = any, O = any> extends alar.ModuleProxy {
+export class Plugin<I = void, O = void> extends alar.ModuleProxy {
     protected paths: string[] = [];
     protected children: { [name: string]: Plugin } = {};
 

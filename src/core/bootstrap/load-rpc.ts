@@ -1,3 +1,4 @@
+import { RpcServer, RpcClient } from "alar";
 import { config } from "./load-config";
 import { green } from "../tools/functions-inner";
 import { sleep } from '../tools/functions';
@@ -5,18 +6,21 @@ import { sleep } from '../tools/functions';
 declare global {
     namespace app {
         namespace rpc {
+            var server: RpcServer;
+            var clients: RpcClient[];
+
             /**
-             * Starts an RPC server according to the given `name`, which is set 
-             * in `config.server.rpc`.
+             * Starts an RPC server according to the given `serverId`, which is 
+             * set in `config.server.rpc`.
              */
-            function serve(name: string): Promise<void>;
+            function serve(serverId: string): Promise<void>;
             /**
-             * Connects to an RPC server according to the given `name`, which is
-             * set in `config.server.rpc`. If `defer` is `true`, when the server
-             * is not online, the function will hang until it becomes available 
-             * and finishes the connection.
+             * Connects to an RPC server according to the given `serverId`, 
+             * which is set in `config.server.rpc`. If `defer` is `true`, when 
+             * the server is not online, the function will hang until it becomes
+             * available and finishes the connection.
              */
-            function connect(name: string, defer?: boolean): Promise<void>;
+            function connect(serverId: string, defer?: boolean): Promise<void>;
             /** Connects to all RPC servers. */
             function connectAll(defer?: boolean): Promise<void>;
         }
@@ -26,30 +30,44 @@ declare global {
 const rpc = config.server.rpc || {};
 
 app.rpc = {
-    async serve(name: string) {
-        let { modules, ...options } = rpc[name];
+    server: null,
+    clients: [],
+    async serve(serverId: string) {
+        let { modules, ...options } = rpc[serverId];
         let service = await app.services.serve(options);
 
         for (let mod of modules) {
             service.register(mod);
         }
 
-        console.log(green`RPC server [${name}] started.`);
+        app.rpc.server = service;
+        app.serverId = serverId;
+        console.log(green`RPC server [${serverId}] started.`);
     },
-    async connect(name: string, defer = false) {
+    async connect(serverId: string, defer = false) {
         try {
-            let { modules, ...options } = rpc[name];
+            let { modules, ...options } = rpc[serverId];
             let service = await app.services.connect(options);
 
             for (let mod of modules) {
                 service.register(mod);
             }
 
-            console.log(green`RPC server [${name}] connected.`);
+            app.rpc.clients.push(service);
+
+            // Copy all the event listeners from the message queue and subscribe
+            // them to the RPC client.
+            for (let event in app.message.events) {
+                for (let listener of app.message.events[event]) {
+                    service.subscribe(event, <any>listener);
+                }
+            }
+
+            console.log(green`RPC server [${serverId}] connected.`);
         } catch (err) {
             if (defer) {
                 await sleep(5000);
-                return app.rpc.connect(name, defer);
+                return app.rpc.connect(serverId, defer);
             } else {
                 throw err;
             }
@@ -58,8 +76,8 @@ app.rpc = {
     async connectAll(defer = false) {
         let connections: Promise<void>[] = [];
 
-        for (let name in rpc) {
-            connections.push(app.rpc.connect(name, defer));
+        for (let serverId in rpc) {
+            connections.push(app.rpc.connect(serverId, defer));
         }
 
         await Promise.all(connections);
