@@ -1,4 +1,7 @@
 import "./bootstrap/rpc-config";
 import "./index";
 
-app.rpc.serve("doc-server");
+(async () => {
+    await app.rpc.serve("doc-server");
+    await app.rpc.connect("schedule-server");
+})();

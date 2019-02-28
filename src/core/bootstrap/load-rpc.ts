@@ -65,6 +65,7 @@ app.rpc = {
 
             console.log(green`RPC server [${serverId}] connected.`);
         } catch (err) {
+            console.log(err);
             if (defer) {
                 await sleep(5000);
                 return app.rpc.connect(serverId, defer);

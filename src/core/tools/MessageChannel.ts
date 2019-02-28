@@ -3,7 +3,7 @@ export class MessageChannel {
 
     constructor(readonly name: string) { }
 
-    publish(event: string, data: any) {
+    publish(event: string, data?: any) {
         let listeners: Function[];
 
         event = this.name + "#" + event;
@@ -11,10 +11,10 @@ export class MessageChannel {
         if (app.rpc.server) {
             // If the current server is an RPC server, publish the event via the
             // RPC channel.
-            return app.rpc.server.publish(event, data);
-        } else if (listeners = this.events[event]) {
-            // If the current server is not a RPC server, say the Web server, 
-            // just trigger all the event listeners.
+            app.rpc.server.publish(event, [app.serverId, data]);
+        }
+
+        if (listeners = this.events[event]) {
             (async () => {
                 for (let handle of listeners) {
                     await handle(data);
@@ -23,9 +23,11 @@ export class MessageChannel {
 
             return listeners.length > 0;
         }
+
+        return false;
     }
 
-    subscribe(event: string, listener: (data: any) => void | Promise<void>) {
+    subscribe(event: string, listener: Function) {
         event = this.name + "#" + event;
 
         if (!this.events[event]) {
@@ -36,13 +38,23 @@ export class MessageChannel {
 
         // If there are active RPC connections, subscribe the event to the RPC
         // client as well.
-        if (app.rpc.clients.length) {
-            for (let client of app.rpc.clients) {
-                client.subscribe(event, listener);
-            }
+        for (let client of app.rpc.clients) {
+            client.subscribe(event, async ([serverId, data]) => {
+                if (serverId !== app.serverId) {
+                    await listener(data);
+                }
+            });
         }
 
         return this;
+    }
+
+    unsubscribe(event: string) {
+        delete this.events[event];
+
+        for (let client of app.rpc.clients) {
+            client.unsubscribe(event);
+        }
     }
 }
 

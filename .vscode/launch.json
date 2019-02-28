@@ -17,6 +17,13 @@
             "protocol": "auto",
             "name": "Start Doc Server",
             "program": "${workspaceFolder}/dist/doc-server"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "protocol": "auto",
+            "name": "Start Schedule Server",
+            "program": "${workspaceFolder}/dist/schedule-server"
         }
     ]
 }

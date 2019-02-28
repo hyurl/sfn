@@ -6,6 +6,7 @@ declare global {
         namespace utils {
             const name: string;
             const path: string;
+            const local: symbol;
             function resolve(path: string): string;
             function serve(config: string | alar.RpcOptions): Promise<alar.RpcServer>;
             function connect(config: string | alar.RpcOptions): Promise<alar.RpcClient>;

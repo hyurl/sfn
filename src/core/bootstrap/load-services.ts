@@ -7,6 +7,7 @@ declare global {
         namespace services {
             const name: string;
             const path: string;
+            const local: symbol;
             /**
              * The default service used in the core, it can be used in user 
              * project as well.
