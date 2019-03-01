@@ -31,6 +31,10 @@ declare global {
     namespace app {
         const router: App;
         const http: HttpServer | HttpsServer | Http2SecureServer;
+        /**
+         * This property is only available in a web server, use `app.message.ws`
+         * instead.
+         */
         const ws: SocketIO.Server;
 
         /** Starts the web server (both `http` and `ws`). */

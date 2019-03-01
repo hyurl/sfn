@@ -6,16 +6,16 @@ The `Service` class is the base class in **SFN**, classes like
 useful features like `i18n`, `logger`, `cache` that you can use to do real 
 jobs.
 
-## How To Use?
+# How To Use?
 
 The `Service` class, inherited from `EventEmitter`, so does usage, you can 
 define a new class then extends Service, or just use it directly. As 
 convenience, you should put your service files in the `src/services/` 
 directory.
 
-### Example
+## Example
 
-#### Use Service Directly
+### Use Service Directly
 
 ```typescript
 import { Service } from "sfn";
@@ -34,7 +34,7 @@ var srv = new Service;
 })(1);
 ```
 
-#### Define A New Service Class
+### Define A New Service Class
 
 You can define a new service class to store the procedure of some frequently
 used functions.
@@ -85,12 +85,14 @@ And then at where you need, use namespace to access the instance of this service
 })();
 ```
 
-## Separating Services
+# Separating Services
 
 The framework [Alar](https://github.com/hyurl/alar) that SFN uses allows 
-services being separated as called as RPC procedures, so that to reduce the 
-pressure of the Web server, and improve the stability. To separate the services,
-you just need to do some simple configurations.
+services being separated and called as RPC procedures, so that to reduce the 
+pressure of the web server, and improve the stability. This mechanism is also 
+used to easily build a distributed service system.
+
+To separate the services, you just need to do some simple configurations.
 
 ```typescript
 // src/config.ts
