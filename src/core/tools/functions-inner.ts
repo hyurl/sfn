@@ -154,3 +154,7 @@ export async function importDirectory(dir: string) {
         }
     }
 }
+
+export function serveTip(type: string, serverId: string, url: string) {
+    return green`${type} server [${serverId}](${url}) started.`;
+}

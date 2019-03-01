@@ -8,10 +8,10 @@ import { APP_PATH, isCli } from "../../init";
 import { config, baseUrl } from "./load-config";
 import {
     red,
-    green,
     moduleExists,
     createImport,
-    importDirectory
+    importDirectory,
+    serveTip
 } from "../tools/functions-inner";
 import "./load-controllers";
 import "./load-services";
@@ -97,17 +97,18 @@ app.serve = function serve() {
                 }
 
                 let finish = () => {
+                    // Set the server ID.
+                    app.serverId = "web-server-" + channel.pid;
+
                     watchWebModules();
 
                     if (typeof process.send == "function") {
                         // notify PM2 that the service is available.
                         process.send("ready");
                     } else {
-                        console.log(green`Web server [${baseUrl}] started.`);
+                        console.log(serveTip("Web", app.serverId, baseUrl));
                     }
 
-                    // Set the server ID.
-                    app.serverId = "web-server-" + channel.pid;
                     resolve();
                 }
 

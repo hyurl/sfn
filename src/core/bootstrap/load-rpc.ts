@@ -1,6 +1,6 @@
 import { RpcServer, RpcClient } from "alar";
 import { config } from "./load-config";
-import { green } from "../tools/functions-inner";
+import { green, serveTip } from "../tools/functions-inner";
 import { sleep } from '../tools/functions';
 
 declare global {
@@ -42,7 +42,7 @@ app.rpc = {
 
         app.rpc.server = service;
         app.serverId = serverId;
-        console.log(green`RPC server [${serverId}] started.`);
+        console.log(serveTip("RPC", serverId, service.dsn));
     },
     async connect(serverId: string, defer = false) {
         try {

@@ -15,19 +15,13 @@
     </p>
 </footer>
 
+<script>
+    const PORT = "<%= port %>";
+</script>
+<script src="/js/socket.io.js"></script>
 <script src="/js/jquery.min.js"></script>
 <script src="/js/soft-loader.js"></script>
 <script src="/js/javascript.js"></script>
-<script src="/js/socket.io.js"></script>
-<script>
-    var socket = io.connect("localhost:<%= port %>");
-    socket.on("/index", function (data) {
-        console.log("Socket:", data);
-    }).on("/repeat-what-I-said", function (data) {
-        console.log("You just said:", data);
-    });
-    socket.emit("/index");
-</script>
 </body>
 
 </html>

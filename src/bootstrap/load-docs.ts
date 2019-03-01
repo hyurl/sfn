@@ -1,6 +1,8 @@
 import * as alar from "alar";
 import * as fs from "fs";
 import { View } from "sfn";
+import startsWith = require('lodash/startsWith');
+import get = require('lodash/get');
 
 declare global {
     namespace app {
@@ -34,11 +36,21 @@ app.docs.setLoader({
 });
 
 if (app.config.hotReloading) {
-    let renewSideMenu = (file: string) => {
+    let reloader = async (file: string) => {
+        if (!startsWith(app.serverId, "web-server"))
+            return;
+
         let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
         let path = `app.docs.sideMenu.${parts[0]}.${parts[1]}`;
 
-        app.services.base.instance().cache.delete(path)
+        app.services.base.instance().cache.delete(path);
+
+        // Use WebSocket to reload the web page.
+        let name = app.docs.resolve(file);
+        let data = (<ModuleProxy<View>>get(global, name)).instance().render();
+
+        app.message.ws.local.emit("renew-doc-contents", data);
     };
-    app.docs.watch().on("change", renewSideMenu).on("unlink", renewSideMenu);
+
+    app.docs.watch().on("change", reloader).on("unlink", reloader);
 }

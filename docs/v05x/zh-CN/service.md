@@ -114,21 +114,14 @@ app.rpc.serve("rpc-server-1");
 ```
 
 编译并使用命令 `node dist/rpc-server-1` 来启动这个独立的服务，并使用 `connect()` 方法来
-连接这个远程服务器：
+连接这个远程服务器（你也可以使用 `connectAll()` 方法来一次性连接所有的远程服务器。）：
 
 ```typescript
 app.rpc.connect("rpc-server-1");
 ```
 
-之后并可以在项目中的任何地方连接这个远程服务了。（你也可以使用 `connectAll()` 方法来一次性
-连接所有的远程服务器。）
-
-```typescript
-(async () => {
-    let user = await app.services.myService.instance().getUser(1);
-    // ...
-})();
-```
+之后项目中所有对该服务的引用都会被重定向到这个远程服务上，你基本上不需要修改任何现有的代码，但
+需要注意所有的属性都不支持远程访问，并且方法都会被包装在 Promise 内。
 
 # 服务间通信
 
@@ -138,7 +131,7 @@ app.rpc.connect("rpc-server-1");
 客户端进行对话。
 
 为了解决各个服务之间的通信问题，SFN 框架在 RPC Socket 的基础上集成了的消息通道机制，
-由一个名为 MessageChannel 的消息队列通过**发布-订阅**模型向系统中的各个服务广播消息，
+由一个名为 `MessageChannel` 的消息队列通过**发布-订阅**模型向系统中的各个服务广播消息，
 而在订阅了消息事件的服务进程中，消息能够被监听器所接收。
 
 默认地，你不需要自己创建 MessageChannel 的实例，SFN 导出它只是用于类型注解，要访问集成
@@ -161,7 +154,7 @@ app.message.subscribe("greeting", msg => {
 ```
 
 与消息总线机制不同，SFN 所包装的 MessageChannel 并不运行在某一台特定的服务器上，它是
-非中心化的，在每一个 RPC 服务中都独立存在，凡是连接到该 RPC 服务器上的其他服务程序，
+分布式的，在每一个 RPC 服务器中都独立存在，凡是连接到该 RPC 服务器上的其他服务程序，
 都可以订阅其事件。这也意味着，并不是所有的服务都能够接收到通过 MessageChannel 发布的
 消息。在上面的例子中，rpc-server-2 必须连接到 rpc-server-1，才能够接收到 `greeting`
 事件发来的消息。
@@ -179,7 +172,9 @@ app.message.ws.emit("greeting", "Hello, World!");
 app.message.ws.via("web-server-1").emit("greeting", "Hello, World!");
 
 // Push WebSocket message via a specified web server to a specified room
-app.message.ws.via("web-server-1").to("room-1").emit("greeting", "Hello, World!");
+app.message.ws.via("web-server-1")
+    .to("SYGJBR5az95_37HhAAAB")
+    .emit("greeting", "Hello, World!");
 
 // ...
 ```

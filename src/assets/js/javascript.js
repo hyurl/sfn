@@ -1,4 +1,6 @@
 /// <reference types="jquery"/>
+/// <reference types="socket.io-client"/>
+
 "use strict";
 
 var QueryString = {
@@ -262,4 +264,17 @@ $(function () {
     //         sidebar.css("buttom", "20px");
     //     }
     // });
+
+
+    var socket = window.socket = io.connect("localhost:" + PORT);
+    socket.on("/index", function (data) {
+        console.log("Socket:", data);
+    }).on("/repeat-what-I-said", function (data) {
+        console.log("You just said:", data);
+    }).on("renew-doc-contents", function (data) {
+        content.removeClass("fadeOut").addClass("fadeIn");
+        SoftLoader.replaceWith(data, document.title, location.href);
+        replaceLink(content);
+    });
+    socket.emit("/index");
 });
