@@ -3,5 +3,5 @@ import "./index";
 
 (async () => {
     await app.rpc.serve("doc-server");
-    await app.rpc.connect("schedule-server");
+    await app.rpc.connect("schedule-server", true);
 })();

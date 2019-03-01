@@ -21,14 +21,14 @@ single-processing.
 PM2 provides many useful tools that allow you managing your application in ease,
 you should go to the official website and learn more about how to use them. 
 
-## Inter-Process Communication
+## Communication Between Cluster Processes
 
 Although PM2 provides it's own IPC communication solution, but it's highly not
 recommended using it in an SFN application, because it relies on the 
 **child_process** module, which might break down the application during 
 development progress when not using PM2.
 
-To communicate between your processes in SFN, you'll have to use 
+To communicate between your cluster processes in SFN, you'll have to use 
 [ipchannel](https://github.com/hyurl/ipchannel) module, which is the only IPC 
 package designed working both in single-processing and multi-processing scenario,
 meaning even you're not under PM2, the logic you designed will still work.

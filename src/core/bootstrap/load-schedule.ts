@@ -3,9 +3,17 @@ import { Schedule, default as ScheduleService } from "../tools/Schedule";
 
 declare global {
     namespace app {
+        /** The portal to create and run tasks. */
         const schedule: Schedule;
 
         namespace services {
+            /**
+             * The schedule service is an internal service held by the framework,
+             * which should not used directly, use `app.schedule` to create and
+             * run tasks instead. However, it's recommended to serve this 
+             * service to an individual RPC server.
+             * @inner
+             */
             const schedule: ModuleProxy<ScheduleService>;
         }
     }

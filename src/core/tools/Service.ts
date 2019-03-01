@@ -108,3 +108,5 @@ export class Service extends EventEmitter {
     @injected([config.database])
     db: DB;
 }
+
+export default Service;

@@ -7,7 +7,6 @@ import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
 import startsWith = require('lodash/startsWith');
 import get = require("lodash/get");
 import * as modelar from "modelar";
-import service from "../bootstrap/load-services";
 
 const tryImport = createImport(require);
 
@@ -72,8 +71,8 @@ export function createImport(require: Function): (id: string) => {
                 stack = stack.replace("_1", "").slice(3);
 
                 process.nextTick(() => {
-                    // Delay importing the Server module, allow configurations
-                    // finish import before using them in service.
+                    let service = app.services.base.instance(app.services.local);
+
                     service.logger.hackTrace(stack);
                     service.logger.error(msg);
                 });

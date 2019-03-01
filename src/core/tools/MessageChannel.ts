@@ -1,8 +1,12 @@
+import { RpcClient } from 'alar';
+
 export class MessageChannel {
-    readonly events: { [name: string]: Function[] } = {};
+    private events: { [name: string]: Function[] } = {};
+    private listenerMap = new Map<Function, Function>();
 
     constructor(readonly name: string) { }
 
+    /** Publishes the optional `data` to the given `event` in the channel. */
     publish(event: string, data?: any) {
         let listeners: Function[];
 
@@ -27,6 +31,7 @@ export class MessageChannel {
         return false;
     }
 
+    /** Subscribes a `listener` to the given `event` of the channel. */
     subscribe(event: string, listener: Function) {
         event = this.name + "#" + event;
 
@@ -39,22 +44,53 @@ export class MessageChannel {
         // If there are active RPC connections, subscribe the event to the RPC
         // client as well.
         for (let client of app.rpc.clients) {
-            client.subscribe(event, async ([serverId, data]) => {
-                if (serverId !== app.serverId) {
-                    await listener(data);
-                }
-            });
+            client.subscribe(event, this.createRpcListener(listener));
         }
 
         return this;
     }
 
-    unsubscribe(event: string) {
-        delete this.events[event];
+    /** Unsubscribes a `listener` or all listeners of the `event`. */
+    unsubscribe(event: string, listener?: Function) {
+        event = this.name + "#" + event;
 
-        for (let client of app.rpc.clients) {
-            client.unsubscribe(event);
+        if (listener) {
+            let listeners = this.events[event] || [];
+            let fn = this.listenerMap.get(listener);
+
+            listeners.splice(listeners.indexOf(listener), 1);
+
+            if (fn) {
+                for (let client of app.rpc.clients) {
+                    client.unsubscribe(event, <any>fn);
+                }
+            }
+        } else {
+            delete this.events[event];
+
+            for (let client of app.rpc.clients) {
+                client.unsubscribe(event);
+            }
         }
+    }
+
+    /** @inner */
+    linkRpcChannel(client: RpcClient) {
+        for (let event in this.events) {
+            for (let listener of this.events[event]) {
+                client.subscribe(event, this.createRpcListener(listener));
+            }
+        }
+    }
+
+    private createRpcListener(listener: Function) {
+        let fn = async ([serverId, data]) => {
+            if (serverId !== app.serverId) {
+                await listener(data);
+            }
+        };
+        this.listenerMap.set(listener, fn);
+        return fn;
     }
 }
 

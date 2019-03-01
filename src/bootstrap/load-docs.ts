@@ -8,7 +8,7 @@ declare global {
     }
 }
 
-// add new module proxy to auto-load and hot-relaod marckdown documentations
+// add new module proxy to auto-load and hot-reload markdown documentations
 global["app"].docs = new alar.ModuleProxy("app.docs", app.ROOT_PATH + "/docs");
 
 app.docs.setLoader({
@@ -38,7 +38,7 @@ if (app.config.hotReloading) {
         let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
         let path = `app.docs.sideMenu.${parts[0]}.${parts[1]}`;
 
-        app.services.internal.cache.delete(path)
+        app.services.base.instance().cache.delete(path)
     };
     app.docs.watch().on("change", renewSideMenu).on("unlink", renewSideMenu);
 }

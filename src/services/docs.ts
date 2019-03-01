@@ -4,7 +4,7 @@ import { resolve as resolvePath } from "path";
 import { Section, constructMarkdown, renderHtml } from "outlining";
 import trim = require("lodash/trim");
 import get = require("lodash/get");
-import meta from "comment-meta"; 
+import meta from "comment-meta";
 
 declare global {
     namespace app {
@@ -17,12 +17,12 @@ declare global {
 export default class DocumentationService extends Service {
     async getSideMenu(version: string, lang: string) {
         let path = `app.docs.sideMenu.${version.replace(/\./g, "")}.${lang}`;
-        let sideMenu: string = app.services.internal.cache.get(path);
+        let sideMenu: string = await app.services.base.instance().cache.get(path);
 
         if (!sideMenu) {
             let categoryTree = await this.getCategoryTree(version, lang);
             sideMenu = renderHtml(categoryTree, "categories", "    ");
-            app.services.internal.cache.set(path, sideMenu);
+            await app.services.base.instance().cache.set(path, sideMenu);
         }
 
         return sideMenu;

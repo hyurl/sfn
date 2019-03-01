@@ -55,17 +55,12 @@ app.rpc = {
 
             app.rpc.clients.push(service);
 
-            // Copy all the event listeners from the message queue and subscribe
-            // them to the RPC client.
-            for (let event in app.message.events) {
-                for (let listener of app.message.events[event]) {
-                    service.subscribe(event, <any>listener);
-                }
-            }
+            // Link all the subscriber listeners from the message channel and to
+            // the RPC channel.
+            app.message.linkRpcChannel(service);
 
             console.log(green`RPC server [${serverId}] connected.`);
         } catch (err) {
-            console.log(err);
             if (defer) {
                 await sleep(5000);
                 return app.rpc.connect(serverId, defer);

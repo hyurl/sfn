@@ -6,6 +6,10 @@ declare global {
         namespace models {
             const name: string;
             const path: string;
+            /**
+             * Pass this symbol to `instance()` method so that always gets the
+             * local instance of the module.
+             */
             const local: symbol;
             function resolve(path: string): string;
             function serve(config: string | alar.RpcOptions): Promise<alar.RpcServer>;

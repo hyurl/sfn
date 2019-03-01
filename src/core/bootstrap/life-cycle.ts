@@ -29,7 +29,7 @@ process.on("SIGINT", async () => {
 });
 
 // Subscribe an event listener so that when receives WebSocket message sent from
-// an RPC server, the message can be dilivered to the web client through a web
+// an RPC server, the message can be delivered to the web client through the web
 // server.
 app.plugins.lifeCycle.startup.bind(() => {
     app.message.subscribe(app.message.ws.name, (context: {
@@ -58,7 +58,7 @@ app.plugins.lifeCycle.startup.bind(() => {
 
 // Try to sync any cached data hosted by the default cache service.
 app.plugins.lifeCycle.startup.bind(async () => {
-    await app.services.internal.cache.sync();
+    await app.services.base.instance(app.services.local).cache.sync();
 });
 
 // Try to close all database connections.

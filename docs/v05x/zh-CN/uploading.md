@@ -19,7 +19,7 @@ import { HttpController, Request, route, upload } from "sfn";
 export default class extends HttpController {
 
     @route.post("/upload")
-    @upload("field1", "field2") // In js: /** @upload field1, field2 */
+    @upload("field1", "field2")
     upload(req: Request) {
         // The req.files property will carry the uploaded files,
         // each field may carry several files.

@@ -1,92 +1,83 @@
 <!-- title: Schedule; order: 17 -->
 # Concept
 
-Running a schedule cyclically is supported by 
-[sfn-scheduler](https://github.com/hyurl/sfn-scheduler) module, which gives 
-you a simple and friendly interface to set a schedule that runs it in a certain 
-time or period.
+Since version 0.5.x, SFN introduced a new distributed schedule system, and run 
+as micro-service. To use this system, you have to create one or more schedule 
+server process, but don't worry, it still easy in hand as usual.
 
-## Example
+## Create Service
 
-```typescript
-// src/schedules/index.ts
-import { Schedule } from "sfn-scheduler";
+### Configuration
 
-var schedule1 = new Schedule("every 2 seconds", () => {
-    console.log("This schedule runs every 2 seconds.");
-});
-
-var schedule2 = new Schedule("in 2 days", () => {
-    console.log("This schedule has been waiting for 2 days.");
-});
-
-console.log(schedule2);
-
-var schedule3 = new Schedule("20:00", () => {
-    console.log("This schedule runs at 20:00 this evening.");
-});
-
-var schedule4 = new Schedule("*:30", () => {
-    console.log("This schedule runs at 30 minutes of every hour in today.");
-});
-
-var schedule5 = new Schedule("*-*-1 8:00", () => {
-    console.log("This schedule runs on every first day in every month.");
-});
-```
+First, add a new item of RPC server in the config file.
 
 ```typescript
-// src/bootstrap/http.ts
-import "../schedules/index";
-
-// ...
-```
-
-## Schedule Pattern
-
-Schedule pattern will be parsed by 
-[sfn-schedule-parser](https://github.com/hyurl/sfn-schedule-parser), which 
-exposes a common API for NodeJS to build schedulers. For full supported 
-patterns, you should follow it for newest features.
-
-## How To Stop?
-
-You can call the method `stop()` to terminate the schedule whenever you want.
-
-```typescript
-var schedule = new Schedule("runs every 2 minutes", () => {
-    // ...
-    schedule.stop();
-});
-```
-
-## Run In Multi-Processing Scenario
-
-SFN production mode is always run in multiple processes, under multi-processing 
-scenario, when you set a schedule task, if not handled properly, you will face 
-the problem that the task runs repeatedly in every process. To fix that problem,
-you will need to use [manager-process](https://github.com/hyurl/manager-process)
-module, to get the unique **manager** process, and run the schedule task 
-only in that process.
-
-First install the dependency module via this command:
-
-```sh
-npm i manager-process
-```
-
-And then use the function it provides to check if the current process should 
-execute the task.
-
-```typescript
-import { isManager } from "manager-process";
-import { Schedule } from "sfn-scheduler";
-
-(async () => {
-    if (await isManager()) {
-        var schedule = new Schedule("every 2 seconds", () => {
-            console.log("This schedule runs every 2 seconds.");
-        });
+// src/config.ts
+export default <SFNConfig> {
+    server: {
+        rpc: {
+            "schedule-server": {
+                host: "localhost",
+                port: 8001,
+                modules: [app.services.schedule]
+            }
+        }
     }
-})();
+}
 ```
+
+(NOTE: `app.services.schedule`) is a built-in service of the framework, you 
+don't have to write any code of this service.)
+
+### Write a Entry File
+
+Now create a new entry file in `src` directory, say, `schedule-server.ts`, its
+code should be like this:
+
+```typescript
+// src/schedule-server.ts
+import "sfn";
+
+app.rpc.serve("schedule-server");
+```
+
+Then compile and run the command `node dist/schedule-server` to start the 
+service.
+
+## Create Schedule Task
+
+You can use the method `app.schedule.create()` to create schedule tasks anywhere
+you want.
+
+```typescript
+app.schedule.create({
+    taskId: "my-schedule-1",
+    start: Date.now() + 5000,
+}, async () => {
+    // do every thing in here after 5 seconds.
+});
+
+app.schedule.create({
+    taskId: "my-schedule-2",
+    start: moment().add(5, "minutes").valueOf() // using moment library
+    repeat: 5000, // running repeatedly every 5 seconds
+    end: momen().add(1, "hour").valueOf() // stops after 1 hour
+}, async () => {
+    // ...
+});
+```
+
+If you want to cancel a task, just call the method `app.schedule.cancel()` to do
+so.
+
+```typescript
+app.schedule.cancel("my-schedule-1");
+```
+
+### About taskId
+
+You have to set a unique but predictable `taskId` for every schedule task, the 
+reason why the framework is designed in this way is that, after any module that
+has been hot-reloaded, and the tasks created inside it is duplicated, the later
+ones can substitute the former ones, so that there would not be duplicated tasks 
+due to hot-reloading of the system. 
