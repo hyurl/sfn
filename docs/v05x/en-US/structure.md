@@ -18,12 +18,13 @@ just recommended.
         - `http.ts` Bootstrap files related to HTTP controllers.
         - `websocket.ts` Bootstrap files related to WebSocket controllers.
         - Other files must be loaded by `index.ts`.
-    - `controllers/`* The directory the stores all controller files.
-    - `locales/`* The directory that stores all language packs.
-    - `models/`* The directory that stores all models files.
-    - `plugins`* The directory that stores all plugin files. 
-    - `services/`* The directory that stores all service files.
-    - `views/`* The directory that stores all view files.
+    - `controllers/`* The directory the stores controller files.
+    - `locales/`* The directory that stores language packs.
+    - `models/`* The directory that stores models files.
+    - `plugins`* The directory that stores plugin files. 
+    - `services/`* The directory that stores service files.
+    - `utils/`* The directory that stores utility module files.
+    - `views/`* The directory that stores view files.
     - `config.ts` The file of configurations.
     - `index.ts` The entry file of the project.
 - `package.json` The specification file of the project.

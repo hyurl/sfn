@@ -1,8 +1,6 @@
-import { config } from "../core/bootstrap/load-config";
-import "../core/bootstrap/load-services";
-import "../core/bootstrap/load-schedule";
+import "sfn";
 
-config.server.rpc = {
+app.config.server.rpc = {
     "doc-server": {
         host: "localhost",
         port: 8000,

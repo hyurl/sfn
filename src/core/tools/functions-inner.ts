@@ -2,11 +2,11 @@ import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
 import * as fs from "fs-extra";
 import * as path from "path";
-import chalk from "chalk";
-import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
-import startsWith = require('lodash/startsWith');
-import get = require("lodash/get");
 import * as modelar from "modelar";
+import chalk from "chalk";
+import get = require("lodash/get");
+import startsWith = require('lodash/startsWith');
+import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
 
 const tryImport = createImport(require);
 
@@ -83,11 +83,17 @@ export function createImport(require: Function): (id: string) => {
     };
 }
 
-function color(color: string, callSite: TemplateStringsArray, bindings: any[]): string {
+function color(
+    color: string,
+    callSite: TemplateStringsArray,
+    bindings: any[]
+): string {
     let msg = callSite.map((str, i) => {
         return i > 0 ? bindings[i - 1] + str : str;
     }).join("");
-    return chalk[color](`[${moment().format("YYYY-MM-DDTHH:mm:ss")}]`) + " " + msg;
+    let timeStr = moment().format("YYYY-MM-DDTHH:mm:ss");
+
+    return chalk[color](`[${timeStr}]`) + " " + msg;
 }
 
 export function grey(callSite: TemplateStringsArray, ...bindings: any[]) {

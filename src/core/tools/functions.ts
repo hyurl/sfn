@@ -1,17 +1,17 @@
 import random = require("lodash/random");
-import { HttpController } from "../controllers/HttpController";
-import { WebSocketController } from "../controllers/WebSocketController";
 import { App, RouteHandler } from "webium";
 import { interceptAsync } from 'function-intercepter';
+import { HttpController } from "../controllers/HttpController";
+import { WebSocketController } from "../controllers/WebSocketController";
 import { HttpError } from './HttpError';
 import { SocketError } from './SocketError';
 import { routeMap, eventMap } from './RouteMap';
+import { resolveModulePath } from './functions-inner';
 import {
     ControllerDecorator,
     WebSocketDecorator,
     HttpDecorator
 } from './interfaces';
-import { resolveModulePath } from './functions-inner';
 
 /** Pauses the execution in an asynchronous operation. */
 export function sleep(timeout: number): Promise<void> {
@@ -38,7 +38,7 @@ export function randStr(
 /** Injects CSRF Token into forms. */
 export function injectCsrfToken(html: string, token: string): string {
     var ele = `<input type="hidden" name="x-csrf-token" value="${token}">`,
-        matches = html.match(/<form\s+.*>/g);
+        matches = html.match(/<form\s+.*?>/g);
 
     if (matches) {
         for (let match of matches) {

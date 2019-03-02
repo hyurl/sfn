@@ -23,11 +23,7 @@ export default class extends HttpController {
             let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
             let content = await app.services.docs.instance().getContent(version, this.lang, name);
 
-            return req.xhr ? content : this.view("docs", {
-                sideMenu,
-                content,
-                port: app.config.server.http.port
-            });
+            return req.xhr ? content : this.view("docs", { sideMenu, content });
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
             throw new HttpError(code, isDevMode ? e.message : null);

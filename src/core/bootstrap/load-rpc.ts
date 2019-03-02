@@ -26,14 +26,14 @@ declare global {
     }
 }
 
-const rpc = config.server.rpc || {};
 const timers: { [id: string]: NodeJS.Timer } = {};
 
 app.rpc = {
     server: null,
     clients: [],
     async serve(serverId: string) {
-        let { modules, ...options } = rpc[serverId];
+        let servers = config.server.rpc;
+        let { modules, ...options } = servers[serverId];
         let service = await app.services.serve(options);
 
         for (let mod of modules) {
@@ -46,7 +46,8 @@ app.rpc = {
     },
     async connect(serverId: string, defer = false) {
         try {
-            let { modules, ...options } = rpc[serverId];
+            let servers = config.server.rpc;
+            let { modules, ...options } = servers[serverId];
             let service = await app.services.connect(options);
 
             for (let mod of modules) {
@@ -78,9 +79,10 @@ app.rpc = {
         }
     },
     async connectAll(defer = false) {
+        let servers = config.server.rpc;
         let connections: Promise<void>[] = [];
 
-        for (let serverId in rpc) {
+        for (let serverId in servers) {
             connections.push(app.rpc.connect(serverId, defer));
         }
 

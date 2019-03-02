@@ -41,15 +41,17 @@ if (app.config.hotReloading) {
             return;
 
         let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
-        let path = `app.docs.sideMenu.${parts[0]}.${parts[1]}`;
+        let lang = parts[1];
+        let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 
         app.services.base.instance().cache.delete(path);
 
         // Use WebSocket to reload the web page.
         let name = app.docs.resolve(file);
         let data = (<ModuleProxy<View>>get(global, name)).instance().render();
+        let pathname = `/docs/${parts[0]}/${parts.slice(2).join("/").slice(0, -3)}`;
 
-        app.message.ws.local.emit("renew-doc-contents", data);
+        app.message.ws.local.emit("renew-doc-contents", pathname, lang, data);
     };
 
     app.docs.watch().on("change", reloader).on("unlink", reloader);

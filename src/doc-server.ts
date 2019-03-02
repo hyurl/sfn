@@ -1,5 +1,4 @@
-import "./bootstrap/rpc-config";
-import "./index";
+import "sfn";
 
 (async () => {
     await app.rpc.serve("doc-server");

@@ -1,4 +1,3 @@
-import "./bootstrap/rpc-config";
-import "./index";
+import "sfn";
 
 app.rpc.serve("schedule-server");

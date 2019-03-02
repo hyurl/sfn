@@ -16,7 +16,7 @@
 </footer>
 
 <script>
-    const PORT = "<%= port %>";
+    const PORT = parseInt("<%= app.config.server.http.port %>");
 </script>
 <script src="/js/socket.io.js"></script>
 <script src="/js/jquery.min.js"></script>
