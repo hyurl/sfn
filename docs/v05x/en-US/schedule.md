@@ -74,10 +74,10 @@ so.
 app.schedule.cancel(taskId);
 ```
 
-### About taskId
+### About Salt
 
-You have to set a unique but predictable `taskId` for every schedule task, the 
+You have to set a unique but predictable `salt` for every schedule task, the 
 reason why the framework is designed in this way is that, after any module that
 has been hot-reloaded, and the tasks created inside it is duplicated, the later
 ones can substitute the former ones, so that there would not be duplicated tasks 
-due to hot-reloading of the system. 
+due to hot-reloading of the system.
