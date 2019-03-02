@@ -1,7 +1,6 @@
 import { RpcServer, RpcClient } from "alar";
 import { config } from "./load-config";
 import { green, serveTip } from "../tools/functions-inner";
-import { sleep } from '../tools/functions';
 
 declare global {
     namespace app {
@@ -28,6 +27,7 @@ declare global {
 }
 
 const rpc = config.server.rpc || {};
+const timers: { [id: string]: NodeJS.Timer } = {};
 
 app.rpc = {
     server: null,
@@ -55,6 +55,11 @@ app.rpc = {
 
             app.rpc.clients.push(service);
 
+            if (timers[serverId]) {
+                clearInterval(timers[serverId]);
+                delete timers[serverId];
+            }
+
             // Link all the subscriber listeners from the message channel and to
             // the RPC channel.
             app.message.linkRpcChannel(service);
@@ -62,8 +67,11 @@ app.rpc = {
             console.log(green`RPC server [${serverId}] connected.`);
         } catch (err) {
             if (defer) {
-                await sleep(5000);
-                return app.rpc.connect(serverId, defer);
+                if (!timers[serverId]) {
+                    timers[serverId] = setInterval(() => {
+                        app.rpc.connect(serverId, defer);
+                    }, 5000);
+                }
             } else {
                 throw err;
             }
