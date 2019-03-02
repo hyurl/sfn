@@ -1,10 +1,14 @@
+import hash = require("string-hash");
+import { ROOT_PATH } from '../../init';
+import { resolveModulePath } from './functions-inner';
+
 export interface TaskOptions {
     /** 
-     * In a process, the task ID must be unique for each task, so that when the
+     * The salt must be unique and predictable for each task, so that when the
      * module is reloaded, the new task can override the ole one, to keep there 
-     * being only one task alive doing the job.
+     * being only one task alive doing the same job.
      */
-    taskId: string;
+    salt: string;
     /** A Unix timestamp to suggest when should the task starts running. */
     start: number;
     /** A Unix timestamp to suggest when should the task stops running. */
@@ -13,8 +17,12 @@ export interface TaskOptions {
     repeat?: number;
 }
 
-export interface ScheduleTask extends TaskOptions {
+export interface ScheduleTask {
     serverId: string;
+    taskId: number;
+    start: number;
+    end?: number;
+    repeat?: number;
     expired?: boolean;
 }
 
@@ -25,14 +33,16 @@ export class Schedule {
      * Creates a new schedule task according to the options and returns the task
      * ID. NOTE: the minimum tick interval of the schedule service is `1000`ms. 
      */
-    create(options: TaskOptions, handler: Function): string {
-        let { taskId, start, end, repeat } = options;
+    create(options: TaskOptions, handler: Function): number {
+        let { salt, start, end, repeat } = options;
+        let taskId = hash(app.serverId + resolveModulePath(ROOT_PATH) + salt);
+        let event = String(taskId);
 
-        app.message.unsubscribe(taskId);
-        app.message.subscribe(taskId, this.createMessageListner(handler));
+        app.message.unsubscribe(event);
+        app.message.subscribe(event, this.createMessageListner(handler));
 
         // Redirect the task to one of the schedule server.
-        app.services.schedule.instance(taskId).add({
+        app.services.schedule.instance(event).add({
             taskId,
             repeat,
             start,
@@ -44,10 +54,10 @@ export class Schedule {
     }
 
     /** Cancels a task according to the given task ID. */
-    cancel(taskId: string) {
-        app.message.unsubscribe(taskId);
-        app.services.schedule.instance(taskId).delete(taskId);
-        return true;
+    cancel(taskId: number) {
+        let event = String(taskId);
+        app.message.unsubscribe(event);
+        app.services.schedule.instance(event).delete(taskId);
     }
 
     private createMessageListner(handler: Function) {
@@ -61,12 +71,12 @@ export class Schedule {
 
 export class ScheduleService {
     private timer: NodeJS.Timer;
-    private tasks = new Map<string, ScheduleTask>();
+    private tasks = new Map<number, ScheduleTask>();
 
     constructor() {
         this.add({
             serverId: app.serverId,
-            taskId: "gc",
+            taskId: -1,
             repeat: 1000 * 60 * 30,
             start: Date.now()
         });
@@ -79,10 +89,10 @@ export class ScheduleService {
 
                 if (!expired && now >= start) {
                     if (!end || now < end) {
-                        if (taskId === "gc" && serverId === app.serverId)
+                        if (taskId === -1 && serverId === app.serverId)
                             this.gc(now);
                         else
-                            app.message.publish(taskId, serverId);
+                            app.message.publish(String(taskId), serverId);
 
                         if (repeat)
                             task.start += task.repeat;
@@ -113,7 +123,7 @@ export class ScheduleService {
         return true;
     }
 
-    delete(taskId: string) {
+    delete(taskId: number) {
         return this.tasks.delete(taskId);
     }
 }

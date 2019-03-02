@@ -45,15 +45,15 @@ app.rpc.serve("schedule-server");
 你可以在任何地方，使用 `app.schedule.create()` 方法来创建定时任务。
 
 ```typescript
-app.schedule.create({
-    taskId: "my-schedule-1",
+var taskId = app.schedule.create({
+    salt: "my-schedule-1",
     start: Date.now() + 5000,
 }, async () => {
     // do every thing in here after 5 seconds.
 });
 
-app.schedule.create({
-    taskId: "my-schedule-2",
+var taskId2 = app.schedule.create({
+    salt: "my-schedule-2",
     start: moment().add(5, "minutes").valueOf() // using moment library
     repeat: 5000, // running repeatedly every 5 seconds
     end: momen().add(1, "hour").valueOf() // stops after 1 hour
@@ -65,7 +65,7 @@ app.schedule.create({
 如果你想要取消一个定时任务，只需要调用 `app.schedule.cancel()` 方法即可。
 
 ```typescript
-app.schedule.cancel("my-schedule-1");
+app.schedule.cancel(taskId);
 ```
 
 ### 关于 taskId

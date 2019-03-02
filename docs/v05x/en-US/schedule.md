@@ -50,15 +50,15 @@ You can use the method `app.schedule.create()` to create schedule tasks anywhere
 you want.
 
 ```typescript
-app.schedule.create({
-    taskId: "my-schedule-1",
+var taskId = app.schedule.create({
+    salt: "my-schedule-1",
     start: Date.now() + 5000,
 }, async () => {
     // do every thing in here after 5 seconds.
 });
 
-app.schedule.create({
-    taskId: "my-schedule-2",
+var taskId2 = app.schedule.create({
+    salt: "my-schedule-2",
     start: moment().add(5, "minutes").valueOf() // using moment library
     repeat: 5000, // running repeatedly every 5 seconds
     end: momen().add(1, "hour").valueOf() // stops after 1 hour
@@ -71,7 +71,7 @@ If you want to cancel a task, just call the method `app.schedule.cancel()` to do
 so.
 
 ```typescript
-app.schedule.cancel("my-schedule-1");
+app.schedule.cancel(taskId);
 ```
 
 ### About taskId
