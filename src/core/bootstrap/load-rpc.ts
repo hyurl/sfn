@@ -43,12 +43,17 @@ app.rpc = {
         app.rpc.server = service;
         app.serverId = serverId;
         console.log(serveTip("RPC", serverId, service.dsn));
+
+        await app.rpc.connect(serverId);
     },
     async connect(serverId: string, defer = false) {
         try {
             let servers = config.server.rpc;
             let { modules, ...options } = servers[serverId];
-            let service = await app.services.connect(options);
+            let service = await app.services.connect({
+                ...options,
+                id: app.serverId
+            });
 
             for (let mod of modules) {
                 service.register(mod);
@@ -83,7 +88,9 @@ app.rpc = {
         let connections: Promise<void>[] = [];
 
         for (let serverId in servers) {
-            connections.push(app.rpc.connect(serverId, defer));
+            if (serverId !== app.serverId) {
+                connections.push(app.rpc.connect(serverId, defer));
+            }
         }
 
         await Promise.all(connections);

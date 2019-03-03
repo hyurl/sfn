@@ -41,9 +41,6 @@ app.plugins.lifeCycle.startup.bind(() => {
         event: string,
         data?: any[]
     }) => {
-        if (context.serverId && app.serverId !== context.serverId)
-            return;
-
         let ws = context.volatile ? app.ws.volatile : app.ws;
 
         ws = context.local ? ws.local : ws;

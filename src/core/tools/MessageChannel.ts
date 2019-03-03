@@ -2,12 +2,14 @@ import { RpcClient } from 'alar';
 
 export class MessageChannel {
     private events: { [name: string]: Function[] } = {};
-    private listenerMap = new Map<Function, Function>();
 
     constructor(readonly name: string) { }
 
-    /** Publishes the optional `data` to the given `event` in the channel. */
-    publish(event: string, data?: any) {
+    /**
+     * Publishes `data` to the given `event` in the channel, if `servers` are
+     * provided, the event will only be emitted to them.
+     */
+    publish(event: string, data?: any, servers?: string[]) {
         let listeners: Function[];
 
         event = this.name + "#" + event;
@@ -15,20 +17,21 @@ export class MessageChannel {
         if (app.rpc.server) {
             // If the current server is an RPC server, publish the event via the
             // RPC channel.
-            app.rpc.server.publish(event, [app.serverId, data]);
-        }
-
-        if (listeners = this.events[event]) {
+            return app.rpc.server.publish(event, data, servers);
+        } else if (listeners = this.events[event]) {
             (async () => {
+                // Use JSON to re-construct the data for local call.
+                data = JSON.parse(JSON.stringify(data));
+
                 for (let handle of listeners) {
                     await handle(data);
                 }
             })();
 
             return listeners.length > 0;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     /** Subscribes a `listener` to the given `event` of the channel. */
@@ -44,7 +47,7 @@ export class MessageChannel {
         // If there are active RPC connections, subscribe the event to the RPC
         // client as well.
         for (let client of app.rpc.clients) {
-            client.subscribe(event, this.createRpcListener(listener));
+            client.subscribe(event, <any>listener);
         }
 
         return this;
@@ -56,14 +59,11 @@ export class MessageChannel {
 
         if (listener) {
             let listeners = this.events[event] || [];
-            let fn = this.listenerMap.get(listener);
 
             listeners.splice(listeners.indexOf(listener), 1);
 
-            if (fn) {
-                for (let client of app.rpc.clients) {
-                    client.unsubscribe(event, <any>fn);
-                }
+            for (let client of app.rpc.clients) {
+                client.unsubscribe(event, <any>listener);
             }
         } else {
             delete this.events[event];
@@ -78,26 +78,16 @@ export class MessageChannel {
     linkRpcChannel(client: RpcClient) {
         for (let event in this.events) {
             for (let listener of this.events[event]) {
-                client.subscribe(event, this.createRpcListener(listener));
+                client.subscribe(event, <any>listener);
             }
         }
-    }
-
-    private createRpcListener(listener: Function) {
-        let fn = async ([serverId, data]) => {
-            if (serverId !== app.serverId) {
-                await listener(data);
-            }
-        };
-        this.listenerMap.set(listener, fn);
-        return fn;
     }
 }
 
 export class WebSocketMessage {
     readonly name = "app.message.ws";
 
-    constructor(private data: object = {}) { }
+    constructor(private data: any = {}) { }
 
     get volatile() {
         return new WebSocketMessage({ ...this.data, volatile: true });
@@ -124,10 +114,20 @@ export class WebSocketMessage {
     }
 
     emit(event: string, ...data: any[]) {
+        let serverId: string;
+
+        if (this.data.serverId) {
+            serverId = this.data.serverId;
+            delete this.data.serverId;
+        } else {
+            // If serverId isn't provided, use the default web server.
+            serverId = "web-server-1";
+        }
+
         return app.message.publish(this.name, {
             ...this.data,
             event,
             data
-        });
+        }, [serverId]);
     }
 }
