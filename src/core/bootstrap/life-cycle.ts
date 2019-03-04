@@ -1,5 +1,6 @@
-import { Plugin } from '../tools/Plugin';
 import { DB } from 'modelar';
+import { SSE } from 'sfn-sse';
+import { Plugin } from '../tools/Plugin';
 import { sleep } from '../tools/functions';
 import { Service } from '../tools/Service';
 
@@ -105,22 +106,30 @@ app.plugins.lifeCycle.startup.bind(() => {
 app.plugins.lifeCycle.startup.bind(() => {
     app.message.subscribe(app.message.sse.name, (context: {
         close?: boolean,
-        target?: number,
-        event: string,
-        id?: string,
-        retry?: number,
-        data?: any[]
+        target?: string,
+        event?: string,
+        data?: any
     }) => {
-        let { close, target, event, id, retry, data } = context;
-        let sse = app.sse[target];
+        let { close, target, event, data } = context;
+        let targets: { [x: string]: SSE };
 
-        if (sse) {
-            if (close) {
-                sse.close();
-            } else if (event) {
-                sse.send(event, data, id, retry);
-            } else {
-                sse.send(data, id, retry);
+        if (target) {
+            targets = { [target]: app.sse[target] };
+        } else {
+            targets = app.sse;
+        }
+
+        for (let id in targets) {
+            let sse = app.sse[id];
+
+            if (sse) {
+                if (close) {
+                    sse.close();
+                } else if (event) {
+                    sse.emit(event, data);
+                } else {
+                    sse.send(data);
+                }
             }
         }
     });

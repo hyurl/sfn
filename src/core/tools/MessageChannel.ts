@@ -20,14 +20,19 @@ export class MessageChannel {
             return app.rpc.server.publish(event, data, servers);
         } else if (!servers) {
             // Publish event to all cluster members.
-            clusterChannel.to("all").emit(event, data);
+            return clusterChannel.to("all").emit(event, data);
         } else {
             // Publish event to specified cluster members.
+            let ok = false;
+
             for (let receiver of servers) {
                 receiver = receiver.match(/\d+/)[0];
+                ok = true;
 
                 clusterChannel.to(parseInt(receiver)).emit(event, data);
             }
+
+            return ok;
         }
     }
 
@@ -111,7 +116,7 @@ export abstract class Message {
     }
 
     /** Sends the message to a specified target. */
-    to(target: string | number) {
+    to(target: string) {
         return new (<any>this.constructor)({ ...this.data, target });
     }
 
@@ -170,28 +175,18 @@ export class SSEMessage extends Message {
         }, [this.getServerId()]);
     }
 
-    send(data: any, id?: string, retry?: number): boolean;
-    send(event: string, data: any, id?: string, retry?: number): boolean;
-    send(...args: any[]): boolean {
-        let event: string, data: any, id: string, retry: number;
+    send(data: any) {
+        return app.message.publish(this.name, {
+            ...this.data,
+            data,
+        }, [this.getServerId()]);
+    }
 
-        if (typeof args[0] === "string" && args[1] !== undefined) {
-            event = args[0];
-            data = args[1];
-            id = args[2];
-            retry = args[3];
-        } else {
-            data = args[0];
-            id = args[1];
-            retry = args[2];
-        }
-
+    emit(event: string, data?: any) {
         return app.message.publish(this.name, {
             ...this.data,
             event,
             data,
-            id,
-            retry
         }, [this.getServerId()]);
     }
 }

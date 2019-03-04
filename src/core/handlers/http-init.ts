@@ -1,17 +1,14 @@
-import SSE = require("sfn-sse");
 import chalk from "chalk";
+import { SSE } from "sfn-sse";
 import { router } from "../bootstrap/index";
 import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { grey, red } from "../tools/functions-inner";
 import truncate = require("lodash/truncate");
-import sequid from "sequid";
 
 const reqLogged = Symbol("reqLogged");
-const requestId = sequid();
 
 router.use(async (req: Request, res: Response, next) => {
-    req.id = requestId.next().value;
     req["originalUrl"] = req.url; // compatible with Express framework.
     req.shortUrl = truncate(req.url, { length: 32 });
     req.isEventSource = SSE.isEventSource(req);
@@ -22,14 +19,14 @@ router.use(async (req: Request, res: Response, next) => {
 
     if (req.isEventSource) {
         res.sse = new SSE(req, res);
-        app.sse[req.id] = res.sse;
+        app.sse[res.sse.id] = res.sse;
     } else {
         res.charset = "UTF-8";
     }
 
     let logger = getDevLogger(req, res);
     let clearSSE = () => {
-        delete app.sse[req.id];
+        res.sse && (delete app.sse[res.sse.id]);
     }
 
     res.on("finish", logger)

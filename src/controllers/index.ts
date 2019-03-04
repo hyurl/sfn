@@ -8,7 +8,5 @@ export default class extends HttpController {
     }
 
     @route.sse("/sse-test")
-    sseTest() {
-
-    }
+    sseTest() { }
 }

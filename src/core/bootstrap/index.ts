@@ -3,7 +3,7 @@ import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
 import { App } from "webium";
 import * as SocketIO from "socket.io";
-import * as SSE from "sfn-sse";
+import { SSE } from "sfn-sse";
 import channel from "ipchannel";
 import { APP_PATH, isCli } from "../../init";
 import { config, baseUrl } from "./load-config";
