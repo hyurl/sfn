@@ -81,6 +81,7 @@
         "multer": "^1.4.1",
         "pluralize": "^7.0.0",
         "reflect-metadata": "^0.1.13",
+        "sequid": "^1.0.0",
         "serve-static": "^1.13.2",
         "sfn-cookie": "^1.0.6",
         "sfn-cors": "^0.1.5",
