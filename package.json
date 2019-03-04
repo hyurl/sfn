@@ -74,7 +74,7 @@
         "hide-protected-properties": "^0.1.1",
         "ideal-filename": "^0.1.2",
         "injectable-ts": "^0.3.1",
-        "ipchannel": "^0.2.3",
+        "ipchannel": "^0.2.4",
         "lodash": "^4.17.11",
         "modelar": "^3.2.3",
         "moment": "^2.24.0",
@@ -99,7 +99,7 @@
     "devDependencies": {
         "@types/cookie-parser": "^1.4.1",
         "@types/marked": "^0.6.1",
-        "@types/node": "^11.9.5",
+        "@types/node": "^11.10.4",
         "@types/pluralize": "0.0.28",
         "@types/serve-static": "^1.13.2",
         "@types/session-file-store": "^1.2.0",
