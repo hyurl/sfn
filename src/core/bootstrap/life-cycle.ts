@@ -28,31 +28,6 @@ process.on("SIGINT", async () => {
     }
 });
 
-// Subscribe an event listener so that when receives WebSocket message sent from
-// an RPC server, the message can be delivered to the web client through the web
-// server.
-app.plugins.lifeCycle.startup.bind(() => {
-    app.message.subscribe(app.message.ws.name, (context: {
-        serverId?: string,
-        nsp?: string,
-        room?: string,
-        volatile?: boolean,
-        local?: boolean,
-        event: string,
-        data?: any[]
-    }) => {
-        let ws = context.volatile ? app.ws.volatile : app.ws;
-
-        ws = context.local ? ws.local : ws;
-
-        let nsp = context.nsp ? ws.of(context.nsp) : ws;
-
-        context.room && (nsp = nsp.to(context.room));
-
-        nsp.emit(context.event, ...context.data);
-    });
-});
-
 // Try to sync any cached data hosted by the default cache service.
 app.plugins.lifeCycle.startup.bind(async () => {
     await app.services.base.instance(app.services.local).cache.sync();
@@ -97,4 +72,29 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
             });
         });
     }
+});
+
+// Subscribe an event listener so that when receives WebSocket message sent from
+// an RPC server, the message can be delivered to the web client through the web
+// server.
+app.plugins.lifeCycle.startup.bind(() => {
+    app.message.subscribe(app.message.ws.name, (context: {
+        serverId?: string,
+        nsp?: string,
+        room?: string,
+        volatile?: boolean,
+        local?: boolean,
+        event: string,
+        data?: any[]
+    }) => {
+        let ws = context.volatile ? app.ws.volatile : app.ws;
+
+        ws = context.local ? ws.local : ws;
+
+        let nsp = context.nsp ? ws.of(context.nsp) : ws;
+
+        context.room && (nsp = nsp.to(context.room));
+
+        nsp.emit(context.event, ...context.data);
+    });
 });

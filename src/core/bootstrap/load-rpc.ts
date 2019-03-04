@@ -6,7 +6,7 @@ declare global {
     namespace app {
         namespace rpc {
             var server: RpcServer;
-            var clients: RpcClient[];
+            var connections: RpcClient[];
 
             /**
              * Starts an RPC server according to the given `serverId`, which is 
@@ -30,7 +30,7 @@ const timers: { [id: string]: NodeJS.Timer } = {};
 
 app.rpc = {
     server: null,
-    clients: [],
+    connections: [],
     async serve(serverId: string) {
         let servers = config.server.rpc;
         let { modules, ...options } = servers[serverId];
@@ -59,7 +59,7 @@ app.rpc = {
                 service.register(mod);
             }
 
-            app.rpc.clients.push(service);
+            app.rpc.connections.push(service);
 
             if (timers[serverId]) {
                 clearInterval(timers[serverId]);

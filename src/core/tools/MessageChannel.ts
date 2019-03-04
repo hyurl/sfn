@@ -1,7 +1,9 @@
 import { RpcClient } from 'alar';
+import clusterChannel from "ipchannel";
 
 export class MessageChannel {
     private events: { [name: string]: Function[] } = {};
+    private clusterListenerMap = new Map<Function, Function>();
 
     constructor(readonly name: string) { }
 
@@ -10,27 +12,22 @@ export class MessageChannel {
      * provided, the event will only be emitted to them.
      */
     publish(event: string, data?: any, servers?: string[]) {
-        let listeners: Function[];
-
         event = this.name + "#" + event;
 
         if (app.rpc.server) {
             // If the current server is an RPC server, publish the event via the
             // RPC channel.
             return app.rpc.server.publish(event, data, servers);
-        } else if (listeners = this.events[event]) {
-            (async () => {
-                // Use JSON to re-construct the data for local call.
-                data = JSON.parse(JSON.stringify(data));
-
-                for (let handle of listeners) {
-                    await handle(data);
-                }
-            })();
-
-            return listeners.length > 0;
+        } else if (!servers) {
+            // Publish event to all cluster members.
+            clusterChannel.to("all").emit(event, data);
         } else {
-            return false;
+            // Publish event to specified cluster members.
+            for (let receiver of servers) {
+                receiver = receiver.match(/\d+/)[0];
+
+                clusterChannel.to(parseInt(receiver)).emit(event, data);
+            }
         }
     }
 
@@ -45,9 +42,13 @@ export class MessageChannel {
         this.events[event].push(listener);
 
         // If there are active RPC connections, subscribe the event to the RPC
-        // client as well.
-        for (let client of app.rpc.clients) {
-            client.subscribe(event, <any>listener);
+        // channel as well.
+        for (let connection of app.rpc.connections) {
+            connection.subscribe(event, <any>listener);
+        }
+
+        if (!app.rpc.server) {
+            clusterChannel.on(event, this.bindClusterChannel(listener));
         }
 
         return this;
@@ -57,30 +58,45 @@ export class MessageChannel {
     unsubscribe(event: string, listener?: Function) {
         event = this.name + "#" + event;
 
+        let clusterListener: Function;
+        let listeners = this.events[event] || [];
+
+        // Unsubscribe event listeners in the RPC channel.
+        for (let connection of app.rpc.connections) {
+            connection.unsubscribe(event, <any>listener);
+        }
+
+        // Remove event listeners in the cluster channel.
         if (listener) {
-            let listeners = this.events[event] || [];
+            clusterChannel.removeAllListeners(event);
+        } else if (clusterListener = this.clusterListenerMap.get(listener)) {
+            clusterChannel.removeListener(event, <any>clusterListener);
+        }
 
-            listeners.splice(listeners.indexOf(listener), 1);
 
-            for (let client of app.rpc.clients) {
-                client.unsubscribe(event, <any>listener);
-            }
+        // Remove event listeners in the message channel.
+        if (!listeners.length) {
+            return false;
+        } else if (listener) {
+            return listeners.splice(listeners.indexOf(listener), 1).length > 0;
         } else {
-            delete this.events[event];
-
-            for (let client of app.rpc.clients) {
-                client.unsubscribe(event);
-            }
+            return delete this.events[event];
         }
     }
 
     /** @inner */
-    linkRpcChannel(client: RpcClient) {
+    linkRpcChannel(connection: RpcClient) {
         for (let event in this.events) {
             for (let listener of this.events[event]) {
-                client.subscribe(event, <any>listener);
+                connection.subscribe(event, <any>listener);
             }
         }
+    }
+
+    private bindClusterChannel(listener: Function) {
+        let fn = (_: number, data: any) => listener(data);
+        this.clusterListenerMap.set(listener, fn);
+        return fn;
     }
 }
 
@@ -119,9 +135,11 @@ export class WebSocketMessage {
         if (this.data.serverId) {
             serverId = this.data.serverId;
             delete this.data.serverId;
-        } else {
+        } else if (app.rpc.server) {
             // If serverId isn't provided, use the default web server.
             serverId = "web-server-1";
+        } else {
+            serverId = app.serverId;
         }
 
         return app.message.publish(this.name, {
