@@ -81,7 +81,7 @@ app.plugins.lifeCycle.startup.bind(() => {
     app.message.subscribe(app.message.ws.name, (context: {
         serverId?: string,
         nsp?: string,
-        room?: string,
+        target?: string,
         volatile?: boolean,
         local?: boolean,
         event: string,
@@ -93,7 +93,7 @@ app.plugins.lifeCycle.startup.bind(() => {
 
         let nsp = context.nsp ? ws.of(context.nsp) : ws;
 
-        context.room && (nsp = nsp.to(context.room));
+        context.target && (nsp = nsp.to(context.target));
 
         nsp.emit(context.event, ...context.data);
     });

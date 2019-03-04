@@ -100,10 +100,22 @@ export class MessageChannel {
     }
 }
 
-export class WebSocketMessage {
-    readonly name = "app.message.ws";
+export abstract class Message {
+    readonly abstract name: string;
 
-    constructor(private data: any = {}) { }
+    constructor(protected data: any = {}) { }
+
+    via(serverId: string) {
+        return new (<any>this.constructor)({ ...this.data, serverId });
+    }
+
+    to(target: string | number) {
+        return new (<any>this.constructor)({ ...this.data, target });
+    }
+}
+
+export class WebSocketMessage extends Message {
+    readonly name = "app.message.ws";
 
     get volatile() {
         return new WebSocketMessage({ ...this.data, volatile: true });
@@ -113,16 +125,8 @@ export class WebSocketMessage {
         return new WebSocketMessage({ ...this.data, local: true });
     }
 
-    via(serverId: string) {
-        return new WebSocketMessage({ ...this.data, serverId });
-    }
-
     of(nsp: string) {
         return new WebSocketMessage({ ... this.data, nsp });
-    }
-
-    to(room: string) {
-        return new WebSocketMessage({ ...this.data, room });
     }
 
     binary(hasBinary?: boolean) {
@@ -147,5 +151,41 @@ export class WebSocketMessage {
             event,
             data
         }, [serverId]);
+    }
+}
+
+export class SSEMessage extends Message {
+    readonly name = "app.message.sse";
+
+    close() {
+        app.message.publish(this.name, {
+            ...this.data,
+            close: true
+        });
+    }
+
+    send(data: any, id?: string, retry?: number): void;
+    send(event: string, data: any, id?: string, retry?: number): void;
+    send(...args: any[]): void {
+        let event: string, data: any, id: string, retry: number;
+
+        if (typeof args[0] === "string" && args[1] !== undefined) {
+            event = args[0];
+            data = args[1];
+            id = args[2];
+            retry = args[3];
+        } else {
+            data = args[0];
+            id = args[1];
+            retry = args[2];
+        }
+
+        app.message.publish(this.name, {
+            ...this.data,
+            event,
+            data,
+            id,
+            retry
+        });
     }
 }
