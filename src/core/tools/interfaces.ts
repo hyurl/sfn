@@ -3,6 +3,7 @@ import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import * as modelar from "modelar";
 import * as ExpressSession from "express-session";
+import * as SSE from "sfn-sse";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
@@ -27,6 +28,7 @@ export abstract class Session {
 }
 
 export interface Request extends webium.Request {
+    id: number;
     /** Gets a DB instance for `modelar`. */
     db: modelar.DB;
     /** The logged-in user of the request. */
@@ -71,6 +73,8 @@ export interface Response extends webium.Response {
      * instead.
      */
     sent: boolean;
+    /** The Sever-Sent Events channel of the response. */
+    sse?: SSE;
 }
 
 export abstract class Response {

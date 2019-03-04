@@ -79,7 +79,6 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
 // server.
 app.plugins.lifeCycle.startup.bind(() => {
     app.message.subscribe(app.message.ws.name, (context: {
-        serverId?: string,
         nsp?: string,
         target?: string,
         volatile?: boolean,
@@ -87,14 +86,42 @@ app.plugins.lifeCycle.startup.bind(() => {
         event: string,
         data?: any[]
     }) => {
-        let ws = context.volatile ? app.ws.volatile : app.ws;
+        let { target, volatile, local, event, data } = context;
+        let ws = volatile ? app.ws.volatile : app.ws;
 
-        ws = context.local ? ws.local : ws;
+        ws = local ? ws.local : ws;
 
         let nsp = context.nsp ? ws.of(context.nsp) : ws;
 
-        context.target && (nsp = nsp.to(context.target));
+        target && (nsp = nsp.to(target));
 
-        nsp.emit(context.event, ...context.data);
+        nsp.emit(event, ...data);
+    });
+});
+
+// Subscribes an event listener so that when receives SSE message sent from an 
+// RPC server, the message can be delivered to the web client through the web
+// server.
+app.plugins.lifeCycle.startup.bind(() => {
+    app.message.subscribe(app.message.sse.name, (context: {
+        close?: boolean,
+        target?: number,
+        event: string,
+        id?: string,
+        retry?: number,
+        data?: any[]
+    }) => {
+        let { close, target, event, id, retry, data } = context;
+        let sse = app.sse[target];
+
+        if (sse) {
+            if (close) {
+                sse.close();
+            } else if (event) {
+                sse.send(event, data, id, retry);
+            } else {
+                sse.send(data, id, retry);
+            }
+        }
     });
 });

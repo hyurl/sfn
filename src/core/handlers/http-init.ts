@@ -5,20 +5,37 @@ import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { grey, red } from "../tools/functions-inner";
 import truncate = require("lodash/truncate");
+import sequid from "sequid";
 
 const reqLogged = Symbol("reqLogged");
+const requestId = sequid();
 
 router.use(async (req: Request, res: Response, next) => {
+    req.id = requestId.next().value;
     req["originalUrl"] = req.url; // compatible with Express framework.
     req.shortUrl = truncate(req.url, { length: 32 });
     req.isEventSource = SSE.isEventSource(req);
     res.headers["server"] = `NodeJS/${process.version}`;
     res.headers["x-powered-by"] = `sfn/${version}`;
     res.gzip = false;
-    res.charset = "UTF-8";
+    res.sent = false;
+
+    if (req.isEventSource) {
+        res.sse = new SSE(req, res);
+        app.sse[req.id] = res.sse;
+    } else {
+        res.charset = "UTF-8";
+    }
 
     let logger = getDevLogger(req, res);
-    res.on("finish", logger).on("close", logger);
+    let clearSSE = () => {
+        delete app.sse[req.id];
+    }
+
+    res.on("finish", logger)
+        .on("finish", clearSSE)
+        .on("close", logger)
+        .on("close", clearSSE);
 
     await next();
 });

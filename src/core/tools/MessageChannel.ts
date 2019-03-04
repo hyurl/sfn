@@ -105,12 +105,30 @@ export abstract class Message {
 
     constructor(protected data: any = {}) { }
 
+    /** Sends the message via a front end server. */
     via(serverId: string) {
         return new (<any>this.constructor)({ ...this.data, serverId });
     }
 
+    /** Sends the message to a specified target. */
     to(target: string | number) {
         return new (<any>this.constructor)({ ...this.data, target });
+    }
+
+    protected getServerId() {
+        let serverId: string;
+
+        if (this.data.serverId) {
+            serverId = this.data.serverId;
+            delete this.data.serverId;
+        } else if (app.rpc.server) {
+            // If serverId isn't provided, use the default web server.
+            serverId = "web-server-1";
+        } else {
+            serverId = app.serverId;
+        }
+
+        return serverId;
     }
 }
 
@@ -134,23 +152,11 @@ export class WebSocketMessage extends Message {
     }
 
     emit(event: string, ...data: any[]) {
-        let serverId: string;
-
-        if (this.data.serverId) {
-            serverId = this.data.serverId;
-            delete this.data.serverId;
-        } else if (app.rpc.server) {
-            // If serverId isn't provided, use the default web server.
-            serverId = "web-server-1";
-        } else {
-            serverId = app.serverId;
-        }
-
         return app.message.publish(this.name, {
             ...this.data,
             event,
             data
-        }, [serverId]);
+        }, [this.getServerId()]);
     }
 }
 
@@ -161,12 +167,12 @@ export class SSEMessage extends Message {
         app.message.publish(this.name, {
             ...this.data,
             close: true
-        });
+        }, [this.getServerId()]);
     }
 
-    send(data: any, id?: string, retry?: number): void;
-    send(event: string, data: any, id?: string, retry?: number): void;
-    send(...args: any[]): void {
+    send(data: any, id?: string, retry?: number): boolean;
+    send(event: string, data: any, id?: string, retry?: number): boolean;
+    send(...args: any[]): boolean {
         let event: string, data: any, id: string, retry: number;
 
         if (typeof args[0] === "string" && args[1] !== undefined) {
@@ -180,12 +186,12 @@ export class SSEMessage extends Message {
             retry = args[2];
         }
 
-        app.message.publish(this.name, {
+        return app.message.publish(this.name, {
             ...this.data,
             event,
             data,
             id,
             retry
-        });
+        }, [this.getServerId()]);
     }
 }

@@ -6,4 +6,9 @@ export default class extends HttpController {
         await app.plugins.web.onView.invoke(this.req);
         return this.view("index");
     }
+
+    @route.sse("/sse-test")
+    sseTest() {
+
+    }
 }

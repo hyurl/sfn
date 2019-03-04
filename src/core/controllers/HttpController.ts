@@ -1,13 +1,11 @@
 import * as path from "path";
 import { DB, User } from "modelar";
-import * as SSE from "sfn-sse";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
 import { config } from "../bootstrap/load-config";
 import { Controller } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
 import { HttpError } from "../tools/HttpError";
-import { realSSE } from "../tools/symbols";
 import { UploadOptions } from "../tools/upload";
 import get = require('lodash/get');
 
@@ -150,11 +148,8 @@ export class HttpController extends Controller {
     }
 
     /** Gets an SSE instance. */
-    get sse(): SSE {
-        if (!this[realSSE]) {
-            this[realSSE] = new SSE(this.req, this.res);
-        }
-        return this[realSSE];
+    get sse() {
+        return this.res.sse;
     }
 
     /**

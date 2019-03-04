@@ -114,6 +114,8 @@ export function route(method: string, path?: string): HttpDecorator {
             let { baseURI = "" } = <typeof HttpController>proto.ctor;
             method = parts[0] === "SSE" ? "GET" : parts[0];
             path = baseURI + parts[1];
+        } else if (method === "SSE") {
+            method = "GET";
         }
 
         let data = {
