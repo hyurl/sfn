@@ -31,7 +31,9 @@ process.on("SIGINT", async () => {
 
 // Try to sync any cached data hosted by the default cache service.
 app.plugins.lifeCycle.startup.bind(async () => {
-    await app.services.base.instance(app.services.local).cache.sync();
+    try {
+        await app.services.base.instance(app.services.local).cache.sync();
+    } catch (e) { }
 });
 
 // Try to close all database connections.
