@@ -39,7 +39,7 @@ export class Schedule {
         let event = String(taskId);
 
         app.message.unsubscribe(event);
-        app.message.subscribe(event, this.createMessageListner(handler));
+        app.message.subscribe(event, handler);
 
         // Redirect the task to one of the schedule server.
         app.services.schedule.instance(event).add({
@@ -58,14 +58,6 @@ export class Schedule {
         let event = String(taskId);
         app.message.unsubscribe(event);
         app.services.schedule.instance(event).delete(taskId);
-    }
-
-    private createMessageListner(handler: Function) {
-        return async (serverId: string) => {
-            if (serverId === app.serverId) {
-                await handler();
-            }
-        };
     }
 }
 
@@ -92,7 +84,7 @@ export class ScheduleService {
                         if (taskId === -1 && serverId === app.serverId)
                             this.gc(now);
                         else
-                            app.message.publish(String(taskId), serverId);
+                            app.message.publish(String(taskId), 1, [serverId]);
 
                         if (repeat)
                             task.start += task.repeat;
