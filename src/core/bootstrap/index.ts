@@ -5,7 +5,7 @@ import { App } from "webium";
 import * as SocketIO from "socket.io";
 import { SSE } from "sfn-sse";
 import channel from "ipchannel";
-import { APP_PATH, isCli } from "../../init";
+import { APP_PATH, isCli, isWebServer, isTsNode } from "../../init";
 import { config, baseUrl } from "./load-config";
 import {
     red,
@@ -33,11 +33,17 @@ declare global {
         const router: App;
         const http: HttpServer | HttpsServer | Http2SecureServer;
         /**
-         * This property is only available in a web server, use `app.message.ws`
+         * This property is reserved by the framework, use `app.message.ws` 
          * instead.
+         * @inner
          */
         const ws: SocketIO.Server;
 
+        /**
+         * This property is reserved by the framework, use `app.message.sse`
+         * instead.
+         * @inner
+         */
         const sse: { [id: number]: SSE };
 
         /** Starts the web server (both `http` and `ws`). */
@@ -45,11 +51,11 @@ declare global {
     }
 }
 
-/** The basic HTTP router created by **webium** framework. */
+/** (Web server only) The basic HTTP router created by **webium** framework. */
 export var router: App = null;
-/** The HTTP server. */
+/** (Web server only) The HTTP server. */
 export var http: HttpServer | HttpsServer | Http2SecureServer = null;
-/** The WebSocket server created by **SocketIO** framework. */
+/** (Web server only) The WebSocket server created by **SocketIO** framework. */
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
@@ -60,6 +66,11 @@ let hostnames = config.server.hostname,
 
 app.serve = function serve() {
     return new Promise((resolve, reject) => {
+        if (!isWebServer) {
+            let entry = "<APP_PATH>/index" + (isTsNode ? ".ts" : ".js");
+            throw new Error(`The web server entry file must be ${entry}`);
+        }
+
         // load HTTP middleware
         require("../handlers/https-redirector");
         require("../handlers/http-init");
@@ -128,33 +139,42 @@ app.serve = function serve() {
 }
 
 if (!isCli) {
-    router = new App({
-        cookieSecret: <string>config.session.secret,
-        domain: hostnames
-    });
+    if (isWebServer) {
+        router = new App({
+            cookieSecret: <string>config.session.secret,
+            domain: hostnames
+        });
 
-    switch (httpServer.type) {
-        case "http":
-            http = new HttpServer(router.listener);
-            break;
-        case "https":
-            http = createServer(httpServer.options, router.listener);
-            break;
-        case "http2":
-            http = require("http2").createSecureServer(
-                httpServer.options,
-                router.listener
-            );
-            break;
+        switch (httpServer.type) {
+            case "http":
+                http = new HttpServer(router.listener);
+                break;
+            case "https":
+                http = createServer(httpServer.options, router.listener);
+                break;
+            case "http2":
+                http = require("http2").createSecureServer(
+                    httpServer.options,
+                    router.listener
+                );
+                break;
+        }
+
+        if (WS.enabled) {
+            if (!WS.port)
+                ws = SocketIO(http, WS.options);
+            else
+                ws = SocketIO(WS.port, WS.options);
+        }
     }
+}
 
-    if (WS.enabled) {
-        if (!WS.port)
-            ws = SocketIO(http, WS.options);
-        else
-            ws = SocketIO(WS.port, WS.options);
-    }
+global["app"].router = router;
+global["app"].http = http;
+global["app"].ws = ws;
+global["app"].sse = isWebServer ? {} : null;
 
+if (!isCli) {
     // Load user-defined bootstrap procedures.
     let bootstrap = APP_PATH + "/bootstrap/index";
     moduleExists(bootstrap) && tryImport(bootstrap);
@@ -165,8 +185,3 @@ if (!isCli) {
         await app.plugins.lifeCycle.startup.invoke();
     });
 }
-
-global["app"].router = router;
-global["app"].http = http;
-global["app"].ws = ws;
-global["app"].sse = {};

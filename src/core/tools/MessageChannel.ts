@@ -169,7 +169,7 @@ export class SSEMessage extends Message {
     readonly name = "app.message.sse";
 
     close() {
-        app.message.publish(this.name, {
+        return app.message.publish(this.name, {
             ...this.data,
             close: true
         }, [this.getServerId()]);

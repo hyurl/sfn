@@ -17,13 +17,13 @@
 
     <script src="/js/socket.io.js"></script>
     <script>
-        var socket = io.connect("localhost:80");
-        socket.on("/index", function(data) {
+        var socket = io.connect("localhost:4000");
+        socket.on("greeting", function(data) {
             console.log("Socket:", data);
-        }).on("/repeat-what-I-said", function(data) {
+        }).on("repeat-what-I-said", function(data) {
             console.log("You just said:", data);
         });
-        socket.emit("/index");
+        socket.emit("greeting");
 
         if (typeof EventSource == "function") {
             var es = new EventSource("/sse-test"),

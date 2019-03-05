@@ -19,6 +19,12 @@ router.use(async (req: Request, res: Response, next) => {
 
     if (req.isEventSource) {
         res.sse = new SSE(req, res);
+
+        // If the SSE connection has been marked closed, return immediately and
+        // do not continue HTTP controlling life cycle.
+        if (res.sse.isClosed)
+            return;
+
         app.sse[res.sse.id] = res.sse;
     } else {
         res.charset = "UTF-8";

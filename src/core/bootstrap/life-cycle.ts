@@ -79,6 +79,8 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
 // an RPC server, the message can be delivered to the web client through the web
 // server.
 app.plugins.lifeCycle.startup.bind(() => {
+    if (!app.ws) return;
+
     app.message.subscribe(app.message.ws.name, (context: {
         nsp?: string,
         target?: string,
@@ -104,6 +106,8 @@ app.plugins.lifeCycle.startup.bind(() => {
 // RPC server, the message can be delivered to the web client through the web
 // server.
 app.plugins.lifeCycle.startup.bind(() => {
+    if (!app.sse) return;
+
     app.message.subscribe(app.message.sse.name, (context: {
         close?: boolean,
         target?: string,
