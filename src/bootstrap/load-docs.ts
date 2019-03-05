@@ -40,7 +40,9 @@ if (app.config.hotReloading) {
         let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
         let lang = parts[1];
 
-        if (startsWith(app.serverId, "doc-server")) {
+        if (startsWith(app.serverId, "doc-server")
+            || !app.rpc.connections.find(conn => conn.id === "doc-server")
+        ) {
             let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 
             app.services.base.instance().cache.delete(path);
