@@ -21,10 +21,10 @@ import "./load-utils";
 import "./load-views";
 import "./load-locales";
 import "./load-plugins";
-import "./load-rpc";
-import "./life-cycle";
 import "./load-message";
 import "./load-schedule";
+import "./life-cycle";
+import "./load-rpc";
 import { watchWebModules } from "./hot-reload";
 import { pathExists } from 'fs-extra';
 
