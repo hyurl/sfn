@@ -60,7 +60,7 @@ export abstract class Request {
 
 export interface Response extends webium.Response {
     /** Sends data to the client via XML document. */
-    xml(data: { [key: string]: any }): void;
+    xml(data: { [key: string]: any }, rootTag?: string, headless?: boolean): void;
     /** Whether the response data should be compressed to GZIP. */
     gzip: boolean;
     /**

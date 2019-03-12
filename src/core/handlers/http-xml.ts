@@ -22,6 +22,7 @@ router.use(<any>BodyParser.text({
                 ignoreAttrs: true,
                 async: true,
                 explicitArray: false,
+                explicitRoot: false
             });
         } catch (e) {
             req.body = null;
@@ -36,14 +37,21 @@ function parsingType(req: IncomingMessage) {
     return plainType.test(type) || xmlType.test(type);
 }
 
-function xml(data: { [key: string]: any }): void {
+function xml(
+    data: { [key: string]: any },
+    rootTag = "root",
+    headless = false
+): void {
     this.type = "application/xml";
+
     if (data === null || data === undefined)
         return this.end();
-    if (typeof data !== "object" || Array.isArray(data)) {
-        throw new TypeError("The data passed to Response.xml() "
-            + "must be an object that contains key-value pairs.");
-    }
-    let builder = new Builder({ cdata: true });
+
+    let builder = new Builder({
+        cdata: true,
+        rootName: rootTag,
+        headless
+    });
+
     this.send(builder.buildObject(data));
 }

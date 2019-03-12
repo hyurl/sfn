@@ -21,6 +21,7 @@ const EFFECT_METHODS: string[] = [
     "POST",
     "PUT"
 ];
+const XMLType = /(text|application)\/xml\b/;
 
 router.onerror = function onerror(err: any, req: Request, res: Response) {
     res.keepAlive = false;
@@ -238,12 +239,11 @@ async function handleResponse(ctrl: HttpController, data: any) {
             res.end();
         } else if (data !== undefined) {
             // Send data to the client.
-            let xml = /(text|application)\/xml\b/;
-            let type = <string>res.getHeader("Content-Type");
+            let type = res.type;
 
             if (data === null) {
                 res.end("");
-            } else if (typeof data === "object" && type && xml.test(type)) {
+            } else if (typeof data === "object" && type && XMLType.test(type)) {
                 res.xml(data);
             } else if (typeof data === "string" && res.gzip) {
                 await handleGzip(ctrl, data);
