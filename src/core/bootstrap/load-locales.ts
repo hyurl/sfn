@@ -17,7 +17,11 @@ app.locales.setLoader({
     extension: ".json",
     load(file: string) {
         if (!this.cache[file]) {
-            this.cache[file] = FRON.parse(fs.readFileSync(file, "utf8"), file);
+            try {
+                this.cache[file] = FRON.parse(fs.readFileSync(file, "utf8"), file);
+            } catch (e) {
+                this.cache[file] = {};
+            }
         }
 
         return this.cache[file];
