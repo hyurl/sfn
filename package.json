@@ -75,6 +75,7 @@
         "ideal-filename": "^0.1.2",
         "injectable-ts": "^0.3.1",
         "ipchannel": "^0.2.4",
+        "is-iterator-like": "^1.0.4",
         "lodash": "^4.17.11",
         "modelar": "^3.2.3",
         "moment": "^2.24.0",

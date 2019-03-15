@@ -14,6 +14,7 @@ import { realCsrfToken } from "../tools/symbols";
 import { isDevMode } from '../../init';
 import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
+import isIteratorLike = require("is-iterator-like");
 
 const EFFECT_METHODS: string[] = [
     "DELETE",
@@ -86,10 +87,18 @@ export function getRouteHandler(key: string): RouteHandler {
 
                 let result = await ctrl[method](...await getArguments(ctrl, method));
 
-                await handleResponse(ctrl, result);
+                if (isIteratorLike(result)) {
+                    await handleIteratorResponse(ctrl, result);
+                } else {
+                    await handleResponse(ctrl, result);
+                }
             }
 
             if (initiated) {
+                if (!req.isEventSource) {
+                    res.end();
+                }
+
                 await ctrl.after();
                 finish(ctrl);
             }
@@ -249,6 +258,31 @@ async function handleResponse(ctrl: HttpController, data: any) {
                 await handleGzip(ctrl, data);
             } else {
                 res.send(data);
+            }
+        }
+    }
+}
+
+async function handleIteratorResponse(
+    ctrl: HttpController,
+    iter: Iterable<any> | AsyncIterable<any>
+) {
+    let { req, res, sse } = ctrl;
+
+    if (!res.headersSent && !req.isEventSource) {
+        if (!res.type) {
+            res.type = req.accept;
+        }
+
+        res.writeHead(200);
+    }
+
+    for await (let data of iter) {
+        if (data !== undefined) {
+            if (req.isEventSource) {
+                sse.send(data);
+            } else {
+                res.write(data);
             }
         }
     }

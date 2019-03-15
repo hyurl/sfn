@@ -8,5 +8,16 @@ export default class extends HttpController {
     }
 
     @route.sse("/sse-test")
-    sseTest() { }
+    *sseTest() {
+        yield 1;
+        yield 2;
+        yield 3;
+    }
+
+    @route.get("/iterator-test")
+    *test() {
+        yield 1;
+        yield 2;
+        yield 3;
+    }
 }

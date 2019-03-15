@@ -16,3 +16,8 @@ process.mainModule = process.mainModule || {
     paths: [],
     filename: __filename || path.resolve(process.cwd(), "<repl>")
 };
+
+// For NodeJS version before 10.0 to support asyncIterator
+if (!Symbol.asyncIterator) {
+    Symbol.asyncIterator = Symbol("Symbol.asyncIterator");
+}

@@ -14,6 +14,7 @@ import { isOwnMethod } from "../tools/functions-inner";
 import last = require("lodash/last");
 import { isDevMode } from '../../init';
 import { eventMap } from '../tools/RouteMap';
+import isIteratorLike = require("is-iterator-like");
 
 let importedNamesapces: string[] = [];
 type SocketEventInfo = {
@@ -80,9 +81,12 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
 
             let res = await ctrl[method](...getArguments(ctrl, method, data));
 
-            // Send data to the client.
-            (res === undefined) || socket.emit(event, res);
-
+            if (isIteratorLike(res)) {
+                await handleIteratorResponse(event, ctrl, res);
+            } else {
+                // Send data to the client.
+                (res === undefined) || socket.emit(event, res);
+            }
         }
 
         if (initiated) {
@@ -93,6 +97,18 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
         ctrl = ctrl || new WebSocketController(socket);
 
         await handleError(err, info, ctrl);
+    }
+}
+
+async function handleIteratorResponse(
+    event: string,
+    ctrl: WebSocketController,
+    iter: Iterable<any> | AsyncIterable<any>
+) {
+    let { socket } = ctrl;
+
+    for await (let data of iter) {
+        (data === undefined) || socket.emit(event, data);
     }
 }
 

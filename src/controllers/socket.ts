@@ -22,4 +22,11 @@ export default class extends WebSocketController {
     repeatWhatISaid(data: string) {
         return data;
     }
+
+    @event("iterator-test")
+    async *test() {
+        yield 1;
+        yield 2;
+        yield 3;
+    }
 }
