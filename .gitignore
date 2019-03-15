@@ -6,3 +6,4 @@ sessions/
 dist/
 *.db
 *.tgz
+.reify*

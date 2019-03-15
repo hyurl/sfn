@@ -1,3 +1,4 @@
+require("./env-fix");
 const path = require("path");
 
 let isTsNode = process.execArgv.join(" ").includes("ts-node");

@@ -1,5 +1,4 @@
-// Force the console to output colorfully.
-process.env.FORCE_COLOR = "10";
+require("../env-fix");
 
 let isTsNode = process.execArgv.join(" ").includes("ts-node");
 let isMain = process.mainModule.filename === __filename;
