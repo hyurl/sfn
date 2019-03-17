@@ -14,7 +14,7 @@ import { isOwnMethod } from "../tools/functions-inner";
 import last = require("lodash/last");
 import { isDevMode } from '../../init';
 import { eventMap } from '../tools/RouteMap';
-import isIteratorLike = require("is-iterator-like");
+import { ThenableAsyncGenerator } from "thenable-generator";
 
 let importedNamesapces: string[] = [];
 type SocketEventInfo = {
@@ -79,13 +79,21 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 initiated = true;
             }
 
-            let res = await ctrl[method](...getArguments(ctrl, method, data));
+            let generator = new ThenableAsyncGenerator(ctrl[method](
+                ...getArguments(ctrl, method, data)
+            ));
 
-            if (isIteratorLike(res)) {
-                await handleIteratorResponse(event, ctrl, res);
-            } else {
+            while (true) {
+                // Fetch any data produced by the method, whether they are
+                // returned or yielded.
+                let { value, done } = await generator.next();
+
                 // Send data to the client.
-                (res === undefined) || socket.emit(event, res);
+                (value === undefined) || socket.emit(event, value);
+
+                if (done) {
+                    break;
+                }
             }
         }
 
@@ -97,18 +105,6 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
         ctrl = ctrl || new WebSocketController(socket);
 
         await handleError(err, info, ctrl);
-    }
-}
-
-async function handleIteratorResponse(
-    event: string,
-    ctrl: WebSocketController,
-    iter: Iterable<any> | AsyncIterable<any>
-) {
-    let { socket } = ctrl;
-
-    for await (let data of iter) {
-        (data === undefined) || socket.emit(event, data);
     }
 }
 
