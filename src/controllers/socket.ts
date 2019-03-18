@@ -25,8 +25,8 @@ export default class extends WebSocketController {
 
     @event("iterator-test")
     async *test() {
-        yield 1;
-        yield 2;
-        yield 3;
+        for await (let result of app.services.test.instance().asyncIterator()) {
+            yield result;
+        }
     }
 }

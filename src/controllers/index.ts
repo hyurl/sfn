@@ -8,16 +8,18 @@ export default class extends HttpController {
     }
 
     @route.sse("/sse-test")
-    *sseTest() {
-        yield 1;
-        yield 2;
-        yield 3;
+    async *sseTest() {
+        for await (let result of app.services.test.instance().asyncIterator()) {
+            yield result;
+        }
+
+        this.sse.close();
     }
 
     @route.get("/iterator-test")
-    *test() {
-        yield 1;
-        yield 2;
-        yield 3;
+    async *test() {
+        for await (let result of app.services.test.instance().asyncIterator()) {
+            yield result;
+        }
     }
 }

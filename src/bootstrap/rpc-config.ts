@@ -4,7 +4,7 @@ app.config.server.rpc = {
     "doc-server": {
         host: "localhost",
         port: 8000,
-        modules: [app.services.docs]
+        modules: [app.services.docs, app.services.test]
     },
     "schedule-server": {
         host: "localhost",
