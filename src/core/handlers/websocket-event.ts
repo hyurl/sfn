@@ -82,12 +82,11 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
             let generator = new ThenableAsyncGenerator(ctrl[method](
                 ...getArguments(ctrl, method, data)
             ));
+            let value: any, done: boolean;
 
-            while (true) {
-                // Fetch any data produced by the method, whether they are
-                // returned or yielded.
-                let { value, done } = await generator.next();
-
+            // Fetch any data produced by the method, whether they are returned 
+            // or yielded.
+            while ({ value, done } = await generator.next()) {
                 // Send data to the client.
                 (value === undefined) || socket.emit(event, value);
 
