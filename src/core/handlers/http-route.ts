@@ -95,7 +95,7 @@ export function getRouteHandler(key: string): RouteHandler {
             }
 
             if (initiated) {
-                if (!req.isEventSource) {
+                if (!req.isEventSource && !res.finished) {
                     res.end();
                 }
 
@@ -265,25 +265,34 @@ async function handleResponse(ctrl: HttpController, data: any) {
 
 async function handleIteratorResponse(
     ctrl: HttpController,
-    iter: Iterable<any> | AsyncIterable<any>
+    iter: IterableIterator<any> | AsyncIterableIterator<any>
 ) {
     let { req, res, sse } = ctrl;
+    let reqType = req.type;
+    let value: any, done: boolean;
 
-    if (!res.headersSent && !req.isEventSource) {
-        if (!res.type) {
-            res.type = req.accept;
+    while ({ value, done } = await iter.next()) {
+        if (value === undefined) {
+            if (done)
+                break;
+            else
+                continue;
+        } else if (!res.headersSent && !req.isEventSource) {
+            if (!res.type && reqType && reqType !== "*/*") {
+                res.type = reqType;
+            } else if (Buffer.isBuffer(value)) {
+                res.type = "application/octet-stream";
+            } else if (typeof value === "string") {
+                res.type = "text/plain";
+            }
+
+            res.writeHead(200);
         }
 
-        res.writeHead(200);
-    }
-
-    for await (let data of iter) {
-        if (data !== undefined) {
-            if (req.isEventSource) {
-                sse.send(data);
-            } else {
-                res.write(data);
-            }
+        if (req.isEventSource) {
+            sse.send(value);
+        } else {
+            res.write(value);
         }
     }
 }

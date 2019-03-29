@@ -1,4 +1,3 @@
-import * as http from "http";
 import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import * as modelar from "modelar";
@@ -53,8 +52,8 @@ export interface Request extends webium.Request {
 
 export abstract class Request {
     static [Symbol.hasInstance](ins: any) {
-        return (ins instanceof http.IncomingMessage)
-            || (ins instanceof require("http2").Http2ServerRequest);
+        return (ins instanceof webium.RequestConstructor)
+            || (ins instanceof webium.Http2RequestConstructor);
     }
 }
 
@@ -78,8 +77,8 @@ export interface Response extends webium.Response {
 
 export abstract class Response {
     static [Symbol.hasInstance](ins: any) {
-        return (ins instanceof http.ServerResponse)
-            || (ins instanceof require("http2").Http2ServerResponse);
+        return (ins instanceof webium.ResponseConstructor)
+            || (ins instanceof webium.Http2ResponseConstructor);
     }
 }
 

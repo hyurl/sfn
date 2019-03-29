@@ -32,10 +32,6 @@ export default class extends WebSocketController {
 一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被自动地以合适
 的形式返回给客户端。
 
-如果多个方法被绑定到了同一个事件上，那么这些方法将会按照其定义的顺序被依次调用，其返回值也会被
-依次发送给客户端。即使绑定了多个方法，一个控制器也只会被实例化一次，`before()` and `after()`
-方法也只会被调用一次，但如果事件绑定在了多个控制器内，那么这些控制器都会被依次实例化，并且调用
-其 `before()` 和 `after()` 方法。
 
 ### 设置命名空间
 
@@ -88,7 +84,7 @@ export default class extends WebSocketController {
 
 更多详情请查看 [依赖注入](./di#在控制器中自动注入)。
 
-### 构造函数
+## 构造函数
 
 有些时候你可能想要在真正的方法被调用前做一些事情，你可能想要进行一些额外的配置，在类被
 实例化前，你想要自定义类的 `constructor`。就像下面这样：
@@ -105,7 +101,7 @@ export default class extends WebSocketController {
 }
 ```
 
-### 在控制器中抛出 SocketError
+## 在控制器中抛出 SocketError
 
 `SocketError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到
 客户端时使用它。当一个 SocketError 被抛出时，框架将会对其进行合适的处理，并自动地发送
@@ -136,6 +132,34 @@ export default class extends WebSocketController {
 当一个 SocketError 被抛出时，框架总是会发送一个包含着 
 `{success: false, code, error}` 的消息到客户端，这个响应形式来自于控制器方法
 [error()](./http-controller#Common-API-response)。
+
+## 绑定多个方法与返回多个值
+
+在 WebSocket 控制器中，如果多个方法被绑定到了同一个事件上，那么这些方法将会按照其定义的
+顺序被依次调用，其返回值也会被依次发送给客户端。即使绑定了多个方法，一个控制器也只会被
+实例化一次，`before()` and `after()` 方法也只会被调用一次，但如果事件绑定在了多个控制器
+内，那么这些控制器都会被依次实例化，并且调用其 `before()` 和 `after()` 方法。并且，如果
+方法是一个生成器，那么该方法所 `yield` 的值也会被依次发送。因此，你也可以使用生成器来向
+客户端持续的向客户端返回数据。
+
+```typescript
+import { WebSocketController, WebSocket, event } from "sfn";
+
+export default class extends WebSocketController {
+    @event("generator-example")
+    async *index(socket: WebSocket) {
+        let i = 0;
+
+        while (true) {
+            yield i++; // the client will receive 1, 2, 3...10 continuously.
+
+            if (i === 10) {
+                break;
+            }
+        }
+    }
+}
+```
 
 ## 自定义 Adapter
 

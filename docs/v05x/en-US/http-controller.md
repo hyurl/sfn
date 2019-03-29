@@ -47,14 +47,6 @@ for corresponding HTTP request method.
 - `route.sse(path: string)` SSE uses GET approach, and implemented by client 
     EventSource.
 
-If several methods are bound to the same route, these methods will be called 
-accordingly. Except SSE, with other request modes, only the first valid 
-(non-`undefined`) value will be sent to the client. Even multiple methods are
-bound, a controller will only be instantiated once, `before()` and `after()` 
-methods will also be called only once. However, if a route is bound to multiple 
-controllers, they will all be instantiated accordingly, and their `before()` and
-`after()` methods will be called as expected.
-
 ### Route Formats
 
 The framework uses [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 
@@ -342,6 +334,41 @@ export default class extends HttpController {
         } catch (err) {
             return this.error(err, err instanceof NotFoundError ? 404 : 500);
             // { success: false, code: 404 | 500, error: err.message }
+        }
+    }
+}
+```
+
+## Bind Multiple Methods and Returns Many Values.
+
+In an HttpController, if several methods are bound to the same route, these 
+methods will be called accordingly. Except SSE, with other request modes, only 
+the first valid (non-`undefined`) value will be sent to the client. Even 
+multiple methods are bound, a controller will only be instantiated once, 
+`before()` and `after()` methods will also be called only once. However, if a 
+route is bound to multiple controllers, they will all be instantiated 
+accordingly, and their `before()` and `after()` methods will be called as 
+expected.
+
+However, if it's an SSE route, then all the returning values of all bound 
+methods will be sent to the client accordingly, and, if the method is a 
+generator, any values `yield`ed by it will be sent as well. that means you can
+use a generator to send data continuously.
+
+```typescript
+import { HttpController, Request, Response, route } from "sfn";
+
+export default class extends HttpController {
+    @route.sse("/generator-example")
+    async *index(req: Request, res: Response) {
+        let i = 0;
+
+        while (true) {
+            yield i++; // the client will receive 1, 2, 3...10 continuously.
+
+            if (i === 10) {
+                break;
+            }
         }
     }
 }

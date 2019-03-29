@@ -37,13 +37,6 @@ socket.io event. When a client emits data to this event, the method will be
 automatically called, and the returning value will be sent back to the client 
 with proper forms.
 
-If several methods are bound to the same event, these methods will be called 
-accordingly, and all returning values will be sent to the client. Even multiple 
-methods are bound, a controller will only be instantiated once, `before()` and 
-`after()` methods will also be called only once. However, if an event is bound 
-to multiple controllers, they will all be instantiated accordingly, and their 
-`before()` and `after()` methods will be called as expected.
-
 ### Set Up Namespace
 
 By default, WebSocket events are bound to root namespace `/`, you can set static
@@ -144,6 +137,36 @@ export default class extends WebSocketController {
 When a SocketError is thrown, the framework will always send a message that 
 contains `{success: false, code, error}` to the client according to the 
 specification of the controller method [error()](./http-controller#Common-API-Response).
+
+## Bind Multiple Methods and Returns Many Values.
+
+In a WebSocketController, if several methods are bound to the same event, these 
+methods will be called accordingly, and all returning values will be sent to the
+client. Even multiple methods are bound, a controller will only be instantiated
+once, `before()` and `after()` methods will also be called only once. However,
+if an event is bound to multiple controllers, they will all be instantiated 
+accordingly, and their `before()` and `after()` methods will be called as 
+expected. And, if the method is a generator, any values `yield`ed by it will be
+sent as well. that means you can use a generator to send data continuously.
+
+```typescript
+import { HttpController, Request, Response, route } from "sfn";
+
+export default class extends HttpController {
+    @route.sse("/generator-example")
+    async *index(req: Request, res: Response) {
+        let i = 0;
+
+        while (true) {
+            yield i++; // the client will receive 1, 2, 3...10 continuously.
+
+            if (i === 10) {
+                break;
+            }
+        }
+    }
+}
+```
 
 ## Customize Adapter
 

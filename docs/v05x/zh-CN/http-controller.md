@@ -41,11 +41,6 @@ URL 地址时，这个方法就会被自动地调用，其返回值将会以合�
 - `route.put(path: string)`
 - `route.sse(path: string)` SSE 使用的是 GET 方式，并由客户端的 EventSource 来实现。
 
-如果多个方法被绑定到了同一个路由上，那么这些方法将会按照其定义的顺序被依次调用，除了 SSE，其他
-请求模式下， 只有第一个有效的返回值（不为 `undefined`）会被发送给客户端。即使绑定了多个方法，
-一个控制器也只会被实例化一次，`before()` and `after()`方法也只会被调用一次，但如果路由绑定
-在了多个控制器内，那么这些控制器都会被依次实例化，并且调用其 `before()` 和 `after()` 方法。
-
 ### 路由格式
 
 框架使用 [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 来解析 URL 
@@ -180,7 +175,7 @@ export default class extends HttpController {
 
 更高级的方案，请查看 [面向切面编程](./aop-mixins#面向切面编程)。
 
-### 处理非 Promise 过程
+## 处理非 Promise 过程
 
 如果你的代码中使用的某些异步的函数、第三方包不支持 `Promise`，那么你就不能使用 
 `await` 来处理它们，要处理这些异步的操作，你可以使用 `util` 模块中的 `promisify()` 函数来
@@ -270,7 +265,7 @@ JSON 信息 `{success: false, code, error}` 的响应将会被返回，这个响
 的模板（如 `404.html`）。如果文件存在，那它将会被发送为错误页面，否则，一个简单的错误响应将会
 被返回。
 
-### 自定义错误页面
+## 自定义错误页面
 
 默认地，框架会根据错误代码发送一个对应的视图文件，并且仅传递 `err: HttpError` 对象到模板中，
 它可能并不满足一些复杂的需求。因此，框架允许你自定义错误处理器，通过重写静态方法
@@ -316,6 +311,37 @@ export default class extends HttpController {
         } catch (err) {
             return this.error(err, err instanceof NotFoundError ? 404 : 500);
             // { success: false, code: 404 | 500, error: err.message }
+        }
+    }
+}
+```
+
+## 绑定多个方法与返回多个值
+
+在 HTTP 控制器中，如果多个方法被绑定到了同一个路由上，那么这些方法将会按照其定义的顺序被
+依次调用，除了 SSE，其他请求模式下， 只有第一个有效的返回值（不为 `undefined`）会被发送
+给客户端。即使绑定了多个方法，一个控制器也只会被实例化一次，`before()` and `after()` 
+方法也只会被调用一次，但如果路由绑定在了多个控制器内，那么这些控制器都会被依次实例化，
+并且调用其 `before()` 和 `after()` 方法。
+
+如果所绑定的是一个 SSE 路由，那么所有被绑定方法的返回值都会被依次发送给客户端。并且，如果
+方法是一个生成器，那么该方法所 `yield` 的值也会被依次发送。因此，你也可以使用生成器来向
+客户端持续的向客户端返回数据。
+
+```typescript
+import { HttpController, Request, Response, route } from "sfn";
+
+export default class extends HttpController {
+    @route.sse("/generator-example")
+    async *index(req: Request, res: Response) {
+        let i = 0;
+
+        while (true) {
+            yield i++; // the client will receive 1, 2, 3...10 continuously.
+
+            if (i === 10) {
+                break;
+            }
         }
     }
 }
