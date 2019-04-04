@@ -1,4 +1,4 @@
-<!-- title: 消息通道; order: 10.1 -->
+<!-- title: Message Channel; order: 10.1 -->
 
 # Inner-Service Communication
 
