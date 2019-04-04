@@ -1,4 +1,6 @@
 /// <reference types="jquery"/>
+/// <reference types="socket.io-client"/>
+
 "use strict";
 
 var QueryString = {
@@ -183,12 +185,12 @@ $(function () {
     var command = $(".command>pre"),
         type = function () {
             command.typeIn("slow", function () {
-                setTimeout(type, 1500);
+                setTimeout(type, 3000);
             });
         };
 
     if (command.length)
-        setTimeout(type, 1500);
+        setTimeout(type, 3000);
 
     if (content.length) {
         var Title = document.title;
@@ -262,4 +264,19 @@ $(function () {
     //         sidebar.css("buttom", "20px");
     //     }
     // });
+
+
+    var socket = window.socket = io.connect("localhost:" + PORT);
+    socket.on("greeting", function (data) {
+        console.log("Socket:", data);
+    }).on("repeat-what-I-said", function (data) {
+        console.log("You just said:", data);
+    }).on("renew-doc-contents", function (pathname, _lang, data) {
+        if (pathname === location.pathname && _lang === lang) {
+            content.removeClass("fadeOut").addClass("fadeIn");
+            SoftLoader.replaceWith(data, document.title, location.href);
+            replaceLink(content);
+        }
+    });
+    socket.emit("greeting");
 });

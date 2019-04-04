@@ -1,23 +1,15 @@
 import * as path from "path";
-import * as fs from "fs-extra";
 import { DB, User } from "modelar";
-import { EjsEngine } from "sfn-ejs-engine";
-import * as SSE from "sfn-sse";
 import { CorsOption as CorsOptions } from "sfn-cors";
-import { SRC_PATH, isDevMode } from "../../init";
+import { SRC_PATH } from "../../init";
 import { config } from "../bootstrap/load-config";
 import { Controller } from "./Controller";
-import { TemplateEngine } from "../tools/TemplateEngine";
-import { MarkdownParser } from "../tools/MarkdownParser";
-import { Request, Response, Session } from "../tools/interfaces";
+import { Request, Response, Session, View } from "../tools/interfaces";
 import { HttpError } from "../tools/HttpError";
-import { realSSE } from "../tools/symbols";
 import { UploadOptions } from "../tools/upload";
-import { loadFile } from '../tools/functions-inner';
+import get = require('lodash/get');
 
 export { CorsOptions };
-
-const Engine = new EjsEngine();
 
 /**
  * HttpController manages requests come from an HTTP client.
@@ -41,24 +33,10 @@ const Engine = new EjsEngine();
  * 
  * If you want to send a response manually, you can just call the `res.send()`
  * or `res.end()` to do so, no more data will be sent after sending one.
- * 
- * The decorator function `@route()` is used to set routes. But when you're 
- * coding in JavaScript, there is not decorators, the framework support 
- * another compatible way to allow you doing such things by using the 
- * **jsdoc** block with a `@route` tag, but you need to set 
- * `config.enableDocRoute` to `true`.
  */
 export class HttpController extends Controller {
-    static viewPath: string = SRC_PATH + "/views";
-    static viewExtname: string = ".html";
-    static engine: TemplateEngine = Engine;
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
-
-    viewPath = this.Class.viewPath;
-    viewExtname = this.Class.viewExtname;
-    /** Sets a specified template engine for the controller. */
-    engine = this.Class.engine;
 
     /** If set, when unauthorized, fallback to the given URL. */
     fallbackTo: string;
@@ -102,74 +80,43 @@ export class HttpController extends Controller {
     /** Gets the absolute view filename if the given one is relative. */
     protected getAbsFilename(filename: string): string {
         if (!path.isAbsolute(filename))
-            filename = `${this.viewPath}/${filename}`;
+            filename = path.resolve(SRC_PATH, "views", filename);
         return filename;
     }
 
     /**
      * Sends view contents to the response context.
      * 
-     * @param filename The template filename, if no extension presented, the 
-     *  `this.viewExtname` will be used. Template files are by default stored 
-     *  in `views/`.
+     * @param path The template path (without extension) related to `src/views`.
      * @param vars Local variables passed to the template.
      */
-    view(filename: string, vars: { [name: string]: any } = {}): Promise<string> {
-        let ext = path.extname(filename);
-        if (ext != this.viewExtname) {
-            ext = this.viewExtname;
-            filename += ext;
-        }
-        filename = this.getAbsFilename(filename);
-
-        // Set response type.
-        this.res.type = ext;
+    view(path: string, vars: { [name: string]: any } = {}) {
+        path = this.getAbsFilename(path);
 
         // i18n support for the template.
         if (!("i18n" in vars)) {
-            vars.i18n = (text, ...replacements) => {
+            vars.i18n = (text: string, ...replacements: string[]) => {
                 return this.i18n(text, ...replacements);
             };
         }
 
-        return this.engine.renderFile(filename, vars);
-    }
+        try {
+            let view: ModuleProxy<View> = get(global, app.views.resolve(path));
 
-    /**
-     * Sends a view file with raw contents to the response context.
-     * 
-     * @param filename The template file, stored in `views/` by default.
-     * @param fromCache Try retrieving contents from cache first.
-     */
-    viewRaw(filename: string, cache = !isDevMode): Promise<string> {
-        filename = this.getAbsFilename(filename);
-        this.res.type = path.extname(filename);
-        return loadFile(filename, cache);
-    }
+            this.res.type = "text/html";
 
-    /**
-     * Sends a view file to the response context, and parse it as a markdown 
-     * file.
-     * 
-     * This method relies on the module `highlightjs`, so when displaying code 
-     * snippets, you need to include CSS files to the HTML page manually.
-     * 
-     * @param filename The template filename, if no extension presented, then 
-     *  `.md` will be used. Template files are by default stored in `views/`.
-     * @param fromCache Try retrieving contents from cache first.
-     */
-    viewMarkdown(filename: string, cache = !isDevMode): Promise<string> {
-        path.extname(filename) != ".md" && (filename += ".md");
-        return this.viewRaw(filename, cache).then(MarkdownParser.parse);
+            return view.instance().render(vars);
+        } catch (err) {
+            if (err instanceof TypeError)
+                throw new HttpError(404);
+            else
+                throw err;
+        }
     }
 
     /** Alias of `res.send()`. */
     send(data: any): void {
         return this.res.send(data);
-    }
-
-    get Class(): typeof HttpController {
-        return <any>this.constructor;
     }
 
     /** Gets/Sets the DB instance. */
@@ -201,11 +148,8 @@ export class HttpController extends Controller {
     }
 
     /** Gets an SSE instance. */
-    get sse(): SSE {
-        if (!this[realSSE]) {
-            this[realSSE] = new SSE(this.req, this.res);
-        }
-        return this[realSSE];
+    get sse() {
+        return this.res.sse;
     }
 
     /**
@@ -224,11 +168,11 @@ export class HttpController extends Controller {
 
     /**
      * By default, the framework will send a view file according to the error 
-     * code, and only pass the `err` object to the template, it may not be 
-     * suitable for complicated needs. For such a reason, the framework allows
-     * you to customize the error view handler by rewriting this method.
+     * code, and only pass the `err: HttpError` object to the template, it may 
+     * not be suitable for complicated needs. For such a reason, the framework 
+     * allows you to customize the error view handler by rewriting this method.
      */
-    static httpErrorView(err: HttpError, instance: HttpController): Promise<string> {
-        return instance.view(instance.res.code.toString(), { err });
+    static httpErrorView(err: HttpError, instance: HttpController): string | Promise<string> {
+        return instance.view(String(err.code), { err });
     }
 }

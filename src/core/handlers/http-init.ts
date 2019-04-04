@@ -1,6 +1,6 @@
-import SSE = require("sfn-sse");
 import chalk from "chalk";
-import { app } from "../bootstrap/index";
+import { SSE } from "sfn-sse";
+import { router } from "../bootstrap/index";
 import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { grey, red } from "../tools/functions-inner";
@@ -8,16 +8,37 @@ import truncate = require("lodash/truncate");
 
 const reqLogged = Symbol("reqLogged");
 
-app.use(async (req: Request, res: Response, next) => {
+router.use(async (req: Request, res: Response, next) => {
     req["originalUrl"] = req.url; // compatible with Express framework.
     req.shortUrl = truncate(req.url, { length: 32 });
     req.isEventSource = SSE.isEventSource(req);
     res.headers["server"] = `NodeJS/${process.version}`;
     res.headers["x-powered-by"] = `sfn/${version}`;
     res.gzip = false;
+    res.sent = false;
+
+    if (req.isEventSource) {
+        res.sse = new SSE(req, res);
+
+        // If the SSE connection has been marked closed, return immediately and
+        // do not continue HTTP controlling life cycle.
+        if (res.sse.isClosed)
+            return;
+
+        app.sse[res.sse.id] = res.sse;
+    } else {
+        res.charset = "UTF-8";
+    }
 
     let logger = getDevLogger(req, res);
-    res.on("finish", logger).on("close", logger);
+    let clearSSE = () => {
+        res.sse && (delete app.sse[res.sse.id]);
+    }
+
+    res.on("finish", logger)
+        .on("finish", clearSSE)
+        .on("close", logger)
+        .on("close", clearSSE);
 
     await next();
 });

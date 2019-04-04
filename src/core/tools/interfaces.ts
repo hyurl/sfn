@@ -1,6 +1,8 @@
 import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import * as modelar from "modelar";
+import * as ExpressSession from "express-session";
+import { SSE } from "sfn-sse";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
@@ -10,8 +12,18 @@ export interface Locale {
     [statement: string]: string;
 }
 
+export interface View {
+    render(data?: { [name: string]: any }): string;
+}
+
 export interface Session extends Express.Session {
     uid: number;
+}
+
+export abstract class Session {
+    static [Symbol.hasInstance](ins: any) {
+        return ins instanceof ExpressSession["Session"];
+    }
 }
 
 export interface Request extends webium.Request {
@@ -23,7 +35,7 @@ export interface Request extends webium.Request {
     isEventSource: boolean;
     /** Gets the CSRF token if available. */
     csrfToken?: string;
-    /** In a sfn app, the session is shared between HTTP and WebSocket. */
+    /** In an sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** 
      * A short-version url, when the url contains more than 64 characters,
@@ -38,9 +50,16 @@ export interface Request extends webium.Request {
     files?: { [field: string]: UploadedFile[] };
 }
 
+export abstract class Request {
+    static [Symbol.hasInstance](ins: any) {
+        return (ins instanceof webium.RequestConstructor)
+            || (ins instanceof webium.Http2RequestConstructor);
+    }
+}
+
 export interface Response extends webium.Response {
     /** Sends data to the client via XML document. */
-    xml(data: { [key: string]: any }): void;
+    xml(data: { [key: string]: any }, rootTag?: string, headless?: boolean): void;
     /** Whether the response data should be compressed to GZIP. */
     gzip: boolean;
     /**
@@ -52,6 +71,15 @@ export interface Response extends webium.Response {
      * instead.
      */
     sent: boolean;
+    /** The Sever-Sent Events channel of the response. */
+    sse?: SSE;
+}
+
+export abstract class Response {
+    static [Symbol.hasInstance](ins: any) {
+        return (ins instanceof webium.ResponseConstructor)
+            || (ins instanceof webium.Http2ResponseConstructor);
+    }
 }
 
 export interface WebSocket extends SocketIO.Socket {
@@ -63,7 +91,7 @@ export interface WebSocket extends SocketIO.Socket {
     db: modelar.DB;
     /** The logged-in user of the socket. */
     user?: modelar.User;
-    /** In a sfn app, the session is shared between HTTP and WebSocket. */
+    /** In an sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** * The cookies of handshake. */
     cookies: { [name: string]: any };
@@ -90,6 +118,12 @@ export interface WebSocket extends SocketIO.Socket {
     secure: boolean;
 }
 
+export abstract class WebSocket {
+    static [Symbol.hasInstance](ins: SocketIO.Socket) {
+        return app.ws && ins.server === app.ws;
+    }
+}
+
 export interface ControllerDecorator extends Function {
     (proto: Controller, prop: string): void;
 }
@@ -100,28 +134,4 @@ export interface HttpDecorator extends Function {
 
 export interface WebSocketDecorator extends Function {
     (proto: WebSocketController, prop: string): void;
-}
-
-export interface WebSocketEventDecorator extends WebSocketDecorator { }
-
-export interface HttpRouteDecorator extends HttpDecorator { }
-
-export interface HttpRoute extends Function {
-    /** Binds the method to a specified URL route. */
-    (route: string): HttpRouteDecorator;
-    (reqMethod: string, path: string): HttpRouteDecorator;
-    (route: string, Class: typeof HttpController, method: string): void
-    (reqMethod: string, path: string, Class: typeof HttpController, method: string): void;
-    delete(path: string): HttpRouteDecorator;
-    delete(path: string, Class: typeof HttpController, method: string): void;
-    get(path: string): HttpRouteDecorator;
-    get(path: string, Class: typeof HttpController, method: string): void;
-    head(path: string): HttpRouteDecorator;
-    head(path: string, Class: typeof HttpController, method: string): void;
-    post(path: string): HttpRouteDecorator;
-    post(path: string, Class: typeof HttpController, method: string): void;
-    patch(path: string): HttpRouteDecorator;
-    patch(path: string, Class: typeof HttpController, method: string): void;
-    put(path: string): HttpRouteDecorator;
-    put(path: string, Class: typeof HttpController, method: string): void;
 }

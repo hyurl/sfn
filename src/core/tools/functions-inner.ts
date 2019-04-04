@@ -1,52 +1,38 @@
-import { extname, basename } from "path";
-import { __awaiter } from 'tslib';
 import * as CallSiteRecord from "callsite-record";
 import * as moment from "moment";
 import * as fs from "fs-extra";
+import * as path from "path";
+import * as modelar from "modelar";
 import chalk from "chalk";
-import { Locale } from "./interfaces";
-import { Service } from './Service';
-import { isTsNode, isDevMode } from "../../init";
+import get = require("lodash/get");
+import startsWith = require('lodash/startsWith');
+import { isTsNode, isDevMode, SRC_PATH, APP_PATH } from "../../init";
 
-let logService: Service;
-const FileCache: { [filename: string]: string } = {};
+const tryImport = createImport(require);
+
+export function isOwnMethod(obj: any, method: string): boolean {
+    return typeof obj[method] === "function" &&
+        (<Object>obj.constructor.prototype).hasOwnProperty(method);
+}
 
 export function moduleExists(name: string): boolean {
     return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
 }
 
-export function loadLanguagePack(filename: string): Locale {
-    let ext = extname(filename),
-        _module = require(filename),
-        lang: Locale;
+export function importUser() {
+    let ctor: typeof modelar.User;
 
-    if (typeof _module.default === "object") {
-        lang = _module.default;
-    } else {
-        lang = _module;
-    }
+    try {
+        ctor = get(app, "models.user").ctor;
 
-    if (lang instanceof Array) {
-        let _lang: Locale = {};
-        for (let v of lang) {
-            _lang[v] = v;
+        if (!ctor || !(ctor.prototype instanceof modelar.User)) {
+            ctor = modelar.User;
         }
-        lang = _lang;
+    } catch (err) {
+        ctor = modelar.User;
     }
 
-    return lang;
-}
-
-export async function loadFile(filename, fromCache = false): Promise<string> {
-    if (fromCache && FileCache[filename] !== undefined) {
-        return FileCache[filename];
-    } else {
-        let content = await fs.readFile(filename, "utf8");
-
-        fromCache && (FileCache[filename] = content);
-
-        return content;
-    }
+    return ctor;
 }
 
 export async function callsiteLog(err: Error) {
@@ -66,7 +52,10 @@ export async function callsiteLog(err: Error) {
     }
 }
 
-export function createImport(require: Function) {
+export function createImport(require: Function): (id: string) => {
+    [x: string]: any;
+    default?: any
+} {
     return (id: string) => {
         try {
             return require(id);
@@ -82,14 +71,10 @@ export function createImport(require: Function) {
                 stack = stack.replace("_1", "").slice(3);
 
                 process.nextTick(() => {
-                    // Delay importing the Server module, allow configurations
-                    // finish import before using them in service.
-                    if (!logService) {
-                        logService = new (require("./Service").Service);
-                    }
+                    let service = app.services.base.instance(app.services.local);
 
-                    logService.logger.hackTrace(stack);
-                    logService.logger.error(msg);
+                    service.logger.hackTrace(stack);
+                    service.logger.error(msg);
                 });
             }
 
@@ -98,23 +83,17 @@ export function createImport(require: Function) {
     };
 }
 
-export function getFuncParams(fn: Function) {
-    let fnStr = fn.toString(),
-        start = fnStr.indexOf("("),
-        end = fnStr.indexOf(")"),
-        paramStr = fnStr.slice(start + 1, end).trim(),
-        params = paramStr.split(",").map(param => {
-            return param.replace(/\s/g, "").split("=")[0];
-        });
-
-    return params;
-}
-
-function color(color: string, callSite: TemplateStringsArray, bindings: any[]): string {
+function color(
+    color: string,
+    callSite: TemplateStringsArray,
+    bindings: any[]
+): string {
     let msg = callSite.map((str, i) => {
         return i > 0 ? bindings[i - 1] + str : str;
     }).join("");
-    return chalk[color](`[${moment().format("YYYY-MM-DDTHH:mm:ss")}]`) + " " + msg;
+    let timeStr = moment().format("YYYY-MM-DDTHH:mm:ss");
+
+    return chalk[color](`[${timeStr}]`) + " " + msg;
 }
 
 export function grey(callSite: TemplateStringsArray, ...bindings: any[]) {
@@ -131,4 +110,57 @@ export function yellow(callSite: TemplateStringsArray, ...bindings: any[]) {
 
 export function red(callSite: TemplateStringsArray, ...bindings: any[]) {
     return color("red", callSite, bindings);
+}
+
+export function resolveModulePath(baseDir: string) {
+    let target = { stack: "" };
+
+    Error.captureStackTrace(target);
+
+    let lines = target.stack.split("\n").slice(1);
+    let re = /[\(\s](\S+):\d+:\d+?/;
+    let filename: string;
+    let ext: string;
+
+    for (let line of lines) {
+        let matches = re.exec(line);
+
+        if (matches) {
+            filename = matches[1][0] === "(" ? matches[1].slice(1) : matches[1];
+            filename = filename.replace(SRC_PATH, APP_PATH);
+
+            if (startsWith(filename, baseDir))
+                break;
+        }
+    }
+
+    if (!filename)
+        return;
+
+    if (ext = path.extname(filename)) {
+        filename = filename.slice(0, -ext.length);
+    }
+
+    return filename;
+}
+
+export async function importDirectory(dir: string) {
+    var ext = isTsNode ? ".ts" : ".js";
+    var files = await fs.readdir(dir);
+
+    for (let file of files) {
+        let filename = path.resolve(dir, file);
+        let stat = await fs.stat(filename);
+
+        if (stat.isFile() && path.extname(file) == ext) {
+            tryImport(filename);
+        } else if (stat.isDirectory()) {
+            // load files recursively.
+            await importDirectory(filename);
+        }
+    }
+}
+
+export function serveTip(type: string, serverId: string, url: string) {
+    return green`${type} server [${serverId}](${url}) started.`;
 }

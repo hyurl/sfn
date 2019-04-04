@@ -8,7 +8,8 @@ import { injectable, injected } from "injectable-ts";
 import HideProtectedProperties = require("hide-protected-properties");
 import { ROOT_PATH } from "../../init";
 import { config } from "../bootstrap/load-config";
-import { LocaleMap } from "./LocaleMap";
+import get = require('lodash/get');
+import { Locale } from './interfaces';
 
 injectable(DB);
 
@@ -16,7 +17,7 @@ export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
     ttl: 1000,
     filename: ROOT_PATH + "/logs/sfn.log",
     fileSize: 1024 * 1024 * 2,
-    trace: true
+    trace: false
 });
 
 export interface CacheOptions extends StoreOptions {
@@ -53,24 +54,30 @@ export class Service extends EventEmitter {
      * If is a HTTP request, check `req.query.lang` or `req.cookies.lang`, if 
      * is socket message, check `socket.cookies.lang`, if any appears, then 
      * always use the setting language, otherwise, check header 
-     * `Accept-Language` instead. Language files are stored in `Locales`, 
-     * could be json or js, and case insensitive.
+     * `Accept-Language` instead. Language files are stored in `src/locales/`.
      * 
      * @param text The original text, accept format with %s, %i, etc.
      * @param replacements Values that replaces %s, %i, etc. in the `text`.
      */
     i18n(text: string, ...replacements: string[]): string {
-        var locale = LocaleMap,
-            lang = this.lang.toLowerCase(),
-            _lang = config.lang.toLowerCase();
+        let mod = get(app.locales, this.lang);
+        let defMod = get(app.locales, config.lang);
+        let locale: Locale = null;
+        let stmt: string;
 
-        if (locale[lang] && locale[lang][text]) {
-            text = locale[lang][text];
-        } else if (locale[_lang] && locale[_lang][text]) {
-            text = locale[_lang][text];
+        if (mod && mod.proto) {
+            locale = mod.instance();
+            locale[text] && (stmt = locale[text]);
         }
 
-        return util.format(text, ...replacements);
+        if (stmt === undefined && defMod && defMod.proto) {
+            locale = defMod.instance();
+            locale[text] && (stmt = locale[text]);
+        }
+
+        (stmt === undefined) && (stmt = text);
+
+        return util.format(stmt, ...replacements);
     }
 
     /** Gets a logger instance. */
@@ -101,3 +108,5 @@ export class Service extends EventEmitter {
     @injected([config.database])
     db: DB;
 }
+
+export default Service;

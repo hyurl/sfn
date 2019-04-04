@@ -1,0 +1,44 @@
+<%- include("./header") %>
+<div class="content">
+    <div class="jumbotron">
+        <h1 class="vivify popInRight">SFN</h1>
+        <p class="desc vivify fadeIn">
+            <%= i18n("An easy and elegant web service framework for NodeJS.") %>
+        </p>
+    </div>
+    <div class="command vivify flipInX">
+        <pre>npm i sfn</pre>
+    </div>
+    <div class="pre-requisit">
+        <div class="vivify rollInRight">
+            <a href="http://nodejs.org/">
+                <img src="https://img.shields.io/badge/NodeJS-v8.0%2B-%23026e00.svg" alt="NodeJS v8.0+">
+            </a>
+            <a href="https://babeljs.io/learn-es2015/">
+                <img src="https://img.shields.io/badge/ES-2017-yellow.svg" alt="ES 2017">
+            </a>
+            <a href="https://typescriptlang.org">
+                <img src="https://img.shields.io/badge/TS-TypeScript-blue.svg" alt="TypeScript">
+                </svg>
+            </a>
+            <a href="https://opensource.org/licenses/MIT">
+                <img src="https://img.shields.io/badge/license-MIT-%233ba136.svg" alt="MIT License">
+            </a>
+        </div>
+    </div>
+    <div class="box">
+        <div class="vivify popInBottom">
+            <h2><%= i18n("Easy and Elegant") %></h2>
+            <p><%- i18n("Elegant Description") %></p>
+        </div>
+        <div class="vivify popInBottom">
+            <h2><%= i18n("Distributed Design") %></h2>
+            <p><%- i18n("Distributed Description") %></p>
+        </div>
+        <div class="vivify popInBottom">
+            <h2><%= i18n("Hot Reloading Modules") %></h2>
+            <p><%- i18n("Hot Reloading Description") %></p>
+        </div>
+    </div>
+</div>
+<%- include("./footer") %>

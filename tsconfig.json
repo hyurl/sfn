@@ -11,20 +11,30 @@
         "importHelpers": true,
         "pretty": true,
         "removeComments": true,
-        "noUnusedLocals": false,
+        "noUnusedLocals": true,
         "noUnusedParameters": false,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        // "diagnostics": true,
+        "baseUrl": ".",
+        "paths": {
+            "sfn": [
+                "."
+            ]
+        }
     },
     "include": [
         "src/*.ts",
-        "src/bootstrap/*.ts",
         "src/controllers/*.ts",
-        "src/controllers/*/*.ts",
+        "src/bootstrap/*.ts",
+        "src/schedules/*.ts",
+        "src/services/*.ts",
         "src/locales/*.ts",
+        "src/plugins/*.ts",
+        "src/models/*.ts",
+        "src/utils/*.ts",
         "src/core/*/*.ts",
         "src/core/*/*/*.ts",
-        "src/cli/*.ts",
-        "src/cli/commands/*.ts"
+        "src/cli/*.ts"
     ],
     "exclude": [
         "./node_modules/*"

@@ -1,12 +1,12 @@
-import { app } from "../bootstrap/index";
+import { router } from "../bootstrap/index";
 import { Request, Response } from "../tools/interfaces";
-import { User } from "../bootstrap/load-user";
+import { importUser } from "../tools/functions-inner";
 
-app.use(async (req: Request, res: Response, next) => {
+router.use(async (req: Request, res: Response, next) => {
     req.user = null;
     if (req.session && req.session.uid) {
         try {
-            req.user = <any>await User.use(req.db).get(req.session.uid);
+            req.user = <any>await importUser().use(req.db).get(req.session.uid);
         } catch (e) { }
     }
     await next();

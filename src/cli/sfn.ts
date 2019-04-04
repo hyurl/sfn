@@ -4,15 +4,19 @@ import * as path from "path";
 import * as program from "commander";
 import pluralize = require("pluralize");
 import kebabCase = require("lodash/kebabCase");
-import { version, APP_PATH, SRC_PATH, isTsNode } from "../init";
+import camelCase = require("lodash/camelCase");
+import upperFirst = require("lodash/upperFirst");
+import cloneDeep = require('lodash/cloneDeep');
+import get = require('lodash/get');
+import { version, APP_PATH, SRC_PATH } from "../init";
 import { config } from "../core/bootstrap/load-config";
 import {
-    loadLanguagePack,
     green,
     red,
     moduleExists,
     createImport
 } from "../core/tools/functions-inner";
+import { Locale } from '../core/tools/interfaces';
 
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
@@ -22,6 +26,7 @@ program.description("create new controllers, models. etc.")
     .version(version, "-v, --version")
     .option("-c, --controller <name>", "create a new controller with a specified name")
     .option("-m, --model <name>", "create a new model with a specified name")
+    .option("-s, --service <name>", "create a new service with a specified name")
     .option("-l, --language <name>", "create a new language pack with a specified name")
     .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
     .on("--help", () => {
@@ -77,44 +82,67 @@ try {
             ? program.controller + "index"
             : program.controller;
         let type = program.type == "websocket" ? "WebSocket" : "Http",
+            ControllerName = upperFirst(path.basename(program.controller)),
+            mod = camelCase(ControllerName),
             input = `${tplDir}/${type}Controller.ts`,
             output = `${SRC_PATH}/controllers/${filename}.ts`;
 
         checkSource(input);
 
         let route = kebabCase(program.controller);
-        let contents = fs.readFileSync(input, "utf8").replace(/\{name\}/g, route);
+        let contents = fs.readFileSync(input, "utf8")
+            .replace(/\{name\}/g, route)
+            .replace(/__Controller__/g, ControllerName)
+            .replace(/__mod__/g, mod);
 
         outputFile(output, contents, "controller");
     } else if (program.model) { // create model.
-        var input = `${tplDir}/Model.ts`,
-            output = `${SRC_PATH}/models/${program.model}.ts`,
-            ModelName = path.basename(program.model),
-            table = pluralize(kebabCase(ModelName));
+        let ModelName = upperFirst(path.basename(program.model)),
+            table = pluralize(kebabCase(ModelName)),
+            mod = camelCase(ModelName),
+            filename = path.dirname(program.model) + "/" + mod,
+            input = `${tplDir}/Model.ts`,
+            output = `${SRC_PATH}/models/${filename}.ts`;
 
         checkSource(input);
 
-        var contents = fs.readFileSync(input, "utf8")
+        let contents = fs.readFileSync(input, "utf8")
             .replace(/__Model__/g, ModelName)
-            .replace(/__table__/g, table);
+            .replace(/__table__/g, table)
+            .replace(/__mod__/g, mod);
 
         outputFile(output, contents, "Model");
+    } else if (program.service) { // create service
+        let ServiceName = upperFirst(path.basename(program.service)),
+            mod = camelCase(ServiceName),
+            filename = path.dirname(program.service) + "/" + mod,
+            input = `${tplDir}/Service.ts`,
+            output = `${SRC_PATH}/services/${filename}.ts`;
+
+        checkSource(input);
+
+        let contents = fs.readFileSync(input, "utf8")
+            .replace(/__Service__/g, ServiceName)
+            .replace(/__mod__/g, mod);
+
+        outputFile(output, contents, "Service");
     } else if (program.language) { // create language pack.
         let output: string = `${SRC_PATH}/locales/${program.language}.json`;
+        let mod: ModuleProxy<Locale> = get(app.locales, config.lang);
+        let lang: Locale;
         let contents: string;
-        let langJson = `${SRC_PATH}/locales/${config.lang}.json`;
-        let langMod = `${APP_PATH}/locales/${config.lang}`;
-        let lang: any;
 
-        if (fs.existsSync(langJson)) {
-            lang = loadLanguagePack(langJson);
-        } else if (moduleExists(langMod)) {
-            lang = loadLanguagePack(langMod);
+        if (mod && mod.proto) {
+            lang = cloneDeep(mod.instance());
+
+            for (let x in lang) {
+                lang[x] = "";
+            }
         } else {
             lang = {};
         }
 
-        contents = JSON.stringify(lang, null, "  ");
+        contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
     } else if (process.argv.length <= 2) {
         program.help();

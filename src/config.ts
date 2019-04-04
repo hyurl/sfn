@@ -1,5 +1,4 @@
 import * as Session from "express-session";
-import * as sessionFileStore from "session-file-store";
 import { ServerResponse } from "http";
 import { Stats } from "fs";
 import serveStatic = require("serve-static");
@@ -8,7 +7,7 @@ import { DBConfig } from "modelar";
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { ROOT_PATH } from "./init";
+import { RpcOptions } from 'alar';
 
 /**
  * @see https://www.npmjs.com/package/serve-static
@@ -32,28 +31,30 @@ export interface SFNConfig {
      * @see https://www.npmjs.com/package/serve-static
      */
     statics?: string[] | { [path: string]: StaticOptions };
-    /** The directories that contain controllers. */
-    controllers?: string[];
     /**
-     * Hot-reloading is an experimental feature and only supports controllers, 
-     * it will watch file changes in the directories set in `controllers`.
+     * When any module file has been modified, rather than restart the whole 
+     * server, try to refresh the memory cache instead. NOTE: **DO NOT** import 
+     * the module statically in anywhere, otherwise it may not be reloaded as 
+     * expected.
      * 
-     * When any controller file has been modified, rather than reload the whole 
-     * server, the system will try to reload the route in memory instead. Make 
-     * sure in your own scripts, **DON'T**, in any where, import any controllers
-     * yourself, otherwise the hot-reloading may not work as expected.
+     * Currently, these entities can be hot-reloaded:
+     * - `controllers`
+     * - `services`
+     * - `models`
+     * - `utils`
+     * - `locales`
+     * - `views`
+     * - `plugins`
+     * 
+     * During development, when hot-reloading is enabled, you should start 
+     * typescript compiler in watch mode (`tsc --watch`).
+     * 
+     * @see https://github.com/hyurl/alar
      */
     hotReloading?: boolean;
     server: {
-        /** Host name(s), used for calculating the subdomain. */
+        /** Host name(s), used for calculating the sub-domain and display. */
         hostname?: string | string[];
-        /** HTTP request timeout, default value is `120000`. */
-        timeout?: number;
-        /**
-         * Auto-start server when worker is online, if `false`, you must call 
-         * `startServer()` manually.
-         */
-        autoStart?: boolean;
         /**
          * Since SFN 0.2.0, when HTTPS or HTTP2 is enabled, will always force 
          * HTTP request to redirect to the new protocol, and setting port for 
@@ -66,6 +67,8 @@ export interface SFNConfig {
             type?: "http" | "https" | "http2";
             /** Default value is `80`. */
             port?: number;
+            /** HTTP request timeout, default value is `120000`. */
+            timeout?: number;
             /**
              * These options are mainly for type `http` and type `http2`.
              * @see https://nodejs.org/dist/latest-v10.x/docs/api/https.html#https_https_createserver_options_requestlistener
@@ -89,6 +92,13 @@ export interface SFNConfig {
              */
             options?: ServerOptions;
         };
+        /**
+         * Configurations for RPC services.
+         * @see https://github.com/hyurl/alar
+         */
+        rpc?: {
+            [serverId: string]: RpcOptions & { modules: ModuleProxy<any>[] }
+        };
     };
     /**
      * Configurations for Modelar ORM.
@@ -107,7 +117,6 @@ export interface SFNConfig {
     mail?: Mail.Options & Mail.Message;
 }
 
-const FileStore = sessionFileStore(Session);
 const env = process.env;
 
 /**
@@ -116,17 +125,15 @@ const env = process.env;
  * supported options on their official websites.
  */
 export const config: SFNConfig = {
-    lang: env.LANG || "en-US",
+    lang: "en-US",
     statics: ["assets"],
-    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: true,
     server: {
         hostname: "localhost",
-        timeout: 120000, // 2 min.
-        autoStart: true,
         http: {
             type: <SFNConfig["server"]["http"]["type"]>env.HTTP_TYPE || "http",
             port: parseInt(env.HTTP_PORT) || 80,
+            timeout: 120000, // 2 min.
             options: null
         },
         websocket: {
@@ -136,7 +143,8 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        }
+        },
+        rpc: {}
     },
     database: {
         type: env.DB_TYPE || "mysql",
@@ -152,10 +160,6 @@ export const config: SFNConfig = {
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new FileStore({
-            path: ROOT_PATH + "/sessions",
-            ttl: 3600 * 24 // 24 hours (in seconds)
-        }),
         cookie: {
             maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
         }

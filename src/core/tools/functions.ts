@@ -1,17 +1,22 @@
 import random = require("lodash/random");
-import { HttpController } from "../controllers/HttpController";
-import { WebSocketController } from "../controllers/WebSocketController";
-import { RouteMap } from "./RouteMap";
-import { EventMap } from "./EventMap";
-import {
-    ControllerDecorator,
-    WebSocketEventDecorator,
-    HttpRoute
-} from './interfaces';
 import { App, RouteHandler } from "webium";
 import { interceptAsync } from 'function-intercepter';
+import { HttpController } from "../controllers/HttpController";
+import { WebSocketController } from "../controllers/WebSocketController";
 import { HttpError } from './HttpError';
 import { SocketError } from './SocketError';
+import { routeMap, eventMap } from './RouteMap';
+import { resolveModulePath } from './functions-inner';
+import {
+    ControllerDecorator,
+    WebSocketDecorator,
+    HttpDecorator
+} from './interfaces';
+
+/** Pauses the execution in an asynchronous operation. */
+export function sleep(timeout: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+}
 
 /** 
  * Generates a random string.
@@ -33,7 +38,7 @@ export function randStr(
 /** Injects CSRF Token into forms. */
 export function injectCsrfToken(html: string, token: string): string {
     var ele = `<input type="hidden" name="x-csrf-token" value="${token}">`,
-        matches = html.match(/<form\s+.*>/g);
+        matches = html.match(/<form\s+.*?>/g);
 
     if (matches) {
         for (let match of matches) {
@@ -62,85 +67,102 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(function
     }
 });
 
-let app: App,
+let router: App,
     handle: (route: string) => RouteHandler,
     tryImport: (nsp: string) => void;
 
 /** Binds the method to a specified socket event. */
-export function event(name: string): WebSocketEventDecorator;
-export function event(name: string, Class: typeof WebSocketController, method: string): void;
-export function event(name: string, Class?: typeof WebSocketController, method?: string) {
-    if (arguments.length === 1) {
-        return (proto: WebSocketController, prop: string) => {
-            let nsp: string = proto.Class.nsp || "/";
+export function event(name: string): WebSocketDecorator {
+    return (proto: WebSocketController, prop: string) => {
+        let modPath = resolveModulePath(app.controllers.path);
 
-            if (!EventMap[nsp]) EventMap[nsp] = {};
-            if (!tryImport)
-                tryImport = require("../handlers/websocket-event").tryImport;
+        if (!modPath)
+            return;
 
+        let { nsp = "/" } = <typeof WebSocketController>proto.ctor;
+        let data = {
+            prefix: nsp,
+            route: name,
+            name: app.controllers.resolve(modPath),
+        };
+        let key = eventMap.keyFor(data);
+
+        eventMap.add(key, prop);
+
+        if (!tryImport)
+            tryImport = require("../handlers/websocket-event").tryImport;
+
+        if (!eventMap.isLocked(key)) {
+            eventMap.lock(key);
             tryImport(nsp);
-            EventMap[nsp][name] = {
-                Class: proto.Class,
-                method: prop
-            };
+        }
+    };
+}
+
+/** Binds the method to a specified URL route. */
+export function route(path: string): HttpDecorator;
+export function route(method: string, path: string): HttpDecorator;
+export function route(method: string, path?: string): HttpDecorator {
+    return (proto: HttpController, prop: string) => {
+        let modPath = resolveModulePath(app.controllers.path);
+
+        if (!modPath)
+            return;
+
+        if (!path) {
+            let parts = method.split(/\s+/);
+            let { baseURI = "" } = <typeof HttpController>proto.ctor;
+            method = parts[0] === "SSE" ? "GET" : parts[0];
+            path = baseURI + parts[1];
+        } else if (method === "SSE") {
+            method = "GET";
+        }
+
+        let data = {
+            prefix: method,
+            route: path,
+            name: app.controllers.resolve(modPath),
         };
-    } else {
-        return event(name)(Class.prototype, method);
-    }
+        let key = routeMap.keyFor(data);
+
+        routeMap.add(key, prop);
+
+        if (!router || !handle) {
+            router = require("../bootstrap/index").router;
+            handle = require("../handlers/http-route").getRouteHandler;
+        }
+
+        if (!routeMap.isLocked(key)) {
+            routeMap.lock(key);
+            router.method(method, path, handle(key));
+        }
+    };
 }
 
-function _route(...args) {
-    let route: string = args.length % 2 ? args[0] : `${args[0]} ${args[1]}`;
+route.delete = function (path: string) {
+    return route("DELETE", path);
+};
 
-    if (args.length <= 2) {
-        return (proto: HttpController, prop: string) => {
-            RouteMap[route] = {
-                Class: proto.Class,
-                method: prop
-            };
-
-            let __route = route.split(/\s+/),
-                method = _route[0] === "SSE" ? "GET" : __route[0],
-                path = (proto.Class.baseURI || "") + __route[1];
-
-            if (!app || !handle) {
-                app = require("../bootstrap/index").app;
-                handle = require("../handlers/http-route").getRouteHandler;
-            }
-
-            app.method(method, path, handle(route), true);
-        };
-    } else {
-        let proto = (args.length == 4 ? args[2] : args[1]).prototype,
-            method = args.length == 4 ? args[3] : args[2];
-
-        return _route(route)(proto, method);
-    }
+route.get = function (path: string) {
+    return route("GET", path);
 }
 
-/** Sets HTTP routes. */
-export const route: HttpRoute = <any>_route;
-
-route.delete = function (...args) {
-    return _route("DELETE", ...args);
+route.head = function (path: string) {
+    return route("HEAD", path);
 };
 
-route.get = function (...args) {
-    return _route("GET", ...args);
+route.patch = function (path: string) {
+    return route("PATCH", path);
+};
+
+route.post = function (path: string) {
+    return route("POST", path);
+};
+
+route.put = function (path: string) {
+    return route("PUT", path);
+};
+
+route.sse = function (path: string) {
+    return route("SSE", path);
 }
-
-route.head = function (...args) {
-    return _route("HEAD", ...args);
-};
-
-route.patch = function (...args) {
-    return _route("PATCH", ...args);
-};
-
-route.post = function (...args) {
-    return _route("POST", ...args);
-};
-
-route.put = function (...args) {
-    return _route("PUT", ...args);
-};

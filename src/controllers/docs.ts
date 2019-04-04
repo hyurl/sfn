@@ -1,105 +1,32 @@
-import { route, HttpError, MarkdownParser, isDevMode, ROOT_PATH } from "sfn";
-import HttpController from "./index";
-import { readdir, readFile } from 'fs-extra';
-import { resolve as resolvePath } from "path";
-import { Section, constructMarkdown, renderHtml } from "outlining";
-import trim = require("lodash/trim");
-import meta from "comment-meta";
+import { route, HttpController, HttpError, ROOT_PATH, Request, Response, isDevMode } from "sfn";
+import { readdir } from 'fs-extra';
 
-export default class DocController extends HttpController {
+export default class extends HttpController {
     @route.get("/docs")
     @route.get("/docs/")
-    async docs() {
+    async docs(req: Request, res: Response) {
         let folders = (await readdir(ROOT_PATH + "/docs")).sort((a, b) => {
             return parseFloat(b.slice(1)) - parseFloat(a.slice(1));
         });
         let url = `/docs/${folders[0]}/getting-started`;
 
-        if (this.req.query.lang)
-            url += `?lang=${this.req.query.lang}`;
+        if (req.query.lang)
+            url += `?lang=${req.query.lang}`;
 
-        return this.res.redirect(url);
+        return res.redirect(url);
     }
 
     @route.get("/docs/:version/:name")
-    async showContents(version: string, name: string) {
-        let lang = this.lang,
-            dir = `${ROOT_PATH}/docs/${version}/${lang}`,
-            ver = `[${version}][${lang}]`.replace(/\./g, ""),
-            content: string = this.cache.get(`doc.contents[${ver}][${name}]`),
-            sideMenu = this.cache.get(`doc.sideMenu[${ver}]`);
-
+    @app.plugins.web.onView.decorate()
+    async showContents(req: Request, version: string, name: string) {
         try {
-            if (isDevMode || !sideMenu) {
-                let categoryTree = await this.getCategoryTree(version, lang, dir);
-                sideMenu = renderHtml(categoryTree, "categories", "    ");
-                this.cache.set(`doc.sideMenu[${ver}]`, sideMenu);
-            }
+            let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
+            let content = await app.services.docs.instance().getContent(version, this.lang, name);
 
-            if (isDevMode || !content) {
-                content = await readFile(resolvePath(dir, name + ".md"), "utf8");
-                content = await MarkdownParser.parse(content);
-                this.cache.set(`doc.contents[${ver}][${name}]`, content);
-            }
+            return req.xhr ? content : this.view("docs", { sideMenu, content });
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
-            throw new HttpError(code, e.message);
+            throw new HttpError(code, isDevMode ? e.message : null);
         }
-
-        return this.req.xhr ? content : this.view("docs", {
-            ...this.indexVars,
-            sideMenu,
-            content
-        });
-    }
-
-    private async getCategoryTree(version: string, lang: string, dir: string) {
-        let files = await readdir(dir),
-            categoryTree: Array<{
-                order: number;
-                id: string;
-                level: number;
-                title: string;
-                children: Section[]
-            }> = [];
-
-        for (let file of files) {
-            let _name = file.slice(0, -3),
-                content = await readFile(dir + "/" + file, "utf8"),
-                metaData = meta(content)[0] || {};
-
-            categoryTree.push({
-                order: parseInt(metaData.order) || 0,
-                id: _name,
-                level: 0,
-                title: `<a href="/docs/${version}/${_name}" title="${metaData.title}">${metaData.title}</a><i class="fa fa-angle-right"></i>`,
-                children: constructMarkdown(content, section => {
-                    let depth = section.id.split(".").length,
-                        padding = depth <= 2 ? depth * 15 + 10 : 40,
-                        title = section.title.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, ""),
-                        isLatin = Buffer.byteLength(section.title) == section.title.length,
-                        _text = section.title.replace(/\s/g, '-'),
-                        re = /[~`!@#\$%\^&\*\(\)\+=\{\}\[\]\|:"'<>,\.\?\/]/g,
-                        id: string;
-
-                    if (isLatin) {
-                        let matches = _text.match(/[\-0-9a-zA-Z]+/g);
-                        id = matches ? matches.join("_") : _text.replace(re, "_");
-                    } else {
-                        id = _text.replace(re, "_");
-                    }
-
-                    id = trim(id, "_");
-
-                    title = `<a href="/docs/${version}/${_name}#${id}" title="${title}"`
-                        + ` style="padding-left: ${padding}px">${title}</a>`
-                        + (section.children ? '<i class="fa fa-angle-right"></i>' : '');
-
-                    return { title };
-                })
-            });
-        }
-
-        return categoryTree.sort((a, b) => a.order - b.order);
     }
 }

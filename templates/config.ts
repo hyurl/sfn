@@ -1,22 +1,20 @@
-import { SFNConfig, SRC_PATH, ROOT_PATH } from "sfn";
+import { SFNConfig, ROOT_PATH } from "sfn";
 import * as Session from "express-session";
 import * as sessionFileStore from "session-file-store";
 
 const FileStore = sessionFileStore(Session);
 const env = process.env;
 
-export const config: SFNConfig = {
-    lang: env.LANG || "en-US",
+export default <SFNConfig>{
+    lang: "en-US",
     statics: ["assets"],
-    controllers: env.CONTROLLERS ? env.CONTROLLERS.split(/,\s*/) : ["controllers"],
     hotReloading: true,
     server: {
         hostname: "localhost",
-        timeout: 120000, // 2 min.
-        autoStart: true,
         http: {
             type: <SFNConfig["server"]["http"]["type"]>env.HTTP_TYPE || "http",
             port: parseInt(env.HTTP_PORT) || 80,
+            timeout: 120000, // 2 min.
             options: null
         },
         websocket: {
@@ -26,7 +24,8 @@ export const config: SFNConfig = {
                 pingTimeout: 5000,
                 pingInterval: 5000
             },
-        }
+        },
+        rpc: {}
     },
     database: {
         type: env.DB_TYPE || "mysql",

@@ -1,14 +1,14 @@
 import serveStatic = require("serve-static");
-import { config } from "../bootstrap/load-config";
-import { app } from "../bootstrap/index";
 import startsWith = require("lodash/startsWith");
+import { config } from "../bootstrap/load-config";
+import { router } from "../bootstrap/index";
 import { resolve } from "path";
 import { SRC_PATH } from '../../init';
 import { Request } from '../tools/interfaces';
 
 if (Array.isArray(config.statics)) {
     config.statics.forEach(path => {
-        app.use(<any>serveStatic(resolve(SRC_PATH, path)));
+        router.use(<any>serveStatic(resolve(SRC_PATH, path)));
     });
 } else {
     for (let path in config.statics) {
@@ -16,7 +16,7 @@ if (Array.isArray(config.statics)) {
             _path = resolve(SRC_PATH, path),
             handle = serveStatic(_path, options);
 
-        app.use(async (req: Request, res, next) => {
+        router.use(async (req: Request, res, next) => {
             if (options.prefix) {
                 let prefix = typeof options.prefix == "string"
                     ? options.prefix

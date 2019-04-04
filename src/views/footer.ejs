@@ -4,7 +4,7 @@
     <p class="text-center">
         <span id="copyright">©
             <%= (new Date).getFullYear() %> hyurl
-            <a href="http://nodejs.org/">Node.js</a> 8.0+.
+            <a href="http://github.com/hyurl/sfn">SFN</a> <%= i18n("version") %>
         </span>
         <span id="license">Licensed under the
             <a target="_blank" href="http://spdx.org/licenses/MIT.html">MIT License</a>.
@@ -15,6 +15,10 @@
     </p>
 </footer>
 
+<script>
+    const PORT = parseInt("<%= app.config.server.http.port %>");
+</script>
+<script src="/js/socket.io.js"></script>
 <script src="/js/jquery.min.js"></script>
 <script src="/js/soft-loader.js"></script>
 <script src="/js/javascript.js"></script>

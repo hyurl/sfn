@@ -17,17 +17,21 @@ npm init
 to initiate your project, assume you have some knowledge of 
 [NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
-### Install TypeScript Compiler And Runtime
+### Prepare TypeScript Environment
 
 **SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
 own code should be as well.
 
-*The runtime [ts-node](https://github.com/TypeStrong/ts-node) is optional, only*
-*needed if you want to run your program without compiling.*
+```sh
+npm i -D typescript
+npm i -D @types/node
+```
+
+Optionally, you can install [ts-node](https://github.com/TypeStrong/ts-node) to
+run the program without compiling source code.
 
 ```sh
-npm i -g typescript
-npm i -g ts-node
+npm i -D ts-node
 ```
 
 ### Install PM2 (Optional)
@@ -64,19 +68,16 @@ sfn init
 
 **SFN** provides a demo, so you can now start server and see what will happen.
 
-If you have installed **ts-node**, use this command to start the project.
-
 ```sh
-ts-node src
-```
-
-Otherwise, compile the source code with command: `tsc`, then run the command:
-
-```sh
+tsc
 node dist
 ```
 
 And the server should be started in few seconds.
+
+```sh
+ts-node --files src # --files flag must be provided
+```
 
 If you have PM2 installed, you can use the following command to start the 
 application, and auto-scale according to the CPU numbers.
@@ -142,6 +143,13 @@ mkdir ./node_modules
 ln -s ./sfn ./node_modules/sfn # some modules require sfn in node_modules
 cd sfn
 npm i
+tsc
+node dist/doc-server # SFN 0.5.x uses separeated documentation service
+```
+
+And open a new terminal, use the following command to start the web server.
+
+```sh
 node dist
 ```
 

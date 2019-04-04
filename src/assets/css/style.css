@@ -7,7 +7,7 @@ body {
 
 pre,
 code {
-  font-family: monospace, consolas;
+  font-family: consolas, monospace;
   border-radius: 4px;
   overflow: auto;
 }
@@ -446,6 +446,7 @@ h6:hover svg {
   padding: 0 25px;
   overflow: auto;
   max-width: 100%;
+  min-height: 400px;
 }
 
 .markdown-content {

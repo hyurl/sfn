@@ -1,1 +1,3 @@
 import "sfn";
+
+app.serve();

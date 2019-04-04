@@ -1,10 +1,10 @@
 import { DB } from "modelar";
-import { app } from "../bootstrap/index";
+import { router } from "../bootstrap/index";
 import { config } from "../bootstrap/load-config";
 import { Request, Response } from "../tools/interfaces";
 import { realDB } from "../tools/symbols";
 
-app.use(async (req: Request, res: Response, next) => {
+router.use(async (req: Request, res: Response, next) => {
     Object.defineProperty(req, "db", {
         get(): DB {
             if (req[realDB] === undefined) {

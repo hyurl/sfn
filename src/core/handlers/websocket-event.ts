@@ -1,9 +1,8 @@
 import { ws } from "../bootstrap/index";
 import { SocketError } from "../tools/SocketError";
-import { WebSocket } from "../tools/interfaces";
+import { WebSocket, Session } from "../tools/interfaces";
 import { realDB, activeEvent } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { EventMap } from "../tools/EventMap";
 import { handleLog } from "./http-route";
 import { logRequest } from "./http-init";
 import initHandler from "./websocket-init";
@@ -11,9 +10,11 @@ import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
 import dbHandler from "./websocket-db";
 import authHandler from "./websocket-auth";
-import { getFuncParams } from "../tools/functions-inner";
+import { isOwnMethod } from "../tools/functions-inner";
 import last = require("lodash/last");
 import { isDevMode } from '../../init';
+import { eventMap } from '../tools/RouteMap';
+import { ThenableAsyncGenerator } from "thenable-generator";
 
 let importedNamesapces: string[] = [];
 type SocketEventInfo = {
@@ -35,10 +36,9 @@ export function tryImport(nsp: string) {
         .use(dbHandler)
         .use(authHandler)
         .on("connection", (socket: WebSocket) => {
-            for (let event in EventMap[nsp]) {
-                socket.removeAllListeners(event);
-                socket.on(event, (...data) => {
-                    handleEvent(socket, nsp, event, data);
+            for (let item of eventMap.values()) {
+                socket.on(item.route, (...data) => {
+                    handleEvent(eventMap.keyFor(item), socket, data);
                 });
             }
 
@@ -53,62 +53,76 @@ export function tryImport(nsp: string) {
         });
 }
 
-async function handleEvent(socket: WebSocket, nsp: string, event: string, data: any[]) {
-    let { Class, method } = EventMap[nsp][event],
+async function handleEvent(key: string, socket: WebSocket, data: any[]) {
+    let mod = eventMap.resolve(key),
+        methods = eventMap.methods(key),
+        { prefix: nsp, route: event } = eventMap.get(key),
         ctrl: WebSocketController = null,
-        info: SocketEventInfo = {
-            time: Date.now(),
-            event,
-            code: 200
-        };
+        initiated = false,
+        info: SocketEventInfo = { time: Date.now(), event, code: 200 };
 
     try {
         socket[activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
-        ctrl = new Class(socket);
+        ctrl = mod.create(socket);
 
-        // HACK, because the activeEvent stored in the socket object will be 
-        // frequently changed time to time a new event activated, so when the 
-        // first time access to `ctrl.event` properties, the active event will 
-        // be copied to the controller instance, so that no matter how it 
-        // changed, the instance will always access to the original event when 
-        // it was emitted.
-        ctrl.event;
+        for (let method of methods) {
+            if (!isOwnMethod(ctrl, method)) {
+                eventMap.del(key, method);
+                continue;
+            } else if (!initiated) {
+                // If the socket has been disconnected before calling the actual
+                // method, return immediately without running any checking 
+                // procedure, and don't call the method.
+                if (socket.disconnected || false === (await ctrl.before()))
+                    return;
 
-        // if the socket has been disconnected before calling the actual method, 
-        // return immediately without running any checking procedure, and don't 
-        // call the method.
-        if (socket.disconnected || false === (await ctrl.before())) return;
+                initiated = true;
+            }
 
-        let _data = await ctrl[method](...getArguments(ctrl, method, data));
+            let generator = new ThenableAsyncGenerator(ctrl[method](
+                ...getArguments(ctrl, method, data)
+            ));
+            let value: any, done: boolean;
 
-        // Send data to the client.
-        _data === undefined || socket.emit(event, _data);
+            // Fetch any data produced by the method, whether they are returned 
+            // or yielded.
+            while ({ value, done } = await generator.next()) {
+                // Send data to the client.
+                (value === undefined) || socket.emit(event, value);
 
-        finish(ctrl, info);
+                if (done) {
+                    break;
+                }
+            }
+        }
 
-        await ctrl.after();
+        if (initiated) {
+            await ctrl.after();
+            finish(ctrl, info);
+        }
     } catch (err) {
         ctrl = ctrl || new WebSocketController(socket);
 
-        await handleError(err, info, ctrl, method);
+        await handleError(err, info, ctrl);
     }
 }
 
 function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
-    let args: any[] = [],
-        fnParams = getFuncParams(ctrl[method]),
-        socketParams = ["websocket", "socket", "sock", "webSocket"];
+    let args: any[] = [];
 
     // Dependency Injection
-    // try to convert parameters to proper types according to the definition of 
+    // Try to convert parameters to proper types according to the definition of 
     // the method.
     let meta: any[] = Reflect.getMetadata("design:paramtypes", ctrl, method);
 
-    for (let i = 0; i < meta.length; i++) {
-        if (meta[i] == Object && socketParams.includes(fnParams[i]))
-            args[i] = ctrl.socket;
-        else
-            args[i] = data.shift();
+    for (let type of meta) {
+        if (type === WebSocket) {
+            args.push(ctrl.socket);
+        } else if (type === Session) {
+            args.push(ctrl.socket.session);
+        } else {
+            args.push(data.shift());
+        }
     }
 
     return args;
@@ -135,10 +149,10 @@ async function handleError(
 
     if (err instanceof SocketError) {
         _err = err;
-    } else if (err instanceof Error && isDevMode) {
-        _err = new SocketError(500, err.message);
+    } else if (err instanceof Error) {
+        _err = new SocketError(500, isDevMode ? err.message : null);
     } else {
-        _err = new SocketError(500);
+        _err = new SocketError(500, String(err));
     }
 
     info.code = _err.code;

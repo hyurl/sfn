@@ -1,7 +1,6 @@
 import { HttpController, Request, Response, route } from "sfn";
 
 export default class extends HttpController {
-
     @route.get("/{name}/")
     index(req: Request, res: Response) {
         // ...
