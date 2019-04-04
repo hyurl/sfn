@@ -1,7 +1,7 @@
 <!-- title: 视图; order: 6 -->
 # 基本概念
 
-自 0.5.x 版本起，SFN 启用了新的试图系统，并通过 [Alar](https://github.com/hyurl/alar)
+自 0.5.x 版本起，SFN 启用了新的视图系统，并通过 [Alar](https://github.com/hyurl/alar)
 框架来将模板作为动态模块以便实现自动加载和热重载。
 
 # 如何使用？
