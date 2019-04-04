@@ -129,5 +129,4 @@ app.rpc.connect("rpc-server-1");
 
 Then all the reference to the service will be redirected to this remote server,
 basically you don't have to change any existing code. But be aware that all the 
-properties will not be accessible remotely, and all methods will be wrapped in
-Promise.
+properties will not be accessible remotely, and all methods will be asynchronous.
