@@ -1,4 +1,6 @@
-.vscode/settings.json
+!.vscode/
+.vscode/*
+!.vscode/launch.json
 node_modules/
 logs/
 cache/
@@ -8,4 +10,3 @@ dist/*
 !dist/cli
 *.db
 *.tgz
-.reify*
