@@ -30,6 +30,13 @@ export const CacheOptions: CacheOptions = {
     gcInterval: 120000
 };
 
+export interface ResultMessage {
+    success: boolean;
+    code: number;
+    data?: any;
+    error?: string;
+}
+
 /**
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
  * `cache` that you can use to do real jobs, and since it is inherited from 
@@ -78,6 +85,25 @@ export class Service extends EventEmitter {
         (stmt === undefined) && (stmt = text);
 
         return util.format(stmt, ...replacements);
+    }
+
+    /** Returns a result indicates the operation is succeeded. */
+    success(data: any, code: number = 200): ResultMessage {
+        return {
+            success: true,
+            code,
+            data,
+        };
+    }
+
+    /** Returns a result indicates the operation is failed. */
+    error(msg: string | Error, code: number = 500): ResultMessage {
+        msg = msg instanceof Error ? msg.message : msg;
+        return {
+            success: false,
+            code,
+            error: msg
+        };
     }
 
     /** Gets a logger instance. */

@@ -19,25 +19,6 @@ export abstract class Controller extends Service {
         return <any>this.constructor;
     };
 
-    /** Sends successful action results to the response context. */
-    success(data: any, code: number = 200) {
-        return {
-            success: true,
-            code,
-            data,
-        };
-    }
-
-    /** Sends failed action results to the response context. */
-    error(msg: string | Error, code: number = 500) {
-        msg = msg instanceof Error ? msg.message : msg;
-        return {
-            success: false,
-            code,
-            error: msg
-        };
-    }
-
     /** This method will be auto-called before calling the actual method. */
     before(): void | false | Promise<void | false> { }
 
