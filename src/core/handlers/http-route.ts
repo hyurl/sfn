@@ -153,14 +153,10 @@ async function handleError(err: any, ctrl: HttpController, method?: string) {
 
     let _err: StatusException;
 
-    if (err instanceof StatusException) {
-        // Be friendly to EventSource.
-        _err = err.code == 405 && req.isEventSource ? new StatusException(204) : err;
-    } else if (err instanceof Error) {
-        _err = new StatusException(500, isDevMode ? err.message : null);
-    } else {
-        _err = new StatusException(500, String(err));
-    }
+    if (err instanceof StatusException && err.code === 405 && req.isEventSource)
+        _err = new StatusException(204); // Be friendly to EventSource.
+    else
+        _err = StatusException.from(err);
 
     if (req.accept == "application/json" || res.jsonp) {
         // Send JSON response.
@@ -339,7 +335,7 @@ function handleCsrfToken(ctrl: HttpController): void {
         });
     } else if (EFFECT_METHODS.includes(req.method)) {
         if (!req.headers.referer) {
-            // If no referer is sent, throw 403 error.
+            // If no referrer is sent, throw 403 error.
             throw new StatusException(403);
         }
 

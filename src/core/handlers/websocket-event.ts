@@ -12,7 +12,6 @@ import dbHandler from "./websocket-db";
 import authHandler from "./websocket-auth";
 import { isOwnMethod } from "../tools/functions-inner";
 import last = require("lodash/last");
-import { isDevMode } from '../../init';
 import { eventMap } from '../tools/RouteMap';
 import { ThenableAsyncGenerator } from "thenable-generator";
 
@@ -145,15 +144,7 @@ async function handleError(
     ctrl: WebSocketController,
     method?: string
 ) {
-    let _err: StatusException; // The original error.
-
-    if (err instanceof StatusException) {
-        _err = err;
-    } else if (err instanceof Error) {
-        _err = new StatusException(500, isDevMode ? err.message : null);
-    } else {
-        _err = new StatusException(500, String(err));
-    }
+    let _err = StatusException.from(err);
 
     info.code = _err.code;
 

@@ -1,4 +1,4 @@
-import { Service, ROOT_PATH, View } from "sfn";
+import { Service, ROOT_PATH, View, StatusException, isDevMode } from "sfn";
 import { readdir, readFile } from 'fs-extra';
 import { resolve as resolvePath } from "path";
 import { Section, constructMarkdown, renderHtml } from "outlining";
@@ -32,7 +32,14 @@ export default class DocumentationService extends Service {
         let dir = `${ROOT_PATH}/docs/${version.replace(/\./g, "")}/${lang}`;
         let filename = resolvePath(dir, name + ".md");
 
-        return (<ModuleProxy<View>>get(global, app.docs.resolve(filename))).instance().render();
+        try {
+            return (<ModuleProxy<View>>get(global, app.docs.resolve(filename)))
+                .instance()
+                .render();
+        } catch (e) {
+            let code = (<Error>e).message.includes("no such file") ? 404 : 500;
+            throw new StatusException(code, isDevMode ? e.message : null);
+        }
     }
 
     async getCategoryTree(version: string, lang: string) {

@@ -1,4 +1,4 @@
-import { route, HttpController, HttpError, ROOT_PATH, Request, Response, isDevMode } from "sfn";
+import { route, HttpController, ROOT_PATH, Request, Response } from "sfn";
 import { readdir } from 'fs-extra';
 
 export default class extends HttpController {
@@ -19,14 +19,9 @@ export default class extends HttpController {
     @route.get("/docs/:version/:name")
     @app.plugins.web.onView.decorate()
     async showContents(req: Request, version: string, name: string) {
-        try {
-            let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
-            let content = await app.services.docs.instance().getContent(version, this.lang, name);
+        let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
+        let content = await app.services.docs.instance().getContent(version, this.lang, name);
 
-            return req.xhr ? content : this.view("docs", { sideMenu, content });
-        } catch (e) {
-            let code = (<Error>e).message.includes("no such file") ? 404 : 500;
-            throw new HttpError(code, isDevMode ? e.message : null);
-        }
+        return req.xhr ? content : this.view("docs", { sideMenu, content });
     }
 }
