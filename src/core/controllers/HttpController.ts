@@ -5,7 +5,7 @@ import { SRC_PATH } from "../../init";
 import { config } from "../bootstrap/load-config";
 import { Controller } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
-import { HttpError } from "../tools/HttpError";
+import { StatusException } from "../tools/StatusException";
 import { UploadOptions } from "../tools/upload";
 import get = require('lodash/get');
 
@@ -108,7 +108,7 @@ export class HttpController extends Controller {
             return view.instance().render(vars);
         } catch (err) {
             if (err instanceof TypeError)
-                throw new HttpError(404);
+                throw new StatusException(404);
             else
                 throw err;
         }
@@ -168,11 +168,15 @@ export class HttpController extends Controller {
 
     /**
      * By default, the framework will send a view file according to the error 
-     * code, and only pass the `err: HttpError` object to the template, it may 
-     * not be suitable for complicated needs. For such a reason, the framework 
-     * allows you to customize the error view handler by rewriting this method.
+     * code, and only pass the `err: StatusException` object to the template, it
+     * may not be suitable for complicated needs. For such a reason, the 
+     * framework allows you to customize the error view handler by rewriting 
+     * this method.
      */
-    static httpErrorView(err: HttpError, instance: HttpController): string | Promise<string> {
+    static httpErrorView(
+        err: StatusException,
+        instance: HttpController
+    ): string | Promise<string> {
         return instance.view(String(err.code), { err });
     }
 }

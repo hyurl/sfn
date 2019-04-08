@@ -1,5 +1,5 @@
 import { ws } from "../bootstrap/index";
-import { SocketError } from "../tools/SocketError";
+import { StatusException } from "../tools/StatusException";
 import { WebSocket, Session } from "../tools/interfaces";
 import { realDB, activeEvent } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
@@ -145,14 +145,14 @@ async function handleError(
     ctrl: WebSocketController,
     method?: string
 ) {
-    let _err: SocketError; // The original error.
+    let _err: StatusException; // The original error.
 
-    if (err instanceof SocketError) {
+    if (err instanceof StatusException) {
         _err = err;
     } else if (err instanceof Error) {
-        _err = new SocketError(500, isDevMode ? err.message : null);
+        _err = new StatusException(500, isDevMode ? err.message : null);
     } else {
-        _err = new SocketError(500, String(err));
+        _err = new StatusException(500, String(err));
     }
 
     info.code = _err.code;

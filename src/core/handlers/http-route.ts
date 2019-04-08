@@ -6,7 +6,7 @@ import { RouteHandler } from "webium";
 import { router } from "../bootstrap/index";
 import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
-import { HttpError } from "../tools/HttpError";
+import { StatusException } from "../tools/StatusException";
 import { randStr } from "../tools/functions";
 import { callsiteLog, isOwnMethod } from "../tools/functions-inner";
 import { Request, Response, Session } from "../tools/interfaces";
@@ -29,15 +29,15 @@ router.onerror = function onerror(err: any, req: Request, res: Response) {
     let ctrl = new HttpController(req, res)
 
     if (res.statusCode === 404)
-        err = new HttpError(404);
+        err = new StatusException(404);
     else if (res.statusCode === 405)
-        err = new HttpError(405);
+        err = new StatusException(405);
     else if (err instanceof Error)
-        err = new HttpError(500, err.message);
+        err = new StatusException(500, err.message);
     else if (typeof err === "string")
-        err = new HttpError(500, err);
+        err = new StatusException(500, err);
     else
-        err = new HttpError(500);
+        err = new StatusException(500);
 
     handleError(err, ctrl, req.method + " " + req.url);
 }
@@ -63,7 +63,7 @@ export function getRouteHandler(key: string): RouteHandler {
                 } else if (!initiated) {
                     // Handle CORS.
                     if (!cors(<any>ctrl.cors, req, res)) {
-                        throw new HttpError(410);
+                        throw new StatusException(410);
                     } else if (req.method === "OPTIONS") {
                         // cors will set proper headers for OPTIONS
                         res.end();
@@ -112,7 +112,7 @@ export function getRouteHandler(key: string): RouteHandler {
 
 export function handleLog(err: Error, ctrl: Controller, method?: string) {
     // Do not log http errors except they are server-side errors. 
-    if (err instanceof HttpError && err.code < 500) return;
+    if (err instanceof StatusException && err.code < 500) return;
 
     if (isDevMode) {
         callsiteLog(err);
@@ -151,15 +151,15 @@ async function handleError(err: any, ctrl: HttpController, method?: string) {
     // If the response hasn't been sent, try to response the error in a proper 
     // form to the client.
 
-    let _err: HttpError;
+    let _err: StatusException;
 
-    if (err instanceof HttpError) {
+    if (err instanceof StatusException) {
         // Be friendly to EventSource.
-        _err = err.code == 405 && req.isEventSource ? new HttpError(204) : err;
+        _err = err.code == 405 && req.isEventSource ? new StatusException(204) : err;
     } else if (err instanceof Error) {
-        _err = new HttpError(500, isDevMode ? err.message : null);
+        _err = new StatusException(500, isDevMode ? err.message : null);
     } else {
-        _err = new HttpError(500, String(err));
+        _err = new StatusException(500, String(err));
     }
 
     if (req.accept == "application/json" || res.jsonp) {
@@ -222,7 +222,7 @@ async function getArguments(ctrl: HttpController, method: string) {
                     let id = <number>number.parse(req.params.id);
 
                     if (!id || isNaN(id))
-                        throw new HttpError(400);
+                        throw new StatusException(400);
 
                     args.push(await (<typeof Model>type).use(req.db).get(id));
                 } catch (e) {
@@ -340,7 +340,7 @@ function handleCsrfToken(ctrl: HttpController): void {
     } else if (EFFECT_METHODS.includes(req.method)) {
         if (!req.headers.referer) {
             // If no referer is sent, throw 403 error.
-            throw new HttpError(403);
+            throw new StatusException(403);
         }
 
         let ref: string = <string>req.headers.referer,
@@ -351,7 +351,7 @@ function handleCsrfToken(ctrl: HttpController): void {
             && req.query["x-csrf-token"] != token
             && req.body["x-csrf-token"] != token)) {
             // If no token or none is matched, throw 403 error.
-            throw new HttpError(403);
+            throw new StatusException(403);
         } else {
             // Make a reference to the token.
             Object.defineProperty(req, "csrfToken", {

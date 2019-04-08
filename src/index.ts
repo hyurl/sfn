@@ -16,8 +16,7 @@ export * from "sfn-xss";
 export * from "./init";
 export * from "./config";
 export * from "./core/tools/interfaces";
-export * from "./core/tools/HttpError";
-export * from "./core/tools/SocketError";
+export * from "./core/tools/StatusException";
 
 // load user config before loading subsequent modules
 export { config } from "./core/bootstrap/load-config";

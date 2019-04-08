@@ -3,8 +3,7 @@ import { App, RouteHandler } from "webium";
 import { interceptAsync } from 'function-intercepter';
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { HttpError } from './HttpError';
-import { SocketError } from './SocketError';
+import { StatusException } from './StatusException';
 import { routeMap, eventMap } from './RouteMap';
 import { resolveModulePath } from './functions-inner';
 import {
@@ -54,15 +53,11 @@ export function injectCsrfToken(html: string, token: string): string {
 /** Requires authentication when calling the method. */
 export const requireAuth: ControllerDecorator = interceptAsync().before(function () {
     if (!this.authorized) {
-        if (this instanceof HttpController) {
-            if (this.fallbackTo) {
-                this.res.redirect(this.fallbackTo, 302);
-                return false;
-            } else {
-                throw new HttpError(401);
-            }
+        if (this instanceof HttpController && this.fallbackTo) {
+            this.res.redirect(this.fallbackTo, 302);
+            return false;
         } else {
-            throw new SocketError(401);
+            throw new StatusException(401);
         }
     }
 });
