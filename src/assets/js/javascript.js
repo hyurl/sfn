@@ -266,7 +266,7 @@ $(function () {
     // });
 
 
-    var socket = window.socket = io.connect("localhost:" + PORT);
+    var socket = window.socket = io.connect(location.host);
     socket.on("greeting", function (data) {
         console.log("Socket:", data);
     }).on("repeat-what-I-said", function (data) {
