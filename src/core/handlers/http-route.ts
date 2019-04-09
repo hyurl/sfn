@@ -76,7 +76,7 @@ export function getRouteHandler(key: string): RouteHandler {
                     initiated = true;
 
                     // Handle GZip.
-                    res.gzip = req.encoding == "gzip" && ctrl.gzip;
+                    res.gzip = req.encodings.includes("gzip") && ctrl.gzip;
 
                     // Handle jsonp.
                     if (req.method == "GET" && ctrl.jsonp && req.query[ctrl.jsonp]) {
