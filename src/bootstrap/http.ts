@@ -16,3 +16,12 @@ app.config.session.store = new FileStore({
 HttpController.httpErrorView = function (err, instance) {
     return instance.view("error", { err, port: app.config.server.http.port });
 }
+
+// correct langauge name
+app.router.use(async (req, res) => {
+    let names = req.lang.split("-");
+
+    if (names.length > 1) {
+        req.lang = names[0] + "-" + names[1].toUpperCase();
+    }
+});
