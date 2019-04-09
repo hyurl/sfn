@@ -1,8 +1,3 @@
-import { ROOT_PATH } from "sfn";
+import "sfn";
 
-(async () => {
-    await app.rpc.serve("logger-server");
-    await app.services.logger.instance().setUp({
-        filename: ROOT_PATH + "/logs/sfn.log"
-    });
-})();
+app.rpc.serve("logger-server");

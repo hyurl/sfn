@@ -1,15 +1,14 @@
 import merge = require("lodash/merge");
 import startsWith = require("lodash/startsWith");
 import { APP_PATH } from "../../init";
-import { config, SFNConfig } from "../../config";
-import * as Mail from "sfn-mail";
+import config from "../../config";
 import { moduleExists, createImport } from '../tools/internal/module';
 
 export { config };
 
 declare global {
     namespace app {
-        const config: SFNConfig;
+        const config: Config;
     }
 }
 
@@ -32,5 +31,3 @@ let { server: { hostname, http: { port, type } } } = config,
 
 /** The base URL of the server (calculated according to the config). */
 export const baseUrl = (type == "http2" ? "https" : type) + "://" + host;
-
-Mail.init(config.mail); // initiate mail configurations

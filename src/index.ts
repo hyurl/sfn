@@ -6,12 +6,12 @@ let isMain = process.mainModule.filename === __filename;
 !isTsNode && require("source-map-support/register");
 
 import "reflect-metadata";
-import * as Mail from "sfn-mail";
-import * as Logger from "sfn-logger";
-import * as SSE from "sfn-sse";
+// import * as Mail from "sfn-mail";
+// import * as Logger from "sfn-logger";
+// import * as SSE from "sfn-sse";
 
-export { Mail, Logger, SSE };
-export { Cookie, CookieOptions } from "sfn-cookie";
+// export { Mail, Logger, SSE };
+// export { Cookie, CookieOptions } from "sfn-cookie";
 export * from "sfn-xss";
 export * from "./init";
 export * from "./config";

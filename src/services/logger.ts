@@ -2,23 +2,17 @@ import * as Logger from "sfn-logger";
 
 declare global {
     namespace app {
+        interface Config {
+            logger?: Logger.Options
+        }
         namespace services {
             const logger: ModuleProxy<LoggerService>;
         }
     }
 }
 
-
 export default class LoggerService {
     protected logger: Logger = null;
-
-    setUp(options?: Logger.Options) {
-        this.logger = new Logger(Object.assign({}, Logger.Options, {
-            ttl: 1000,
-            fileSize: 1024 * 1024 * 2,
-            trace: false
-        }, options));
-    }
 
     debug(...msg: any[]) {
         this.logger.debug(...msg);
@@ -38,5 +32,19 @@ export default class LoggerService {
 
     warn(...msg: any[]) {
         this.logger.warn(...msg);
+    }
+
+    static getInstance() {
+        let service = new this;
+
+        service.logger = new Logger({
+            filename: app.ROOT_PATH + "/logs/sfn.log",
+            ttl: 1000,
+            fileSize: 1024 * 1024 * 2,
+            trace: false,
+            ...app.config.logger
+        });
+
+        return service;
     }
 }
