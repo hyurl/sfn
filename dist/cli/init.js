@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const fs = require("fs-extra");
 const init_1 = require("../init");
-const functions_inner_1 = require("../core/tools/functions-inner");
+const color_1 = require("../core/tools/internal/color");
 let sfnd = path.normalize(__dirname + "/../../..");
 if (process.cwd() != sfnd)
     process.exit();
-console.log(functions_inner_1.grey `Initiating...`);
+console.log(color_1.grey `Initiating...`);
 try {
     let tplDir = `${sfnd}/templates`, bootstrap = `${init_1.SRC_PATH}/bootstrap`, assetsDir = `${init_1.SRC_PATH}/assets`, ctrlDir = `${init_1.SRC_PATH}/controllers`, localeDir = `${init_1.SRC_PATH}/locales`, viewDir = `${init_1.SRC_PATH}/views`, modelDir = `${init_1.SRC_PATH}/models`, scheduleDir = `${init_1.SRC_PATH}/schedules`, serviceDir = `${init_1.SRC_PATH}/services`, configFile = `${init_1.SRC_PATH}/config.ts`, indexFile = `${init_1.SRC_PATH}/index.ts`, envFile = `${init_1.ROOT_PATH}/.env`, tsconfig = `${init_1.SRC_PATH}/tsconfig.json`;
     if (!fs.existsSync(tsconfig))
@@ -53,15 +53,15 @@ try {
                     type: "node",
                     request: "launch",
                     protocol: "auto",
-                    name: "Start Web Server",
+                    name: "Web Server",
                     program: "${workspaceFolder}/dist/index"
                 }
             ]
         }, { spaces: 4 });
     }
-    console.log(functions_inner_1.green `Initiation succeed!`);
+    console.log(color_1.green `Initiation succeed!`);
 }
 catch (err) {
-    console.log(functions_inner_1.red `Initiation failed!`);
+    console.log(color_1.red `Initiation failed!`);
 }
 //# sourceMappingURL=init.js.map

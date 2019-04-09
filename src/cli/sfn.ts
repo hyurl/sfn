@@ -10,12 +10,8 @@ import cloneDeep = require('lodash/cloneDeep');
 import get = require('lodash/get');
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { config } from "../core/bootstrap/load-config";
-import {
-    green,
-    red,
-    moduleExists,
-    createImport
-} from "../core/tools/functions-inner";
+import { green, red } from "../core/tools/internal/color";
+import { moduleExists, createImport } from "../core/tools/internal/module";
 import { Locale } from '../core/tools/interfaces';
 
 const tryImport = createImport(require);

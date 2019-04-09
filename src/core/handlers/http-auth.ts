@@ -1,6 +1,6 @@
 import { router } from "../bootstrap/index";
 import { Request, Response } from "../tools/interfaces";
-import { importUser } from "../tools/functions-inner";
+import { importUser } from "../tools/internal/module";
 
 router.use(async (req: Request, res: Response, next) => {
     req.user = null;

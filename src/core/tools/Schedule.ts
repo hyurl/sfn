@@ -1,6 +1,6 @@
 import hash = require("string-hash");
 import { ROOT_PATH } from '../../init';
-import { resolveModulePath } from './functions-inner';
+import { traceModulePath } from './internal/module';
 
 export interface TaskOptions {
     /** 
@@ -35,7 +35,7 @@ export class Schedule {
      */
     create(options: TaskOptions, handler: Function): number {
         let { salt, start, end, repeat } = options;
-        let taskId = hash(app.serverId + resolveModulePath(ROOT_PATH) + salt);
+        let taskId = hash(app.serverId + traceModulePath(ROOT_PATH) + salt);
         let event = String(taskId);
 
         app.message.unsubscribe(event);

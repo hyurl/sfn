@@ -1,6 +1,6 @@
 import { createServer, STATUS_CODES } from "http";
 import { config } from "../bootstrap/load-config";
-import { red } from "../tools/functions-inner";
+import { red } from "../tools/internal/color";
 import { version } from "../../init";
 
 let server = config.server.http;

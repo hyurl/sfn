@@ -3,17 +3,17 @@ import { StatusException } from "../tools/StatusException";
 import { WebSocket, Session } from "../tools/interfaces";
 import { realDB, activeEvent } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { handleLog } from "./http-route";
 import { logRequest } from "./http-init";
 import initHandler from "./websocket-init";
 import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
 import dbHandler from "./websocket-db";
 import authHandler from "./websocket-auth";
-import { isOwnMethod } from "../tools/functions-inner";
-import last = require("lodash/last");
+import { isOwnMethod } from "../tools/internal";
+import { tryLogError } from "../tools/internal/error";
 import { eventMap } from '../tools/RouteMap';
 import { ThenableAsyncGenerator } from "thenable-generator";
+import last = require("lodash/last");
 
 let importedNamesapces: string[] = [];
 type SocketEventInfo = {
@@ -47,7 +47,7 @@ export function tryImport(nsp: string) {
                     time: Date.now(),
                     event: "",
                     code: 500
-                }, ctrl, socket.protocol.toUpperCase());
+                }, ctrl, socket.protocol.toUpperCase() + " id: " + socket.id);
             });
         });
 }
@@ -142,7 +142,7 @@ async function handleError(
     err: any,
     info: SocketEventInfo,
     ctrl: WebSocketController,
-    method?: string
+    stack?: string
 ) {
     let _err = StatusException.from(err);
 
@@ -153,6 +153,6 @@ async function handleError(
         ctrl.socket.emit(info.event, ctrl.error(_err.message, _err.code));
     }
 
-    handleLog(err, ctrl, method);
+    tryLogError(err, stack);
     finish(ctrl, info);
 }

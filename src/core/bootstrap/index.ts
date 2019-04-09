@@ -6,14 +6,14 @@ import * as SocketIO from "socket.io";
 import { SSE } from "sfn-sse";
 import channel from "ipchannel";
 import { APP_PATH, isCli, isWebServer, isTsNode } from "../../init";
-import { config, baseUrl } from "./load-config";
 import {
-    red,
     moduleExists,
     createImport,
-    importDirectory,
-    serveTip
-} from "../tools/functions-inner";
+    importDirectory
+} from "../tools/internal/module";
+import { red } from "../tools/internal/color";
+import { serveTip } from "../tools/internal";
+import { config, baseUrl } from "./load-config";
 import "./load-controllers";
 import "./load-services";
 import "./load-models";
@@ -67,8 +67,8 @@ let hostnames = config.server.hostname,
 app.serve = function serve() {
     return new Promise((resolve, reject) => {
         if (!isWebServer) {
-            let entry = "<APP_PATH>/index" + (isTsNode ? ".ts" : ".js");
-            throw new Error(`The web server entry file must be ${entry}`);
+            let entry = `${APP_PATH}/index` + (isTsNode ? ".ts" : ".js");
+            throw new Error(`The web server entry file must be '${entry}'`);
         }
 
         // load HTTP middleware

@@ -3,7 +3,7 @@ import { SSE } from "sfn-sse";
 import { router } from "../bootstrap/index";
 import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
-import { grey, red } from "../tools/functions-inner";
+import { grey, red } from "../tools/internal/color";
 import truncate = require("lodash/truncate");
 
 const reqLogged = Symbol("reqLogged");
@@ -44,7 +44,7 @@ router.use(async (req: Request, res: Response, next) => {
 });
 
 export function logRequest(reqTime: number, type: string, code: number, url: string): void {
-    if (isDevMode) {
+    if (isDevMode || code >= 500) {
         // dev mode log out request info.
         var cost: number | string = Date.now() - reqTime,
             codeStr = code.toString(),
@@ -72,7 +72,9 @@ export function logRequest(reqTime: number, type: string, code: number, url: str
 
 function getDevLogger(req: Request, res: Response) {
     return () => {
-        if (res[reqLogged]) return;
+        if (res[reqLogged])
+            return;
+
         res[reqLogged] = true;
         let type = req.isEventSource ? "SSE" : req.method;
         logRequest(req.time, type, res.statusCode, req.shortUrl);

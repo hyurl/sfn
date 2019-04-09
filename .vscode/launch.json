@@ -8,21 +8,28 @@
             "type": "node",
             "request": "launch",
             "protocol": "auto",
-            "name": "Start Web Server",
+            "name": "Web Server",
             "program": "${workspaceFolder}/dist/index"
         },
         {
             "type": "node",
             "request": "launch",
             "protocol": "auto",
-            "name": "Start Doc Server",
+            "name": "Doc Server",
             "program": "${workspaceFolder}/dist/doc-server"
         },
         {
             "type": "node",
             "request": "launch",
             "protocol": "auto",
-            "name": "Start Schedule Server",
+            "name": "Logger Server",
+            "program": "${workspaceFolder}/dist/logger-server"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "protocol": "auto",
+            "name": "Schedule Server",
             "program": "${workspaceFolder}/dist/schedule-server"
         }
     ]

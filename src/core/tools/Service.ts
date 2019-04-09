@@ -13,6 +13,7 @@ import { Locale } from './interfaces';
 
 injectable(DB);
 
+/** @deprecated */
 export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
     ttl: 1000,
     filename: ROOT_PATH + "/logs/sfn.log",
@@ -20,10 +21,12 @@ export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
     trace: false
 });
 
+/** @deprecated */
 export interface CacheOptions extends StoreOptions {
     name: string
 }
 
+/** @deprecated */
 export const CacheOptions: CacheOptions = {
     name: "sfn",
     path: ROOT_PATH + "/cache",
@@ -47,9 +50,10 @@ export interface ResultMessage {
 export class Service extends EventEmitter {
     /** The language of the current service. */
     lang: string = config.lang;
-    /** Configurations for the logger in this instance. */
+
+    /** @deprecated Configurations for the logger in this instance. */
     logOptions: Logger.Options = Object.assign({}, LogOptions);
-    /** Configurations for the logger in this instance. */
+    /** @deprecated Configurations for the logger in this instance. */
     cacheOptions: CacheOptions = Object.assign({}, CacheOptions);
 
     static readonly Loggers: { [filename: string]: Logger } = {};
@@ -106,7 +110,7 @@ export class Service extends EventEmitter {
         };
     }
 
-    /** Gets a logger instance. */
+    /** @deprecated Gets a logger instance. */
     get logger(): Logger {
         let filename = this.logOptions.filename || LogOptions.filename;
 
@@ -118,7 +122,7 @@ export class Service extends EventEmitter {
         return Service.Loggers[filename];
     }
 
-    /** Gets a cache instance. */
+    /** @deprecated Gets a cache instance. */
     get cache(): Storage {
         let { path: dirname, name } = this.cacheOptions;
         let filename = path.resolve(dirname, name + ".db");

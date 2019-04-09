@@ -11,5 +11,5 @@ declare global {
 }
 
 app.plugins.web.onView.bind(async (req) => {
-    app.services.base.instance().logger.log(`Client IP: ${req.ip}, URL: ${req.url}`);
+    app.services.logger.instance().log(`Client IP: ${req.ip}, URL: ${req.url}`);
 });

@@ -12,8 +12,9 @@ const cloneDeep = require("lodash/cloneDeep");
 const get = require("lodash/get");
 const init_1 = require("../init");
 const load_config_1 = require("../core/bootstrap/load-config");
-const functions_inner_1 = require("../core/tools/functions-inner");
-const tryImport = functions_inner_1.createImport(require);
+const color_1 = require("../core/tools/internal/color");
+const module_1 = require("../core/tools/internal/module");
+const tryImport = module_1.createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
 program.description("create new controllers, models. etc.")
@@ -38,7 +39,7 @@ program.command("init")
     process.exit();
 });
 let cliBootstrap = init_1.APP_PATH + "/bootstrap/cli";
-functions_inner_1.moduleExists(cliBootstrap) && tryImport(cliBootstrap);
+module_1.moduleExists(cliBootstrap) && tryImport(cliBootstrap);
 program.parse(process.argv);
 function outputFile(filename, data, type) {
     filename = path.normalize(filename);
@@ -50,7 +51,7 @@ function outputFile(filename, data, type) {
         fs.ensureDirSync(dir);
     }
     fs.writeFileSync(filename, data);
-    console.log(functions_inner_1.green `${type} '${filename}' created.`);
+    console.log(color_1.green `${type} '${filename}' created.`);
     process.exit();
 }
 function lastChar(str) {
@@ -114,7 +115,7 @@ try {
     }
 }
 catch (err) {
-    console.log(functions_inner_1.red `${err.toString()}`);
+    console.log(color_1.red `${err.toString()}`);
     process.exit();
 }
 //# sourceMappingURL=sfn.js.map

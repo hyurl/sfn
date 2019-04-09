@@ -2,7 +2,7 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import { SRC_PATH, ROOT_PATH } from "../init";
-import { red, green, grey } from "../core/tools/functions-inner";
+import { red, green, grey } from "../core/tools/internal/color";
 
 let sfnd = path.normalize(__dirname + "/../../..");
 
@@ -85,7 +85,7 @@ try {
                     type: "node",
                     request: "launch",
                     protocol: "auto",
-                    name: "Start Web Server",
+                    name: "Web Server",
                     program: "${workspaceFolder}/dist/index"
                 }
             ]

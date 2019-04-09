@@ -4,14 +4,13 @@ import values = require("lodash/values");
 import { Model } from 'modelar';
 import { RouteHandler } from "webium";
 import { router } from "../bootstrap/index";
-import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { StatusException } from "../tools/StatusException";
 import { randStr } from "../tools/functions";
-import { callsiteLog, isOwnMethod } from "../tools/functions-inner";
+import { isOwnMethod } from "../tools/internal";
+import { tryLogError } from "../tools/internal/error";
 import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
-import { isDevMode } from '../../init';
 import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
 import isIteratorLike = require("is-iterator-like");
@@ -39,7 +38,7 @@ router.onerror = function onerror(err: any, req: Request, res: Response) {
     else
         err = new StatusException(500);
 
-    handleError(err, ctrl, req.method + " " + req.url);
+    handleError(err, ctrl, req.method + " " + req.shortUrl);
 }
 
 export function getRouteHandler(key: string): RouteHandler {
@@ -50,7 +49,7 @@ export function getRouteHandler(key: string): RouteHandler {
             initiated = false;
 
         res.on("error", (err) => {
-            handleLog(err, ctrl);
+            tryLogError(err, req.method + " " + req.shortUrl);
         });
 
         try {
@@ -110,43 +109,17 @@ export function getRouteHandler(key: string): RouteHandler {
     }
 }
 
-export function handleLog(err: Error, ctrl: Controller, method?: string) {
-    // Do not log http errors except they are server-side errors. 
-    if (err instanceof StatusException && err.code < 500) return;
-
-    if (isDevMode) {
-        callsiteLog(err);
-    } else {
-        // Log the error to a file.
-        let msg = err.toString(),
-            stack: string;
-
-        if (method && method.indexOf(" ") > 0) {
-            stack = method;
-        } else {
-            let i = err.stack.indexOf("\n") + 1;
-
-            stack = (err.stack.slice(i, err.stack.indexOf("\n", i))).trim();
-            method && (stack = stack.replace("<anonymous>", method));
-            stack = stack.replace("_1", "").slice(3);
-        }
-
-        ctrl.logger.hackTrace(stack);
-        ctrl.logger.error(msg);
-    }
-}
-
-function handleFinish(err: Error, ctrl: HttpController, method: string) {
-    handleLog(err, ctrl, method);
+function handleFinish(err: Error, ctrl: HttpController, stack: string) {
+    tryLogError(err, stack);
     finish(ctrl);
 }
 
-async function handleError(err: any, ctrl: HttpController, method?: string) {
+async function handleError(err: any, ctrl: HttpController, stack?: string) {
     let { req, res } = ctrl;
 
     // If the response is has already been sent, handle finish immediately.
     if (res.sent)
-        return handleFinish(err, ctrl, method);
+        return handleFinish(err, ctrl, stack);
 
     // If the response hasn't been sent, try to response the error in a proper 
     // form to the client.
@@ -178,7 +151,7 @@ async function handleError(err: any, ctrl: HttpController, method?: string) {
         }
     }
 
-    handleFinish(err, ctrl, method);
+    handleFinish(err, ctrl, stack);
 }
 
 async function getArguments(ctrl: HttpController, method: string) {
@@ -287,8 +260,10 @@ async function handleIteratorResponse(
 
         if (req.isEventSource) {
             sse.send(value);
-        } else {
+        } else if (Buffer.isBuffer(value)) {
             res.write(value);
+        } else {
+            res.write(String(value));
         }
     }
 }

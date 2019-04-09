@@ -1,6 +1,7 @@
 import { RpcServer, RpcClient } from "alar";
 import { config } from "./load-config";
-import { green, serveTip } from "../tools/functions-inner";
+import { serveTip } from "../tools/internal";
+import { green } from "../tools/internal/color";
 
 declare global {
     namespace app {

@@ -1,6 +1,6 @@
 import { isCli } from '../../init';
 import { config } from "./load-config";
-import { createImport } from '../tools/functions-inner';
+import { createImport } from '../tools/internal/module';
 
 const tryImport = createImport(require);
 

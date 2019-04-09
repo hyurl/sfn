@@ -5,7 +5,7 @@ import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { StatusException } from './StatusException';
 import { routeMap, eventMap } from './RouteMap';
-import { resolveModulePath } from './functions-inner';
+import { traceModulePath } from './internal/module';
 import {
     ControllerDecorator,
     WebSocketDecorator,
@@ -69,7 +69,7 @@ let router: App,
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketDecorator {
     return (proto: WebSocketController, prop: string) => {
-        let modPath = resolveModulePath(app.controllers.path);
+        let modPath = traceModulePath(app.controllers.path);
 
         if (!modPath)
             return;
@@ -99,7 +99,7 @@ export function route(path: string): HttpDecorator;
 export function route(method: string, path: string): HttpDecorator;
 export function route(method: string, path?: string): HttpDecorator {
     return (proto: HttpController, prop: string) => {
-        let modPath = resolveModulePath(app.controllers.path);
+        let modPath = traceModulePath(app.controllers.path);
 
         if (!modPath)
             return;

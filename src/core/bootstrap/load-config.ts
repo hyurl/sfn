@@ -3,7 +3,7 @@ import startsWith = require("lodash/startsWith");
 import { APP_PATH } from "../../init";
 import { config, SFNConfig } from "../../config";
 import * as Mail from "sfn-mail";
-import { moduleExists, createImport } from '../tools/functions-inner';
+import { moduleExists, createImport } from '../tools/internal/module';
 
 export { config };
 

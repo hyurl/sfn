@@ -1,7 +1,7 @@
 import * as alar from "alar";
 import { interceptAsync } from 'function-intercepter';
 import { APP_PATH } from '../../init';
-import { resolveModulePath, createImport } from './functions-inner';
+import { createImport, traceModulePath } from './internal/module';
 
 const tryImport = createImport(require);
 
@@ -15,7 +15,7 @@ export class Plugin<I = void, O = void> extends alar.ModuleProxy {
 
     /** Binds a handler to the plugin. */
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
-        let path = resolveModulePath(this.path);
+        let path = traceModulePath(this.path);
         let name = this.resolve(path);
 
         if (!Plugin.Container[name]) {
