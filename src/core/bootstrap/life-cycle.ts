@@ -2,7 +2,6 @@ import { DB } from 'modelar';
 import { SSE } from 'sfn-sse';
 import { Plugin } from '../tools/Plugin';
 import { sleep } from '../tools/functions';
-import { Service } from '../tools/Service';
 
 declare global {
     namespace app {
@@ -29,24 +28,10 @@ process.on("SIGINT", async () => {
     }
 });
 
-// Try to sync any cached data hosted by the default cache service.
-app.plugins.lifeCycle.startup.bind(async () => {
-    try {
-        await app.services.base.instance(app.services.local).cache.sync();
-    } catch (e) { }
-});
-
 // Try to close all database connections.
 app.plugins.lifeCycle.shutdown.bind(async () => {
     DB.close();
     await sleep(500);
-});
-
-// Try to close all caches.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    for (let filename in Service.Caches) {
-        await Service.Caches[filename].close();
-    }
 });
 
 // Try to close http server.

@@ -110,11 +110,14 @@ app.serve = function serve() {
                     await importDirectory(app.controllers.path);
                 }
 
-                let finish = () => {
-                    // Set the server ID.
+                let finish = async () => {
+                    // set the server ID
                     app.serverId = "web-server-" + channel.pid;
 
                     watchWebModules();
+
+                    // invoke all start-up plugins.
+                    await app.plugins.lifeCycle.startup.invoke();
 
                     if (typeof process.send == "function") {
                         // notify PM2 that the service is available.
@@ -127,7 +130,7 @@ app.serve = function serve() {
                 }
 
                 if (channel.pid) {
-                    finish();
+                    await finish();
                 } else {
                     channel.on("connect", finish);
                 }
@@ -182,6 +185,5 @@ if (!isCli) {
     // load plugins
     pathExists(app.plugins.path).then(async (exists) => {
         exists && (await importDirectory(app.plugins.path));
-        await app.plugins.lifeCycle.startup.invoke();
     });
 }

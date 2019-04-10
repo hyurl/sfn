@@ -43,8 +43,13 @@ app.rpc = {
 
         app.rpc.server = service;
         app.serverId = serverId;
+
+        // invoke all start-up plugins.
+        await app.plugins.lifeCycle.startup.invoke();
+
         console.log(serveTip("RPC", serverId, service.dsn));
 
+        // self-connect after serving.
         await app.rpc.connect(serverId);
     },
     async connect(serverId: string, defer = false) {

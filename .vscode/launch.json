@@ -31,6 +31,13 @@
             "protocol": "auto",
             "name": "Schedule Server",
             "program": "${workspaceFolder}/dist/schedule-server"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "protocol": "auto",
+            "name": "Cache Server",
+            "program": "${workspaceFolder}/dist/cache-server"
         }
     ]
 }

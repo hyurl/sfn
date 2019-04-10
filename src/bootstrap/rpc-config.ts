@@ -15,5 +15,10 @@ app.config.server.rpc = {
         host: "localhost",
         port: 4003,
         modules: [app.services.schedule]
+    },
+    "cache-server": {
+        host: "localhost",
+        port: 4004,
+        modules: [app.services.cache]
     }
 };

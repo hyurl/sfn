@@ -14,24 +14,30 @@ declare global {
 export default class LoggerService {
     protected logger: Logger = null;
 
-    debug(...msg: any[]) {
+    async debug(...msg: any[]) {
         this.logger.debug(...msg);
     }
 
-    error(...msg: any[]) {
+    async error(...msg: any[]) {
         this.logger.error(...msg);
     }
 
-    info(...msg: any[]) {
+    async info(...msg: any[]) {
         this.logger.info(...msg);
     }
 
-    log(...msg: any[]) {
+    async log(...msg: any[]) {
         this.logger.log(...msg);
     }
 
-    warn(...msg: any[]) {
+    async warn(...msg: any[]) {
         this.logger.warn(...msg);
+    }
+
+    close(waitTime?: number) {
+        return new Promise((resolve, reject) => {
+            this.logger.close(resolve, waitTime);
+        });
     }
 
     static getInstance() {

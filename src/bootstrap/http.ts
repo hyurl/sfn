@@ -17,7 +17,7 @@ HttpController.httpErrorView = function (err, instance) {
     return instance.view("error", { err, port: app.config.server.http.port });
 }
 
-// correct langauge name
+// correct language name
 app.router.use(async (req, res) => {
     let names = req.lang.split("-");
 

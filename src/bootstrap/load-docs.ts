@@ -45,7 +45,7 @@ if (app.config.hotReloading) {
         ) {
             let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 
-            app.services.base.instance().cache.delete(path);
+            app.services.cache.instance().delete(path);
         } else if (startsWith(app.serverId, "web-server")) {
             // Use WebSocket to reload the web page.
             let name = app.docs.resolve(file);
