@@ -1,6 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer, createServer } from "https";
 import { Http2SecureServer } from "http2";
+import { pathExists } from 'fs-extra';
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import { SSE } from "sfn-sse";
@@ -22,11 +23,14 @@ import "./load-views";
 import "./load-locales";
 import "./load-plugins";
 import "./load-message";
-import "./load-schedule";
 import "./life-cycle";
 import "./load-rpc";
+
+// Load internal services
+import "./load-schedule";
+
+// Initiate hot-reload
 import { watchWebModules } from "./hot-reload";
-import { pathExists } from 'fs-extra';
 
 declare global {
     namespace app {

@@ -11,7 +11,8 @@ declare global {
              * The schedule service is an internal service held by the framework,
              * which should not used directly, use `app.schedule` to create and
              * run tasks instead. However, it's recommended to serve this 
-             * service to an individual RPC server.
+             * service in an individual RPC server, when it does, start the
+             * schedule server before other servers.
              * @inner
              */
             const schedule: ModuleProxy<ScheduleService>;

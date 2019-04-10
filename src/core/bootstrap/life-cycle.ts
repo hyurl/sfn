@@ -63,7 +63,7 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
 });
 
 // Subscribe an event listener so that when receives WebSocket message sent from
-// an RPC server, the message can be delivered to the web client through the web
+// an RPC server, the message can be delivered to the web client via the web
 // server.
 app.plugins.lifeCycle.startup.bind(() => {
     if (!app.ws) return;
@@ -90,7 +90,7 @@ app.plugins.lifeCycle.startup.bind(() => {
 });
 
 // Subscribes an event listener so that when receives SSE message sent from an 
-// RPC server, the message can be delivered to the web client through the web
+// RPC server, the message can be delivered to the web client via the web
 // server.
 app.plugins.lifeCycle.startup.bind(() => {
     if (!app.sse) return;

@@ -1,3 +1,5 @@
+import * as path from "path";
+import * as fs from "fs-extra";
 import hash = require("string-hash");
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
@@ -64,6 +66,7 @@ export class Schedule {
 export class ScheduleService {
     private timer: NodeJS.Timer;
     private tasks = new Map<number, ScheduleTask>();
+    private filename = app.ROOT_PATH + `/cache/schedules-${app.serverId}.json`;
 
     constructor() {
         this.add({
@@ -87,7 +90,7 @@ export class ScheduleService {
                             app.message.publish(String(taskId), 1, [serverId]);
 
                         if (repeat)
-                            task.start += task.repeat;
+                            task.start = now + task.repeat;
                         else
                             task.expired = true;
                     } else {
@@ -98,11 +101,41 @@ export class ScheduleService {
         }, 1000);
     }
 
-    stop() {
-        clearInterval(this.timer);
+    /** Stops the schedule service. */
+    async stop() {
+        this.timer && clearInterval(this.timer);
+
+        // Run garbage collection to remove expired tasks before caching.
+        await this.gc();
+
+        let tasks: [number, ScheduleTask][] = [];
+
+        for (let [taskId, task] of this.tasks) {
+            if (taskId > 0) { // only cache user defined tasks.
+                tasks.push([taskId, task]);
+            }
+        }
+
+        if (tasks.length) {
+            await fs.ensureDir(path.dirname(this.filename));
+            await fs.writeJSON(this.filename, tasks);
+        }
     }
 
-    private async gc(now: number) {
+    /** Recovers cached schedules from the previous shutdown. */
+    async resume() {
+        try {
+            let tasks: [number, ScheduleTask][] = await fs.readJSON(this.filename);
+
+            for (let [taskId, task] of tasks) {
+                this.tasks.set(taskId, task);
+            }
+        } catch (e) { }
+    }
+
+    private async gc(now?: number) {
+        now = now || Date.now();
+
         for (let [taskId, task] of this.tasks) {
             if (task.expired || (task.end && now >= task.end)) {
                 this.tasks.delete(taskId);
@@ -110,12 +143,12 @@ export class ScheduleService {
         }
     }
 
-    add(task: ScheduleTask) {
+    async add(task: ScheduleTask) {
         this.tasks.set(task.taskId, { ...task, expired: false });
         return true;
     }
 
-    delete(taskId: number) {
+    async delete(taskId: number) {
         return this.tasks.delete(taskId);
     }
 }
