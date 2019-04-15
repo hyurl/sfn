@@ -9,7 +9,13 @@
             "request": "launch",
             "protocol": "auto",
             "name": "Web Server",
-            "program": "${workspaceFolder}/dist/index"
+            "program": "${workspaceFolder}/dist/index",
+            "serverReadyAction": {
+                "pattern": "\\((http[s]{0,1}://.+)\\) started",
+                "uriFormat": "%s",
+                "action": "debugWithChrome",
+                "webRoot": "${workspaceFolder}"
+            }
         },
         {
             "type": "node",
