@@ -12,10 +12,7 @@ declare global {
              * local instance of the module.
              */
             const local: symbol;
-            /**
-             * The basic service used in the core, it can be used in user 
-             * project as well.
-             */
+            /** @deprecated */
             const base: ModuleProxy<Service>;
             function resolve(path: string): string;
             function serve(config: string | alar.RpcOptions): Promise<alar.RpcServer>;

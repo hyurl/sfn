@@ -160,4 +160,4 @@ route.put = function (path: string) {
 
 route.sse = function (path: string) {
     return route("SSE", path);
-}
+};
