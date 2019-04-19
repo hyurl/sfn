@@ -4,7 +4,9 @@ import * as net from "net";
 import * as repl from "repl";
 import * as path from "path";
 import * as fs from "fs-extra";
+import * as readline from "readline";
 import { processTopLevelAwait } from "node-repl-await";
+import isSocketResetError = require('is-socket-reset-error');
 
 function isRecoverableError(error: Error) {
     if (error.name === 'SyntaxError') {
@@ -65,6 +67,10 @@ export async function serve(name: string) {
 
         socket.on("close", () => {
             replServer.close();
+        }).on("error", err => {
+            if (!isSocketResetError(err)) {
+                console.log(err);
+            }
         });
     }).listen(getSockPath(name, true));
 }
@@ -77,12 +83,19 @@ export async function connect(name: string) {
                 resolve(socket);
             });
     });
+    let input = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
 
-    process.stdin.pipe(socket);
+    input.on("line", line => {
+        socket.write(line + "\n");
+    });
+
     socket.pipe(process.stdout);
 
-    socket.on("close", () => {
-        process.exit();
+    socket.on("close", (hadError) => {
+        process.exit(hadError ? 1 : 0);
     });
 
     return socket;
