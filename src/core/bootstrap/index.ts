@@ -129,10 +129,10 @@ app.serve = function serve() {
                         process.send("ready");
                     } else {
                         console.log(serveTip("Web", app.serverId, baseUrl));
-
-                        // try to serve the repl server.
-                        await serveRepl(app.serverId);
                     }
+
+                    // try to serve the repl server.
+                    await serveRepl(app.serverId);
 
                     resolve();
                 }
