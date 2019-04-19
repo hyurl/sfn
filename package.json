@@ -76,15 +76,13 @@
         "injectable-ts": "^0.3.1",
         "ipchannel": "^0.2.5",
         "is-iterator-like": "^1.0.4",
-        "is-socket-reset-error": "^0.1.1",
         "lodash": "^4.17.11",
         "modelar": "^3.2.3",
         "moment": "^2.24.0",
         "multer": "^1.4.1",
-        "node-repl-await": "^0.1.0",
         "pluralize": "^7.0.0",
+        "power-repl": "^0.1.0",
         "reflect-metadata": "^0.1.13",
-        "sequid": "^1.0.1",
         "serve-static": "^1.13.2",
         "sfn-cookie": "^1.0.6",
         "sfn-cors": "^0.1.5",
@@ -98,8 +96,7 @@
         "thenable-generator": "^0.3.6",
         "tslib": "^1.9.3",
         "webium": "^0.5.4",
-        "xml2js": "^0.4.19",
-        "xpipe": "^1.0.5"
+        "xml2js": "^0.4.19"
     },
     "devDependencies": {
         "@types/cookie-parser": "^1.4.1",

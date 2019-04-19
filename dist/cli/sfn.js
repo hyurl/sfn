@@ -117,7 +117,10 @@ try {
             serverId = process.argv[3];
         }
         require("../bootstrap/index");
-        repl_1.connect(serverId);
+        repl_1.connect(serverId).catch((err) => {
+            console.log(err);
+            process.exit(1);
+        });
     }
     else {
         program.help();

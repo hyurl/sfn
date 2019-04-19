@@ -151,7 +151,10 @@ try {
         }
 
         require("../bootstrap/index");
-        connectRepl(serverId);
+        connectRepl(serverId).catch((err) => {
+            console.log(err);
+            process.exit(1);
+        });
     } else {
         program.help();
         process.exit();

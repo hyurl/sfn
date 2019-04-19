@@ -67,7 +67,7 @@ export class Schedule {
 }
 
 export class ScheduleService {
-    private timer: NodeJS.Timer;
+    private timer: NodeJS.Timer = null;
     private tasks = new Map<number, ScheduleTask>();
     private filename = app.ROOT_PATH + `/cache/schedules-${app.serverId}.json`;
 
@@ -78,30 +78,7 @@ export class ScheduleService {
             repeat: 1000 * 60 * 30,
             start: Date.now()
         });
-
-        this.timer = setInterval(() => {
-            let now = Date.now();
-
-            for (let [taskId, task] of this.tasks) {
-                let { start, end, expired, serverId, repeat } = task;
-
-                if (!expired && now >= start) {
-                    if (!end || now < end) {
-                        if (taskId === -1 && serverId === app.serverId)
-                            this.gc(now);
-                        else
-                            app.message.publish(String(taskId), 1, [serverId]);
-
-                        if (repeat)
-                            task.start = now + task.repeat;
-                        else
-                            task.expired = true;
-                    } else {
-                        task.expired = true;
-                    }
-                }
-            }
-        }, 1000);
+        this.resume();
     }
 
     /** Stops the schedule service. */
@@ -127,6 +104,30 @@ export class ScheduleService {
 
     /** Recovers cached schedules from the previous shutdown. */
     async resume() {
+        this.timer = setInterval(() => {
+            let now = Date.now();
+
+            for (let [taskId, task] of this.tasks) {
+                let { start, end, expired, serverId, repeat } = task;
+
+                if (!expired && now >= start) {
+                    if (!end || now < end) {
+                        if (taskId === -1 && serverId === app.serverId)
+                            this.gc(now);
+                        else
+                            app.message.publish(String(taskId), 1, [serverId]);
+
+                        if (repeat)
+                            task.start = now + task.repeat;
+                        else
+                            task.expired = true;
+                    } else {
+                        task.expired = true;
+                    }
+                }
+            }
+        }, 1000);
+
         try {
             let tasks: [number, ScheduleTask][] = await fs.readJSON(this.filename);
 
