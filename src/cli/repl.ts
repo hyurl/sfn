@@ -1,17 +1,18 @@
 import * as repl from "repl";
 import "../init";
-import "../core/bootstrap/index";
 import "../core/bootstrap/load-config";
+import "../core/bootstrap/index";
+import "../bootstrap/rpc-config";
 
 function isRecoverableError(error) {
     if (error.name === 'SyntaxError') {
-        return /^(Unexpected end of input)/.test(error.message);
+        return /^(Unexpected end of input|Unexpected token)/.test(error.message);
     }
     return false;
 }
 
 (async () => {
-    await app.rpc.connectAll();
+    await app.rpc.connectAll(true);
 
     repl.start({
         async eval(code, context, filename, callback) {

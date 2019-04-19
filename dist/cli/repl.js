@@ -2,16 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const repl = require("repl");
 require("../init");
-require("../core/bootstrap/index");
 require("../core/bootstrap/load-config");
+require("../core/bootstrap/index");
+require("../bootstrap/rpc-config");
 function isRecoverableError(error) {
     if (error.name === 'SyntaxError') {
-        return /^(Unexpected end of input)/.test(error.message);
+        return /^(Unexpected end of input|Unexpected token)/.test(error.message);
     }
     return false;
 }
 (async () => {
-    await app.rpc.connectAll();
+    await app.rpc.connectAll(true);
     repl.start({
         async eval(code, context, filename, callback) {
             try {
@@ -19,7 +20,6 @@ function isRecoverableError(error) {
                 callback(null, result);
             }
             catch (err) {
-                console.log(err);
                 if (isRecoverableError(err)) {
                     callback(new repl.Recoverable(err), void 0);
                 }
