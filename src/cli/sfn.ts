@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "source-map-support/register";
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as program from "commander";
@@ -11,6 +12,7 @@ import get = require('lodash/get');
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { config } from "../core/bootstrap/load-config";
 import { green, red } from "../core/tools/internal/color";
+import { connect as connectRepl } from "../core/tools/internal/repl";
 import { moduleExists, createImport } from "../core/tools/internal/module";
 import { Locale } from '../core/tools/interfaces';
 
@@ -140,7 +142,17 @@ try {
 
         contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
-    } else if (process.argv.length <= 2) {
+    } else if (process.argv.length > 2) {
+        // open REPL session
+        let serverId = process.argv[2];
+
+        if (serverId === "repl") {
+            serverId = process.argv[3];
+        }
+
+        require("../bootstrap/index");
+        connectRepl(serverId);
+    } else {
         program.help();
         process.exit();
     }

@@ -28,6 +28,8 @@ declare global {
 var appPath = path.dirname(process.mainModule.filename);
 var argv = process.execArgv.join(" ");
 
+appPath === path.resolve(__dirname, "..") && (appPath = __dirname);
+
 /** The version of framework. */
 export const version: string = require("../package.json").version;
 

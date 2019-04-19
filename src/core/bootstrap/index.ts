@@ -12,8 +12,9 @@ import {
     createImport,
     importDirectory
 } from "../tools/internal/module";
-import { red } from "../tools/internal/color";
 import { serveTip } from "../tools/internal";
+import { red } from "../tools/internal/color";
+import { serve as serveRepl } from "../tools/internal/repl";
 import { config, baseUrl } from "./load-config";
 import "./load-controllers";
 import "./load-services";
@@ -128,6 +129,9 @@ app.serve = function serve() {
                         process.send("ready");
                     } else {
                         console.log(serveTip("Web", app.serverId, baseUrl));
+
+                        // try to serve the repl server.
+                        await serveRepl(app.serverId);
                     }
 
                     resolve();

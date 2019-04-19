@@ -34,6 +34,11 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
     await sleep(500);
 });
 
+// Try to stop the internal schedule service.
+app.plugins.lifeCycle.shutdown.bind(async () => {
+    await app.services.schedule.instance(app.services.local).stop();
+});
+
 // Try to close http server.
 app.plugins.lifeCycle.shutdown.bind(async () => {
     if (app.http) {

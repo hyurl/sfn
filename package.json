@@ -97,7 +97,8 @@
         "thenable-generator": "^0.3.6",
         "tslib": "^1.9.3",
         "webium": "^0.5.4",
-        "xml2js": "^0.4.19"
+        "xml2js": "^0.4.19",
+        "xpipe": "^1.0.5"
     },
     "devDependencies": {
         "@types/cookie-parser": "^1.4.1",

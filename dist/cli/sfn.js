@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("source-map-support/register");
 const fs = require("fs-extra");
 const path = require("path");
 const program = require("commander");
@@ -13,6 +14,7 @@ const get = require("lodash/get");
 const init_1 = require("../init");
 const load_config_1 = require("../core/bootstrap/load-config");
 const color_1 = require("../core/tools/internal/color");
+const repl_1 = require("../core/tools/internal/repl");
 const module_1 = require("../core/tools/internal/module");
 const tryImport = module_1.createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
@@ -109,7 +111,15 @@ try {
         contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
     }
-    else if (process.argv.length <= 2) {
+    else if (process.argv.length > 2) {
+        let serverId = process.argv[2];
+        if (serverId === "repl") {
+            serverId = process.argv[3];
+        }
+        require("../bootstrap/index");
+        repl_1.connect(serverId);
+    }
+    else {
         program.help();
         process.exit();
     }

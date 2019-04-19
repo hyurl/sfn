@@ -57,6 +57,9 @@ export class Schedule {
 
     /** Cancels a task according to the given task ID. */
     cancel(taskId: number) {
+        if (!taskId)
+            return;
+
         let event = String(taskId);
         app.message.unsubscribe(event);
         app.services.schedule.instance(event).delete(taskId);

@@ -2,6 +2,7 @@ import { RpcServer, RpcClient } from "alar";
 import { config } from "./load-config";
 import { serveTip } from "../tools/internal";
 import { green } from "../tools/internal/color";
+import { serve as serveRepl } from "../tools/internal/repl";
 
 declare global {
     namespace app {
@@ -27,7 +28,7 @@ declare global {
     }
 }
 
-const timers: { [id: string]: NodeJS.Timer } = {};
+const tasks: { [id: string]: number } = {};
 
 app.rpc = {
     server: null,
@@ -51,6 +52,9 @@ app.rpc = {
 
         // self-connect after serving.
         await app.rpc.connect(serverId);
+
+        // try to serve the repl server.
+        await serveRepl(app.serverId);
     },
     async connect(serverId: string, defer = false) {
         try {
@@ -67,9 +71,9 @@ app.rpc = {
 
             app.rpc.connections.push(service);
 
-            if (timers[serverId]) {
-                clearInterval(timers[serverId]);
-                delete timers[serverId];
+            if (tasks[serverId]) {
+                app.schedule.cancel(tasks[serverId]);
+                delete tasks[serverId];
             }
 
             // Link all the subscriber listeners from the message channel and to
@@ -79,10 +83,14 @@ app.rpc = {
             console.log(green`RPC server [${serverId}] connected.`);
         } catch (err) {
             if (defer) {
-                if (!timers[serverId]) {
-                    timers[serverId] = setInterval(() => {
+                if (!tasks[serverId]) {
+                    tasks[serverId] = app.schedule.create({
+                        salt: `connect-${serverId}`,
+                        start: Date.now(),
+                        repeat: 1000,
+                    }, () => {
                         app.rpc.connect(serverId, defer);
-                    }, 5000);
+                    });
                 }
             } else {
                 throw err;
