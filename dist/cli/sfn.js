@@ -32,6 +32,7 @@ program.description("create new controllers, models. etc.")
     console.log("  sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'");
     console.log("  sfn -m Article                   create a model named 'Article'");
     console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
+    console.log("  sfn repl web-server-1            open REPL session to web-server-1");
     console.log("");
 });
 program.command("init")
@@ -40,6 +41,10 @@ program.command("init")
     require("./init");
     process.exit();
 });
+program.command("repl <serverId>")
+    .option("--no-stdout", "do not display any data output to process.stdout")
+    .description("open REPL session to the given server")
+    .action(openREPLSession);
 let cliBootstrap = init_1.APP_PATH + "/bootstrap/cli";
 module_1.moduleExists(cliBootstrap) && tryImport(cliBootstrap);
 program.parse(process.argv);
@@ -62,6 +67,28 @@ function lastChar(str) {
 function checkSource(filename) {
     if (!fs.existsSync(filename))
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
+}
+let replSessionOpen = false;
+function openREPLSession(serverId, options) {
+    if (replSessionOpen)
+        return;
+    if (!serverId) {
+        console.log(color_1.red `trying to open REPL session without serverId`);
+        process.exit(1);
+    }
+    else {
+        replSessionOpen = true;
+    }
+    require("../bootstrap/index");
+    repl_1.connect(serverId, options["no-stdout"]).catch((err) => {
+        if (/^Error: connect/.test(err.toString())) {
+            console.log(color_1.red `(code: ${err["code"]}) failed to connect [${serverId}]`);
+        }
+        else {
+            console.log(color_1.red `${err.toString()}`);
+        }
+        process.exit(1);
+    });
 }
 try {
     if (program.controller) {
@@ -111,24 +138,18 @@ try {
         contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
     }
-    else if (process.argv.length > 2) {
-        let serverId = process.argv[2];
-        if (serverId === "repl") {
-            serverId = process.argv[3];
-        }
-        require("../bootstrap/index");
-        repl_1.connect(serverId).catch((err) => {
-            console.log(err);
-            process.exit(1);
+    else if (process.argv.length >= 3) {
+        openREPLSession(process.argv[2], {
+            "no-stdout": process.argv[3] === "--no-stdout"
         });
     }
-    else {
+    else if (process.argv.length <= 3) {
         program.help();
         process.exit();
     }
 }
 catch (err) {
     console.log(color_1.red `${err.toString()}`);
-    process.exit();
+    process.exit(1);
 }
 //# sourceMappingURL=sfn.js.map

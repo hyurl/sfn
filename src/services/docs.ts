@@ -34,7 +34,7 @@ export default class DocumentationService extends Service {
 
         try {
             return (<ModuleProxy<View>>get(global, app.docs.resolve(filename)))
-                .instance()
+                .instance(filename)
                 .render();
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;

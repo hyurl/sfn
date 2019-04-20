@@ -105,7 +105,7 @@ export class HttpController extends Controller {
 
             this.res.type = "text/html";
 
-            return view.instance().render(vars);
+            return view.instance(path).render(vars);
         } catch (err) {
             if (err instanceof TypeError)
                 throw new StatusException(404);
@@ -173,10 +173,7 @@ export class HttpController extends Controller {
      * framework allows you to customize the error view handler by rewriting 
      * this method.
      */
-    static httpErrorView(
-        err: StatusException,
-        instance: HttpController
-    ): string | Promise<string> {
+    static httpErrorView(err: StatusException, instance: HttpController) {
         return instance.view(String(err.code), { err });
     }
 }

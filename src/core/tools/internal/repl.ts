@@ -13,6 +13,9 @@ export function serve(name: string) {
     return _serve(getSockPath(name));
 }
 
-export function connect(name: string) {
-    return _connect(getSockPath(name));
+export function connect(name: string, noStdout = false) {
+    return _connect({
+        path: getSockPath(name),
+        noStdout
+    });
 }

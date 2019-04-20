@@ -46,10 +46,12 @@ if (app.config.hotReloading) {
             let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 
             app.services.cache.instance().delete(path);
-        } else if (startsWith(app.serverId, "web-server")) {
+        }
+
+        if (startsWith(app.serverId, "web-server")) {
             // Use WebSocket to reload the web page.
             let name = app.docs.resolve(file);
-            let data = (<ModuleProxy<View>>get(global, name)).instance().render();
+            let data = (<ModuleProxy<View>>get(global, name)).instance(file).render();
             let pathname = `/docs/${parts[0]}/${parts.slice(2).join("/").slice(0, -3)}`;
 
             app.message.ws.local.emit("renew-doc-contents", pathname, lang, data);

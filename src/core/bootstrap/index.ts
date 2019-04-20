@@ -131,7 +131,7 @@ app.serve = function serve() {
                         console.log(serveTip("Web", app.serverId, baseUrl));
                     }
 
-                    // try to serve the repl server.
+                    // try to serve the REPL server.
                     await serveRepl(app.serverId);
 
                     resolve();

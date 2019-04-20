@@ -9,7 +9,7 @@ import camelCase = require("lodash/camelCase");
 import upperFirst = require("lodash/upperFirst");
 import cloneDeep = require('lodash/cloneDeep');
 import get = require('lodash/get');
-import { version, APP_PATH, SRC_PATH } from "../init";
+import { version, APP_PATH, SRC_PATH, ROOT_PATH } from "../init";
 import { config } from "../core/bootstrap/load-config";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
@@ -30,9 +30,10 @@ program.description("create new controllers, models. etc.")
     .on("--help", () => {
         console.log("\nExamples:");
         console.log("  sfn -c Article                   create an http controller named 'Article'");
-        console.log("  sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'")
+        console.log("  sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'");
         console.log("  sfn -m Article                   create a model named 'Article'");
         console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
+        console.log("  sfn repl web-server-1            open REPL session to web-server-1");
         console.log("");
     });
 
@@ -43,6 +44,12 @@ program.command("init")
         require("./init");
         process.exit();
     });
+
+// Command `sfn repl <serverId>` is used to open REPL session.
+program.command("repl <serverId>")
+    .option("--no-stdout", "do not display any data output to process.stdout")
+    .description("open REPL session to the given server")
+    .action(openREPLSession);
 
 // Load user-defined bootstrap procedures.
 let cliBootstrap = APP_PATH + "/bootstrap/cli";
@@ -72,6 +79,29 @@ function lastChar(str: string): string {
 function checkSource(filename: string): void {
     if (!fs.existsSync(filename))
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
+}
+
+let replSessionOpen = false;
+function openREPLSession(serverId, options) {
+    if (replSessionOpen) return;
+
+    if (!serverId) {
+        console.log(red`trying to open REPL session without serverId`);
+        process.exit(1);
+    } else {
+        replSessionOpen = true;
+    }
+
+    require("../bootstrap/index");
+    connectRepl(serverId, options["no-stdout"]).catch((err) => {
+        if (/^Error: connect/.test(err.toString())) {
+            console.log(red`(code: ${err["code"]}) failed to connect [${serverId}]`);
+        } else {
+            console.log(red`${err.toString()}`);
+        }
+
+        process.exit(1);
+    });
 }
 
 try {
@@ -142,24 +172,16 @@ try {
 
         contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
-    } else if (process.argv.length > 2) {
-        // open REPL session
-        let serverId = process.argv[2];
-
-        if (serverId === "repl") {
-            serverId = process.argv[3];
-        }
-
-        require("../bootstrap/index");
-        connectRepl(serverId).catch((err) => {
-            console.log(err);
-            process.exit(1);
+    } else if (process.argv.length >= 3) {
+        // open REPL session, internal usage
+        openREPLSession(process.argv[2], {
+            "no-stdout": process.argv[3] === "--no-stdout"
         });
-    } else {
+    } else if (process.argv.length <= 3) {
         program.help();
         process.exit();
     }
 } catch (err) {
     console.log(red`${err.toString()}`);
-    process.exit();
+    process.exit(1);
 }

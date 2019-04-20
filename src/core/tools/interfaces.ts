@@ -13,7 +13,7 @@ export interface Locale {
 }
 
 export interface View {
-    render(data?: { [name: string]: any }): string;
+    render(data?: { [name: string]: any }): string | Promise<string>;
 }
 
 export interface Session extends Express.Session {

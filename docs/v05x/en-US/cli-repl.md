@@ -1,8 +1,8 @@
-<!-- title: Command Line; order: 7 -->
+<!-- title: CLI & REPL; order: 7 -->
 ## Purpose
 
 To making programming fast, **SFN** provides some commands, you can use them 
-in the shell or CMD, to generate needed files, to start and stop servers, etc. 
+in the shell or CMD, to generate needed files, to interact with the servers, etc. 
 They're few and easy to learn.
 
 To enable this feature, you need to configure your computer a little bit, so 
@@ -109,3 +109,23 @@ sfn -l zh-CN
 This command should create a file named `zh-CN.json` in `src/locales/` 
 directory, if the default language pack is available, the new pack will 
 reference to it, and all you need to do is just translation.
+
+## REPL
+
+Since version 0.5.2, SFN provides an REPL window to allow you attach and
+interact with the running processes, very similar to Node.js built-in REPL, you 
+can run any valid JavaScript code in the REPL, but unlike the built-in REPL runs
+code locally, SFN REPL will redirect the input to the corresponding server
+process you wished, to interact directly with that process.
+
+To open the REPL window, simply type the command `sfn repl <serverId>` in the
+terminal, where the `<serverId>` is the server you wish to attach, e.g. 
+`sfn repl web-server-1` will attach the REPL session to the web-server-1. Once
+the REPL is ready, you can do almost everything you familiar with the built-in
+REPL.
+
+### `await` Statement Support
+
+SFN REPL provide fully support of top level `await` statements, so you're free
+to use this keyword to resolve any async operation and prints the final result
+just like you would do in the Chrome Console.
