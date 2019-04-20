@@ -70,8 +70,9 @@ app.rpc = {
 
                 // If detects the schedule service is served by other processes
                 // and being connected, stop the local schedule service.
-                if (mod === app.services.schedule) {
-                    await app.services.schedule.instance(app.services.local).stop();
+                if (serverId !== app.serverId && mod === app.services.schedule) {
+                    let { local } = app.services;
+                    await app.services.schedule.instance(local).stop(true);
                 }
             }
 

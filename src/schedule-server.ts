@@ -6,8 +6,8 @@ app.plugins.lifeCycle.startup.bind(async () => {
 });
 
 // Try to safely stop the schedule service.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    await app.services.schedule.instance(app.services.local).stop();
-});
+// app.plugins.lifeCycle.shutdown.bind(async () => {
+//     await app.services.schedule.instance(app.services.local).stop();
+// });
 
 app.rpc.serve("schedule-server");
