@@ -67,6 +67,12 @@ app.rpc = {
 
             for (let mod of modules) {
                 service.register(mod);
+
+                // If detects the schedule service is served by other processes
+                // and being connected, stop the local schedule service.
+                if (mod === app.services.schedule) {
+                    await app.services.schedule.instance(app.services.local).stop();
+                }
             }
 
             app.rpc.connections.push(service);
