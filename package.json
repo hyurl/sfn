@@ -81,7 +81,7 @@
         "moment": "^2.24.0",
         "multer": "^1.4.1",
         "pluralize": "^7.0.0",
-        "power-repl": "^0.1.3",
+        "power-repl": "^0.1.5",
         "reflect-metadata": "^0.1.13",
         "serve-static": "^1.13.2",
         "sfn-cookie": "^1.0.6",
