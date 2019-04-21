@@ -10,3 +10,4 @@ dist/*
 !dist/cli
 *.db
 *.tgz
+.*history
