@@ -13,7 +13,8 @@ import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
-import isIteratorLike = require("is-iterator-like");
+import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
+// import isIteratorLike = require("is-iterator-like");
 
 const EFFECT_METHODS: string[] = [
     "DELETE",
@@ -86,7 +87,7 @@ export function getRouteHandler(key: string): RouteHandler {
 
                 let result = await ctrl[method](...await getArguments(ctrl, method));
 
-                if (isIteratorLike(result)) {
+                if (isIterableIterator(result) || isAsyncIterableIterator(result)) {
                     await handleIteratorResponse(ctrl, result);
                 } else {
                     await handleResponse(ctrl, result);
