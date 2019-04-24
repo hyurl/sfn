@@ -52,6 +52,8 @@ export class MessageChannel {
             connection.subscribe(event, <any>listener);
         }
 
+        // If the current process is not an RPC server, bind the event to the 
+        // cluster channel instead.
         if (!app.rpc.server) {
             clusterChannel.on(event, this.bindClusterChannel(listener));
         }

@@ -7,7 +7,17 @@ import { serve as serveRepl } from "../tools/internal/repl";
 declare global {
     namespace app {
         namespace rpc {
+            /**
+             * The RPC server instance, only available when the current process 
+             * is an RPC server (and the server started), if it's a web server,
+             * the variable will be `null`.
+             */
             var server: RpcServer;
+
+            /**
+             * Contains all the RPC client instances, if no RPC connection
+             * establishhed, the variable will be an empty array.
+             */
             var connections: RpcClient[];
 
             /**
