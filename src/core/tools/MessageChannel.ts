@@ -113,12 +113,12 @@ export abstract class Message {
     constructor(protected data: any = {}) { }
 
     /** Sends the message via a front end server. */
-    via(serverId: string) {
+    via(serverId: string): InstanceType<new (...args: any[]) => this> {
         return new (<any>this.constructor)({ ...this.data, serverId });
     }
 
     /** Sends the message to a specified target. */
-    to(target: string) {
+    to(target: string): InstanceType<new (...args: any[]) => this> {
         return new (<any>this.constructor)({ ...this.data, target });
     }
 

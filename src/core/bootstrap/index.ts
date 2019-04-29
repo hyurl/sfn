@@ -12,7 +12,7 @@ import {
     createImport,
     importDirectory
 } from "../tools/internal/module";
-import { serveTip } from "../tools/internal";
+import { serveTip, inspectAs } from "../tools/internal";
 import { red } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
 import { config, baseUrl } from "./load-config";
@@ -49,7 +49,7 @@ declare global {
          * instead.
          * @inner
          */
-        const sse: { [id: number]: SSE };
+        const sse: { [id: string]: SSE };
 
         /** Starts the web server (both `http` and `ws`). */
         function serve(): Promise<void>;
@@ -176,6 +176,8 @@ if (!isCli) {
                 ws = SocketIO(http, WS.options);
             else
                 ws = SocketIO(WS.port, WS.options);
+
+            ws = inspectAs(ws, "[Sealed Object]");
         }
     }
 }
@@ -183,7 +185,7 @@ if (!isCli) {
 global["app"].router = router;
 global["app"].http = http;
 global["app"].ws = ws;
-global["app"].sse = isWebServer ? {} : null;
+global["app"].sse = isWebServer ? inspectAs({}, "[Sealed Object]") : null;
 
 if (!isCli) {
     // Load user-defined bootstrap procedures.
