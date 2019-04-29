@@ -303,10 +303,7 @@ function handleCsrfToken(ctrl: HttpController): void {
                 res.set("X-CSRF-Token", v);
             },
             get() {
-                if (!req[realCsrfToken])
-                    req.csrfToken = randStr(64);
-
-                return req[realCsrfToken];
+                return !req[realCsrfToken] || (req.csrfToken = randStr(64));
             }
         });
     } else if (EFFECT_METHODS.includes(req.method)) {
