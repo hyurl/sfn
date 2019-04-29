@@ -12,4 +12,8 @@ export default class TestService {
         yield 2;
         yield 3;
     }
+
+    testSchedule(data: any) {
+        console.log(data);
+    }
 }

@@ -2,6 +2,8 @@ import { DB } from 'modelar';
 import { SSE } from 'sfn-sse';
 import { Plugin } from '../tools/Plugin';
 import { sleep } from '../tools/functions';
+import { tryLogError } from '../tools/internal/error';
+import get = require('lodash/get');
 
 declare global {
     namespace app {
@@ -126,6 +128,23 @@ app.plugins.lifeCycle.startup.bind(() => {
                 } else {
                     sse.send(data);
                 }
+            }
+        }
+    });
+});
+
+// Subscribe an event listener so that when receives schedule task sent from an
+// RPC server, the task can task can be invoked in the current server.
+app.plugins.lifeCycle.startup.bind(() => {
+    app.message.subscribe(app.schedule.name, async (context: any[]) => {
+        let [module, method, data] = context;
+        let mod: ModuleProxy<any> = get(global, module, null);
+
+        if (mod) {
+            try {
+                await mod.instance(app.services.local)[method](data);
+            } catch (err) {
+                tryLogError(err);
             }
         }
     });

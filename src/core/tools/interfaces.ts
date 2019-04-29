@@ -8,6 +8,18 @@ import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { UploadedFile } from "./upload";
 
+// Add some useful types to the global scope
+declare global {
+    type FunctionPropertyNames<T> = {
+        [K in keyof T]: T[K] extends Function ? K : never
+    }[keyof T];
+    type NonFunctionPropertyNames<T> = {
+        [K in keyof T]: T[K] extends Function ? never : K
+    }[keyof T];
+    type FunctionProperties<T> = Pick<T, FunctionPropertyNames<T>>;
+    type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
+}
+
 export interface Locale {
     [statement: string]: string;
 }
