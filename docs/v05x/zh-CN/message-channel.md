@@ -32,9 +32,9 @@ app.message.subscribe("greeting", msg => {
 ```
 
 与传统的消息总线机制不同，SFN 所包装的 MessageChannel 并不运行在某一台特定的服务器上，
-它是分布式的，在每一个服务器中都独立存在，凡是连接到该服务器上的其他服务程序，都可以订阅
-其事件。这也意味着，并不是所有的服务都能够接收到通过 MessageChannel 发布的消息。在上面
-的例子中，rpc-server-2 必须连接到 rpc-server-1，才能够接收到 `greeting` 事件发来的
+它是分布式、去中心化的，在每一个服务器中都独立存在，凡是连接到该服务器上的其他服务程序，
+都可以订阅其事件。这也意味着，并不是所有的服务都能够接收到通过 MessageChannel 发布的消息。
+在上面的例子中，rpc-server-2 必须连接到 rpc-server-1，才能够接收到 `greeting` 事件发来的
 消息。
 
 # 推送 WebSocket 消息

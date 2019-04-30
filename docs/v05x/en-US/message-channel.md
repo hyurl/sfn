@@ -36,11 +36,11 @@ app.message.subscribe("greeting", msg => {
 ```
 
 Unlike the traditional message queue mechanism, the MessageChannel that SFN 
-provided doesn't run on a specific server, it's distributed and exists on every
-individual server, any other services connected to the server can subscribe its 
-events. Which means, not every service could receive the messages published by 
-the MessageChannel. In the above example, rpc-server-2 must connect to 
-rpc-server-1 in order to receive the `greeting` event.
+provided doesn't run on a specific server, it's distributed, decentralized and 
+exists on every individual server, any other services connected to the server 
+can subscribe its events. Which means, not every service could receive the 
+messages published by the MessageChannel. In the above example, rpc-server-2 
+must connect to rpc-server-1 in order to receive the `greeting` event.
 
 # Push WebSocket Messages
 

@@ -110,3 +110,7 @@ export default class extends HttpController {
     }
 }
 ```
+
+## Communication Between RPC Processes
+
+Please check [Message Channel](./message-channel).

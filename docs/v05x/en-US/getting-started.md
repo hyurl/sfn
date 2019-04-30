@@ -82,5 +82,5 @@ If you have PM2 installed, you can use the following command to start the
 application, and auto-scale according to the CPU numbers.
 
 ```sh
-pm2 start dist/index.js -i max
+pm2 start dist/index.js -i max -n my-app
 ```

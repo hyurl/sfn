@@ -1,5 +1,5 @@
 import { RpcServer, RpcClient } from "alar";
-import { serveTip } from "../tools/internal";
+import { serveTip, inspectAs } from "../tools/internal";
 import { green } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
 
@@ -13,11 +13,8 @@ declare global {
              */
             var server: RpcServer;
 
-            /**
-             * Contains all the RPC client instances, if no RPC connection
-             * establishhed, the variable will be an empty array.
-             */
-            var connections: RpcClient[];
+            /** @inner reserved portal used by the framework */
+            var connections: { [serverId: string]: RpcClient };
 
             /**
              * Starts an RPC server according to the given `serverId`, which is 
@@ -33,6 +30,8 @@ declare global {
             function connect(serverId: string, defer?: boolean): Promise<void>;
             /** Connects to all RPC servers. */
             function connectAll(defer?: boolean): Promise<void>;
+            /** Checks if the target server is connected. */
+            function hasConnect(serverId: string): boolean;
         }
     }
 }
@@ -41,7 +40,7 @@ const tasks: { [id: string]: number } = {};
 
 app.rpc = {
     server: null,
-    connections: [],
+    connections: inspectAs({}, "[Sealed Object]"),
     async serve(serverId: string) {
         let servers = app.config.server.rpc;
         let { modules, ...options } = servers[serverId];
@@ -62,10 +61,14 @@ app.rpc = {
         // self-connect after serving.
         await app.rpc.connect(serverId);
 
-        // try to serve the repl server.
+        // try to serve the REPL server.
         await serveRepl(app.serverId);
     },
     async connect(serverId: string, defer = false) {
+        // prevent duplicated connect.
+        if (app.rpc.hasConnect(serverId))
+            return;
+
         try {
             let servers = app.config.server.rpc;
             let { modules, ...options } = servers[serverId];
@@ -73,6 +76,8 @@ app.rpc = {
                 ...options,
                 id: app.serverId
             });
+
+            app.rpc.connections[serverId] = service;
 
             for (let mod of modules) {
                 service.register(mod);
@@ -84,8 +89,6 @@ app.rpc = {
                     await app.services.schedule.instance(local).stop(true);
                 }
             }
-
-            app.rpc.connections.push(service);
 
             if (tasks[serverId]) {
                 app.schedule.cancel(tasks[serverId]);
@@ -124,5 +127,8 @@ app.rpc = {
         }
 
         await Promise.all(connections);
+    },
+    hasConnect(serverId: string) {
+        return !!app.rpc.connections[serverId];
     }
 }

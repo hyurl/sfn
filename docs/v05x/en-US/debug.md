@@ -26,7 +26,7 @@ have to do is just configure it just like the following, and it's ready to debug
             "type": "node",
             "request": "launch",
             "protocol": "auto",
-            "name": "Launch the Server",
+            "name": "Web Server",
             "program": "${workspaceFolder}/dist/index"
         }
     ]

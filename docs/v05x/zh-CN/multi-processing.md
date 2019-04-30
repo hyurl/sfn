@@ -100,3 +100,7 @@ export default class extends HttpController {
     }
 }
 ```
+
+## RPC 服务进程之间的通信
+
+请查看 [消息通道](./message-channel)。

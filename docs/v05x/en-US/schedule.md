@@ -76,8 +76,62 @@ app.schedule.cancel(taskId);
 
 ### About Salt
 
-You have to set a unique but predictable `salt` for every schedule task, the 
-reason why the framework is designed in this way is that, after any module that
-has been hot-reloaded, and the tasks created inside it is duplicated, the later
-ones can substitute the former ones, so that there would not be duplicated tasks 
-due to hot-reloading of the system.
+It's recommended to set a unique but predictable `salt` for every schedule task,
+the reason of this design is that, after any module that has been hot-reloaded,
+and the tasks created inside it is duplicated, the later ones can substitute the
+former ones, so that there would not be duplicated tasks due to hot-reloading of
+the system.
+
+
+### Bind Service To The Schedule
+
+Other than provide a callable function, you can bind a module and method to the
+schedule as the handler function, and take extra benefits like after the service 
+rebooted, the schedule can resume running.
+
+```typescript
+// services/someService.ts
+declare global {
+    namespace app {
+        namespace services {
+            const myService: ModuleProxy<MyService>;
+        }
+    }
+}
+
+export default class MyService {
+    async syncDataEveryDay() {
+        // ...
+    }
+}
+
+var taskId = app.schedule.create({
+    start: Date.now(),
+    repeat: 1000 * 3600 * 24,
+    module: app.services.myService,
+    handler: "syncDataEveryDay"
+});
+```
+
+### Pass Data To The Handler
+
+When creating the data, you can set `data` option and every time calls the
+handler, passing the data to the function. But must notice, the data will be 
+jsonified for transmission between service processes, any thing that cannot be 
+jsonified will be lost; and, one set, the data cannot be modified.
+
+```typescript
+export default class MyService {
+    async syncDataEveryDay(data: { foo: any }) {
+        // ...
+    }
+}
+
+var taskId = app.schedule.create({
+    start: Date.now(),
+    repeat: 1000 * 3600 * 24,
+    module: app.services.myService,
+    handler: "syncDataEveryDay",
+    data: { foo: "Hello, World!" }
+});
+```

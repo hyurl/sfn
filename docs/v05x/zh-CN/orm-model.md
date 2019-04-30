@@ -178,7 +178,7 @@ export default class extends HttpController {
 ## User 模型
 
 默认地，框架会使用 **Modelar** 自带地默认 `User` 类，用于授权以及一些其它地事务，但
-它显然不适合你地项目，因此你应该定义一个新的类来替换它。
+它显然不适合你的项目，因此你应该定义一个新的类来替换它。
 
 ```typescript
 // src/models/user.ts

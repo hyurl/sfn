@@ -186,6 +186,21 @@ export default class extends HttpController {
 }
 ```
 
+### Internal Plugin Interface
+
+SFN reserved a plugin interface `lifeCycle`, used to control all activities
+related to server startup and shutdown, also you can add your own logic to this 
+interface, to open or close some activity during startup and shutdown. The
+following example comes from the SFN website itself.
+
+```typescript
+// src/logger-server.ts
+// Try to safely close the logger service.
+app.plugins.lifeCycle.shutdown.bind(async () => {
+    await app.services.logger.instance(app.services.local).close();
+});
+```
+
 Plugins are hot pluggable components, if you want to add a new function inside 
 some procedure, you just need to bind a new handler on the plugin interface, and
 if you want to remove some function, you just need to remove that corresponding 

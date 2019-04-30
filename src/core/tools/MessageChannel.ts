@@ -1,5 +1,6 @@
 import { RpcClient } from 'alar';
 import clusterChannel from "ipchannel";
+import values = require("lodash/values")
 
 export class MessageChannel {
     private events: { [name: string]: Function[] } = {};
@@ -48,7 +49,7 @@ export class MessageChannel {
 
         // If there are active RPC connections, subscribe the event to the RPC
         // channel as well.
-        for (let connection of app.rpc.connections) {
+        for (let connection of values(app.rpc.connections)) {
             connection.subscribe(event, <any>listener);
         }
 
@@ -69,7 +70,7 @@ export class MessageChannel {
         let listeners = this.events[event] || [];
 
         // Unsubscribe event listeners in the RPC channel.
-        for (let connection of app.rpc.connections) {
+        for (let connection of values(app.rpc.connections)) {
             connection.unsubscribe(event, <any>listener);
         }
 

@@ -70,6 +70,57 @@ app.schedule.cancel(taskId);
 
 ### 关于 salt
 
-你必须为每一个定时任务设置一个独立却又能预知的 `salt`，框架这样设计的目的是为了在任何
+推荐为每一个定时任务设置一个独立却又能预知的 `salt`，框架这样设计的目的是为了在任何
 一个模块被热重载的时候，里面创建的定时任务在被重复创建时，后者能覆盖前者，而不会因为
 热重载导致系统中存在重复的任务。
+
+### 将模块绑定到定时任务
+
+除了在创建任务时提供一个可执行的回调函数，你还可以将一个模块和方法绑定为定时任务的处理器
+函数，这样做可以享受额外的好处，例如，即使服务器重启了，定时任务依旧可以恢复运行。
+
+```typescript
+// services/someService.ts
+declare global {
+    namespace app {
+        namespace services {
+            const myService: ModuleProxy<MyService>;
+        }
+    }
+}
+
+export default class MyService {
+    async syncDataEveryDay() {
+        // ...
+    }
+}
+
+var taskId = app.schedule.create({
+    start: Date.now(),
+    repeat: 1000 * 3600 * 24,
+    module: app.services.myService,
+    handler: "syncDataEveryDay"
+});
+```
+
+### 传递数据到定时任务的处理器函数中
+
+可以在创建定时任务时，设置 `data` 选项来在每一次调用处理器函数时，将其传递到函数中，但
+需要注意的是，数据将会被转换为 JSON 来在服务进程之间传递，所有不支持 JSON 化的数据都将会
+丢失；并且，数据一经设置将不能被改变。
+
+```typescript
+export default class MyService {
+    async syncDataEveryDay(data: { foo: any }) {
+        // ...
+    }
+}
+
+var taskId = app.schedule.create({
+    start: Date.now(),
+    repeat: 1000 * 3600 * 24,
+    module: app.services.myService,
+    handler: "syncDataEveryDay",
+    data: { foo: "Hello, World!" }
+});
+```

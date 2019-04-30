@@ -22,7 +22,7 @@ SFN 提供了一个简单的适用于 **Visual Studio Code** 进行调试的方�
             "type": "node",
             "request": "launch",
             "protocol": "auto",
-            "name": "启动服务器",
+            "name": "Web 服务器",
             "program": "${workspaceFolder}/dist/index"
         }
     ]

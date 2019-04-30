@@ -11,8 +11,8 @@
 
 ### HttpController 中的注入
 
-在 HttpController 中，这个特性支持继承自 `modelar.Model` 的类，以及 `Request` 和
-`Response` 接口。
+在 HttpController 中，这个特性支持继承自 `modelar.Model` 的类，以及 `Request`、
+`Response` 和 `Session` 接口。
 
 同时，你还可以直接把 URL 参数设置为方法的参数，它们也会被注入。
 
@@ -60,8 +60,8 @@ export default class extends HttpController {
 
 ### WebSocketController 中的注入
 
-而在一个 WebSocketController 中，由于 WebSocket 发送和接收数据的方式和 HTTP 有些不同，
-因此它仅支持唯一的 `WebSocket` 接口，而其他的参数，则可以直接从客户端发送过来。
+而在一个 WebSocketController 中，由于 WebSocket 发送和接收数据的方式有些不同，
+因此它仅支持 `WebSocket` 和 `Session` 接口，而其他的参数，则可以直接从客户端发送过来。
 
 ```typescript
 import { WebSocketController, WebSocket, event } from "sfn"

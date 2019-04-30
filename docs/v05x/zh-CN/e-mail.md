@@ -7,27 +7,25 @@
 
 ## 如何使用？
 
-### 配置
+### 初始化
 
-你必须要在真的发送邮件之前进行合适的配置，修改你的配置文件 `config.ts`，设置合适的主机名和
-端口，以及用户名、密码等等。
+你必须要在真的发送邮件之前进行合适的配置，例如设置合适的主机名和端口，以及用户名、密码等等。
 
 ```typescript
-export default <SFNConfig>{
-    // ...
-    mail: {
-        pool: true,
-        host: "example.com",
-        port: 25,
-        secure: false,
-        from: "my-address@example.com",
-        auth: {
-            username: "my-username",
-            password: "my-password"
-        }
-    },
-    // ...
-}
+// bootstrap/index.ts
+import * as Mail from "sfn-mail";
+
+Mail.init({
+    pool: true,
+    host: "example.com",
+    port: 25,
+    secure: false,
+    from: "my-address@example.com",
+    auth: {
+        username: "my-username",
+        password: "my-password"
+    }
+});
 ```
 
 当配置完成之后，在你想要发送邮件的地方，只需要从 `Mail` 类实例化一个新的邮件，这个
@@ -36,7 +34,8 @@ export default <SFNConfig>{
 ## 示例
 
 ```typescript
-import { HttpController, Request, route, Mail, HttpError } from "sfn";
+import { HttpController, Request, route, HttpError } from "sfn";
+import * as Mail from "sfn-mail";
 
 export default class extends HttpController {
     @route.post("/send-email")

@@ -180,6 +180,20 @@ export default class extends HttpController {
 }
 ```
 
+### 内置的插件接口
+
+SFN 框架内置使用了一个名为 `lifeCycle` 的插件接口，用以控制服务启动和关闭有关的活动，
+你也可以将自己的一些逻辑绑定到该接口上，来在系统启动或关闭时打开或关闭一些活动。下面的
+示例来自 SFN 网站自己的逻辑：
+
+```typescript
+// src/logger-server.ts
+// Try to safely close the logger service.
+app.plugins.lifeCycle.shutdown.bind(async () => {
+    await app.services.logger.instance(app.services.local).close();
+});
+```
+
 插件是可热插拔的组件，如果你想要在应用的某个过程中添加新功能，只需要绑定一个新的处理器函数到插件
 接口上，如果你想要移除某个功能，只需要从插件接口中移除对应的处理器函数即可，并且利用系统的热重载
 特性将修改立即应用。通过这种方式，你可以编写具有极高扩展性的应用软件，只需要建立一个插件系统，并

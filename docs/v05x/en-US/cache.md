@@ -1,6 +1,10 @@
 <!-- title: Cache; order: 12 -->
 # Concept
 
+**Warning: since SFN 0.5.x, the built-in cache function has be deprecated,**
+**it is recommended that a user should implement his own cache service and runs**
+**it distributed as a micro-service.**
+
 Since version 0.4, SFN uses
 [cluster-storage](https://github.com/hyurl/cluster-storage) to store cache data,
 which is a tool that can share and auto-sync data in NodeJS cluster, and with 

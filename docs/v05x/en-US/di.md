@@ -1,21 +1,21 @@
 <!-- title: Dependency Injection; order: 18 -->
 # Concept
 
-Since SFN 0.5.x introduce Alar framework to auto-load and hot-reload modules, 
-traditional DI support is no longer suggested, so here only list out controller
-DI support.
+Since SFN 0.5.x introduced Alar framework to auto-load and hot-reload modules, 
+traditional DI support is no longer suggested, so here I only list out controller
+DI specifications.
 
 ## Auto-Injection in Controllers
 
 When dealing with controllers, both HttpController and WebSocketController 
-support the feature of auto-injection, which is, when invoking a handler method 
+support the feature of auto-injection, which is, when invoking a handler method,
 the dependencies declared in its signature will be auto-injected according to 
 the given data sent by the client.
 
 ### Injection in HttpController
 
 In HttpController, this feature supports the classes inherited from 
-`modelar.Model`, and the interfaces `Request` and `Response`.
+`modelar.Model`, and the interfaces `Request`, `Response` and `Session`.
 
 In an HttpController, you can directly set the URL parameters as the parameters 
 of the method, and they will be injected as well.
@@ -65,8 +65,8 @@ export default class extends HttpController {
 ### Injection in WebSocketController
 
 While in a WebSocketController, since the WebSocket sending and receiving data 
-in a different way from HTTP, so it only supports the only interface 
-`WebSocket`, and other arguments can be directly sent from the client.
+in a different way, so it only supports the interfaces `WebSocket` and
+`Session`, and other arguments can be directly sent from the client.
 
 ```typescript
 import { WebSocketController, WebSocket, event } from "sfn"

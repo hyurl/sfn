@@ -124,8 +124,13 @@ terminal, where the `<serverId>` is the server you wish to attach, e.g.
 the REPL is ready, you can do almost everything you familiar with the built-in
 REPL.
 
-### `await` Statement Support
+Another tip, if you don't want any standard output content being transmitted to
+the REPL, you can use option `--no-stdout` to prevent it, this is very useful 
+since there may be many data being written to the stdout during runtime, e.g.
+`console.log`.
 
-SFN REPL provide fully support of top level `await` statements, so you're free
+### `await` Operator Support
+
+SFN REPL provide fully support of top level `await` operator, so you're free
 to use this keyword to resolve any async operation and prints the final result
 just like you would do in the Chrome Console.

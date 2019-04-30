@@ -9,26 +9,24 @@ to send e-mails.
 
 ### Configuration
 
-You must configure properly before you can actually send an e-mail, modify 
-your configuration file `config.ts`, set a proper host and port, username, 
-password, etc.
+You must configure properly before you can actually send an e-mail, for example,
+setting a proper host and port, username, password, etc.
 
 ```typescript
-export default <SFNConfig>{
-    // ...
-    mail: {
-        pool: true,
-        host: "example.com",
-        port: 25,
-        secure: false,
-        from: "my-address@example.com",
-        auth: {
-            username: "my-username",
-            password: "my-password"
-        }
-    },
-    // ...
-}
+// bootstrap/index.ts
+import * as Mail from "sfn-mail";
+
+Mail.init({
+    pool: true,
+    host: "example.com",
+    port: 25,
+    secure: false,
+    from: "my-address@example.com",
+    auth: {
+        username: "my-username",
+        password: "my-password"
+    }
+});
 ```
 
 After the configuring is done, at where you want to send e-mail, just 
@@ -37,7 +35,8 @@ instantiate a new mail from the `Mail` class, this example shows you how.
 ### Example
 
 ```typescript
-import { HttpController, Request, route, Mail, HttpError } from "sfn";
+import { HttpController, Request, route, HttpError } from "sfn";
+import * as Mail from "sfn-mail";
 
 export default class extends HttpController {
     @route.post("/send-email")

@@ -41,7 +41,7 @@ if (app.config.hotReloading) {
         let lang = parts[1];
 
         if (startsWith(app.serverId, "doc-server")
-            || !app.rpc.connections.find(conn => conn.id === "doc-server")
+            || !app.rpc.hasConnect("doc-server")
         ) {
             let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 

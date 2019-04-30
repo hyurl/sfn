@@ -1,6 +1,10 @@
 <!-- title: Logging; order: 11 -->
 # Concept
 
+**Warning: since SFN 0.5.x, the built-in logger function has be deprecated,**
+**it is recommended that a user should implement his own logger service and runs**
+**it distributed as a micro-service.**
+
 You may have seen the `logger` property in the [Service](./service) page, its 
 backed by [sfn-logger](https://github.com/hyurl/sfn-logger) module actually.
 You may want to learn more complicated details about this module, but in 

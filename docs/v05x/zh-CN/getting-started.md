@@ -69,7 +69,7 @@ node dist
 如果你希望通过 ts-node 来启动项目，则需要使用下面的命令：
 
 ```sh
-ts-node --files src # --files 参数必须提供给
+ts-node --files src # --files 参数必须提供
 ```
 
 接着，服务器将会在几秒钟之内完成启动。
@@ -77,5 +77,5 @@ ts-node --files src # --files 参数必须提供给
 如果你安装了 PM2，则可以使用下面的命令来启动服务器，并按照 CPU 核心数自动规模化部署：
 
 ```sh
-pm2 start dist/index.js -i max
+pm2 start dist/index.js -i max -n my-app
 ```
