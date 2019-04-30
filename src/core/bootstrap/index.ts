@@ -12,17 +12,9 @@ import {
     createImport,
     importDirectory
 } from "../tools/internal/module";
-import { serveTip, inspectAs } from "../tools/internal";
+import { serveTip, inspectAs, baseUrl } from "../tools/internal";
 import { red } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
-import { config, baseUrl } from "./load-config";
-import "./load-controllers";
-import "./load-services";
-import "./load-models";
-import "./load-utils";
-import "./load-views";
-import "./load-locales";
-import "./load-plugins";
 import "./load-message";
 import "./life-cycle";
 import "./load-rpc";
@@ -64,10 +56,10 @@ export var http: HttpServer | HttpsServer | Http2SecureServer = null;
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
-let hostnames = config.server.hostname,
-    httpServer = config.server.http,
+let hostnames = app.config.server.hostname,
+    httpServer = app.config.server.http,
     httpPort = httpServer.port,
-    WS = config.server.websocket;
+    WS = app.config.server.websocket;
 
 app.serve = function serve() {
     return new Promise((resolve, reject) => {
@@ -97,7 +89,7 @@ app.serve = function serve() {
 
         // Start HTTP server.
         if (typeof http["setTimeout"] == "function") {
-            http["setTimeout"](config.server.http.timeout);
+            http["setTimeout"](app.config.server.http.timeout);
         }
 
         http.on("error", (err: Error) => {
@@ -128,7 +120,7 @@ app.serve = function serve() {
                         // notify PM2 that the service is available.
                         process.send("ready");
                     } else {
-                        console.log(serveTip("Web", app.serverId, baseUrl));
+                        console.log(serveTip("Web", app.serverId, baseUrl()));
                     }
 
                     // try to serve the REPL server.
@@ -152,7 +144,7 @@ app.serve = function serve() {
 if (!isCli) {
     if (isWebServer) {
         router = new App({
-            cookieSecret: <string>config.session.secret,
+            cookieSecret: <string>app.config.session.secret,
             domain: hostnames
         });
 

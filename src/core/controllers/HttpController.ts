@@ -2,7 +2,6 @@ import * as path from "path";
 import { DB, User } from "modelar";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
-import { config } from "../bootstrap/load-config";
 import { Controller } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
 import { StatusException } from "../tools/StatusException";
@@ -74,7 +73,7 @@ export class HttpController extends Controller {
         this.lang = (req.query && req.query.lang)
             || (req.cookies && req.cookies.lang)
             || req.lang
-            || config.lang;
+            || app.config.lang;
     }
 
     /** Gets the absolute view filename if the given one is relative. */

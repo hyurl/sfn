@@ -4,14 +4,11 @@ import { EventEmitter } from "events";
 import { Storage, StoreOptions } from "cluster-storage";
 import * as Logger from "sfn-logger";
 import { DB } from "modelar";
-import { injectable, injected } from "injectable-ts";
 import HideProtectedProperties = require("hide-protected-properties");
 import { ROOT_PATH } from "../../init";
-import { config } from "../bootstrap/load-config";
 import get = require('lodash/get');
 import { Locale } from './interfaces';
-
-injectable(DB);
+import { realDB } from './symbols';
 
 /** @deprecated */
 export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
@@ -45,11 +42,10 @@ export interface ResultMessage {
  * `cache` that you can use to do real jobs, and since it is inherited from 
  * EventEmitter, you can bind customized events if needed.
  */
-@injectable
 @HideProtectedProperties
 export class Service extends EventEmitter {
     /** The language of the current service. */
-    lang: string = config.lang;
+    lang: string = app.config.lang;
 
     /** @deprecated Configurations for the logger in this instance. */
     logOptions: Logger.Options = Object.assign({}, LogOptions);
@@ -72,7 +68,7 @@ export class Service extends EventEmitter {
      */
     i18n(text: string, ...replacements: string[]): string {
         let mod = get(app.locales, this.lang);
-        let defMod = get(app.locales, config.lang);
+        let defMod = get(app.locales, app.config.lang);
         let locale: Locale = null;
         let stmt: string;
 
@@ -135,8 +131,13 @@ export class Service extends EventEmitter {
     }
 
     /** Gets/Sets a DB instance. */
-    @injected([config.database])
-    db: DB;
+    get db() {
+        return this[realDB] || (this[realDB] = new DB(app.config.database));
+    }
+
+    set db(v: DB) {
+        this[realDB] = v;
+    }
 }
 
 export default Service;

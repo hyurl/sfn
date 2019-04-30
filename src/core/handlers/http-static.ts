@@ -1,18 +1,17 @@
 import serveStatic = require("serve-static");
 import startsWith = require("lodash/startsWith");
-import { config } from "../bootstrap/load-config";
 import { router } from "../bootstrap/index";
 import { resolve } from "path";
 import { SRC_PATH } from '../../init';
 import { Request } from '../tools/interfaces';
 
-if (Array.isArray(config.statics)) {
-    config.statics.forEach(path => {
+if (Array.isArray(app.config.statics)) {
+    app.config.statics.forEach(path => {
         router.use(<any>serveStatic(resolve(SRC_PATH, path)));
     });
 } else {
-    for (let path in config.statics) {
-        let options = config.statics[path],
+    for (let path in app.config.statics) {
+        let options = app.config.statics[path],
             _path = resolve(SRC_PATH, path),
             handle = serveStatic(_path, options);
 

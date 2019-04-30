@@ -25,9 +25,3 @@ if (!startsWith(__filename, APP_PATH) && moduleExists(moduleName)) {
         merge(config, mod.default);
     }
 }
-
-let { server: { hostname, http: { port, type } } } = config,
-    host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
-
-/** The base URL of the server (calculated according to the config). */
-export const baseUrl = (type == "http2" ? "https" : type) + "://" + host;

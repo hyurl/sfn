@@ -1,7 +1,6 @@
 import { DB, User } from "modelar";
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
-import { config } from "../bootstrap/load-config";
 import { activeEvent } from "../tools/symbols";
 
 /**
@@ -46,7 +45,7 @@ export class WebSocketController extends Controller {
         this.event = this.socket[activeEvent];
         this.lang = (socket.cookies && socket.cookies.lang)
             || socket.lang
-            || config.lang;
+            || app.config.lang;
     }
 
     /** Gets/Sets the DB instance. */

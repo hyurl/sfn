@@ -1,5 +1,4 @@
 import { RpcServer, RpcClient } from "alar";
-import { config } from "./load-config";
 import { serveTip } from "../tools/internal";
 import { green } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
@@ -44,7 +43,7 @@ app.rpc = {
     server: null,
     connections: [],
     async serve(serverId: string) {
-        let servers = config.server.rpc;
+        let servers = app.config.server.rpc;
         let { modules, ...options } = servers[serverId];
         let service = await app.services.serve(options);
 
@@ -68,7 +67,7 @@ app.rpc = {
     },
     async connect(serverId: string, defer = false) {
         try {
-            let servers = config.server.rpc;
+            let servers = app.config.server.rpc;
             let { modules, ...options } = servers[serverId];
             let service = await app.services.connect({
                 ...options,
@@ -115,7 +114,7 @@ app.rpc = {
         }
     },
     async connectAll(defer = false) {
-        let servers = config.server.rpc;
+        let servers = app.config.server.rpc;
         let connections: Promise<void>[] = [];
 
         for (let serverId in servers) {

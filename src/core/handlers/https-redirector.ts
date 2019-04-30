@@ -1,9 +1,8 @@
 import { createServer, STATUS_CODES } from "http";
-import { config } from "../bootstrap/load-config";
 import { red } from "../tools/internal/color";
 import { version } from "../../init";
 
-let server = config.server.http;
+let server = app.config.server.http;
 
 if (server.type == "https" || server.type == "http2") {
     // redirect all HTTP request to HTTPS.

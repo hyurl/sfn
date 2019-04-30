@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "description": "A Service Framework for Node.js.",
     "main": "index.js",
     "types": "src/index.ts",
@@ -74,7 +74,6 @@
         "function-intercepter": "^0.2.3",
         "hide-protected-properties": "^0.1.1",
         "ideal-filename": "^0.1.2",
-        "injectable-ts": "^0.3.1",
         "ipchannel": "^0.2.5",
         "lodash": "^4.17.11",
         "modelar": "^3.2.3",
