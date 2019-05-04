@@ -29,11 +29,11 @@ program.description("create new controllers, models. etc.")
     .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
     .on("--help", () => {
     console.log("\nExamples:");
-    console.log("  sfn -c article                   create an http controller named 'article'");
-    console.log("  sfn -c article -t websocket      create a websocket controller named 'article'");
-    console.log("  sfn -m Article                   create a model named 'Article'");
-    console.log("  sfn -s Article                   create a service named 'ArticleService'");
-    console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
+    console.log("  sfn -c article                   create an http controller of article");
+    console.log("  sfn -c article -t websocket      create a websocket controller of article");
+    console.log("  sfn -m article                   create a article model");
+    console.log("  sfn -s article                   create a article service");
+    console.log("  sfn -l zh-CN                     create a language pack of 'zh-CN'");
     console.log("  sfn repl web-server-1            open REPL session to web-server-1");
     console.log("");
 });
@@ -123,6 +123,10 @@ try {
         outputFile(output, contents, "Service");
     }
     else if (program.language) {
+        let names = program.language.split("-");
+        if (names.length > 1) {
+            program.language = names[0] + "-" + names[1].toUpperCase();
+        }
         let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
         let mod = get(app.locales, load_config_1.config.lang);
         let lang;
