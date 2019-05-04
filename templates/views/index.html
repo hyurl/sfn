@@ -17,7 +17,7 @@
 
     <script src="/js/socket.io.js"></script>
     <script>
-        var socket = io.connect("localhost:4000");
+        var socket = io.connect(location.host);
         socket.on("greeting", function(data) {
             console.log("Socket:", data);
         }).on("repeat-what-I-said", function(data) {
