@@ -64,7 +64,7 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(function
 
 let router: App,
     handle: (route: string) => RouteHandler,
-    tryImport: (nsp: string) => void;
+    wsTryImport: (nsp: string) => void;
 
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketDecorator {
@@ -84,12 +84,12 @@ export function event(name: string): WebSocketDecorator {
 
         eventMap.add(key, prop);
 
-        if (!tryImport)
-            tryImport = require("../handlers/websocket-event").tryImport;
+        if (!wsTryImport)
+            wsTryImport = require("../handlers/websocket-event").tryImport;
 
         if (!eventMap.isLocked(key)) {
             eventMap.lock(key);
-            tryImport(nsp);
+            wsTryImport(nsp);
         }
     };
 }

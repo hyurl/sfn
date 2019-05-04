@@ -19,6 +19,7 @@ import { Locale } from '../core/tools/interfaces';
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
+var replSessionOpen = false;
 
 program.description("create new controllers, models. etc.")
     .version(version, "-v, --version")
@@ -41,7 +42,7 @@ program.description("create new controllers, models. etc.")
 program.command("init")
     .description("initiate a new project")
     .action(() => {
-        require("./init");
+        tryImport("./init");
         process.exit();
     });
 
@@ -81,7 +82,6 @@ function checkSource(filename: string): void {
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
 }
 
-let replSessionOpen = false;
 function openREPLSession(serverId, options) {
     if (replSessionOpen) return;
 
@@ -92,7 +92,10 @@ function openREPLSession(serverId, options) {
         replSessionOpen = true;
     }
 
-    require("../bootstrap/index");
+    // Load user-defined bootstrap procedures.
+    let bootstrap = APP_PATH + "/bootstrap/index";
+    moduleExists(bootstrap) && tryImport(bootstrap);
+
     connectRepl(serverId, options["no-stdout"]).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
             console.log(red`(code: ${err["code"]}) failed to connect [${serverId}]`);

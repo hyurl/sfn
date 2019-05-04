@@ -4,75 +4,61 @@ import * as fs from "fs-extra";
 import { SRC_PATH, ROOT_PATH } from "../init";
 import { red, green, grey } from "../core/tools/internal/color";
 
-let sfnd = path.normalize(__dirname + "/../../..");
+let sfnd = path.normalize(__dirname + "/../..");
 
-if (process.cwd() != sfnd)
+if (process.cwd() === sfnd)
     process.exit();
 
 // initiate the project.
 console.log(grey`Initiating...`);
 
 try {
-    let tplDir = `${sfnd}/templates`,
-        bootstrap = `${SRC_PATH}/bootstrap`,
-        assetsDir = `${SRC_PATH}/assets`,
-        ctrlDir = `${SRC_PATH}/controllers`,
-        localeDir = `${SRC_PATH}/locales`,
-        viewDir = `${SRC_PATH}/views`,
-        modelDir = `${SRC_PATH}/models`,
-        scheduleDir = `${SRC_PATH}/schedules`,
-        serviceDir = `${SRC_PATH}/services`,
-        configFile = `${SRC_PATH}/config.ts`,
-        indexFile = `${SRC_PATH}/index.ts`,
-        envFile = `${ROOT_PATH}/.env`,
-        tsconfig = `${SRC_PATH}/tsconfig.json`;
+    let tplDir = `${sfnd}/templates`;
+    let bootstrap = `${SRC_PATH}/bootstrap`;
+    let creatingFolders = [
+        SRC_PATH,
+        bootstrap,
+        `${SRC_PATH}/models`,
+        `${SRC_PATH}/services`
+    ];
+    let copyingFiles = new Map([
+        [`${tplDir}/.env`, `${ROOT_PATH}/.env`],
+        [`${tplDir}/tsconfig.json`, `${ROOT_PATH}/tsconfig.json`],
+        [`${tplDir}/config.ts`, `${SRC_PATH}/config.ts`],
+        [`${tplDir}/index.ts`, `${SRC_PATH}/index.ts`],
+        [`${tplDir}/assets`, `${SRC_PATH}/assets`],
+        [`${tplDir}/controllers`, `${SRC_PATH}/controllers`],
+        [`${tplDir}/locales`, `${SRC_PATH}/locales`],
+        [`${tplDir}/views`, `${SRC_PATH}/views`]
+    ]);
+    let creatingFiles = new Map([
+        [`${bootstrap}/index.ts`, "// Custom bootstrap procedures.\n"],
+        [`${bootstrap}/http.ts`, "// Custom bootstrap procedures for HTTP server.\n"],
+        [`${bootstrap}/websocket.ts`, "// Custom bootstrap procedures for WebSocket server.\n"],
+        [`${bootstrap}/cli.ts`, "// Custom CLI commands.\n// See https://github.com/tj/commander.js#command-specific-options\n"]
+    ]);
 
-    if (!fs.existsSync(tsconfig))
-        fs.copyFileSync(`${tplDir}/tsconfig.json`, tsconfig);
-
-    if (!fs.existsSync(envFile))
-        fs.copyFileSync(`${sfnd}/.env`, envFile);
-
-    if (!fs.existsSync(SRC_PATH))
-        fs.ensureDirSync(SRC_PATH);
-
-    if (!fs.existsSync(assetsDir))
-        fs.copySync(`${tplDir}/assets`, assetsDir);
-
-    if (!fs.existsSync(bootstrap)) {
-        fs.ensureDirSync(bootstrap);
-        fs.writeFileSync(`${bootstrap}/master.ts`, "");
-        fs.writeFileSync(`${bootstrap}/worker.ts`, "");
-        fs.writeFileSync(`${bootstrap}/http.ts`, "");
-        fs.writeFileSync(`${bootstrap}/websocket.ts`, "");
-        fs.writeFileSync(`${bootstrap}/cli.ts`, "");
+    // try to create needed folders
+    for (let folder of creatingFolders) {
+        if (!fs.existsSync(folder)) {
+            fs.ensureDirSync(folder);
+        }
     }
 
-    if (!fs.existsSync(ctrlDir)) {
-        let dir = `${tplDir}/controllers`;
-        fs.copySync(dir, ctrlDir);
+    // try to copy needed files
+    for (let [src, dst] of copyingFiles) {
+        if (!fs.existsSync(dst) && fs.existsSync(src)) {
+            fs.copySync(src, dst);
+        }
     }
 
-    if (!fs.existsSync(localeDir))
-        fs.copySync(`${tplDir}/locales`, localeDir);
-
-    if (!fs.existsSync(viewDir))
-        fs.copySync(`${tplDir}/views`, viewDir);
-
-    if (!fs.existsSync(modelDir))
-        fs.ensureDirSync(modelDir);
-
-    if (!fs.existsSync(scheduleDir))
-        fs.ensureDirSync(scheduleDir);
-
-    if (!fs.existsSync(serviceDir))
-        fs.ensureDirSync(serviceDir);
-
-    if (!fs.existsSync(configFile))
-        fs.copySync(`${tplDir}/config.ts`, configFile);
-
-    if (!fs.existsSync(indexFile))
-        fs.copySync(`${tplDir}/index.ts`, indexFile);
+    // try to create files
+    for (let [file, content] of creatingFiles) {
+        if (!fs.existsSync(file)) {
+            fs.ensureDirSync(path.dirname(file));
+            fs.writeFileSync(file, content, "utf8");
+        }
+    }
 
     // expose vscode debug configurations
     let dir = `${ROOT_PATH}/.vscode/`,
@@ -94,5 +80,5 @@ try {
 
     console.log(green`Initiation succeed!`);
 } catch (err) {
-    console.log(red`Initiation failed!`);
+    console.log(red`Initiation failed!`, String(err));
 }

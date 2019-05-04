@@ -1,5 +1,5 @@
-This folder stores language packages, each package are named in RFC1766 standard,
-and JSONC (JSON with Comments) is supported.
+This folder stores language packages, each package is named in RFC1766 standard,
+support JSON and JSONC (JSON with Comments) files.
 
 ```jsonc
 // zh-CN.json

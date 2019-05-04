@@ -1,8 +1,3 @@
-import { ROOT_PATH } from "sfn";
-import * as Session from "express-session";
-import * as sessionFileStore from "session-file-store";
-
-const FileStore = sessionFileStore(Session);
 const env = process.env;
 
 export default <app.Config>{
@@ -33,10 +28,6 @@ export default <app.Config>{
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
-        store: new FileStore({
-            path: ROOT_PATH + "/sessions",
-            ttl: 3600 * 24 // 24 hours (in seconds)
-        }),
         cookie: {
             maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
         }

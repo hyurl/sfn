@@ -23,5 +23,6 @@ dist/*-server*
 *.tgz
 ecosystem.config.js
 package-lock.json
-tsconfig.json
-.*
+/tsconfig.json
+/repl.js
+/.*

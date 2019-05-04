@@ -19,6 +19,7 @@ const module_1 = require("../core/tools/internal/module");
 const tryImport = module_1.createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
+var replSessionOpen = false;
 program.description("create new controllers, models. etc.")
     .version(init_1.version, "-v, --version")
     .option("-c, --controller <name>", "create a new controller with a specified name")
@@ -38,7 +39,7 @@ program.description("create new controllers, models. etc.")
 program.command("init")
     .description("initiate a new project")
     .action(() => {
-    require("./init");
+    tryImport("./init");
     process.exit();
 });
 program.command("repl <serverId>")
@@ -68,7 +69,6 @@ function checkSource(filename) {
     if (!fs.existsSync(filename))
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
 }
-let replSessionOpen = false;
 function openREPLSession(serverId, options) {
     if (replSessionOpen)
         return;
@@ -79,7 +79,8 @@ function openREPLSession(serverId, options) {
     else {
         replSessionOpen = true;
     }
-    require("../bootstrap/index");
+    let bootstrap = init_1.APP_PATH + "/bootstrap/index";
+    module_1.moduleExists(bootstrap) && tryImport(bootstrap);
     repl_1.connect(serverId, options["no-stdout"]).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
             console.log(color_1.red `(code: ${err["code"]}) failed to connect [${serverId}]`);
