@@ -31,9 +31,9 @@ program.description("create new controllers, models. etc.")
     console.log("\nExamples:");
     console.log("  sfn -c article                   create an http controller of article");
     console.log("  sfn -c article -t websocket      create a websocket controller of article");
-    console.log("  sfn -m article                   create a article model");
-    console.log("  sfn -s article                   create a article service");
-    console.log("  sfn -l zh-CN                     create a language pack of 'zh-CN'");
+    console.log("  sfn -m article                   create an article model");
+    console.log("  sfn -s article                   create an article service");
+    console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
     console.log("  sfn repl web-server-1            open REPL session to web-server-1");
     console.log("");
 });
