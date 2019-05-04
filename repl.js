@@ -1,4 +1,7 @@
 require("./dist/cli/sfn");
 
 // Example:
-// node repl web-server-1 # connect to the REPL server hosted by web-server-1
+// Connect to web-server-1:
+// `node repl web-server-1`
+// When using the option '--no-stdout', put the option at the end:
+// `node repl web-server-1 --no-stdout`

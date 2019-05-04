@@ -81,7 +81,7 @@ function openREPLSession(serverId, options) {
     }
     let bootstrap = init_1.APP_PATH + "/bootstrap/index";
     module_1.moduleExists(bootstrap) && tryImport(bootstrap);
-    repl_1.connect(serverId, options["no-stdout"]).catch((err) => {
+    repl_1.connect(serverId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
             console.log(color_1.red `(code: ${err["code"]}) failed to connect [${serverId}]`);
         }
@@ -141,7 +141,7 @@ try {
     }
     else if (process.argv.length >= 3) {
         openREPLSession(process.argv[2], {
-            "no-stdout": process.argv[3] === "--no-stdout"
+            stdout: process.argv[3] !== "--no-stdout"
         });
     }
     else if (process.argv.length <= 3) {

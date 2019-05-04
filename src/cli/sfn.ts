@@ -82,7 +82,7 @@ function checkSource(filename: string): void {
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
 }
 
-function openREPLSession(serverId, options) {
+function openREPLSession(serverId: string, options: { stdout: boolean }) {
     if (replSessionOpen) return;
 
     if (!serverId) {
@@ -96,7 +96,7 @@ function openREPLSession(serverId, options) {
     let bootstrap = APP_PATH + "/bootstrap/index";
     moduleExists(bootstrap) && tryImport(bootstrap);
 
-    connectRepl(serverId, options["no-stdout"]).catch((err) => {
+    connectRepl(serverId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
             console.log(red`(code: ${err["code"]}) failed to connect [${serverId}]`);
         } else {
@@ -178,7 +178,7 @@ try {
     } else if (process.argv.length >= 3) {
         // open REPL session, internal usage
         openREPLSession(process.argv[2], {
-            "no-stdout": process.argv[3] === "--no-stdout"
+            stdout: process.argv[3] !== "--no-stdout"
         });
     } else if (process.argv.length <= 3) {
         program.help();
