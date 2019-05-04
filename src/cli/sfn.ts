@@ -30,9 +30,10 @@ program.description("create new controllers, models. etc.")
     .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
     .on("--help", () => {
         console.log("\nExamples:");
-        console.log("  sfn -c Article                   create an http controller named 'Article'");
-        console.log("  sfn -c ArticleSock -t websocket  create a websocket controller named 'ArticleSock'");
+        console.log("  sfn -c article                   create an http controller named 'article'");
+        console.log("  sfn -c article -t websocket      create a websocket controller named 'article'");
         console.log("  sfn -m Article                   create a model named 'Article'");
+        console.log("  sfn -s Article                   create a service named 'ArticleService'");
         console.log("  sfn -l zh-CN                     create a language pack named 'zh-CN'");
         console.log("  sfn repl web-server-1            open REPL session to web-server-1");
         console.log("");
@@ -111,20 +112,18 @@ try {
     if (program.controller) { // create controller.
         let filename = lastChar(program.controller) == "/"
             ? program.controller + "index"
-            : program.controller;
+            : (<string>program.controller).toLowerCase();
         let type = program.type == "websocket" ? "WebSocket" : "Http",
             ControllerName = upperFirst(path.basename(program.controller)),
-            mod = camelCase(ControllerName),
             input = `${tplDir}/${type}Controller.ts`,
             output = `${SRC_PATH}/controllers/${filename}.ts`;
 
         checkSource(input);
 
-        let route = kebabCase(program.controller);
+        let route = (<string>program.controller).toLowerCase();
         let contents = fs.readFileSync(input, "utf8")
             .replace(/\{name\}/g, route)
-            .replace(/__Controller__/g, ControllerName)
-            .replace(/__mod__/g, mod);
+            .replace(/__Controller__/g, ControllerName);
 
         outputFile(output, contents, "controller");
     } else if (program.model) { // create model.
@@ -153,7 +152,7 @@ try {
         checkSource(input);
 
         let contents = fs.readFileSync(input, "utf8")
-            .replace(/__Service__/g, ServiceName)
+            .replace(/__Service__/g, ServiceName + "Service")
             .replace(/__mod__/g, mod);
 
         outputFile(output, contents, "Service");

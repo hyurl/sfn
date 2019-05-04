@@ -18,13 +18,17 @@
     "include": [
         "src/*.ts",
         "src/controllers/*.ts",
+        "src/controllers/*/*.ts",
         "src/bootstrap/*.ts",
-        "src/schedules/*.ts",
         "src/services/*.ts",
+        "src/services/*/*.ts",
         "src/locales/*.ts",
         "src/plugins/*.ts",
+        "src/plugins/*/*.ts",
         "src/models/*.ts",
-        "src/utils/*.ts"
+        "src/models/*/*.ts",
+        "src/utils/*.ts",
+        "src/utils/*/*.ts"
     ],
     "exclude": [
         "./node_modules/*"
