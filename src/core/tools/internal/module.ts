@@ -4,6 +4,7 @@ import * as modelar from "modelar";
 import { isTsNode } from "../../../init";
 import { tryLogError, resolveErrorStack } from './error';
 import get = require('lodash/get');
+import { isSubClassOf } from '.';
 
 const tryImport = createImport(require);
 
@@ -50,7 +51,7 @@ export function importUser() {
     try {
         ctor = get(app, "models.user").ctor;
 
-        if (!ctor || !(ctor.prototype instanceof modelar.User)) {
+        if (!ctor || !(isSubClassOf(ctor, modelar.User))) {
             ctor = modelar.User;
         }
     } catch (err) {

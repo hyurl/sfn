@@ -23,3 +23,7 @@ export function inspectAs<T>(target: T, data: any): T {
     target[util.inspect.custom] = () => data;
     return target;
 }
+
+export function isSubClassOf(target: Function, base: Function) {
+    return target.prototype instanceof base;
+}

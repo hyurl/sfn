@@ -7,7 +7,7 @@ import { router } from "../bootstrap/index";
 import { HttpController } from "../controllers/HttpController";
 import { StatusException } from "../tools/StatusException";
 import { randStr } from "../tools/functions";
-import { isOwnMethod } from "../tools/internal";
+import { isOwnMethod, isSubClassOf } from "../tools/internal";
 import { tryLogError } from "../tools/internal/error";
 import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
@@ -177,7 +177,7 @@ async function getArguments(ctrl: HttpController, method: string) {
             args.push(res);
         } else if (type === Session) { // inject Session
             args.push(req.session);
-        } else if (type.prototype instanceof Model) { // inject user-defined Model
+        } else if (isSubClassOf(type, Model)) { // inject user-defined Model
             if (req.method == "POST" && req.params.id === undefined) {
                 // POST request means creating a new model.
                 // If a POST request with an ID, which means the 
