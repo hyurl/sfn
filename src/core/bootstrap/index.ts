@@ -61,37 +61,37 @@ let hostnames = app.config.server.hostname,
     httpPort = httpServer.port,
     WS = app.config.server.websocket;
 
-app.serve = function serve() {
-    return new Promise((resolve, reject) => {
-        if (!isWebServer) {
-            let entry = `${APP_PATH}/index` + (isTsNode ? ".ts" : ".js");
-            throw new Error(`The web server entry file must be '${entry}'`);
-        }
+app.serve = async function serve() {
+    if (!isWebServer) {
+        let entry = `${APP_PATH}/index` + (isTsNode ? ".ts" : ".js");
+        throw new Error(`The web server entry file must be '${entry}'`);
+    }
 
-        // load HTTP middleware
-        require("../handlers/https-redirector");
-        require("../handlers/http-init");
-        require("../handlers/http-static");
-        require("../handlers/http-xml");
-        require("../handlers/http-session");
-        require("../handlers/http-db");
-        require("../handlers/http-auth");
+    // load HTTP middleware
+    await import("../handlers/https-redirector");
+    await import("../handlers/http-init");
+    await import("../handlers/http-static");
+    await import("../handlers/http-xml");
+    await import("../handlers/http-session");
+    await import("../handlers/http-db");
+    await import("../handlers/http-auth");
 
+    // Load user-defined bootstrap procedures.
+    let httpBootstrap = APP_PATH + "/bootstrap/http";
+    moduleExists(httpBootstrap) && tryImport(httpBootstrap);
+
+    if (WS.enabled) {
         // Load user-defined bootstrap procedures.
-        let httpBootstrap = APP_PATH + "/bootstrap/http";
-        moduleExists(httpBootstrap) && tryImport(httpBootstrap);
+        let wsBootstrap = APP_PATH + "/bootstrap/websocket";
+        moduleExists(wsBootstrap) && tryImport(wsBootstrap);
+    }
 
-        if (WS.enabled) {
-            // Load user-defined bootstrap procedures.
-            let wsBootstrap = APP_PATH + "/bootstrap/websocket";
-            moduleExists(wsBootstrap) && tryImport(wsBootstrap);
-        }
+    // Start HTTP server.
+    if (typeof http["setTimeout"] == "function") {
+        http["setTimeout"](app.config.server.http.timeout);
+    }
 
-        // Start HTTP server.
-        if (typeof http["setTimeout"] == "function") {
-            http["setTimeout"](app.config.server.http.timeout);
-        }
-
+    return new Promise((resolve, reject) => {
         http.on("error", (err: Error) => {
             console.log(red`${err.toString()}`);
 

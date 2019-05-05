@@ -154,7 +154,7 @@ export default <app.Config>{
     },
     session: {
         secret: "sfn",
-        name: "sfn-sid",
+        name: "sid",
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
