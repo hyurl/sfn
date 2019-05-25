@@ -80,7 +80,7 @@ export function upload(...args): HttpDecorator {
                 storage: multer.diskStorage({
                     destination: (req, file, cb) => {
                         let { savePath } = options[file.fieldname];
-                        fs.ensureDir(savePath, err => {
+                        fs.ensureDir(savePath, {}, err => {
                             cb(err, savePath);
                         });
                     },

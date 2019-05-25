@@ -69,7 +69,7 @@
         "cookie-parser": "^1.4.4",
         "dotenv": "^7.0.0",
         "express-session": "^1.16.1",
-        "fron": "^0.1.4",
+        "fron": "^0.1.7",
         "fs-extra": "^7.0.1",
         "function-intercepter": "^0.2.3",
         "hide-protected-properties": "^0.1.1",
