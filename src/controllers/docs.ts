@@ -1,7 +1,11 @@
 import { route, HttpController, ROOT_PATH, Request, Response } from "sfn";
 import { readdir } from 'fs-extra';
+import DocumentationService from "../services/docs";
 
 export default class extends HttpController {
+    @app.services.docs.inject()
+    protected docSrv: DocumentationService;
+
     @route.get("/docs")
     @route.get("/docs/")
     async docs(req: Request, res: Response) {
@@ -19,8 +23,8 @@ export default class extends HttpController {
     @route.get("/docs/:version/:name")
     @app.plugins.web.onView.decorate()
     async showContents(req: Request, version: string, name: string) {
-        let sideMenu = await app.services.docs.instance().getSideMenu(version, this.lang);
-        let content = await app.services.docs.instance().getContent(version, this.lang, name);
+        let sideMenu = await this.docSrv.getSideMenu(version, this.lang);
+        let content = await this.docSrv.getContent(version, this.lang, name);
 
         return req.xhr ? content : this.view("docs", { sideMenu, content });
     }
