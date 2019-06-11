@@ -98,3 +98,11 @@ export default class extends HttpController {
     }
 }
 ```
+
+## Alar 框架提供的依赖注入
+
+Alar 3.5 增加了 `inject()` 方法来实现基于属性访问器的依赖注入，但需要注意：该
+方案仅支持注入服务单例，并且会造成所依赖模块在使用之前就进行一次加载，虽然并不
+影响热重载。
+
+详情请查看：https://github.com/hyurl/alar#dependency-injection.

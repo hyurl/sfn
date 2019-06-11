@@ -103,3 +103,12 @@ export default class extends HttpController {
     }
 }
 ```
+
+## The Dependency Alar Provided
+
+Alar 3.5 added a new method `inject()` to implement a property accessor based
+dependency injection, but be noticed that this approach only supports injecting
+singleton instances, and will cause the dependency module being loaded before
+actually using it, though it doesn't affect hot-reloading.
+
+Please check: https://github.com/hyurl/alar#dependency-injection.
