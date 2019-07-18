@@ -9,7 +9,10 @@ export interface TaskOptions<T = any> {
     start: number;
     /** A Unix timestamp to suggest when should the task stops running. */
     end?: number;
-    /** A Unix timestamp to suggest how often should the task runs repeatedly. */
+    /**
+     * A number of milliseconds to suggest how often should the task runs
+     * repeatedly.
+     */
     repeat?: number;
     /** 
      * The salt must be unique and predictable for each task, so that when the
