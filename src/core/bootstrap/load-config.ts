@@ -12,7 +12,7 @@ declare global {
     }
 }
 
-global["app"].config = config;
+global.app.config = config;
 
 let moduleName = APP_PATH + "/config";
 let tryImport = createImport(require);

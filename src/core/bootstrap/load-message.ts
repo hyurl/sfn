@@ -11,6 +11,6 @@ declare global {
     }
 }
 
-global["app"].message = new MessageChannel("app.message");
-global["app"].message.ws = new WebSocketMessage;
-global["app"].message.sse = new SSEMessage;
+global.app.message = new MessageChannel("app.message");
+global.app.message.ws = new WebSocketMessage;
+global.app.message.sse = new SSEMessage;

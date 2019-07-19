@@ -21,8 +21,8 @@ declare global {
 }
 
 
-global["app"].schedule = new Schedule("app.schedule");
-global["app"].services.schedule = new alar.ModuleProxyBase(
+global.app.schedule = new Schedule("app.schedule");
+global.app.services.schedule = new alar.ModuleProxyBase(
     "app.services.schedule",
     __dirname + "/../tools/Schedule"
 );

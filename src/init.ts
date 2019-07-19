@@ -4,6 +4,12 @@ import * as FRON from "fron";
 import { config as configEnv } from "dotenv";
 
 declare global {
+    namespace NodeJS {
+        interface Global {
+            app: { [name: string]: any };
+        }
+    }
+
     namespace app {
         const ROOT_PATH: string;
         const SRC_PATH: string;
@@ -81,7 +87,7 @@ export const isWebServer = process.mainModule.filename == webEntryFile;
 // support .env configuration file
 configEnv({ path: ROOT_PATH + "/.env" });
 
-global["app"] = {
+global.app = {
     ROOT_PATH,
     SRC_PATH,
     APP_PATH,

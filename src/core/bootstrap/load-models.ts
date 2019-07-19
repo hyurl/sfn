@@ -19,4 +19,4 @@ declare global {
     }
 }
 
-global["app"].models = new alar.ModuleProxy("app.models", APP_PATH + "/models");
+global.app.models = new alar.ModuleProxy("app.models", APP_PATH + "/models");

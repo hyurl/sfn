@@ -10,7 +10,7 @@ declare global {
     }
 }
 
-global["app"].locales = new alar.ModuleProxy("app.locales", SRC_PATH + "/locales");
+global.app.locales = new alar.ModuleProxy("app.locales", SRC_PATH + "/locales");
 
 app.locales.setLoader({
     cache: {},

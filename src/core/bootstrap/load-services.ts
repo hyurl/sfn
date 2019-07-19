@@ -22,8 +22,8 @@ declare global {
     }
 }
 
-global["app"].services = new alar.ModuleProxy("app.services", APP_PATH + "/services");
-global["app"].services.base = new alar.ModuleProxyBase(
+global.app.services = new alar.ModuleProxy("app.services", APP_PATH + "/services");
+global.app.services.base = new alar.ModuleProxyBase(
     "app.services.base",
     __dirname + "/../tools/Service"
 );

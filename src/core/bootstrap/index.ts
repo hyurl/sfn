@@ -174,10 +174,10 @@ if (!isCli) {
     }
 }
 
-global["app"].router = router;
-global["app"].http = http;
-global["app"].ws = ws;
-global["app"].sse = isWebServer ? inspectAs({}, "[Sealed Object]") : null;
+global.app.router = router;
+global.app.http = http;
+global.app.ws = ws;
+global.app.sse = isWebServer ? inspectAs({}, "[Sealed Object]") : null;
 
 if (!isCli) {
     // Load user-defined bootstrap procedures.

@@ -11,7 +11,7 @@ declare global {
 }
 
 // add new module proxy to auto-load and hot-reload markdown documentations
-global["app"].docs = new alar.ModuleProxy("app.docs", app.ROOT_PATH + "/docs");
+global.app.docs = new alar.ModuleProxy("app.docs", app.ROOT_PATH + "/docs");
 
 app.docs.setLoader({
     cache: {},

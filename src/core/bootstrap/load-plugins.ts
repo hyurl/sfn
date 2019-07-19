@@ -12,4 +12,4 @@ declare global {
     }
 }
 
-global["app"].plugins = new Plugin("app.plugins");
+global.app.plugins = new Plugin("app.plugins");
