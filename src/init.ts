@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as FRON from "fron";
+import * as alar from "alar";
 import { config as configEnv } from "dotenv";
 
 declare global {
@@ -28,6 +29,12 @@ declare global {
          * the server started.
          */
         var serverId: string;
+
+        /**
+         * Pass this symbol to `ModuleProxy<any>.instance()` method so that it
+         * can always resolve the local instance of the module.
+         */
+        const local: symbol;
     }
 }
 
@@ -95,5 +102,6 @@ global.app = {
     isDevMode,
     isTsNode,
     isCli,
-    isWebServer
+    isWebServer,
+    local: alar.util.local
 };

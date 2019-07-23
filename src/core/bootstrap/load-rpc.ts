@@ -95,7 +95,7 @@ app.rpc = {
                 delete tasks[serverId];
             }
 
-            // Link all the subscriber listeners from the message channel and to
+            // Link all the subscriber listeners from the message channel to
             // the RPC channel.
             app.message.linkRpcChannel(service);
 
