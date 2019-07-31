@@ -7,6 +7,7 @@ import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
 import { RpcOptions } from 'alar';
+import { transRecordTypes } from './core/tools/internal';
 
 declare global {
     namespace app {
@@ -123,7 +124,7 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
  */
 export type SFNConfig = app.Config;
 
-const env = process.env;
+const env = transRecordTypes(process.env);
 
 /**
  * The configuration of the program.
@@ -138,7 +139,7 @@ export default <app.Config>{
         hostname: "localhost",
         http: {
             type: <app.Config["server"]["http"]["type"]>env.HTTP_TYPE || "http",
-            port: parseInt(env.HTTP_PORT) || 80,
+            port: env.HTTP_PORT || 80,
             timeout: 120000, // 2 min.
             options: null
         },
@@ -165,7 +166,7 @@ export default <app.Config>{
     database: {
         type: env.DB_TYPE || "mysql",
         host: env.DB_HOST || "localhost",
-        port: parseInt(env.DB_PORT) || 3306,
+        port: env.DB_PORT || 3306,
         database: env.DB_NAME || "sfn",
         user: env.DB_USER || "root",
         password: env.DB_PASS || "123456"

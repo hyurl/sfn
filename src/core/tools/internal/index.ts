@@ -27,3 +27,24 @@ export function inspectAs<T>(target: T, data: any): T {
 export function isSubClassOf(target: Function, base: Function) {
     return target.prototype instanceof base;
 }
+
+export function transRecordTypes(data: Record<string, string>) {
+    let _data: Record<string, string | number | boolean> = {};
+    let numbers = /^\s*[0-9]+\s*$/;
+
+    for (let key in data) {
+        let value = data[key];
+
+        if (["true", "True", "TRUE"].includes(value)) {
+            _data[key] = true;
+        } else if (["false", "False", "FALSE"].includes(value)) {
+            _data[key] = false;
+        } else if (numbers.test(value)) {
+            _data[key] = parseInt(value);
+        } else {
+            _data[key] = data[key];
+        }
+    }
+
+    return _data;
+}
