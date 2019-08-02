@@ -69,13 +69,17 @@ export async function tryLogError(err: any, stack?: string) {
         });
 
         if (csr) {
-            let str = await csr.render({});
+            try {
+                let str = await csr.render({});
 
-            console.log();
-            console.log(err.toString());
-            console.log();
-            console.log(str);
-            console.log();
+                console.log();
+                console.log(err.toString());
+                console.log();
+                console.log(str);
+                console.log();
+            } catch (e) {
+                console.log(err);
+            }
         }
     } else {
         if (!(err instanceof Error)) {
