@@ -19,9 +19,11 @@ HttpController.httpErrorView = function (err, instance) {
 
 // correct language name
 app.router.use(async (req, res) => {
-    let names = req.lang.split("-");
+    if (req.lang) {
+        let names = req.lang.split("-");
 
-    if (names.length > 1) {
-        req.lang = names[0] + "-" + names[1].toUpperCase();
+        if (names.length > 1) {
+            req.lang = names[0] + "-" + names[1].toUpperCase();
+        }
     }
 });
