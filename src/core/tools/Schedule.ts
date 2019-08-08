@@ -31,11 +31,11 @@ export interface TaskOptions<T = any> {
      */
     handler?: ((data: any) => void) | keyof FunctionProperties<T>;
     /**
-     * The data passed to the handler, note that the data will be jsonified for
-     * transmission, anything that cannot be jsonified will be lost during
-     * transmission.
+     * The data passed to the handler as arguments, note that the data will be
+     * jsonified for transmission, anything that cannot be jsonified will be
+     * lost during transmission.
      */
-    data?: any
+    data?: any[]
 }
 
 export interface ScheduleTask {
@@ -47,7 +47,7 @@ export interface ScheduleTask {
     expired?: boolean;
     module?: string;
     handler?: string;
-    data?: any
+    data?: any[]
 }
 
 export class Schedule {

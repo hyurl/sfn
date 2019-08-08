@@ -141,13 +141,15 @@ app.plugins.lifeCycle.startup.bind(() => {
 // Subscribe an event listener so that when receives schedule task sent from an
 // RPC server, the task can task can be invoked in the current server.
 app.plugins.lifeCycle.startup.bind(() => {
-    app.message.subscribe(app.schedule.name, async (context: any[]) => {
-        let [module, method, data] = context;
-        let mod: ModuleProxy<any> = get(global, module, null);
+    type Context = [string, string, any[]];
 
-        if (mod) {
+    app.message.subscribe(app.schedule.name, async (context: Context) => {
+        let [modname, method, data] = context;
+        let module: ModuleProxy<any> = get(global, modname, null);
+
+        if (module) {
             try {
-                await mod.instance(app.services.local)[method](data);
+                await module.instance(app.services.local)[method](...data);
             } catch (err) {
                 tryLogError(err);
             }
