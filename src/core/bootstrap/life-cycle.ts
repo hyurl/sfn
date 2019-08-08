@@ -149,7 +149,7 @@ app.plugins.lifeCycle.startup.bind(() => {
 
         if (module) {
             try {
-                await module.instance(app.services.local)[method](...data);
+                await module.instance(app.local)[method](...(data || []));
             } catch (err) {
                 tryLogError(err);
             }
