@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as fs from "fs-extra";
+import * as FRON from "fron";
 import * as modelar from "modelar";
 import { isTsNode } from "../../../init";
 import { tryLogError, resolveErrorStack } from './error';
@@ -12,13 +13,21 @@ export function moduleExists(name: string): boolean {
     return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
 }
 
-export function createImport(require: Function): (id: string) => {
+export function createImport(require: NodeRequire): (id: string) => {
     [x: string]: any;
     default?: any
 } {
     return (id: string) => {
         try {
-            return require(id);
+            let filename = require.resolve(id);
+
+            // When loading a JSON file, use FRON to parse the content so that
+            // the content could support JSONC (JSON with comment) format.
+            if (path.extname(filename) === ".json") {
+                return FRON.parse(fs.readFileSync(filename, "utf8"));
+            } else {
+                return require(id);
+            }
         } catch (err) {
             err.stack = resolveErrorStack(err.stack, null, 1).stack;
             tryLogError(err);

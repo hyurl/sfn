@@ -3,6 +3,7 @@ import * as fs from "fs-extra";
 import hash = require("string-hash");
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
+import moment = require('moment');
 
 export interface TaskOptions<T = any> {
     /** A Unix timestamp to suggest when should the task starts running. */
@@ -10,7 +11,7 @@ export interface TaskOptions<T = any> {
     /** A Unix timestamp to suggest when should the task stops running. */
     end?: number;
     /**
-     * A number of milliseconds to suggest how often should the task runs
+     * A number of seconds to suggest how often should the task runs
      * repeatedly.
      */
     repeat?: number;
@@ -89,6 +90,15 @@ export class Schedule {
             );
         }
 
+        // Compatible fix with milliseconds
+        if (String(start).length === 13) {
+            start = Math.round(start / 1000);
+
+            if (repeat) {
+                repeat = Math.ceil(repeat / 1000);
+            }
+        }
+
         let taskId = hash(idParam.join("#"));
         let event = String(taskId);
 
@@ -137,8 +147,8 @@ export class ScheduleService {
         this.setup().add({
             taskId: -1,
             serverId: app.serverId,
-            start: Date.now(),
-            repeat: 1000 * 60 * 30
+            start: moment().unix(),
+            repeat: 60 * 30
         });
     }
 
@@ -204,7 +214,7 @@ export class ScheduleService {
     private setup() {
         this.clear().state = "running";
         this.timer = setInterval(() => {
-            let now = Date.now();
+            let now = moment().unix();
 
             for (let [taskId, task] of this.tasks) {
                 let { start, end, expired, serverId, repeat, data } = task;
@@ -243,7 +253,7 @@ export class ScheduleService {
     }
 
     private async gc(now?: number) {
-        now = now || Date.now();
+        now = now || moment().unix();
 
         for (let [taskId, task] of this.tasks) {
             if (task.expired || (task.end && now >= task.end)) {

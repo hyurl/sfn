@@ -2,6 +2,7 @@ import { RpcServer, RpcClient } from "alar";
 import { serveTip, inspectAs } from "../tools/internal";
 import { green } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
+import moment = require('moment');
 
 declare global {
     namespace app {
@@ -105,8 +106,8 @@ app.rpc = {
                 if (!tasks[serverId]) {
                     tasks[serverId] = app.schedule.create({
                         salt: `connect-${serverId}`,
-                        start: Date.now(),
-                        repeat: 1000,
+                        start: moment().unix(),
+                        repeat: 1,
                     }, () => {
                         app.rpc.connect(serverId, defer);
                     });

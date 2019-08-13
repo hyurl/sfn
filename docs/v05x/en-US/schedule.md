@@ -52,7 +52,7 @@ you want.
 ```typescript
 var taskId = app.schedule.create({
     salt: "my-schedule-1",
-    start: Date.now() + 5000,
+    start: moment().unix() + 5,
 }, async () => {
     // do every thing in here after 5 seconds.
 });
@@ -60,7 +60,7 @@ var taskId = app.schedule.create({
 var taskId2 = app.schedule.create({
     salt: "my-schedule-2",
     start: moment().add(5, "minutes").valueOf() // using moment library
-    repeat: 5000, // running repeatedly every 5 seconds
+    repeat: 5, // running repeatedly every 5 seconds
     end: momen().add(1, "hour").valueOf() // stops after 1 hour
 }, async () => {
     // ...
@@ -106,8 +106,8 @@ export default class MyService {
 }
 
 var taskId = app.schedule.create({
-    start: Date.now(),
-    repeat: 1000 * 3600 * 24,
+    start: moment().unix(),
+    repeat: 3600 * 24,
     module: app.services.myService,
     handler: "syncDataEveryDay"
 });
@@ -128,8 +128,8 @@ export default class MyService {
 }
 
 var taskId = app.schedule.create({
-    start: Date.now(),
-    repeat: 1000 * 3600 * 24,
+    start: moment().unix(),
+    repeat: 3600 * 24,
     module: app.services.myService,
     handler: "syncDataEveryDay",
     data: { foo: "Hello, World!" }
