@@ -6,7 +6,7 @@ function getSockPath(name: string) {
     let { port } = app.config.server.http;
     Array.isArray(hostname) && (hostname = hostname[0]);
 
-    return `${os.tmpdir()}/.sfn/${hostname}-${port}/${name}`;
+    return `${os.tmpdir()}/.sfn/${hostname}-${port}/${name}.sock`;
 }
 
 export function serve(name: string) {

@@ -21,9 +21,8 @@ export function createImport(require: NodeRequire): (id: string) => {
         try {
             let filename = require.resolve(id);
 
-            // When loading a JSON file, use FRON to parse the content so that
-            // the content could support JSONC (JSON with comment) format.
-            if (path.extname(filename) === ".json") {
+            // Support JSONC (JSON with comment) files.
+            if ([".json", ".jsonc"].includes(path.extname(filename))) {
                 return FRON.parse(fs.readFileSync(filename, "utf8"));
             } else {
                 return require(id);

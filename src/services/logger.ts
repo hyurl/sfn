@@ -20,6 +20,7 @@ export default class LoggerService extends Logger {
             trace: false,
             ...app.config.logger
         });
+        this.dateFormat = "YYYY-MM-DD HH:mm:ss";
     }
 
     async debug(...msg: any[]) {

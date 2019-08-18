@@ -139,7 +139,7 @@ app.plugins.lifeCycle.startup.bind(() => {
 });
 
 // Subscribe an event listener so that when receives schedule task sent from an
-// RPC server, the task can task can be invoked in the current server.
+// RPC server, the task can be invoked in the current server.
 app.plugins.lifeCycle.startup.bind(() => {
     type Context = [string, string, any[]];
 

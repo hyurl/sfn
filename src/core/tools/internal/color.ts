@@ -9,7 +9,7 @@ function color(
     let msg = callSite.map((str, i) => {
         return i > 0 ? bindings[i - 1] + str : str;
     }).join("");
-    let timeStr = moment().format("YYYY-MM-DDTHH:mm:ss");
+    let timeStr = moment().format("YYYY-MM-DD HH:mm:ss");
 
     return chalk[color](`[${timeStr}]`) + " " + msg;
 }
