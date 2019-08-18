@@ -1,5 +1,4 @@
 import * as path from "path";
-import { DB, User } from "modelar";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
 import { Controller } from "./Controller";
@@ -67,7 +66,6 @@ export class HttpController extends Controller {
 
     constructor(req: Request, res: Response) {
         super();
-        this.authorized = req.user !== null;
         this.req = req;
         this.res = res;
         this.lang = (req.query && req.query.lang)
@@ -118,27 +116,9 @@ export class HttpController extends Controller {
         return this.res.send(data);
     }
 
-    /** Gets/Sets the DB instance. */
-    get db(): DB {
-        return this.req.db;
-    }
-
-    set db(v: DB) {
-        this.req.db = v;
-    }
-
     /** Alias of `req.session`. */
     get session(): Session {
         return this.req.session;
-    }
-
-    /** Alias of `req.user`. */
-    get user(): User {
-        return this.req.user;
-    }
-
-    set user(v: User) {
-        this.req.user = v;
     }
 
     /** Alias of `req.url`. */

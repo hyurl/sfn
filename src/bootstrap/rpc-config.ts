@@ -4,21 +4,22 @@ app.config.server.rpc = {
     "doc-server": {
         host: "localhost",
         port: 4001,
-        modules: [app.services.docs, app.services.test]
+        services: [app.services.docs, app.services.test],
+        dependencies: [app.services.logger, app.services.schedule]
     },
     "logger-server": {
         host: "localhost",
         port: 4002,
-        modules: [app.services.logger]
+        services: [app.services.logger]
     },
     "schedule-server": {
         host: "localhost",
         port: 4003,
-        modules: [app.services.schedule]
+        services: [app.services.schedule]
     },
     "cache-server": {
         host: "localhost",
         port: 4004,
-        modules: [app.services.cache]
+        services: [app.services.cache]
     }
 };

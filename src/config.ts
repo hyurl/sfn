@@ -2,17 +2,16 @@ import * as Session from "express-session";
 import { ServerResponse } from "http";
 import { Stats } from "fs";
 import serveStatic = require("serve-static");
-import { DBConfig } from "modelar";
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { RpcOptions } from 'alar';
-import { transRecordTypes } from './core/tools/internal';
+import { RpcOptions, ClientOptions } from 'alar';
+import { FSWatcher } from "chokidar";
+import { ensureType } from './core/tools/internal';
 
 declare global {
     namespace app {
         interface Config {
-            [x: string]: any;
             /** Default language of the application. */
             lang?: string;
             /**
@@ -21,26 +20,15 @@ declare global {
              */
             statics?: string[] | { [path: string]: StaticOptions };
             /**
-             * When any module file has been modified, rather than restart the 
-             * whole server, try to refresh the memory cache instead. NOTE: 
-             * **DO NOT** import the module statically in anywhere, otherwise it
-             * may not be reloaded as expected.
+             * Watch modules and when files changed, refresh the memory cache
+             * and hot-reload the module.
              * 
-             * Currently, these entities can be hot-reloaded:
-             * - `controllers`
-             * - `services`
-             * - `models`
-             * - `utils`
-             * - `locales`
-             * - `views`
-             * - `plugins`
-             * 
-             * During development, when hot-reloading is enabled, you should 
-             * start typescript compiler in watch mode (`tsc --watch`).
+             * NOTE: **DO NOT** import the module statically in anywhere,
+             * otherwise it may not be reloaded as expected.
              * 
              * @see https://github.com/hyurl/alar
              */
-            hotReloading?: boolean;
+            watch?: { watch: (...args: any[]) => FSWatcher }[];
             server: {
                 /** Host name(s), used for calculating the sub-domain. */
                 hostname?: string | string[];
@@ -86,8 +74,10 @@ declare global {
                  * @see https://github.com/hyurl/alar
                  */
                 rpc?: {
-                    [serverId: string]: RpcOptions & {
-                        modules: ModuleProxy<any>[]
+                    [serverId: string]: RpcOptions & ClientOptions & {
+                        [x: string]: any;
+                        services: ModuleProxy<any>[];
+                        dependencies?: "all" | ModuleProxy<any>[];
                     }
                 };
             };
@@ -96,11 +86,6 @@ declare global {
              * @see https://www.npmjs.com/package/express-session
              */
             session?: Session.SessionOptions;
-            /**
-             * Configurations for Modelar ORM.
-             * @see https://github.com/hyurl/modelar
-             */
-            database?: DBConfig;
         }
     }
 }
@@ -118,13 +103,7 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
     setHeaders?: (res: ServerResponse, path: string, stat: Stats) => void;
 };
 
-/**
- * @deprecated Use `app.Config` instead and share the benefits of declaration
- * merging.
- */
-export type SFNConfig = app.Config;
-
-const env = transRecordTypes(process.env);
+const env: Record<string, string | number | boolean> = ensureType(process.env);
 
 /**
  * The configuration of the program.
@@ -134,7 +113,7 @@ const env = transRecordTypes(process.env);
 export default <app.Config>{
     lang: "en-US",
     statics: ["assets"],
-    hotReloading: true,
+    watch: [],
     server: {
         hostname: "localhost",
         http: {
@@ -162,13 +141,5 @@ export default <app.Config>{
         cookie: {
             maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
         }
-    },
-    database: {
-        type: env.DB_TYPE || "mysql",
-        host: env.DB_HOST || "localhost",
-        port: env.DB_PORT || 3306,
-        database: env.DB_NAME || "sfn",
-        user: env.DB_USER || "root",
-        password: env.DB_PASS || "123456"
     }
 };

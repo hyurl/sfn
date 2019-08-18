@@ -9,7 +9,10 @@ declare global {
     }
 }
 
-global.app.views = new alar.ModuleProxy("app.views", SRC_PATH + "/views");
+export const ViewEntry = global.app.views = new alar.ModuleProxy(
+    "app.views",
+    SRC_PATH + "/views"
+);
 
 app.views.setLoader({
     cache: {},

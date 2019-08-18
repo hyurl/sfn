@@ -5,14 +5,14 @@ import { pathExists } from 'fs-extra';
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import { SSE } from "sfn-sse";
-import channel from "ipchannel";
-import { APP_PATH, isCli, isWebServer, isTsNode } from "../../init";
+import channel, { Channel } from "ipchannel";
+import { APP_PATH, isCli } from "../../init";
 import {
     moduleExists,
     createImport,
     importDirectory
 } from "../tools/internal/module";
-import { serveTip, inspectAs, baseUrl } from "../tools/internal";
+import { serveTip, inspectAs, baseUrl, define } from "../tools/internal";
 import { red } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
 import "./load-message";
@@ -23,7 +23,7 @@ import "./load-rpc";
 import "./load-schedule";
 
 // Initiate hot-reload
-import { watchWebModules } from "./hot-reload";
+import "./hot-reload";
 
 declare global {
     namespace app {
@@ -43,8 +43,14 @@ declare global {
          */
         const sse: { [id: string]: SSE };
 
-        /** Starts the web server (both `http` and `ws`). */
-        function serve(): Promise<void>;
+        /** The communication channel between cluster processes. */
+        const channel: Channel;
+
+        /**
+         * Starts the web server (both `http` and `ws`) or an RPC server if
+         * `serverId` is provided.
+         */
+        function serve(serverId?: string): Promise<void>;
     }
 }
 
@@ -56,15 +62,52 @@ export var http: HttpServer | HttpsServer | Http2SecureServer = null;
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
-let hostnames = app.config.server.hostname,
-    httpServer = app.config.server.http,
-    httpPort = httpServer.port,
-    WS = app.config.server.websocket;
+let hostnames = app.config.server.hostname;
+let httpServer = app.config.server.http;
+let httpPort = httpServer.port;
+let WS = app.config.server.websocket;
+let sseContainer = null;
 
-app.serve = async function serve() {
-    if (!isWebServer) {
-        let entry = `${APP_PATH}/index` + (isTsNode ? ".ts" : ".js");
-        throw new Error(`The web server entry file must be '${entry}'`);
+define(app, "router", () => router);
+define(app, "http", () => http);
+define(app, "ws", () => ws);
+define(app, "sse", () => sseContainer);
+define(app, "channel", () => router ? channel : null);
+
+app.serve = async function serve(serverId?: string) {
+    if (serverId && !serverId.startsWith("web-server")) {
+        return app.rpc.serve(serverId);
+    }
+
+    sseContainer = {};
+
+    router = new App({
+        cookieSecret: <string>app.config.session.secret,
+        domain: hostnames
+    });
+
+    switch (httpServer.type) {
+        case "http":
+            http = new HttpServer(router.listener);
+            break;
+        case "https":
+            http = createServer(httpServer.options, router.listener);
+            break;
+        case "http2":
+            http = require("http2").createSecureServer(
+                httpServer.options,
+                router.listener
+            );
+            break;
+    }
+
+    if (WS.enabled) {
+        if (!WS.port)
+            ws = SocketIO(http, WS.options);
+        else
+            ws = SocketIO(WS.port, WS.options);
+
+        ws = inspectAs(ws, "[Sealed Object]");
     }
 
     // load HTTP middleware
@@ -73,8 +116,6 @@ app.serve = async function serve() {
     await import("../handlers/http-static");
     await import("../handlers/http-xml");
     await import("../handlers/http-session");
-    await import("../handlers/http-db");
-    await import("../handlers/http-auth");
 
     // Load user-defined bootstrap procedures.
     let httpBootstrap = APP_PATH + "/bootstrap/http";
@@ -111,10 +152,8 @@ app.serve = async function serve() {
                     // set the server ID
                     app.serverId = "web-server-" + channel.pid;
 
-                    watchWebModules();
-
-                    // invoke all start-up plugins.
-                    await app.plugins.lifeCycle.startup.invoke();
+                    // invoke all start-up hooks.
+                    await app.hooks.lifeCycle.startup.invoke();
 
                     if (typeof process.send == "function") {
                         // notify PM2 that the service is available.
@@ -142,50 +181,12 @@ app.serve = async function serve() {
 }
 
 if (!isCli) {
-    if (isWebServer) {
-        router = new App({
-            cookieSecret: <string>app.config.session.secret,
-            domain: hostnames
-        });
-
-        switch (httpServer.type) {
-            case "http":
-                http = new HttpServer(router.listener);
-                break;
-            case "https":
-                http = createServer(httpServer.options, router.listener);
-                break;
-            case "http2":
-                http = require("http2").createSecureServer(
-                    httpServer.options,
-                    router.listener
-                );
-                break;
-        }
-
-        if (WS.enabled) {
-            if (!WS.port)
-                ws = SocketIO(http, WS.options);
-            else
-                ws = SocketIO(WS.port, WS.options);
-
-            ws = inspectAs(ws, "[Sealed Object]");
-        }
-    }
-}
-
-global.app.router = router;
-global.app.http = http;
-global.app.ws = ws;
-global.app.sse = isWebServer ? inspectAs({}, "[Sealed Object]") : null;
-
-if (!isCli) {
     // Load user-defined bootstrap procedures.
     let bootstrap = APP_PATH + "/bootstrap/index";
     moduleExists(bootstrap) && tryImport(bootstrap);
 
-    // load plugins
-    pathExists(app.plugins.path).then(async (exists) => {
-        exists && (await importDirectory(app.plugins.path));
+    // load hooks
+    pathExists(app.hooks.path).then(async (exists) => {
+        exists && (await importDirectory(app.hooks.path));
     });
 }

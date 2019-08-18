@@ -1,4 +1,3 @@
-import { DB, User } from "modelar";
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
 import { activeEvent } from "../tools/symbols";
@@ -29,18 +28,17 @@ import { activeEvent } from "../tools/symbols";
  * transmissions.
  */
 export class WebSocketController extends Controller {
-    /** Sets a specified namesapce for WebSocket channel (used by SocketIO). */
+    /** Sets a specified namespace for WebSocket channel (used by SocketIO). */
     static nsp: string = "/";
 
     /** Reference to the corresponding socket context. */
     readonly socket: WebSocket;
 
-    /** The current active event (namesapce included). */
+    /** The current active event (namespace included). */
     readonly event: string;
 
     constructor(socket: WebSocket) {
         super();
-        this.authorized = socket.user !== null;
         this.socket = socket;
         this.event = this.socket[activeEvent];
         this.lang = (socket.cookies && socket.cookies.lang)
@@ -48,26 +46,8 @@ export class WebSocketController extends Controller {
             || app.config.lang;
     }
 
-    /** Gets/Sets the DB instance. */
-    get db(): DB {
-        return this.socket.db;
-    }
-
-    set db(v: DB) {
-        this.socket.db = v;
-    }
-
     /** Alias of `socket.session`. */
     get session(): Session {
         return this.socket.session;
-    }
-
-    /** Alias of `socket.user` */
-    get user(): User {
-        return this.socket.user;
-    }
-
-    set user(v: User) {
-        this.socket.user = v;
     }
 }

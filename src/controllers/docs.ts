@@ -21,7 +21,7 @@ export default class extends HttpController {
     }
 
     @route.get("/docs/:version/:name")
-    @app.plugins.web.onView.decorate()
+    @app.hooks.web.onView.decorate()
     async showContents(req: Request, version: string, name: string) {
         let sideMenu = await this.docSrv.getSideMenu(version, this.lang);
         let content = await this.docSrv.getContent(version, this.lang, name);

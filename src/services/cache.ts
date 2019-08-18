@@ -14,6 +14,14 @@ declare global {
 export default class CacheService {
     protected cache: Storage;
 
+    async init() {
+        await this.cache.sync();
+    }
+
+    async destroy() {
+        await this.cache.close();
+    }
+
     async set<T>(path: string, data: T, ttl?: number) {
         return this.cache.set(path, data, ttl);
     }
@@ -28,18 +36,6 @@ export default class CacheService {
 
     async delete(path: string) {
         return this.cache.delete(path);
-    }
-
-    close() {
-        return this.cache.close();
-    }
-
-    destroy() {
-        return this.cache.destroy();
-    }
-
-    sync() {
-        return this.cache.sync();
     }
 
     static getInstance() {

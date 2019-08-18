@@ -12,6 +12,12 @@ import {
     HttpDecorator
 } from './interfaces';
 
+// Expose some internal functions as utilities to the public API.
+export { green, grey, red, yellow } from "./internal/color";
+export { tryLogError } from "./internal/error";
+export { isOwnMethod, isSubClassOf, ensureType } from "./internal/index";
+export { moduleExists, createImport } from "./internal/module";
+
 /** Pauses the execution in an asynchronous operation. */
 export function sleep(timeout: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, timeout));

@@ -86,11 +86,6 @@ export const APP_PATH: string = isTsNode ? SRC_PATH : appPath;
 /** Whether the program is running in development mode. */
 export const isDevMode = isDebugMode || !process.send;
 
-var webEntryFile = path.resolve(APP_PATH, "index" + (isTsNode ? ".ts" : ".js"));
-
-/** Whether the program is running as a web server. */
-export const isWebServer = process.mainModule.filename == webEntryFile;
-
 // support .env configuration file
 configEnv({ path: ROOT_PATH + "/.env" });
 
@@ -102,6 +97,5 @@ global.app = {
     isDevMode,
     isTsNode,
     isCli,
-    isWebServer,
     local: alar.util.local
 };

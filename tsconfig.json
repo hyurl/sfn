@@ -14,6 +14,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "emitDecoratorMetadata": true,
+        // "strictBindCallApply": true,
         // "diagnostics": true,
         "baseUrl": ".",
         "paths": {
@@ -29,7 +30,7 @@
         "src/schedules/*.ts",
         "src/services/*.ts",
         "src/locales/*.ts",
-        "src/plugins/*.ts",
+        "src/hooks/*.ts",
         "src/models/*.ts",
         "src/utils/*.ts",
         "src/core/*/*.ts",

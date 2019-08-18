@@ -19,9 +19,9 @@ export abstract class Controller extends Service {
         return <any>this.constructor;
     };
 
-    /** This method will be auto-called before calling the actual method. */
-    before(): void | false | Promise<void | false> { }
+    /** @deprecated Use `init()` instead. */
+    before?(): void | Promise<void>;
 
-    /** This method will be auto-called after calling the actual method. */
-    after(): void | false | Promise<void | false> { }
+    /** @deprecated Use `destroy()` instead. */
+    after?(): void | Promise<void>;
 }

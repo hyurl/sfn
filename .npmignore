@@ -6,14 +6,14 @@ sessions/
 docs/
 dist/bootstrap/
 dist/controllers/
-dist/plugins/
+dist/hooks/
 dist/services/
 dist/utils/
 src/assets/
 src/bootstrap/
 src/controllers/
 src/locales/
-src/plugins/
+src/hooks/
 src/services/
 src/utils/
 src/views/

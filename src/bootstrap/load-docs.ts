@@ -35,28 +35,32 @@ app.docs.setLoader({
     }
 });
 
-if (app.config.hotReloading) {
-    let reloader = (file: string) => {
-        let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
-        let lang = parts[1];
 
-        if (startsWith(app.serverId, "doc-server")
-            || !app.rpc.hasConnect("doc-server")
-        ) {
-            let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
+// Rewrite watch method for more advanced functions.
+const _watch: () => alar.FSWatcher = app.docs.watch.bind(app.docs);
+app.docs.watch = () => {
+    return _watch().on("change", reload).on("unlink", reload);
+};
 
-            app.services.cache.instance().delete(path);
-        }
 
-        if (startsWith(app.serverId, "web-server")) {
-            // Use WebSocket to reload the web page.
-            let name = app.docs.resolve(file);
-            let data = (<ModuleProxy<View>>get(global, name)).instance(file).render();
-            let pathname = `/docs/${parts[0]}/${parts.slice(2).join("/").slice(0, -3)}`;
+function reload(file: string) {
+    let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
+    let lang = parts[1];
 
-            app.message.ws.local.emit("renew-doc-contents", pathname, lang, data);
-        }
-    };
+    if (startsWith(app.serverId, "doc-server")
+        || !app.rpc.hasConnect("doc-server")
+    ) {
+        let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 
-    app.docs.watch().on("change", reloader).on("unlink", reloader);
+        app.services.cache.instance().delete(path);
+    }
+
+    if (startsWith(app.serverId, "web-server")) {
+        // Use WebSocket to reload the web page.
+        let name = app.docs.resolve(file);
+        let data = (<ModuleProxy<View>>get(global, name)).instance(file).render();
+        let pathname = `/docs/${parts[0]}/${parts.slice(2).join("/").slice(0, -3)}`;
+
+        app.message.ws.local.emit("renew-doc-contents", pathname, lang, data);
+    }
 }

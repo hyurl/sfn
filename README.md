@@ -156,9 +156,3 @@ node dist
 And the doc server will started, note that the server port is `80` by default, 
 if it's not available on your machine, simply modify it in `.env` file before 
 running the application.
-
-## TODO List
-
-1. Distributed Cache Service
-2. Distributed Email Service
-3. Distributed Logging Service

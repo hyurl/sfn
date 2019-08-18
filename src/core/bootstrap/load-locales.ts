@@ -1,8 +1,7 @@
-import * as fs from "fs";
 import * as alar from "alar";
-import * as FRON from "fron";
 import { SRC_PATH } from '../../init';
 import { Locale } from '../tools/interfaces';
+import { createImport } from '../tools/internal/module';
 
 declare global {
     namespace app {
@@ -12,19 +11,13 @@ declare global {
 
 global.app.locales = new alar.ModuleProxy("app.locales", SRC_PATH + "/locales");
 
+const tryImport = createImport(require);
+
 app.locales.setLoader({
     cache: {},
-    extension: ".json",
+    extension: [".json", ".jsonc"],
     load(file: string) {
-        if (!this.cache[file]) {
-            try {
-                this.cache[file] = FRON.parse(fs.readFileSync(file, "utf8"), file);
-            } catch (e) {
-                this.cache[file] = {};
-            }
-        }
-
-        return this.cache[file];
+        return this.cache[file] || (this.cache[file] = tryImport(file));
     },
     unload(file: string) {
         delete this.cache[file];

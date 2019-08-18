@@ -2,12 +2,13 @@ import { MessageChannel, WebSocketMessage, SSEMessage } from "../tools/MessageCh
 
 declare global {
     namespace app {
-        const message: MessageChannel & {
+        const message: MessageChannel & message;
+        interface message {
             /** Sends message to the client through the WebSocket channel. */
             ws: WebSocketMessage,
             /** Sends message to the client through the SSE channel. */
             sse: SSEMessage
-        };
+        }
     }
 }
 

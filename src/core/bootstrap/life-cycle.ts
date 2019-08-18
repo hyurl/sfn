@@ -1,16 +1,15 @@
-import { DB } from 'modelar';
 import { SSE } from 'sfn-sse';
-import { Plugin } from '../tools/Plugin';
-import { sleep } from '../tools/functions';
+import { Hook } from '../tools/Hook';
 import { tryLogError } from '../tools/internal/error';
 import get = require('lodash/get');
+import { sleep } from '../tools/functions';
 
 declare global {
     namespace app {
-        namespace plugins {
+        namespace hooks {
             namespace lifeCycle {
-                const startup: Plugin;
-                const shutdown: Plugin;
+                const startup: Hook;
+                const shutdown: Hook;
             }
         }
     }
@@ -19,7 +18,7 @@ declare global {
 // gracefully shutdown
 process.on("SIGINT", async () => {
     try {
-        await app.plugins.lifeCycle.shutdown.invoke();
+        await app.hooks.lifeCycle.shutdown.invoke();
         process.exit();
     } catch (err) {
         process.exit(1);
@@ -30,24 +29,18 @@ process.on("SIGINT", async () => {
     }
 });
 
-// Try to close all database connections.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    DB.close();
-    await sleep(500);
-});
-
 // Try to recover cached schedules from the previous shutdown.
-app.plugins.lifeCycle.startup.bind(async () => {
-    await app.services.schedule.instance(app.services.local).resume();
+app.hooks.lifeCycle.startup.bind(async () => {
+    await app.services.schedule.instance(app.local).resume();
 });
 
 // Try to stop the internal schedule service.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    await app.services.schedule.instance(app.services.local).stop();
+app.hooks.lifeCycle.shutdown.bind(async () => {
+    await app.services.schedule.instance(app.local).stop();
 });
 
 // Try to close http server.
-app.plugins.lifeCycle.shutdown.bind(async () => {
+app.hooks.lifeCycle.shutdown.bind(async () => {
     if (app.http) {
         await new Promise(resolve => {
             let timer = setTimeout(resolve, 500);
@@ -57,11 +50,18 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
                 resolve();
             });
         });
+
+        // close SSE connections.
+        for (let id in app.sse) {
+            app.sse[id].close();
+        }
+
+        await sleep(500);
     }
 });
 
 // Try to close ws server.
-app.plugins.lifeCycle.shutdown.bind(async () => {
+app.hooks.lifeCycle.shutdown.bind(async () => {
     if (app.ws) {
         await new Promise(resolve => {
             let timer = setTimeout(resolve, 500);
@@ -77,7 +77,7 @@ app.plugins.lifeCycle.shutdown.bind(async () => {
 // Subscribe an event listener so that when receives WebSocket message sent from
 // an RPC server, the message can be delivered to the web client via the web
 // server.
-app.plugins.lifeCycle.startup.bind(() => {
+app.hooks.lifeCycle.startup.bind(() => {
     if (!app.ws) return;
 
     app.message.subscribe(app.message.ws.name, (context: {
@@ -104,7 +104,7 @@ app.plugins.lifeCycle.startup.bind(() => {
 // Subscribes an event listener so that when receives SSE message sent from an 
 // RPC server, the message can be delivered to the web client via the web
 // server.
-app.plugins.lifeCycle.startup.bind(() => {
+app.hooks.lifeCycle.startup.bind(() => {
     if (!app.sse) return;
 
     app.message.subscribe(app.message.sse.name, (context: {
@@ -140,7 +140,7 @@ app.plugins.lifeCycle.startup.bind(() => {
 
 // Subscribe an event listener so that when receives schedule task sent from an
 // RPC server, the task can be invoked in the current server.
-app.plugins.lifeCycle.startup.bind(() => {
+app.hooks.lifeCycle.startup.bind(() => {
     type Context = [string, string, any[]];
 
     app.message.subscribe(app.schedule.name, async (context: Context) => {
@@ -155,4 +155,34 @@ app.plugins.lifeCycle.startup.bind(() => {
             }
         }
     });
+});
+
+// Add the ability to allow services initiating themselves before serving.
+app.hooks.lifeCycle.startup.bind(async () => {
+    let config = app.config.server.rpc[app.serverId];
+
+    if (config) {
+        for (let service of config.services) {
+            // If a service has a method called 'init()', call it to initiate the
+            // service.
+            if (typeof service.instance(app.local).init === "function") {
+                await service.instance(app.local).init();
+            }
+        }
+    }
+});
+
+// Add the ability to allow services clearing resources before system shutdown.
+app.hooks.lifeCycle.shutdown.bind(async () => {
+    let config = app.config.server.rpc[app.serverId];
+
+    if (config) {
+        for (let service of config.services) {
+            // If a service has a method called 'init()', call it to initiate the
+            // service.
+            if (typeof service.instance(app.local).destroy === "function") {
+                await service.instance(app.local).destroy();
+            }
+        }
+    }
 });

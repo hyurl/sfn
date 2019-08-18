@@ -1,19 +1,19 @@
 import * as zlib from "zlib";
 import * as cors from "sfn-cors";
 import values = require("lodash/values");
-import { Model } from 'modelar';
 import { RouteHandler } from "webium";
 import { router } from "../bootstrap/index";
 import { HttpController } from "../controllers/HttpController";
 import { StatusException } from "../tools/StatusException";
 import { randStr } from "../tools/functions";
-import { isOwnMethod, isSubClassOf } from "../tools/internal";
+import { isOwnMethod } from "../tools/internal";
 import { tryLogError } from "../tools/internal/error";
 import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
+import { Controller } from '../controllers/Controller';
 // import isIteratorLike = require("is-iterator-like");
 
 const EFFECT_METHODS: string[] = [
@@ -72,7 +72,7 @@ export function getRouteHandler(key: string): RouteHandler {
                     // Handle CSRF token.
                     handleCsrfToken(ctrl);
 
-                    if (false === (await ctrl.before())) return;
+                    await applyInit(ctrl);
 
                     initiated = true;
 
@@ -99,7 +99,8 @@ export function getRouteHandler(key: string): RouteHandler {
                     res.end();
                 }
 
-                await ctrl.after();
+                await applyDestroy(ctrl);
+
                 finish(ctrl);
             }
         } catch (err) {
@@ -107,6 +108,22 @@ export function getRouteHandler(key: string): RouteHandler {
 
             handleError(err, ctrl);
         }
+    }
+}
+
+export async function applyInit(ctrl: Controller) {
+    if (typeof ctrl.init === "function") {
+        await ctrl.init();
+    } else if (typeof ctrl.before === "function") {
+        await ctrl.before();
+    }
+}
+
+export async function applyDestroy(ctrl: Controller) {
+    if (typeof ctrl.destroy === "function") {
+        await ctrl.destroy();
+    } else if (typeof ctrl.after === "function") {
+        await ctrl.after();
     }
 }
 
@@ -177,28 +194,6 @@ async function getArguments(ctrl: HttpController, method: string) {
             args.push(res);
         } else if (type === Session) { // inject Session
             args.push(req.session);
-        } else if (isSubClassOf(type, Model)) { // inject user-defined Model
-            if (req.method == "POST" && req.params.id === undefined) {
-                // POST request means creating a new model.
-                // If a POST request with an ID, which means the 
-                // request isn't a RESTful request, DO NOT 
-                // create new model.
-                args.push((new (<typeof Model>type)).use(req.db));
-            } else {
-                // Other type of requests, such as GET, DELETE, 
-                // PATCH, PUT, all need to retrieve an existing 
-                // model.
-                try {
-                    let id = <number>number.parse(req.params.id);
-
-                    if (!id || isNaN(id))
-                        throw new StatusException(400);
-
-                    args.push(await (<typeof Model>type).use(req.db).get(id));
-                } catch (e) {
-                    args.push(null);
-                }
-            }
         } else {
             args.push(data.shift());
         }

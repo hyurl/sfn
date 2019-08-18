@@ -174,7 +174,7 @@ export class ScheduleService {
 
         let tasks: ScheduleTask[] = [];
         let mod = app.services.schedule;
-        let { local } = app.services;
+        let { local } = app;
 
         for (let [taskId, task] of this.tasks) {
             if (taskId <= 0) // do not deal with internal tasks

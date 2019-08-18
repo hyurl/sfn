@@ -1,6 +1,5 @@
 import * as webium from "webium";
 import * as SocketIO from "socket.io";
-import * as modelar from "modelar";
 import * as ExpressSession from "express-session";
 import { SSE } from "sfn-sse";
 import { Controller } from "../controllers/Controller";
@@ -27,10 +26,6 @@ export abstract class Session {
 }
 
 export interface Request extends webium.Request {
-    /** Gets a DB instance for `modelar`. */
-    db: modelar.DB;
-    /** The logged-in user of the request. */
-    user?: modelar.User;
     /** Whether the request comes from an EventSource.  */
     isEventSource: boolean;
     /** Gets the CSRF token if available. */
@@ -87,10 +82,6 @@ export interface WebSocket extends SocketIO.Socket {
     domainName?: string;
     /** The subdomain name of the handshake. */
     subdomain?: string;
-    /** Gets a DB instance for `modelar`. */
-    db: modelar.DB;
-    /** The logged-in user of the socket. */
-    user?: modelar.User;
     /** In an sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
     /** * The cookies of handshake. */

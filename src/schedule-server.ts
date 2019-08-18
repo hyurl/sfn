@@ -1,3 +1,3 @@
 import "sfn";
 
-app.rpc.serve("schedule-server");
+app.serve("schedule-server");

@@ -39,40 +39,71 @@ declare global {
 
 const tasks: { [id: string]: number } = {};
 
+function ensureServerId(serverId: string): void {
+    if (!app.config.server.rpc[serverId]) {
+        throw new Error("The serverId is invalid");
+    }
+}
+
 app.rpc = {
     server: null,
     connections: inspectAs({}, "[Sealed Object]"),
     async serve(serverId: string) {
+        ensureServerId(serverId);
+
         let servers = app.config.server.rpc;
-        let { modules, ...options } = servers[serverId];
+        let { services, dependencies, ...options } = servers[serverId];
         let service = await app.services.serve(options);
 
-        for (let mod of modules) {
+        for (let mod of services) {
             service.register(mod);
         }
 
         app.rpc.server = service;
         app.serverId = serverId;
 
-        // invoke all start-up plugins.
-        await app.plugins.lifeCycle.startup.invoke();
+        // invoke all start-up hooks.
+        await app.hooks.lifeCycle.startup.invoke();
 
         console.log(serveTip("RPC", serverId, service.dsn));
 
         // self-connect after serving.
         await app.rpc.connect(serverId);
 
+        // connect to dependency services.
+        if (dependencies) {
+            if (dependencies === "all") {
+                await app.rpc.connectAll(true);
+            } else {
+                // used to prevent duplicated connections.
+                let metServers: string[] = [];
+
+                for (let dependency of dependencies) {
+                    for (let id in servers) {
+                        if (id !== app.serverId && !metServers.includes(id)) {
+                            if (servers[id].services.includes(dependency)) {
+                                metServers.push(id);
+                                await app.rpc.connect(id, true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // try to serve the REPL server.
         await serveRepl(app.serverId);
     },
     async connect(serverId: string, defer = false) {
+        ensureServerId(serverId);
+
         // prevent duplicated connect.
         if (app.rpc.hasConnect(serverId))
             return;
 
         try {
             let servers = app.config.server.rpc;
-            let { modules, ...options } = servers[serverId];
+            let { services, ...options } = servers[serverId];
             let service = await app.services.connect({
                 ...options,
                 id: app.serverId
@@ -80,14 +111,13 @@ app.rpc = {
 
             app.rpc.connections[serverId] = service;
 
-            for (let mod of modules) {
+            for (let mod of services) {
                 service.register(mod);
 
                 // If detects the schedule service is served by other processes
                 // and being connected, stop the local schedule service.
                 if (serverId !== app.serverId && mod === app.services.schedule) {
-                    let { local } = app.services;
-                    await app.services.schedule.instance(local).stop(true);
+                    await app.services.schedule.instance(app.local).stop(true);
                 }
             }
 
