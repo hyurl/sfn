@@ -4,9 +4,11 @@ import { serve as _serve, connect as _connect } from "power-repl";
 function getSockPath(name: string) {
     let hostname = app.config.server.hostname;
     let { port } = app.config.server.http;
+    let baseDir = os.platform() === "win32" ? os.tmpdir() : "/tmp";
+
     Array.isArray(hostname) && (hostname = hostname[0]);
 
-    return `${os.tmpdir()}/.sfn/${hostname}-${port}/${name}.sock`;
+    return `${baseDir}/sfn/${port}/${name}.sock`;
 }
 
 export function serve(name: string) {

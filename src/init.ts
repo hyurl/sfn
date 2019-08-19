@@ -58,7 +58,7 @@ export const isCli = appPath == path.resolve(__dirname, "cli");
 isCli && (appPath = path.resolve(process.cwd(), "dist"));
 
 /** The root path of the project. */
-export const ROOT_PATH = path.normalize(appPath + "/..");
+export const ROOT_PATH = global["ROOT_PATH"] || path.normalize(appPath + "/..");
 
 var srcPath: string = appPath;
 
