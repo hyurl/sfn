@@ -29,7 +29,11 @@ export * from "./core/tools/MessageChannel";
 export * from "./core/controllers/HttpController";
 export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
-export { StaticOptions } from "./config";
+
+import config, { StaticOptions } from "./config";
+export { StaticOptions };
+
+global.app.config = config;
 
 if (isMain) {
     require("./core/tools/internal/module").bootstrap();

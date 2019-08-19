@@ -3,6 +3,7 @@ import * as fs from "fs-extra";
 import * as FRON from "fron";
 import { isTsNode } from "../../../init";
 import { tryLogError, resolveErrorStack } from './error';
+import merge = require('lodash/merge');
 
 const tryImport = createImport(require);
 
@@ -68,7 +69,9 @@ export async function importDirectory(dir: string) {
 }
 
 export function bootstrap() {
-    require("../../bootstrap/load-config");
+    let moduleName = app.APP_PATH + "/config";
+    let tryImport = createImport(require);
+    let config = require("../../../config");
 
     if (!app.isCli) {
         // Load user-defined bootstrap procedures.
@@ -80,5 +83,14 @@ export function bootstrap() {
         fs.pathExists(app.hooks.path).then(async (exists) => {
             exists && (await importDirectory(app.hooks.path));
         });
+    }
+
+    if (moduleExists(moduleName)) {
+        // Load user-defined configurations.
+        let mod = tryImport(moduleName);
+
+        if (Object.is(mod, config) && typeof mod.default == "object") {
+            merge(config, mod.default);
+        }
     }
 }

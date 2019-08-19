@@ -4,8 +4,15 @@ app.config.server.rpc = {
     "doc-server": {
         host: "localhost",
         port: 4001,
-        services: [app.services.docs, app.services.test],
-        dependencies: [app.services.logger, app.services.schedule]
+        services: [
+            app.services.docs,
+            app.services.test
+        ],
+        dependencies: [
+            app.services.logger,
+            app.services.schedule,
+            app.services.cache
+        ]
     },
     "logger-server": {
         host: "localhost",
