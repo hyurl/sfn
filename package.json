@@ -74,7 +74,7 @@
         "express-session": "^1.16.2",
         "fron": "^0.1.9",
         "fs-extra": "^7.0.1",
-        "function-intercepter": "^1.0.0",
+        "function-intercepter": "^1.0.1",
         "hide-protected-properties": "^0.1.1",
         "ideal-filename": "^0.1.3",
         "ipchannel": "^0.2.6",

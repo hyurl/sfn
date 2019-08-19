@@ -1,6 +1,6 @@
 import random = require("lodash/random");
 import { App, RouteHandler } from "webium";
-import { interceptAsync } from 'function-intercepter';
+import { interceptAsync, intercept } from 'function-intercepter';
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { StatusException } from './StatusException';
@@ -61,9 +61,14 @@ export function injectCsrfToken(html: string, token: string): string {
 export const requireAuth: ControllerDecorator = interceptAsync().before(
     function (this: Controller) {
         if (!this.authorized) {
-            if (this instanceof HttpController && this.fallbackTo) {
-                this.res.redirect(this.fallbackTo, 302);
-                return false;
+            if (this instanceof HttpController) {
+                if (typeof this.fallbackTo === "string") {
+                    this.res.redirect(this.fallbackTo, 302);
+                } else {
+                    this.res.send(this.fallbackTo);
+                }
+
+                return intercept.BREAK;
             } else {
                 throw new StatusException(401);
             }

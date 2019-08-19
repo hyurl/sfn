@@ -1,11 +1,12 @@
 import * as path from "path";
+import get = require('lodash/get');
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
 import { Controller } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
 import { StatusException } from "../tools/StatusException";
 import { UploadOptions } from "../tools/upload";
-import get = require('lodash/get');
+import { ResultMessage } from '../tools/Service';
 
 export { CorsOptions };
 
@@ -36,8 +37,11 @@ export class HttpController extends Controller {
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
 
-    /** If set, when unauthorized, fallback to the given URL. */
-    fallbackTo: string;
+    /**
+     * If set, when unauthorized, fallback to the given URL or response an
+     * error message.
+     */
+    fallbackTo: string | ResultMessage;
     /** Whether the response data should be compressed to GZip. */
     gzip: boolean = true;
     /**
