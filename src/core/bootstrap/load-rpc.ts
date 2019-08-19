@@ -31,6 +31,11 @@ declare global {
             function connect(serverId: string, defer?: boolean): Promise<void>;
             /** Connects to all RPC servers. */
             function connectAll(defer?: boolean): Promise<void>;
+            /**
+             * Connects to all dependency services, by default, `serverId` is
+             * the `app.serverId`, and don't have to pass it.
+             */
+            function connectDependencies(serverId?: string): Promise<void>;
             /** Checks if the target server is connected. */
             function hasConnect(serverId: string): boolean;
         }
@@ -52,7 +57,7 @@ app.rpc = {
         ensureServerId(serverId);
 
         let servers = app.config.server.rpc;
-        let { services = [], dependencies, ...options } = servers[serverId];
+        let { services = [], ...options } = servers[serverId];
         let service = await app.services.serve(options);
 
         for (let mod of services) {
@@ -79,25 +84,7 @@ app.rpc = {
         await app.rpc.connect(serverId);
 
         // connect to dependency services.
-        if (dependencies) {
-            if (dependencies === "all") {
-                await app.rpc.connectAll(true);
-            } else {
-                // used to prevent duplicated connections.
-                let metServers: string[] = [];
-
-                for (let dependency of dependencies) {
-                    for (let id in servers) {
-                        if (id !== app.serverId && !metServers.includes(id)) {
-                            if (servers[id].services.includes(dependency)) {
-                                metServers.push(id);
-                                await app.rpc.connect(id, true);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        await app.rpc.connectDependencies(serverId);
 
         // try to serve the REPL server.
         await serveRepl(app.serverId);
@@ -166,6 +153,33 @@ app.rpc = {
         }
 
         await Promise.all(connections);
+    },
+    async connectDependencies(serverId?: string) {
+        serverId = serverId || app.serverId;
+        let servers = app.config.server.rpc;
+        let dependencies = servers[serverId]
+            ? servers[serverId].dependencies
+            : null;
+
+        if (dependencies) {
+            if (dependencies === "all") {
+                await app.rpc.connectAll(true);
+            } else {
+                // used to prevent duplicated connections.
+                let metServers: string[] = [];
+
+                for (let dependency of dependencies) {
+                    for (let id in servers) {
+                        if (id !== app.serverId && !metServers.includes(id)) {
+                            if (servers[id].services.includes(dependency)) {
+                                metServers.push(id);
+                                await app.rpc.connect(id, true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     },
     hasConnect(serverId: string) {
         return !!app.rpc.connections[serverId];
