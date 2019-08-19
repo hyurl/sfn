@@ -54,7 +54,7 @@ export function upload(options: { [field: string]: UploadOptions }): HttpDecorat
 /** Allows the method accept file uploading with specified fields. */
 export function upload(...fields: string[]): HttpDecorator;
 export function upload(...args): HttpDecorator {
-    return interceptAsync<HttpController>().before(function () {
+    return interceptAsync().before(function (this: HttpController) {
         let fields: Array<{ name: string, maxCount: number }> = [],
             options: { [field: string]: UploadOptions } = {},
             { req, res } = this;

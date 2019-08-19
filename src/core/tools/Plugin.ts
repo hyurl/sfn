@@ -1,33 +1,33 @@
-import * as alar from "alar";
+import { normalize, extname } from 'path';
+import { watch } from "chokidar";
+import { applyMagic } from 'js-magic';
 import { interceptAsync } from 'function-intercepter';
-import { APP_PATH } from '../../init';
 import { createImport, traceModulePath } from './internal/module';
 
 const tryImport = createImport(require);
 
-export class Plugin<I = void, O = void> extends alar.ModuleProxy {
-    protected paths: string[] = [];
+@applyMagic
+export class Plugin<I = void, O = void> {
+    protected path: string;
     protected children: { [name: string]: Plugin } = {};
 
-    constructor(readonly name: string) {
-        super(name, APP_PATH + "/plugins");
+    constructor(readonly name: string, path: string) {
+        this.path = normalize(path);
     }
 
     /** Binds a handler to the plugin. */
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
-        let path = traceModulePath(this.path);
-        let name = this.resolve(path);
+        let path = traceModulePath(this.path) || "<internal>";
 
-        if (!Plugin.Container[name]) {
-            Plugin.Container[name] = {};
+        if (!Plugin.Container[path]) {
+            Plugin.Container[path] = {};
         }
 
-        if (!Plugin.Container[name][this.name]) {
-            Plugin.Container[name][this.name] = [];
+        if (!Plugin.Container[path][this.name]) {
+            Plugin.Container[path][this.name] = [];
         }
 
-        Plugin.Container[name][this.name].push(handler);
-        this.paths.includes(name) || this.paths.push(name);
+        Plugin.Container[path][this.name].push(handler);
 
         return this;
     }
@@ -60,29 +60,15 @@ export class Plugin<I = void, O = void> extends alar.ModuleProxy {
     getHandlers() {
         let handlers: Function[] = [];
 
-        for (let name of this.paths) {
-            let container = Plugin.Container[name];
-            handlers = handlers.concat(container ? container[this.name] : []);
+        for (let container of Object.values(Plugin.Container)) {
+            let _handlers = container[this.name];
+
+            if (_handlers && _handlers.length > 0) {
+                handlers.push(..._handlers);
+            }
         }
 
         return handlers;
-    }
-
-    watch() {
-        return super.watch().on("add", (filename: string) => {
-            this.resolve(filename) && tryImport(filename);
-        }).on("change", (filename: string) => {
-            let name = this.resolve(filename);
-
-            if (name) {
-                // remove previous plugins from the internal container
-                delete Plugin.Container[name];
-                tryImport(filename);
-            }
-        }).on("unlink", (filename: string) => {
-            let name = this.resolve(filename);
-            name && (delete Plugin.Container[name]);
-        });
     }
 
     protected __get(prop: string) {
@@ -93,8 +79,13 @@ export class Plugin<I = void, O = void> extends alar.ModuleProxy {
         } else if (typeof prop != "symbol") {
             return this.children[prop] = new Plugin(
                 this.name + "." + String(prop),
+                this.path
             );
         }
+    }
+
+    protected __has(prop: string) {
+        return (prop in this) || (prop in this.children);
     }
 }
 
@@ -104,4 +95,31 @@ export namespace Plugin {
             [name: string]: Function[];
         }
     } = {};
+}
+
+export class PluginProxy extends Plugin {
+    watch() {
+        return watch(this.path, {
+            followSymlinks: false,
+            awaitWriteFinish: true
+        }).on("add", filename => {
+            [".js", ".ts"].includes(extname(filename)) && tryImport(filename);
+        }).on("change", filename => {
+            if ([".js", ".ts"].includes(extname(filename))) {
+                // remove previous plugins from the internal container
+                this.clearCache(filename);
+                tryImport(filename);
+            }
+        }).on("unlink", filename => {
+            if ([".js", ".ts"].includes(extname(filename))) {
+                this.clearCache(filename);
+            }
+        });
+    }
+
+    private clearCache(filename: string) {
+        let path = filename.slice(0, -extname(filename).length);
+        path && (Plugin.Container[path] = {});
+        delete require.cache[filename];
+    }
 }

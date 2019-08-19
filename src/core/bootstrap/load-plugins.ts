@@ -1,5 +1,6 @@
 import { FSWatcher } from "alar";
-import { Plugin } from '../tools/Plugin';
+import { PluginProxy } from '../tools/Plugin';
+import { APP_PATH } from '../../init';
 
 declare global {
     namespace app {
@@ -12,4 +13,4 @@ declare global {
     }
 }
 
-global.app.plugins = new Plugin("app.plugins");
+global.app.plugins = new PluginProxy("app.plugins", APP_PATH + "/plugins");
