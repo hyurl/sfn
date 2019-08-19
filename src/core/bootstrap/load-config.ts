@@ -4,12 +4,6 @@ import { APP_PATH } from "../../init";
 import config from "../../config";
 import { moduleExists, createImport } from '../tools/internal/module';
 
-declare global {
-    namespace app {
-        const config: Config;
-    }
-}
-
 global.app.config = config;
 
 let moduleName = APP_PATH + "/config";

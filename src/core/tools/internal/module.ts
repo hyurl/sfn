@@ -66,3 +66,19 @@ export async function importDirectory(dir: string) {
         }
     }
 }
+
+export function bootstrap() {
+    require("../../bootstrap/load-config");
+
+    if (!app.isCli) {
+        // Load user-defined bootstrap procedures.
+        let bootstrap = app.APP_PATH + "/bootstrap/index";
+
+        moduleExists(bootstrap) && tryImport(bootstrap);
+
+        // load hooks
+        fs.pathExists(app.hooks.path).then(async (exists) => {
+            exists && (await importDirectory(app.hooks.path));
+        });
+    }
+}

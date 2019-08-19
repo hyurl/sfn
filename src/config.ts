@@ -11,6 +11,7 @@ import { ensureType } from './core/tools/internal';
 
 declare global {
     namespace app {
+        const config: Config;
         interface Config {
             /** Default language of the application. */
             lang?: string;
