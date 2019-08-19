@@ -12,7 +12,6 @@ const upperFirst = require("lodash/upperFirst");
 const cloneDeep = require("lodash/cloneDeep");
 const get = require("lodash/get");
 const init_1 = require("../init");
-const load_config_1 = require("../core/bootstrap/load-config");
 const color_1 = require("../core/tools/internal/color");
 const repl_1 = require("../core/tools/internal/repl");
 const module_1 = require("../core/tools/internal/module");
@@ -128,7 +127,7 @@ try {
             program.language = names[0] + "-" + names[1].toUpperCase();
         }
         let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
-        let mod = get(app.locales, load_config_1.config.lang);
+        let mod = get(app.locales, app.config.lang);
         let lang;
         let contents;
         if (mod && mod.proto) {

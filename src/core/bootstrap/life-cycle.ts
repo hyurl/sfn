@@ -19,6 +19,18 @@ declare global {
 process.on("SIGINT", async () => {
     try {
         await app.hooks.lifeCycle.shutdown.invoke();
+
+        if (app.rpc.server) {
+            let { services = [] } = app.config.server.rpc[app.serverId];
+            // If a service has a method called 'init()', call it to initiate the
+            // service.
+            for (let service of services) {
+                if (typeof service.instance(app.local).destroy === "function") {
+                    await service.instance(app.local).destroy();
+                }
+            }
+        }
+
         process.exit();
     } catch (err) {
         process.exit(1);
@@ -155,34 +167,4 @@ app.hooks.lifeCycle.startup.bind(() => {
             }
         }
     });
-});
-
-// Add the ability to allow services initiating themselves before serving.
-app.hooks.lifeCycle.startup.bind(async () => {
-    let config = app.config.server.rpc[app.serverId];
-
-    if (config) {
-        for (let service of config.services) {
-            // If a service has a method called 'init()', call it to initiate the
-            // service.
-            if (typeof service.instance(app.local).init === "function") {
-                await service.instance(app.local).init();
-            }
-        }
-    }
-});
-
-// Add the ability to allow services clearing resources before system shutdown.
-app.hooks.lifeCycle.shutdown.bind(async () => {
-    let config = app.config.server.rpc[app.serverId];
-
-    if (config) {
-        for (let service of config.services) {
-            // If a service has a method called 'init()', call it to initiate the
-            // service.
-            if (typeof service.instance(app.local).destroy === "function") {
-                await service.instance(app.local).destroy();
-            }
-        }
-    }
 });

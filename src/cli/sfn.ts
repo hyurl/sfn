@@ -10,7 +10,6 @@ import upperFirst = require("lodash/upperFirst");
 import cloneDeep = require('lodash/cloneDeep');
 import get = require('lodash/get');
 import { version, APP_PATH, SRC_PATH } from "../init";
-import { config } from "../core/bootstrap/load-config";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
 import { moduleExists, createImport } from "../core/tools/internal/module";
@@ -164,7 +163,7 @@ try {
         }
 
         let output: string = `${SRC_PATH}/locales/${program.language}.json`;
-        let mod: ModuleProxy<Locale> = get(app.locales, config.lang);
+        let mod: ModuleProxy<Locale> = get(app.locales, app.config.lang);
         let lang: Locale;
         let contents: string;
 

@@ -4,8 +4,6 @@ import { APP_PATH } from "../../init";
 import config from "../../config";
 import { moduleExists, createImport } from '../tools/internal/module';
 
-export { config };
-
 declare global {
     namespace app {
         const config: Config;

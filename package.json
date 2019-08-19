@@ -2,7 +2,7 @@
     "name": "sfn",
     "version": "0.6.0",
     "description": "A Service Framework for Node.js.",
-    "main": "index.js",
+    "main": "dist/index.js",
     "types": "src/index.ts",
     "bin": "dist/cli/sfn.js",
     "scripts": {

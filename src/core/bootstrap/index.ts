@@ -6,11 +6,11 @@ import { App } from "webium";
 import * as SocketIO from "socket.io";
 import { SSE } from "sfn-sse";
 import channel, { Channel } from "ipchannel";
-import { APP_PATH, isCli } from "../../init";
+import { APP_PATH } from "../../init";
 import {
     moduleExists,
     createImport,
-    importDirectory
+    importDirectory,
 } from "../tools/internal/module";
 import { serveTip, inspectAs, baseUrl, define } from "../tools/internal";
 import { red } from "../tools/internal/color";
@@ -62,10 +62,6 @@ export var http: HttpServer | HttpsServer | Http2SecureServer = null;
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
-let hostnames = app.config.server.hostname;
-let httpServer = app.config.server.http;
-let httpPort = httpServer.port;
-let WS = app.config.server.websocket;
 let sseContainer = null;
 
 define(app, "router", () => router);
@@ -79,25 +75,24 @@ app.serve = async function serve(serverId?: string) {
         return app.rpc.serve(serverId);
     }
 
-    sseContainer = {};
+    let { type, port, timeout, options } = app.config.server.http;
+    let WS = app.config.server.websocket;
 
+    sseContainer = {};
     router = new App({
         cookieSecret: <string>app.config.session.secret,
-        domain: hostnames
+        domain: app.config.server.hostname
     });
 
-    switch (httpServer.type) {
+    switch (type) {
         case "http":
             http = new HttpServer(router.listener);
             break;
         case "https":
-            http = createServer(httpServer.options, router.listener);
+            http = createServer(options, router.listener);
             break;
         case "http2":
-            http = require("http2").createSecureServer(
-                httpServer.options,
-                router.listener
-            );
+            http = require("http2").createSecureServer(options, router.listener);
             break;
     }
 
@@ -129,7 +124,7 @@ app.serve = async function serve(serverId?: string) {
 
     // Start HTTP server.
     if (typeof http["setTimeout"] == "function") {
-        http["setTimeout"](app.config.server.http.timeout);
+        http["setTimeout"](timeout);
     }
 
     return new Promise((resolve, reject) => {
@@ -141,7 +136,7 @@ app.serve = async function serve(serverId?: string) {
             } else {
                 reject(err);
             }
-        }).listen(httpPort, async () => {
+        }).listen(port, async () => {
             try {
                 // load controllers
                 if (await pathExists(app.controllers.path)) {
@@ -177,16 +172,5 @@ app.serve = async function serve(serverId?: string) {
                 reject(err);
             }
         });
-    });
-}
-
-if (!isCli) {
-    // Load user-defined bootstrap procedures.
-    let bootstrap = APP_PATH + "/bootstrap/index";
-    moduleExists(bootstrap) && tryImport(bootstrap);
-
-    // load hooks
-    pathExists(app.hooks.path).then(async (exists) => {
-        exists && (await importDirectory(app.hooks.path));
     });
 }

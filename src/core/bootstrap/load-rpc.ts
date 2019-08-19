@@ -52,7 +52,7 @@ app.rpc = {
         ensureServerId(serverId);
 
         let servers = app.config.server.rpc;
-        let { services, dependencies, ...options } = servers[serverId];
+        let { services = [], dependencies, ...options } = servers[serverId];
         let service = await app.services.serve(options);
 
         for (let mod of services) {
@@ -64,6 +64,14 @@ app.rpc = {
 
         // invoke all start-up hooks.
         await app.hooks.lifeCycle.startup.invoke();
+
+        // If a service has a method called 'init()', call it to initiate the
+        // service.
+        for (let service of services) {
+            if (typeof service.instance(app.local).init === "function") {
+                await service.instance(app.local).init();
+            }
+        }
 
         console.log(serveTip("RPC", serverId, service.dsn));
 

@@ -18,6 +18,7 @@ export { green, grey, red, yellow } from "./internal/color";
 export { tryLogError } from "./internal/error";
 export { isOwnMethod, isSubClassOf, ensureType, define } from "./internal/index";
 export { moduleExists, createImport } from "./internal/module";
+export { serve as serveRepl, connect as connectRepl } from "./internal/repl";
 
 /** Pauses the execution in an asynchronous operation. */
 export function sleep(timeout: number): Promise<void> {
