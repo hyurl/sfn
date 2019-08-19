@@ -101,10 +101,11 @@ export class HookProxy extends Hook {
     watch() {
         return watch(this.path, {
             followSymlinks: false,
-            awaitWriteFinish: true
-        }).on("add", (filename: string) => {
+            awaitWriteFinish: true,
+            ignored: /\.(js\.map|d\.ts|md)$/,
+        }).on("add", filename => {
             tryImport(filename);
-        }).on("change", (filename: string) => {
+        }).on("change", filename => {
             // remove previous hooks from the internal container
             this.clearCache(filename);
             tryImport(filename);
