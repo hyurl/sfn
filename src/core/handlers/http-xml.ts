@@ -38,6 +38,7 @@ function parsingType(req: IncomingMessage) {
 }
 
 function xml(
+    this: Response,
     data: { [key: string]: any },
     rootTag = "root",
     headless = false

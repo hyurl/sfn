@@ -11,11 +11,12 @@ import {
     WebSocketDecorator,
     HttpDecorator
 } from './interfaces';
+import { Controller } from '../controllers/Controller';
 
 // Expose some internal functions as utilities to the public API.
 export { green, grey, red, yellow } from "./internal/color";
 export { tryLogError } from "./internal/error";
-export { isOwnMethod, isSubClassOf, ensureType } from "./internal/index";
+export { isOwnMethod, isSubClassOf, ensureType, define } from "./internal/index";
 export { moduleExists, createImport } from "./internal/module";
 
 /** Pauses the execution in an asynchronous operation. */
@@ -57,16 +58,18 @@ export function injectCsrfToken(html: string, token: string): string {
 }
 
 /** Requires authentication when calling the method. */
-export const requireAuth: ControllerDecorator = interceptAsync().before(function () {
-    if (!this.authorized) {
-        if (this instanceof HttpController && this.fallbackTo) {
-            this.res.redirect(this.fallbackTo, 302);
-            return false;
-        } else {
-            throw new StatusException(401);
+export const requireAuth: ControllerDecorator = interceptAsync().before(
+    function (this: Controller) {
+        if (!this.authorized) {
+            if (this instanceof HttpController && this.fallbackTo) {
+                this.res.redirect(this.fallbackTo, 302);
+                return false;
+            } else {
+                throw new StatusException(401);
+            }
         }
     }
-});
+);
 
 let router: App,
     handle: (route: string) => RouteHandler,

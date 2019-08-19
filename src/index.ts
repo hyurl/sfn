@@ -26,6 +26,7 @@ export * from "./core/tools/StatusException";
 import "./core/bootstrap/load-config";
 
 export * from "./core/tools/Hook";
+export * from "./core/tools/Schedule";
 export * from "./core/tools/Service";
 export * from "./core/tools/MessageChannel";
 export * from "./core/controllers/HttpController";
