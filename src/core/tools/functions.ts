@@ -100,18 +100,20 @@ export function route(method: string, path: string): HttpDecorator;
 export function route(method: string, path?: string): HttpDecorator {
     return (proto: HttpController, prop: string) => {
         let modPath = traceModulePath(app.controllers.path);
+        let { baseURI = "" } = <typeof HttpController>proto.ctor;
 
         if (!modPath)
             return;
 
         if (!path) {
             let parts = method.split(/\s+/);
-            let { baseURI = "" } = <typeof HttpController>proto.ctor;
             method = parts[0] === "SSE" ? "GET" : parts[0];
-            path = baseURI + parts[1];
+            path = parts[1];
         } else if (method === "SSE") {
             method = "GET";
         }
+
+        path = baseURI + path;
 
         let data = {
             prefix: method,
