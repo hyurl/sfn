@@ -97,5 +97,6 @@ global.app = {
     isDevMode,
     isTsNode,
     isCli,
-    local: alar.util.local
+    local: alar.util.local,
+    isWebServer: false
 };

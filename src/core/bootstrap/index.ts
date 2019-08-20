@@ -78,6 +78,7 @@ app.serve = async function serve(serverId?: string) {
     let { type, port, timeout, options } = app.config.server.http;
     let WS = app.config.server.websocket;
 
+    global.app.isWebServer = true;
     sseContainer = {};
     router = new App({
         cookieSecret: <string>app.config.session.secret,
