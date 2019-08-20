@@ -89,8 +89,8 @@ export function bootstrap() {
         // Load user-defined configurations.
         let mod = tryImport(moduleName);
 
-        if (Object.is(mod, config) && typeof mod.default == "object") {
-            merge(config, mod.default);
+        if (!Object.is(mod, config) && typeof mod.default == "object") {
+            merge(config.default, mod.default);
         }
     }
 }
