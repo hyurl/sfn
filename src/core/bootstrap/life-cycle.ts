@@ -21,7 +21,7 @@ process.on("SIGINT", async () => {
         await app.hooks.lifeCycle.shutdown.invoke();
 
         if (app.rpc.server) {
-            let { services = [] } = app.config.server.rpc[app.serverId];
+            let { services = [] } = app.config.server.rpc[app.id];
             // If a service has a method called 'init()', call it to initiate the
             // service.
             for (let service of services) {

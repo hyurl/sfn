@@ -37,5 +37,12 @@ global.app.config = config;
 
 if (isMain) {
     require("./core/tools/internal/module").bootstrap();
-    app.serve().then(() => app.rpc.connectAll(true));
+
+    let appId = process.argv[2];
+
+    if (appId) {
+        app.serve(appId);
+    } else {
+        app.serve();
+    }
 }

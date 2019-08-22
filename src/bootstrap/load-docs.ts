@@ -47,7 +47,7 @@ function reload(file: string) {
     let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
     let lang = parts[1];
 
-    if (startsWith(app.serverId, "doc-server")
+    if (startsWith(app.id, "doc-server")
         || !app.rpc.hasConnect("doc-server")
     ) {
         let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
@@ -55,7 +55,7 @@ function reload(file: string) {
         app.services.cache.instance().delete(path);
     }
 
-    if (startsWith(app.serverId, "web-server")) {
+    if (startsWith(app.id, "web-server")) {
         // Use WebSocket to reload the web page.
         let name = app.docs.resolve(file);
         let data = (<ModuleProxy<View>>get(global, name)).instance(file).render();
