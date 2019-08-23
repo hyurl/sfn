@@ -3,15 +3,15 @@ import { green } from './color';
 
 const truePattern = /^\s*(true|yes)\s*$/i;
 const falsePattern = /^\s*(false|no)\s*$/i;
-const nullPattern = /^\s*(null|nil|void)\s*$/i;
+const nullPattern = /^\s*(null|nil|none|void)\s*$/i;
 
 export function isOwnMethod(obj: any, method: string): boolean {
     return typeof obj[method] === "function" &&
         (<Object>obj.constructor.prototype).hasOwnProperty(method);
 }
 
-export function serveTip(type: string, serverId: string, url: string) {
-    return green`${type} server [${serverId}](${url}) started.`;
+export function serveTip(type: string, id: string, url: string) {
+    return green`${type} server [${id}](${url}) started.`;
 }
 
 export function baseUrl(): string {

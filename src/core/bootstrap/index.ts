@@ -48,9 +48,9 @@ declare global {
 
         /**
          * Starts the web server (both `http` and `ws`) or an RPC server if
-         * `serverId` is provided.
+         * `id` is provided.
          */
-        function serve(serverId?: string): Promise<void>;
+        function serve(id?: string): Promise<void>;
     }
 }
 
@@ -70,9 +70,9 @@ define(app, "ws", () => ws);
 define(app, "sse", () => sseContainer);
 define(app, "channel", () => router ? channel : null);
 
-app.serve = async function serve(serverId?: string) {
-    if (serverId && !serverId.startsWith("web-server")) {
-        return app.rpc.serve(serverId);
+app.serve = async function serve(id?: string) {
+    if (id && !id.startsWith("web-server")) {
+        return app.rpc.serve(id);
     }
 
     let { type, port, timeout, options } = app.config.server.http;
@@ -146,20 +146,23 @@ app.serve = async function serve(serverId?: string) {
 
                 let finish = async () => {
                     // set the server ID
-                    app.serverId = "web-server-" + channel.pid;
+                    app.id = "web-server-" + channel.pid;
 
                     // invoke all start-up hooks.
                     await app.hooks.lifeCycle.startup.invoke();
+
+                    // try to serve the REPL server.
+                    await serveRepl(app.id);
+
+                    // try to connect all RPC services.
+                    await app.rpc.connectAll(true);
 
                     if (typeof process.send == "function") {
                         // notify PM2 that the service is available.
                         process.send("ready");
                     } else {
-                        console.log(serveTip("Web", app.serverId, baseUrl()));
+                        console.log(serveTip("Web", app.id, baseUrl()));
                     }
-
-                    // try to serve the REPL server.
-                    await serveRepl(app.serverId);
 
                     resolve();
                 }

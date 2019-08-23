@@ -75,7 +75,7 @@ declare global {
                  * @see https://github.com/hyurl/alar
                  */
                 rpc?: {
-                    [serverId: string]: RpcOptions & ClientOptions & {
+                    [id: string]: RpcOptions & ClientOptions & {
                         [x: string]: any;
                         services: ModuleProxy<any>[];
                         dependencies?: "all" | ModuleProxy<any>[];

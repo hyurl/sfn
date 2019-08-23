@@ -11,7 +11,7 @@
             "name": "Web Server",
             "program": "${workspaceFolder}/dist/index",
             "serverReadyAction": {
-                "pattern": "\\((http[s]{0,1}://.+)\\) started",
+                "pattern": "\\((http(s)?://.+)\\) started",
                 "uriFormat": "%s",
                 "action": "debugWithChrome",
                 "webRoot": "${workspaceFolder}"
@@ -30,28 +30,40 @@
             "request": "launch",
             "protocol": "auto",
             "name": "Doc Server",
-            "program": "${workspaceFolder}/dist/doc-server"
+            "program": "${workspaceFolder}/dist/index",
+            "args": [
+                "doc-server"
+            ]
         },
         {
             "type": "node",
             "request": "launch",
             "protocol": "auto",
             "name": "Logger Server",
-            "program": "${workspaceFolder}/dist/logger-server"
+            "program": "${workspaceFolder}/dist/index",
+            "args": [
+                "logger-server"
+            ]
         },
         {
             "type": "node",
             "request": "launch",
             "protocol": "auto",
             "name": "Schedule Server",
-            "program": "${workspaceFolder}/dist/schedule-server"
+            "program": "${workspaceFolder}/dist/index",
+            "args": [
+                "schedule-server"
+            ]
         },
         {
             "type": "node",
             "request": "launch",
             "protocol": "auto",
             "name": "Cache Server",
-            "program": "${workspaceFolder}/dist/cache-server"
+            "program": "${workspaceFolder}/dist/index",
+            "args": [
+                "cache-server"
+            ]
         }
     ]
 }

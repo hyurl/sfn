@@ -15,49 +15,49 @@ declare global {
             var server: RpcServer;
 
             /** @inner reserved portal used by the framework */
-            var connections: { [serverId: string]: RpcClient };
+            var connections: { [id: string]: RpcClient };
 
             /**
-             * Starts an RPC server according to the given `serverId`, which is 
+             * Starts an RPC server according to the given `id`, which is 
              * set in `config.server.rpc`.
              */
-            function serve(serverId: string): Promise<void>;
+            function serve(id: string): Promise<void>;
             /**
-             * Connects to an RPC server according to the given `serverId`, 
+             * Connects to an RPC server according to the given `id`, 
              * which is set in `config.server.rpc`. If `defer` is `true`, when 
              * the server is not online, the function will hang until it becomes
              * available and finishes the connection.
              */
-            function connect(serverId: string, defer?: boolean): Promise<void>;
+            function connect(id: string, defer?: boolean): Promise<void>;
             /** Connects to all RPC servers. */
             function connectAll(defer?: boolean): Promise<void>;
             /**
-             * Connects to all dependency services, by default, `serverId` is
-             * the `app.serverId`, and don't have to pass it.
+             * Connects to all dependency services, by default, `id` is
+             * the `app.id`, and don't have to pass it.
              */
-            function connectDependencies(serverId?: string): Promise<void>;
+            function connectDependencies(id?: string): Promise<void>;
             /** Checks if the target server is connected. */
-            function hasConnect(serverId: string): boolean;
+            function hasConnect(id: string): boolean;
         }
     }
 }
 
 const tasks: { [id: string]: number } = {};
 
-function ensureServerId(serverId: string): void {
-    if (!app.config.server.rpc[serverId]) {
-        throw new Error("The serverId is invalid");
+function ensureAppId(id: string): void {
+    if (!app.config.server.rpc[id]) {
+        throw new Error("The app ID is invalid");
     }
 }
 
 app.rpc = {
     server: null,
     connections: inspectAs({}, "[Sealed Object]"),
-    async serve(serverId: string) {
-        ensureServerId(serverId);
+    async serve(id: string) {
+        ensureAppId(id);
 
         let servers = app.config.server.rpc;
-        let { services = [], ...options } = servers[serverId];
+        let { services = [], ...options } = servers[id];
         let service = await app.services.serve(options);
 
         for (let mod of services) {
@@ -65,7 +65,7 @@ app.rpc = {
         }
 
         app.rpc.server = service;
-        app.serverId = serverId;
+        app.id = id;
 
         // invoke all start-up hooks.
         await app.hooks.lifeCycle.startup.invoke();
@@ -78,63 +78,63 @@ app.rpc = {
             }
         }
 
-        console.log(serveTip("RPC", serverId, service.dsn));
+        console.log(serveTip("RPC", id, service.dsn));
 
         // self-connect after serving.
-        await app.rpc.connect(serverId);
+        await app.rpc.connect(id);
 
         // connect to dependency services.
-        await app.rpc.connectDependencies(serverId);
+        await app.rpc.connectDependencies(id);
 
         // try to serve the REPL server.
-        await serveRepl(app.serverId);
+        await serveRepl(app.id);
     },
-    async connect(serverId: string, defer = false) {
-        ensureServerId(serverId);
+    async connect(id: string, defer = false) {
+        ensureAppId(id);
 
         // prevent duplicated connect.
-        if (app.rpc.hasConnect(serverId))
+        if (app.rpc.hasConnect(id))
             return;
 
         try {
             let servers = app.config.server.rpc;
-            let { services, ...options } = servers[serverId];
+            let { services, ...options } = servers[id];
             let service = await app.services.connect({
                 ...options,
-                id: app.serverId
+                id: app.id
             });
 
-            app.rpc.connections[serverId] = service;
+            app.rpc.connections[id] = service;
 
             for (let mod of services) {
                 service.register(mod);
 
                 // If detects the schedule service is served by other processes
                 // and being connected, stop the local schedule service.
-                if (serverId !== app.serverId && mod === app.services.schedule) {
+                if (id !== app.id && mod === app.services.schedule) {
                     await app.services.schedule.instance(app.local).stop(true);
                 }
             }
 
-            if (tasks[serverId]) {
-                app.schedule.cancel(tasks[serverId]);
-                delete tasks[serverId];
+            if (tasks[id]) {
+                app.schedule.cancel(tasks[id]);
+                delete tasks[id];
             }
 
             // Link all the subscriber listeners from the message channel to
             // the RPC channel.
             app.message.linkRpcChannel(service);
 
-            console.log(green`RPC server [${serverId}] connected.`);
+            console.log(green`RPC server [${id}] connected.`);
         } catch (err) {
             if (defer) {
-                if (!tasks[serverId]) {
-                    tasks[serverId] = app.schedule.create({
-                        salt: `connect-${serverId}`,
+                if (!tasks[id]) {
+                    tasks[id] = app.schedule.create({
+                        salt: `connect-${id}`,
                         start: moment().unix(),
                         repeat: 1,
                     }, () => {
-                        app.rpc.connect(serverId, defer);
+                        app.rpc.connect(id, defer);
                     });
                 }
             } else {
@@ -146,19 +146,19 @@ app.rpc = {
         let servers = app.config.server.rpc;
         let connections: Promise<void>[] = [];
 
-        for (let serverId in servers) {
-            if (serverId !== app.serverId) {
-                connections.push(app.rpc.connect(serverId, defer));
+        for (let id in servers) {
+            if (id !== app.id) {
+                connections.push(app.rpc.connect(id, defer));
             }
         }
 
         await Promise.all(connections);
     },
-    async connectDependencies(serverId?: string) {
-        serverId = serverId || app.serverId;
+    async connectDependencies(id?: string) {
+        id = id || app.id;
         let servers = app.config.server.rpc;
-        let dependencies = servers[serverId]
-            ? servers[serverId].dependencies
+        let dependencies = servers[id]
+            ? servers[id].dependencies
             : null;
 
         if (dependencies) {
@@ -170,7 +170,7 @@ app.rpc = {
 
                 for (let dependency of dependencies) {
                     for (let id in servers) {
-                        if (id !== app.serverId && !metServers.includes(id)) {
+                        if (id !== app.id && !metServers.includes(id)) {
                             if (servers[id].services.includes(dependency)) {
                                 metServers.push(id);
                                 await app.rpc.connect(id, true);
@@ -181,7 +181,7 @@ app.rpc = {
             }
         }
     },
-    hasConnect(serverId: string) {
-        return !!app.rpc.connections[serverId];
+    hasConnect(id: string) {
+        return !!app.rpc.connections[id];
     }
 }

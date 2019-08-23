@@ -46,8 +46,8 @@ program.command("init")
         process.exit();
     });
 
-// Command `sfn repl <serverId>` is used to open REPL session.
-program.command("repl <serverId>")
+// Command `sfn repl <appId>` is used to open REPL session.
+program.command("repl <appId>")
     .option("--no-stdout", "do not display any data output to process.stdout")
     .description("open REPL session to the given server")
     .action(openREPLSession);
@@ -82,11 +82,11 @@ function checkSource(filename: string): void {
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
 }
 
-function openREPLSession(serverId: string, options: { stdout: boolean }) {
+function openREPLSession(appId: string, options: { stdout: boolean }) {
     if (replSessionOpen) return;
 
-    if (!serverId) {
-        console.log(red`trying to open REPL session without serverId`);
+    if (!appId) {
+        console.log(red`trying to open REPL session without appId`);
         process.exit(1);
     } else {
         replSessionOpen = true;
@@ -96,9 +96,9 @@ function openREPLSession(serverId: string, options: { stdout: boolean }) {
     let bootstrap = APP_PATH + "/bootstrap/index";
     moduleExists(bootstrap) && tryImport(bootstrap);
 
-    connectRepl(serverId, !options.stdout).catch((err) => {
+    connectRepl(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
-            console.log(red`(code: ${err["code"]}) failed to connect [${serverId}]`);
+            console.log(red`(code: ${err["code"]}) failed to connect [${appId}]`);
         } else {
             console.log(red`${err.toString()}`);
         }

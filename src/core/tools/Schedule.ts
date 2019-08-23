@@ -40,7 +40,7 @@ export interface TaskOptions<T = any> {
 }
 
 export interface ScheduleTask {
-    serverId: string;
+    appId: string;
     taskId: number;
     start: number;
     end?: number;
@@ -62,7 +62,7 @@ export class Schedule {
     create<T>(options: TaskOptions<T>): number;
     create(options: TaskOptions, handler?: Function | string): number {
         let { salt, start, end, repeat, module, data } = options;
-        let idParam: string[] = [app.serverId, traceModulePath(ROOT_PATH)];
+        let idParam: string[] = [app.id, traceModulePath(ROOT_PATH)];
         let isMethod = false;
         let isCallable = false;
 
@@ -114,7 +114,7 @@ export class Schedule {
         // Redirect the task to one of the schedule server.
         app.services.schedule.instance(event).add({
             taskId,
-            serverId: app.serverId,
+            appId: app.id,
             start,
             repeat,
             end,
@@ -140,13 +140,13 @@ export class Schedule {
 export class ScheduleService {
     private timer: NodeJS.Timer = null;
     private tasks = new Map<number, ScheduleTask>();
-    private filename = app.ROOT_PATH + `/cache/schedules-${app.serverId}.json`;
+    private filename = app.ROOT_PATH + `/cache/schedules-${app.id}.json`;
     private state: "running" | "stopped";
 
     constructor() {
         this.setup().add({
             taskId: -1,
-            serverId: app.serverId,
+            appId: app.id,
             start: moment().unix(),
             repeat: 60 * 30
         });
@@ -217,20 +217,20 @@ export class ScheduleService {
             let now = moment().unix();
 
             for (let [taskId, task] of this.tasks) {
-                let { start, end, expired, serverId, repeat, data } = task;
+                let { start, end, expired, appId, repeat, data } = task;
 
                 if (!expired && now >= start) {
                     if (!end || now < end) {
-                        if (taskId === -1 && serverId === app.serverId) {
+                        if (taskId === -1 && appId === app.id) {
                             this.gc(now);
                         } else if (!task.handler) {
-                            app.message.publish(String(taskId), data, [serverId]);
+                            app.message.publish(String(taskId), data, [appId]);
                         } else {
                             app.message.publish(app.schedule.name, [
                                 task.module,
                                 task.handler,
                                 data
-                            ], [serverId]);
+                            ], [appId]);
                         }
 
                         if (repeat)

@@ -42,7 +42,7 @@ program.command("init")
     tryImport("./init");
     process.exit();
 });
-program.command("repl <serverId>")
+program.command("repl <appId>")
     .option("--no-stdout", "do not display any data output to process.stdout")
     .description("open REPL session to the given server")
     .action(openREPLSession);
@@ -69,11 +69,11 @@ function checkSource(filename) {
     if (!fs.existsSync(filename))
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
 }
-function openREPLSession(serverId, options) {
+function openREPLSession(appId, options) {
     if (replSessionOpen)
         return;
-    if (!serverId) {
-        console.log(color_1.red `trying to open REPL session without serverId`);
+    if (!appId) {
+        console.log(color_1.red `trying to open REPL session without appId`);
         process.exit(1);
     }
     else {
@@ -81,9 +81,9 @@ function openREPLSession(serverId, options) {
     }
     let bootstrap = init_1.APP_PATH + "/bootstrap/index";
     module_1.moduleExists(bootstrap) && tryImport(bootstrap);
-    repl_1.connect(serverId, !options.stdout).catch((err) => {
+    repl_1.connect(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
-            console.log(color_1.red `(code: ${err["code"]}) failed to connect [${serverId}]`);
+            console.log(color_1.red `(code: ${err["code"]}) failed to connect [${appId}]`);
         }
         else {
             console.log(color_1.red `${err.toString()}`);

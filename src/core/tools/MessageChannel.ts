@@ -114,8 +114,8 @@ export abstract class Message {
     constructor(protected data: any = {}) { }
 
     /** Sends the message via a front end server. */
-    via(serverId: string): InstanceType<new (...args: any[]) => this> {
-        return new (<any>this.constructor)({ ...this.data, serverId });
+    via(appId: string): InstanceType<new (...args: any[]) => this> {
+        return new (<any>this.constructor)({ ...this.data, appId });
     }
 
     /** Sends the message to a specified target. */
@@ -123,20 +123,20 @@ export abstract class Message {
         return new (<any>this.constructor)({ ...this.data, target });
     }
 
-    protected getServerId() {
-        let serverId: string;
+    protected getAppId() {
+        let appId: string;
 
-        if (this.data.serverId) {
-            serverId = this.data.serverId;
-            delete this.data.serverId;
+        if (this.data.appId) {
+            appId = this.data.appId;
+            delete this.data.appId;
         } else if (app.rpc.server) {
-            // If serverId isn't provided, use the default web server.
-            serverId = "web-server-1";
+            // If appId isn't provided, use the default web server.
+            appId = "web-server-1";
         } else {
-            serverId = app.serverId;
+            appId = app.id;
         }
 
-        return serverId;
+        return appId;
     }
 }
 
@@ -164,7 +164,7 @@ export class WebSocketMessage extends Message {
             ...this.data,
             event,
             data
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 }
 
@@ -175,14 +175,14 @@ export class SSEMessage extends Message {
         return app.message.publish(this.name, {
             ...this.data,
             close: true
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 
     send(data: any) {
         return app.message.publish(this.name, {
             ...this.data,
             data,
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 
     emit(event: string, data?: any) {
@@ -190,6 +190,6 @@ export class SSEMessage extends Message {
             ...this.data,
             event,
             data,
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 }
