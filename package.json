@@ -80,6 +80,7 @@
         "ipchannel": "^0.2.6",
         "js-magic": "^1.0.0",
         "lodash": "^4.17.15",
+        "md5": "^2.2.1",
         "moment": "^2.24.0",
         "multer": "^1.4.2",
         "pluralize": "^7.0.0",
@@ -100,6 +101,7 @@
     "devDependencies": {
         "@types/cookie-parser": "^1.4.1",
         "@types/marked": "^0.6.5",
+        "@types/md5": "^2.1.33",
         "@types/node": "^11.13.18",
         "@types/pluralize": "0.0.28",
         "@types/serve-static": "^1.13.2",

@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as fs from "fs-extra";
-import hash = require("string-hash");
+import md5 = require("md5");
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
 import moment = require('moment');
@@ -41,7 +41,7 @@ export interface TaskOptions<T = any> {
 
 export interface ScheduleTask {
     appId: string;
-    taskId: number;
+    taskId: string;
     start: number;
     end?: number;
     repeat?: number;
@@ -58,9 +58,9 @@ export class Schedule {
      * Creates a new schedule task according to the options and returns the task
      * ID. NOTE: the minimum tick interval of the schedule service is `1000`ms. 
      */
-    create(options: TaskOptions, handler: (data: any) => void): number;
-    create<T>(options: TaskOptions<T>): number;
-    create(options: TaskOptions, handler?: Function | string): number {
+    create(options: TaskOptions, handler: (data: any) => void): string;
+    create<T>(options: TaskOptions<T>): string;
+    create(options: TaskOptions, handler?: Function | string): string {
         let { salt, start, end, repeat, module, data } = options;
         let idParam: string[] = [app.id, traceModulePath(ROOT_PATH)];
         let isMethod = false;
@@ -99,7 +99,7 @@ export class Schedule {
             }
         }
 
-        let taskId = hash(idParam.join("#"));
+        let taskId = md5(idParam.join("#"));
         let event = String(taskId);
 
         // If the handler is provided a callable function, directly subscribe 
@@ -127,7 +127,7 @@ export class Schedule {
     }
 
     /** Cancels a task according to the given task ID. */
-    cancel(taskId: number) {
+    cancel(taskId: string) {
         if (!taskId)
             return;
 
@@ -139,13 +139,14 @@ export class Schedule {
 
 export class ScheduleService {
     private timer: NodeJS.Timer = null;
-    private tasks = new Map<number, ScheduleTask>();
+    private tasks = new Map<string, ScheduleTask>();
     private filename = app.ROOT_PATH + `/cache/schedules-${app.id}.json`;
     private state: "running" | "stopped";
+    private gcTaskId = md5("");
 
     constructor() {
         this.setup().add({
-            taskId: -1,
+            taskId: this.gcTaskId,
             appId: app.id,
             start: moment().unix(),
             repeat: 60 * 30
@@ -157,7 +158,7 @@ export class ScheduleService {
         return true;
     }
 
-    async delete(taskId: number) {
+    async delete(taskId: string) {
         return this.tasks.delete(taskId);
     }
 
@@ -177,7 +178,7 @@ export class ScheduleService {
         let { local } = app;
 
         for (let [taskId, task] of this.tasks) {
-            if (taskId <= 0) // do not deal with internal tasks
+            if (taskId === this.gcTaskId) // do not deal with internal tasks
                 continue;
 
             this.tasks.delete(taskId);
@@ -221,7 +222,7 @@ export class ScheduleService {
 
                 if (!expired && now >= start) {
                     if (!end || now < end) {
-                        if (taskId === -1 && appId === app.id) {
+                        if (taskId === this.gcTaskId && appId === app.id) {
                             this.gc(now);
                         } else if (!task.handler) {
                             app.message.publish(String(taskId), data, [appId]);

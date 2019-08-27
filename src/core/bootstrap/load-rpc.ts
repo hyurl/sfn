@@ -42,7 +42,7 @@ declare global {
     }
 }
 
-const tasks: { [id: string]: number } = {};
+const tasks: { [id: string]: string } = {};
 
 function ensureAppId(id: string): void {
     if (!app.config.server.rpc[id]) {

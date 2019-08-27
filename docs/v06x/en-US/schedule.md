@@ -5,6 +5,10 @@ Since version 0.5.x, SFN introduced a new distributed schedule system, and run
 as micro-service. To use this system, you have to create one or more schedule 
 server process, but don't worry, it still easy in hand as usual.
 
+Before version 0.6.0, the schedule uses a hash number as task ID, but since 
+v0.6, the task ID has been changed to a MD5 string to prevent potential
+conflicts.
+
 ## Create Service
 
 ### Configuration
