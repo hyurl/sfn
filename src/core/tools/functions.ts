@@ -89,7 +89,13 @@ export function event(name: string): WebSocketDecorator {
         if (!modPath)
             return;
 
-        let { nsp = "/" } = <typeof WebSocketController>proto.ctor;
+        // let { nsp = "/" } = <typeof WebSocketController>proto.ctor;
+        let nsp: string = "";
+
+        if (proto.ctor.hasOwnProperty("nsp")) {
+            nsp = proto.ctor["nsp"];
+        }
+
         let data = {
             prefix: nsp,
             route: name,
@@ -115,7 +121,12 @@ export function route(method: string, path: string): HttpDecorator;
 export function route(method: string, path?: string): HttpDecorator {
     return (proto: HttpController, prop: string) => {
         let modPath = traceModulePath(app.controllers.path);
-        let { baseURI = "" } = <typeof HttpController>proto.ctor;
+        // let { baseURI = "" } = <typeof HttpController>proto.ctor;
+        let baseURI: string = "";
+
+        if (proto.ctor.hasOwnProperty("baseURI")) {
+            baseURI = proto.ctor["baseURI"];
+        }
 
         if (!modPath)
             return;
