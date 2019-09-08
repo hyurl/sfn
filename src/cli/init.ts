@@ -22,7 +22,6 @@ try {
         `${SRC_PATH}/services`
     ];
     let copyingFiles = new Map([
-        [`${tplDir}/.env`, `${ROOT_PATH}/.env`],
         [`${tplDir}/tsconfig.json`, `${ROOT_PATH}/tsconfig.json`],
         [`${tplDir}/config.ts`, `${SRC_PATH}/config.ts`],
         [`${tplDir}/index.ts`, `${SRC_PATH}/index.ts`],

@@ -106,17 +106,13 @@ export default class extends WebSocketController {
 }
 ```
 
-### Throw SocketError In the Controller
+### Throw Status Exception In the Controller
 
-`SocketError` is a customized error class that safe to use when you're going 
-to response an error to the client. when a SocketError is thrown, then 
-framework will handle it properly, and sending error response automatically.
-
-`SocketError` is much the same as `HttpError`, so using HTTP error code is 
-very common with the SocketError.
+Like in an HttpController, you can throw a `StatusException`, the framework will
+handle it properly, and sending error response automatically.
 
 ```typescript
-import { WebSocketController, SocketError, event } from "sfn";
+import { WebSocketController, StatusException, event } from "sfn";
 
 export default class extends WebSocketController {
     @event("/example")
@@ -126,15 +122,15 @@ export default class extends WebSocketController {
         // ...
         if (!well) {
             if (!msg)
-                throw new SocketError(400); // => 400 bad request
+                throw new StatusException(400); // => 400 bad request
             else
-                throw new SocketError(400, msg); // => 400 with customized message
+                throw new StatusException(400, msg); // => 400 with customized message
         }
     }
 }
 ```
 
-When a SocketError is thrown, the framework will always send a message that 
+When a StatusException is thrown, the framework will always send a message that 
 contains `{success: false, code, error}` to the client according to the 
 specification of the controller method [error()](./http-controller#Common-API-Response).
 

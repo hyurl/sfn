@@ -66,7 +66,7 @@ The `uploadOptions` is an `UploadOptions`, which contains these properties:
 
 The file state in the constructor and the route-binding method is different, in 
 the constructor (also in the 
-[before()](./http-controller#Before-And-After-Operations) method), the file is in
+[init()](./http-controller#Before-And-After-Operations) method), the file is in
 uploading state, while in the method, it's uploaded.
 
 ```typescript

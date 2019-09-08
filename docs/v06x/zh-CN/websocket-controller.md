@@ -101,17 +101,13 @@ export default class extends WebSocketController {
 }
 ```
 
-## 在控制器中抛出 SocketError
+## 在控制器中抛出状态异常
 
-`SocketError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到
-客户端时使用它。当一个 SocketError 被抛出时，框架将会对其进行合适的处理，并自动地发送
-错误响应内容。
-
-`SocketError` 和 `HttpError` 几乎是一样的，因此在 SocketError 中使用 HTTP 错误
-代码是很常见的。
+和在 HttpController 中一样，你可以使用 `StatusException` 来抛出状态异常，框架将
+会对其进行合适的处理，并自动地发送错误响应内容。
 
 ```typescript
-import { WebSocketController, SocketError, event } from "sfn";
+import { WebSocketController, StatusException, event } from "sfn";
 
 export default class extends WebSocketController {
     @event("/example")
@@ -121,24 +117,24 @@ export default class extends WebSocketController {
         // ...
         if (!well) {
             if (!msg)
-                throw new SocketError(400); // => 400 bad request
+                throw new StatusException(400); // => 400 bad request
             else
-                throw new SocketError(400, msg); // => 400 with customized message
+                throw new StatusException(400, msg); // => 400 with customized message
         }
     }
 }
 ```
 
-当一个 SocketError 被抛出时，框架总是会发送一个包含着 
+当一个 StatusException 被抛出时，框架总是会发送一个包含着 
 `{success: false, code, error}` 的消息到客户端，这个响应形式来自于控制器方法
-[error()](./http-controller#Common-API-response)。
+[error()](./http-controller#通用-API-响应)。
 
 ## 绑定多个方法与返回多个值
 
 在 WebSocket 控制器中，如果多个方法被绑定到了同一个事件上，那么这些方法将会按照其定义的
 顺序被依次调用，其返回值也会被依次发送给客户端。即使绑定了多个方法，一个控制器也只会被
-实例化一次，`before()` and `after()` 方法也只会被调用一次，但如果事件绑定在了多个控制器
-内，那么这些控制器都会被依次实例化，并且调用其 `before()` 和 `after()` 方法。并且，如果
+实例化一次，`init()` and `destroy()` 方法也只会被调用一次，但如果事件绑定在了多个控制器
+内，那么这些控制器都会被依次实例化，并且调用其 `init()` 和 `destroy()` 方法。并且，如果
 方法是一个生成器，那么该方法所 `yield` 的值也会被依次发送。因此，你也可以使用生成器来向
 客户端持续的向客户端返回数据。
 

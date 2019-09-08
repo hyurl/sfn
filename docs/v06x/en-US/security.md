@@ -4,26 +4,10 @@
 Both `HttpController` and `WebSocketController` provide a simple approach to 
 control user authorization.
 
-When an HTTP request or socket.io event fires, the framework will try to 
-retrieve information of the logged-in user. The way that the framework checks 
-if any user logged-in is by checking if there is a `session` key-value pair 
-named `uid` valid, if the `uid` exists, then try to get the user instance and 
-assign it to the `req.user` or `socket.user` property.
-
-If any user retrieved, that the user is seemed logged-in. You can [define your 
-own `User` class](./orm-model#The-User-Model) in `src/models/` directory to 
-extend the default `modelar.User` class, otherwise the default one will be used.
-
-So if you want to set a user's state to logged-in, you just need to set 
-`req.session.uid` or `socket.session.uid` to the user ID, and that's done. 
-Remember, sessions in an **SFN** application are shared between HTTP and 
-WebSocket, that means once you changed one side, the other side will be 
-modified as well.
-
-In the controller, there is a property `authorized`, if it's `true`, that 
-means the operation is permitted, `false` the otherwise. By default it just 
-check if `req.user !== null` (or `socket.user !== null`), you can set a more 
-complicated checking condition to suit your needs.
+In a controller, there is a property `authorized`, if it's `true`, that 
+means the operation is permitted, `false` the otherwise. Since v0.6, the
+framework no longer checks and sets this property, it's `false` by default, you
+have to customize your checking condition to suit your needs.
 
 If an operation is unauthorized, the framework will throws an HttpError 
 (or SocketError) `401 Unauthorized` to the client.
@@ -78,7 +62,7 @@ constructor since it's all synchronous, but most of the case you will need to do
 some async operations before checking, say retrieving data from the database, 
 you will need to have a look at 
 [Before And After Operations](./http-controller#Before-And-After-Operations) and
-[Aspect Oriented Programing](./aop-mixins#Aspect-Oriented-Programing).
+[Aspect Oriented Programing](./mixins-aop#Aspect-Oriented-Programming).
 
 # CSRF Protection
 
@@ -138,7 +122,7 @@ export default class extends HttpController {
 ### Sending the CSRF Token Back To the Server
 
 On client side, you just need to send a field `x-csrf-token` that carries the 
-token along with your data via any of these approaches:
+token along with your data via one of these approaches:
 
 - `HTTP request header` for Ajax.
 - `URL search string` e.g. `?x-csrf-token={token}`

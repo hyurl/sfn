@@ -7,7 +7,6 @@ import * as https from "https";
 import * as http2 from "http2";
 import { RpcOptions, ClientOptions } from 'alar';
 import { FSWatcher } from "chokidar";
-import { ensureType } from './core/tools/internal';
 
 declare global {
     namespace app {
@@ -15,6 +14,11 @@ declare global {
         interface Config {
             /** Default language of the application. */
             lang?: string;
+            /**
+             * Save schedules when the system shuts down and rebuild after
+             * reboot.
+             */
+            saveSchedules?: boolean;
             /**
              * The directories that serve static resources.
              * @see https://www.npmjs.com/package/serve-static
@@ -104,8 +108,6 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
     setHeaders?: (res: ServerResponse, path: string, stat: Stats) => void;
 };
 
-const env: Record<string, string | number | boolean> = ensureType(process.env);
-
 /**
  * The configuration of the program.
  * Some of these settings are for their dependencies, you may check out all 
@@ -113,13 +115,14 @@ const env: Record<string, string | number | boolean> = ensureType(process.env);
  */
 export default <app.Config>{
     lang: "en-US",
+    saveSchedules: false,
     statics: ["assets"],
     watch: [],
     server: {
         hostname: "localhost",
         http: {
-            type: <app.Config["server"]["http"]["type"]>env.HTTP_TYPE || "http",
-            port: env.HTTP_PORT || 80,
+            type: "http",
+            port: 4000,
             timeout: 120000, // 2 min.
             options: null
         },

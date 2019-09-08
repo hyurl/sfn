@@ -43,12 +43,16 @@ process.on("SIGINT", async () => {
 
 // Try to recover cached schedules from the previous shutdown.
 app.hooks.lifeCycle.startup.bind(async () => {
-    await app.services.schedule.instance(app.local).resume();
+    if (app.config.saveSchedules) {
+        await app.services.schedule.instance(app.local).resume();
+    }
 });
 
 // Try to stop the internal schedule service.
 app.hooks.lifeCycle.shutdown.bind(async () => {
-    await app.services.schedule.instance(app.local).stop();
+    if (app.config.saveSchedules) {
+        await app.services.schedule.instance(app.local).stop();
+    }
 });
 
 // Try to close http server.

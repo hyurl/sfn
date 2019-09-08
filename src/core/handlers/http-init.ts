@@ -26,8 +26,14 @@ router.use(async (req: Request, res: Response, next) => {
             return;
 
         app.sse[res.sse.id] = res.sse;
-    } else {
-        res.charset = "UTF-8";
+    }
+
+    if (req.lang) {
+        let names = req.lang.split("-");
+
+        if (names.length > 1) {
+            req.lang = names[0] + "-" + names[1].toUpperCase();
+        }
     }
 
     let logger = getDevLogger(req, res);

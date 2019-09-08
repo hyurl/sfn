@@ -62,7 +62,7 @@ export default class extends HttpController {
 ### 文件状态
 
 在构造函数中的文件状态和绑定到路由的方法中的状态是不同的，在构造函数中（以及在 
-[before()](./http-controller#前置和后置操作) 方法中），文件处于正在上传状态，而在
+[init()](./http-controller#前置和后置操作) 方法中），文件处于正在上传状态，而在
 方法中，它已经上传完成了。
 
 ```typescript

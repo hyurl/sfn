@@ -3,22 +3,9 @@
 
 `HttpController` 和 `WebSocketController` 都提供了一个简单地方式来控制用户的权限。
 
-当一个 HTTP 请求或者 socket.io 事件触发时，框架会尝试恢复登录用户的会话信息。框架
-检测是否有用户登录的方法是，检查 `session` 对象的键值对中是否存在一个合法的 `uid` 
-属性，如果 `uid` 存在，就尝试获取该用户的实例，并将其赋值到 `req.user` 或者 
-`socket.user` 属性上。
-
-如果有任何用户被取回，那么该用户就被视为以登录的。你可以
-[定义自己的 `User` 类](./orm-model#User-模型)，并将其存储到 `src/models/` 目录下，
-从而扩展默认的 `modelar.User` 类，否则这个默认类将会被使用。
-
-因此如果你想要设置一个用户的状态为已登录，你只需要设置 `req.session.uid` 或者 
-`socket.session.uid` 为一个用户 ID 即可。记住，会话在 **SFN** 框架中是共享于 HTTP 
-和 WebSocket 之间的，这意味着一旦你修改了其中一端，另一端也会同时被改变。
-
 在控制器中，存在着一个属性 `authorized`，如果它的值是 `true`，那就意味着操作是被
-允许的，`false` 则相反。默认的，框架只检查 `req.user !== null`
-（或 `socket.user !== null`），你可以设置更复杂的检测条件以便其适合你的需要。
+允许的，`false` 则相反。自 v0.6 版本起，框架不再自动检查和设置该值，他默认为 `false`
+你需要设置检测条件以便其适合你的需要。
 
 如果操作是未授权的，框架将会自动抛出一个 HttpError（或 SocketError）
 `401 Unauthorized` 并返回到客户端。

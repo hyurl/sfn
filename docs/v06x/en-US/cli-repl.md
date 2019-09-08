@@ -45,12 +45,6 @@ Initiates the project and create needed files. This command should be run right
 after you install the framework. But you can also run it to recover 
 must-be-present files when any missing.
 
-*In history versions, SFN once provided some commands like **start**, **stop**,*
-*and **reload** to inactive with the program. But since 0.3.0, SFN started being*
-*friendly to [PM2](https://pm2.io), and use PM2 as its load balancer, so those*
-*commands has been removed. Please check the documentation of PM2 for how to*
-*inactive with the application.*
-
 ### `sfn -c <name> [-t <type>]`
 
 Creates controller file according to the specified name. In a **SFN** 
@@ -118,8 +112,8 @@ can run any valid JavaScript code in the REPL, but unlike the built-in REPL runs
 code locally, SFN REPL will redirect the input to the corresponding server
 process you wished, to interact directly with that process.
 
-To open the REPL window, simply type the command `sfn repl <serverId>` in the
-terminal, where the `<serverId>` is the server you wish to attach, e.g. 
+To open the REPL window, simply type the command `sfn repl <appId>` in the
+terminal, where the `<appId>` is the server you wish to attach, e.g. 
 `sfn repl web-server-1` will attach the REPL session to the web-server-1. Once
 the REPL is ready, you can do almost everything you familiar with the built-in
 REPL.

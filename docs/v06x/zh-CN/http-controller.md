@@ -145,6 +145,9 @@ export default class extends HttpController {
 `async constructor()` 的，但不用担心，**SFN** 提供了一个简单的方式让你可以这么做。框架允许
 你定义方法 `before()` 和 `after()` 来控制流程。
 
+(**注意:** 在 v0.6 之前，这些方法被命名为 `before()` 和 `after()`，他们现在已经被废弃，
+因为新的 方法名和服务更加一致。)
+
 ```typescript
 import * as fs from "fs";
 import { HttpController, Request, Response, route } from "sfn";
@@ -155,11 +158,11 @@ const readFile = util.promisify(fs.readFile);
 export default class extends HttpController {
     txtData: string;
 
-    async before() {
+    async init() {
         this.txtData = await readFile("example.txt", "utf8");
     }
 
-    after() {
+    destroy() {
         // This method is just for example, it's not necessary here, but 
         // sometimes you should define it and say, close database connections in 
         // it.
@@ -173,7 +176,7 @@ export default class extends HttpController {
 }
 ```
 
-更高级的方案，请查看 [面向切面编程](./aop-mixins#面向切面编程)。
+更高级的方案，请查看 [面向切面编程](./mixins-aop#面向切面编程)。
 
 ## 处理非 Promise 过程
 
@@ -232,13 +235,14 @@ export default class extends HttpController {
 }
 ```
 
-## 在控制器中抛出 HttpError
+## 在控制器中抛出状态异常
 
-`HttpError` 是一个由框架定义的错误类，它是安全的，你可以在想要响应一个 HTTP 错误到客户端时
-使用它。当一个 HttpError 被抛出时，框架将会对其进行合适的处理，并自动地发送错误响应内容。
+`StatusException` 是一个由框架定义的异常类，它是安全的，你可以在想要响应一个 HTTP
+错误到客户端时使用它。当一个 StatusException 被抛出时，框架将会对其进行合适的处理
+并自动地发送错误响应内容。
 
 ```typescript
-import { HttpController, HttpError, route } from "sfn";
+import { HttpController, StatusException, route } from "sfn";
 
 export default class extends HttpController {
     @route.get("/example")
@@ -248,9 +252,9 @@ export default class extends HttpController {
         // ...
         if (!well) {
             if (!msg)
-                throw new HttpError(400); // => 400 bad request
+                throw new StatusException(400); // => 400 bad request
             else
-                throw new HttpError(400, msg); // => 400 with customized message
+                throw new StatusException(400, msg); // => 400 with customized message
         }
     }
 }
@@ -320,9 +324,9 @@ export default class extends HttpController {
 
 在 HTTP 控制器中，如果多个方法被绑定到了同一个路由上，那么这些方法将会按照其定义的顺序被
 依次调用，除了 SSE，其他请求模式下， 只有第一个有效的返回值（不为 `undefined`）会被发送
-给客户端。即使绑定了多个方法，一个控制器也只会被实例化一次，`before()` and `after()` 
+给客户端。即使绑定了多个方法，一个控制器也只会被实例化一次，`init()` and `destroy()` 
 方法也只会被调用一次，但如果路由绑定在了多个控制器内，那么这些控制器都会被依次实例化，
-并且调用其 `before()` 和 `after()` 方法。
+并且调用其 `init()` 和 `destroy()` 方法。
 
 如果所绑定的是一个 SSE 路由，那么所有被绑定方法的返回值都会被依次发送给客户端。并且，如果
 方法是一个生成器，那么该方法所 `yield` 的值也会被依次发送。因此，你也可以使用生成器来向

@@ -1,12 +1,13 @@
 export default <app.Config>{
     lang: "en-US",
+    saveSchedules: false,
     statics: ["assets"],
-    hotReloading: true,
+    watch: [],
     server: {
         hostname: "localhost",
         http: {
-            type: process.env.HTTP_TYPE || "http",
-            port: parseInt(process.env.HTTP_PORT) || 80,
+            type: "http",
+            port: 4000,
             timeout: 120000, // 2 min.
             options: null
         },

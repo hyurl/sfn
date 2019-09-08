@@ -154,7 +154,10 @@ export default class extends HttpController {
 If you want to do some asynchronous operations before calling the actual method,
 JavaScript will not allow you define an `async constructor()`, but don't worry,
 **SFN** provides you the way to do it, the framework allows you define the 
-method `before()` and `after()` to control the flow.
+methods `init()` and `destroy()` to control the flow.
+
+(**NOTE:** Before v0.6, these methods are called `before()` and `after()`, which
+are deprecated since the new methods are more consistent to the service.)
 
 ```typescript
 import * as fs from "fs";
@@ -166,11 +169,11 @@ const readFile = util.promisify(fs.readFile);
 export default class extends HttpController {
     txtData: string;
 
-    async before() {
+    async init() {
         this.txtData = await readFile("example.txt", "utf8");
     }
 
-    after() {
+    destroy() {
         // This method is just for example, it's not necessary here, but 
         // sometimes you should define it and say, close database connections in 
         // it.
@@ -185,7 +188,7 @@ export default class extends HttpController {
 ```
 
 For more advanced usage, please see 
-[Aspect Oriented Programing](./aop-mixins#Aspect-Oriented-Programing).
+[Aspect Oriented Programing](./mixins-aop#Aspect-Oriented-Programming).
 
 ### Handle Non-Promise Procedures
 
@@ -249,14 +252,15 @@ export default class extends HttpController {
 }
 ```
 
-## Throw HttpError In the Controller
+## Throw Status Exception In the Controller
 
-`HttpError` is a customized error class that safe to use when you're going to 
-response an HTTP error to the client. when an HttpError is thrown, the framework
-will handle it properly, and sending error response automatically.
+`StatusException` is a customized error class that safe to use when you're going
+to 
+response an HTTP error to the client. when an StatusException is thrown, the
+framework will handle it properly, and sending error response automatically.
 
 ```typescript
-import { HttpController, HttpError, route } from "sfn";
+import { HttpController, StatusException, route } from "sfn";
 
 export default class extends HttpController {
     @route.get("/example")
@@ -266,9 +270,9 @@ export default class extends HttpController {
         // ...
         if (!well) {
             if (!msg)
-                throw new HttpError(400); // => 400 bad request
+                throw new StatusException(400); // => 400 bad request
             else
-                throw new HttpError(400, msg); // => 400 with customized message
+                throw new StatusException(400, msg); // => 400 with customized message
         }
     }
 }
@@ -345,9 +349,9 @@ In an HttpController, if several methods are bound to the same route, these
 methods will be called accordingly. Except SSE, with other request modes, only 
 the first valid (non-`undefined`) value will be sent to the client. Even 
 multiple methods are bound, a controller will only be instantiated once, 
-`before()` and `after()` methods will also be called only once. However, if a 
+`init()` and `destroy()` methods will also be called only once. However, if a 
 route is bound to multiple controllers, they will all be instantiated 
-accordingly, and their `before()` and `after()` methods will be called as 
+accordingly, and their `init()` and `destroy()` methods will be called as 
 expected.
 
 However, if it's an SSE route, then all the returning values of all bound 

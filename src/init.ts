@@ -2,7 +2,6 @@ import * as path from "path";
 import * as fs from "fs";
 import * as FRON from "fron";
 import * as alar from "alar";
-import { config as configEnv } from "dotenv";
 
 declare global {
     namespace NodeJS {
@@ -100,9 +99,6 @@ export const APP_PATH: string = isTsNode ? SRC_PATH : appPath;
 
 /** Whether the program is running in development mode. */
 export const isDevMode = isDebugMode || !process.send;
-
-// support .env configuration file
-configEnv({ path: ROOT_PATH + "/.env" });
 
 global.app = {
     ROOT_PATH,

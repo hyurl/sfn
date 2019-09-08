@@ -1,9 +1,12 @@
 <!-- title: 服务; order: 10 -->
 # 基本概念
 
-`Service` 类是 **SFN** 框架中的基本类，其他类如 `HttpController`、
-`WebSocketController` 都继承自它。它提供了一些有用的特性，如 `i18n`、`logger`、
-`cache` 等，能够让你用来做真正的事情。
+**服务**是 SFN 框架中最基本也是最重要的概念。
+
+
+`Service` 类是 **SFN** 框架中的一个基类，其他类如 `HttpController`、
+`WebSocketController` 都继承自它。它提供了一些有用的方法，如 `i18n`、`success`、
+`error` 等，能够让你用来做一些简单的事情。
 
 # 如何使用？
 
