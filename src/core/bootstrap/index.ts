@@ -151,18 +151,18 @@ app.serve = async function serve(id?: string) {
                     // invoke all start-up hooks.
                     await app.hooks.lifeCycle.startup.invoke();
 
-                    // try to serve the REPL server.
-                    await serveRepl(app.id);
-
-                    // try to connect all RPC services.
-                    await app.rpc.connectAll(true);
-
                     if (typeof process.send == "function") {
                         // notify PM2 that the service is available.
                         process.send("ready");
                     } else {
                         console.log(serveTip("Web", app.id, baseUrl()));
                     }
+
+                    // try to connect all RPC services.
+                    await app.rpc.connectAll(true);
+
+                    // try to serve the REPL server.
+                    await serveRepl(app.id);
 
                     resolve();
                 }
