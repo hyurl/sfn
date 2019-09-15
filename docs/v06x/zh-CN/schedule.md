@@ -15,13 +15,13 @@
 
 ```typescript
 // src/config.ts
-export default <SFNConfig> {
+export default <app.Config> {
     server: {
         rpc: {
             "schedule-server": {
                 host: "localhost",
                 port: 8001,
-                modules: [app.services.schedule]
+                services: [app.services.schedule]
             }
         }
     }

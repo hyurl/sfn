@@ -81,7 +81,12 @@ declare global {
                 rpc?: {
                     [id: string]: RpcOptions & ClientOptions & {
                         [x: string]: any;
+                        /** The services that should be hosted by this server. */
                         services: ModuleProxy<any>[];
+                        /**
+                         * The services that this server depended on. (hosted 
+                         * ones excluded.)
+                         */
                         dependencies?: "all" | ModuleProxy<any>[];
                     }
                 };

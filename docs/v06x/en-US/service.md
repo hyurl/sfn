@@ -96,13 +96,13 @@ To separate the services, you just need to do some simple configurations.
 
 ```typescript
 // src/config.ts
-export default <SFNConfig>{
+export default <app.Config>{
     server: {
         rpc: {
-            "rpc-server-1": {
+            "cache-server-1": {
                 host: "127.0.0.1",
                 port: 8081,
-                modules: [app.services.myService]
+                services: [app.services.cache]
             }
         }
     }

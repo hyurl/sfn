@@ -16,7 +16,7 @@ import * as FileStore from "session-file-store";
 
 let Store = <any>FileStore(Session);
 
-export default <SFNConfig>{
+export default <app.Config>{
     // ... 
     session: {
         secret: "sfn",
