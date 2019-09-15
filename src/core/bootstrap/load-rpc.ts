@@ -58,7 +58,7 @@ app.rpc = {
 
         let servers = app.config.server.rpc;
         let { services = [], ...options } = servers[id];
-        let service = await app.services.serve(options);
+        let service = await app.services.serve({ ...options, id });
 
         for (let mod of services) {
             service.register(mod);
@@ -99,10 +99,7 @@ app.rpc = {
         try {
             let servers = app.config.server.rpc;
             let { services, ...options } = servers[id];
-            let service = await app.services.connect({
-                ...options,
-                id: app.id
-            });
+            let service = await app.services.connect({ ...options, id: app.id });
 
             app.rpc.connections[id] = service;
 
