@@ -38,6 +38,12 @@ export class HttpController extends Controller {
     static baseURI: string;
 
     /**
+     * Enables Cross-Origin Resource Sharing, set an array to accept multiple 
+     * origins, an `*` to accept all, or an object for more complicated needs.
+     */
+    static cors: string | string[] | CorsOptions = null;
+
+    /**
      * If set, when unauthorized, fallback to the given URL or response an
      * error message.
      */
@@ -56,11 +62,6 @@ export class HttpController extends Controller {
      * pass it to a view.
      */
     csrfProtection: boolean = false;
-    /**
-     * Enables Cross-Origin Resource Sharing, set an array to accept multiple 
-     * origins, an `*` to accept all, or an object for more complicated needs.
-     */
-    cors: string | string[] | CorsOptions | false = false;
     /** Configurations for uploading files. */
     uploadOptions: UploadOptions = Object.assign({}, UploadOptions);
     /** Reference to the corresponding request context. */

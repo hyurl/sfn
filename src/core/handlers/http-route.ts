@@ -14,7 +14,6 @@ import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
 import { Controller } from '../controllers/Controller';
-// import isIteratorLike = require("is-iterator-like");
 
 const EFFECT_METHODS: string[] = [
     "DELETE",
@@ -62,11 +61,11 @@ export function getRouteHandler(key: string): RouteHandler {
                     continue;
                 } else if (!initiated) {
                     // Handle CORS.
-                    if (!cors(<any>ctrl.cors, req, res)) {
+                    if (!cors(<any>ctrl.ctor["cors"], req, res)) {
                         throw new StatusException(410);
                     } else if (req.method === "OPTIONS") {
                         // cors will set proper headers for OPTIONS
-                        res.end();
+                        return res.end();
                     }
 
                     // Handle CSRF token.
@@ -85,7 +84,7 @@ export function getRouteHandler(key: string): RouteHandler {
                     }
                 }
 
-                let result = await ctrl[method](...await getArguments(ctrl, method));
+                let result = await ctrl[method](...getArguments(ctrl, method));
 
                 if (isIterableIterator(result) || isAsyncIterableIterator(result)) {
                     await handleIteratorResponse(ctrl, result);
@@ -95,7 +94,7 @@ export function getRouteHandler(key: string): RouteHandler {
             }
 
             if (initiated) {
-                if (!req.isEventSource && !res.finished) {
+                if (!req.isEventSource && !res.sent) {
                     res.end();
                 }
 
@@ -172,7 +171,7 @@ async function handleError(err: any, ctrl: HttpController, stack?: string) {
     handleFinish(err, ctrl, stack);
 }
 
-async function getArguments(ctrl: HttpController, method: string) {
+function getArguments(ctrl: HttpController, method: string) {
     let { req, res } = ctrl,
         data: string[] = values(req.params),
         args: any[] = [];

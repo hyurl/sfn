@@ -12,6 +12,7 @@ import {
     HttpDecorator
 } from './interfaces';
 import { Controller } from '../controllers/Controller';
+import * as cors from "sfn-cors";
 
 // Expose some internal functions as utilities to the public API.
 export { green, grey, red, yellow } from "./internal/color";
@@ -65,8 +66,10 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(
             if (this instanceof HttpController) {
                 if (typeof this.fallbackTo === "string") {
                     this.res.redirect(this.fallbackTo, 302);
-                } else {
+                } else if (this.fallbackTo) {
                     this.res.send(this.fallbackTo);
+                } else {
+                    throw new StatusException(401);
                 }
 
                 return intercept.BREAK;
@@ -158,6 +161,20 @@ export function route(method: string, path?: string): HttpDecorator {
         if (!routeMap.isLocked(key)) {
             routeMap.lock(key);
             router.method(method, path, handle(key));
+
+            if (method === "POST" && proto.ctor.hasOwnProperty("cors")) {
+                let _cors = proto.ctor["cors"];
+                let _key = routeMap.keyFor({ ...data, prefix: "OPTIONS", });
+
+                if (!routeMap.isLocked(_key)) {
+                    routeMap.lock(_key);
+                    router.method("OPTIONS", path, (req, res) => {
+                        // Handle CORS.
+                        cors(_cors, req, res);
+                        res.end();
+                    });
+                }
+            }
         }
     };
 }
