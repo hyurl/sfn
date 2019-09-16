@@ -1,5 +1,5 @@
 import random = require("lodash/random");
-import { App, RouteHandler } from "webium";
+import { App, RouteHandler, HttpMethods } from "webium";
 import { interceptAsync, intercept } from 'function-intercepter';
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
@@ -92,7 +92,6 @@ export function event(name: string): WebSocketDecorator {
         if (!modPath)
             return;
 
-        // let { nsp = "/" } = <typeof WebSocketController>proto.ctor;
         let nsp: string = "";
 
         if (proto.ctor.hasOwnProperty("nsp")) {
@@ -120,11 +119,10 @@ export function event(name: string): WebSocketDecorator {
 
 /** Binds the method to a specified URL route. */
 export function route(path: string): HttpDecorator;
-export function route(method: string, path: string): HttpDecorator;
+export function route(method: HttpMethods | "SSE", path: string): HttpDecorator;
 export function route(method: string, path?: string): HttpDecorator {
     return (proto: HttpController, prop: string) => {
         let modPath = traceModulePath(app.controllers.path);
-        // let { baseURI = "" } = <typeof HttpController>proto.ctor;
         let baseURI: string = "";
 
         if (proto.ctor.hasOwnProperty("baseURI")) {
@@ -160,20 +158,14 @@ export function route(method: string, path?: string): HttpDecorator {
 
         if (!routeMap.isLocked(key)) {
             routeMap.lock(key);
-            router.method(method, path, handle(key));
+            router.method(<HttpMethods>method, path, handle(key));
 
-            if (method === "POST" && proto.ctor.hasOwnProperty("cors")) {
-                let _cors = proto.ctor["cors"];
-                let _key = routeMap.keyFor({ ...data, prefix: "OPTIONS", });
-
-                if (!routeMap.isLocked(_key)) {
-                    routeMap.lock(_key);
-                    router.method("OPTIONS", path, (req, res) => {
-                        // Handle CORS.
-                        cors(_cors, req, res);
-                        res.end();
-                    });
-                }
+            if (method === "POST" && proto.ctor.hasOwnProperty("cors") &&
+                !router.contains("OPTIONS", path)) {
+                router.method("OPTIONS", path, (req, res) => {
+                    cors(proto.ctor["cors"], req, res);
+                    res.end();
+                }, true);
             }
         }
     };

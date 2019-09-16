@@ -61,11 +61,8 @@ export function getRouteHandler(key: string): RouteHandler {
                     continue;
                 } else if (!initiated) {
                     // Handle CORS.
-                    if (!cors(<any>ctrl.ctor["cors"], req, res)) {
+                    if (ctrl.ctor["cors"] && !cors(ctrl.ctor["cors"], req, res)) {
                         throw new StatusException(410);
-                    } else if (req.method === "OPTIONS") {
-                        // cors will set proper headers for OPTIONS
-                        return res.end();
                     }
 
                     // Handle CSRF token.
