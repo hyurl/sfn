@@ -78,7 +78,7 @@ export class Service extends EventEmitter {
         return {
             success: false,
             code,
-            error: msg
+            error: this.i18n(msg)
         };
     }
 }

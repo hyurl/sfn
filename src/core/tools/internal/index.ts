@@ -63,7 +63,7 @@ export function ensureType(value: any) {
             } else {
                 let num = Number(value);
 
-                if (!isNaN(num) && num <= Number.MAX_SAFE_INTEGER) {
+                if (!isNaN(num) && num <= Math.pow(2, 31) - 1) {
                     return num;
                 } else {
                     return value;
