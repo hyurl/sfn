@@ -88,6 +88,11 @@ app.rpc = {
 
         // try to serve the REPL server.
         await serveRepl(app.id);
+
+        if (typeof process.send == "function") {
+            // notify PM2 that the service is available.
+            process.send("ready");
+        }
     },
     async connect(id: string, defer = false) {
         ensureAppId(id);

@@ -5,7 +5,6 @@ import { pathExists } from 'fs-extra';
 import { App } from "webium";
 import * as SocketIO from "socket.io";
 import { SSE } from "sfn-sse";
-import channel, { Channel } from "ipchannel";
 import { APP_PATH } from "../../init";
 import {
     moduleExists,
@@ -43,9 +42,6 @@ declare global {
          */
         const sse: { [id: string]: SSE };
 
-        /** The communication channel between cluster processes. */
-        const channel: Channel;
-
         /**
          * Starts the web server (both `http` and `ws`) or an RPC server if
          * `id` is provided.
@@ -68,7 +64,6 @@ define(app, "router", () => router);
 define(app, "http", () => http);
 define(app, "ws", () => ws);
 define(app, "sse", () => sseContainer);
-define(app, "channel", () => router ? channel : null);
 
 app.serve = async function serve(id?: string) {
     if (id && !id.startsWith("web-server")) {
@@ -144,34 +139,30 @@ app.serve = async function serve(id?: string) {
                     await importDirectory(app.controllers.path);
                 }
 
-                let finish = async () => {
-                    // set the server ID
-                    app.id = "web-server-" + channel.pid;
-
-                    // invoke all start-up hooks.
-                    await app.hooks.lifeCycle.startup.invoke();
-
-                    if (typeof process.send == "function") {
-                        // notify PM2 that the service is available.
-                        process.send("ready");
-                    } else {
-                        console.log(serveTip("Web", app.id, baseUrl()));
-                    }
-
-                    // try to connect all RPC services.
-                    await app.rpc.connectAll(true);
-
-                    // try to serve the REPL server.
-                    await serveRepl(app.id);
-
-                    resolve();
-                }
-
-                if (channel.pid) {
-                    await finish();
+                // set the server ID
+                if (process.env.NODE_APP_INSTANCE) {
+                    app.id = "web-server-" + process.env.NODE_APP_INSTANCE;
                 } else {
-                    channel.on("connect", finish);
+                    app.id = "web-server";
                 }
+
+                // invoke all start-up hooks.
+                await app.hooks.lifeCycle.startup.invoke();
+
+                console.log(serveTip("Web", app.id, baseUrl()));
+
+                // try to connect all RPC services.
+                await app.rpc.connectAll(true);
+
+                // try to serve the REPL server.
+                await serveRepl(app.id);
+
+                if (typeof process.send == "function") {
+                    // notify PM2 that the service is available.
+                    process.send("ready");
+                }
+
+                resolve();
             } catch (err) {
                 reject(err);
             }

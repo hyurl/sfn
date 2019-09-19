@@ -142,7 +142,7 @@ export default class extends HttpController {
 import { HttpController, route } from "sfn";
 
 export default class extends HttpController {
-    cors = "example.com";
+    static cors = "example.com";
 
     // ...
 }

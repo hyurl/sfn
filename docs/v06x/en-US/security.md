@@ -152,7 +152,7 @@ easy to configure. As usual, you just need to turn it on in the controller.
 import { HttpController, route } from "sfn";
 
 export default class extends HttpController {
-    cors = "example.com";
+    static cors = "example.com";
 
     // ...
 }

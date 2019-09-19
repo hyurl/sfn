@@ -1,10 +1,8 @@
 import { RpcClient } from 'alar';
-import clusterChannel from "ipchannel";
 import values = require("lodash/values")
 
 export class MessageChannel {
     private events: { [name: string]: Function[] } = {};
-    private clusterListenerMap = new Map<Function, Function>();
 
     constructor(readonly name: string) { }
 
@@ -12,28 +10,24 @@ export class MessageChannel {
      * Publishes `data` to the given `event` in the channel, if `servers` are
      * provided, the event will only be emitted to them.
      */
-    publish(event: string, data?: any, servers?: string[]) {
+    publish(event: string, data?: any, servers?: string[]): boolean {
         event = this.name + "#" + event;
 
         if (app.rpc.server) {
             // If the current server is an RPC server, publish the event via the
             // RPC channel.
             return app.rpc.server.publish(event, data, servers);
-        } else if (!servers) {
-            // Publish event to all cluster members.
-            return clusterChannel.to("all").emit(event, data);
+        } else if (this.events[event] && this.events[event].length > 0) {
+            // Invoke the listeners asynchronously.
+            (async () => {
+                for (let listener of this.events[event]) {
+                    listener.call(void 0, data);
+                }
+            })().catch(() => null);
+
+            return true;
         } else {
-            // Publish event to specified cluster members.
-            let ok = false;
-
-            for (let receiver of servers) {
-                receiver = receiver.match(/\d+/)[0];
-                ok = true;
-
-                clusterChannel.to(parseInt(receiver)).emit(event, data);
-            }
-
-            return ok;
+            return false;
         }
     }
 
@@ -53,12 +47,6 @@ export class MessageChannel {
             connection.subscribe(event, <any>listener);
         }
 
-        // If the current process is not an RPC server, bind the event to the 
-        // cluster channel instead.
-        if (!app.rpc.server) {
-            clusterChannel.on(event, this.bindClusterChannel(listener));
-        }
-
         return this;
     }
 
@@ -66,7 +54,6 @@ export class MessageChannel {
     unsubscribe(event: string, listener?: Function) {
         event = this.name + "#" + event;
 
-        let clusterListener: Function;
         let listeners = this.events[event] || [];
 
         // Unsubscribe event listeners in the RPC channel.
@@ -74,19 +61,13 @@ export class MessageChannel {
             connection.unsubscribe(event, <any>listener);
         }
 
-        // Remove event listeners in the cluster channel.
-        if (listener) {
-            clusterChannel.removeAllListeners(event);
-        } else if (clusterListener = this.clusterListenerMap.get(listener)) {
-            clusterChannel.removeListener(event, <any>clusterListener);
-        }
-
 
         // Remove event listeners in the message channel.
         if (!listeners.length) {
             return false;
         } else if (listener) {
-            return listeners.splice(listeners.indexOf(listener), 1).length > 0;
+            let i = listeners.indexOf(listener);
+            return i === -1 ? false : listeners.splice(i, 1).length > 0;
         } else {
             return delete this.events[event];
         }
@@ -99,12 +80,6 @@ export class MessageChannel {
                 connection.subscribe(event, <any>listener);
             }
         }
-    }
-
-    private bindClusterChannel(listener: Function) {
-        let fn = (_: number, data: any) => listener(data);
-        this.clusterListenerMap.set(listener, fn);
-        return fn;
     }
 }
 
