@@ -1,4 +1,4 @@
-import { WebSocketController, event } from "sfn";
+import { WebSocketController, event, sleep } from "sfn";
 
 export default class extends WebSocketController {
 
@@ -20,7 +20,10 @@ export default class extends WebSocketController {
      */
     @event("repeat-what-I-said")
     repeatWhatISaid(data: string) {
-        return data;
+        return this.queue("repeat-what-I-said", async () => {
+            await sleep(1000);
+            return data;
+        });
     }
 
     @event("iterator-test")

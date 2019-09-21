@@ -71,22 +71,22 @@ export class Service extends EventEmitter {
      * Throttles the operation in the body associated to a unique key.
      * @param interval default `0`.
      */
-    async throttle<T>(key: string, body: () => T | Promise<T>, interval = 0) {
+    async throttle<T>(
+        key: string,
+        body: () => T | Promise<T>,
+        interval = 0,
+        error: any = new Error("To many operations")
+    ) {
         let result = await new Promise<T>((resolve, reject) => {
             let now = Date.now();
 
             if (this.throttles[key] && this.throttles[key] >= now) {
-                return reject(new Error("To many operations"));
+                return reject(error);
             } else {
                 this.throttles[key] = now + interval;
                 resolve(body.call(this));
             }
         });
-
-        // GC
-        if (this.throttles[key] <= Date.now()) {
-            delete this.throttles[key];
-        }
 
         return result;
     }

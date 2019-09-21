@@ -3,8 +3,10 @@ import { HttpController, route } from "sfn";
 export default class extends HttpController {
     @route.get("/")
     async index() {
-        await app.hooks.web.onView.invoke(this.req);
-        return this.view("index");
+        return this.throttle(this.req.url, async () => {
+            await app.hooks.web.onView.invoke(this.req);
+            return this.view("index");
+        }, 1000);
     }
 
     @route.sse("/sse-test")

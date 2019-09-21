@@ -16,7 +16,7 @@ export abstract class Controller extends Service {
     authorized: boolean = false;
 
     abstract readonly session: Session;
-    static flow = new Service();
+    static flow: Service = null;
 
     /** A reference to the class constructor. */
     get ctor(): new (...args: any[]) => this {

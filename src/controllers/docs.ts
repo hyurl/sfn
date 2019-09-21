@@ -23,9 +23,11 @@ export default class extends HttpController {
     @route.get("/docs/:version/:name")
     @app.hooks.web.onView.decorate()
     async showContents(req: Request, version: string, name: string) {
-        let sideMenu = await this.docSrv.getSideMenu(version, this.lang);
-        let content = await this.docSrv.getContent(version, this.lang, name);
+        return this.throttle(req.url, async () => {
+            let sideMenu = await this.docSrv.getSideMenu(version, this.lang);
+            let content = await this.docSrv.getContent(version, this.lang, name);
 
-        return req.xhr ? content : this.view("docs", { sideMenu, content });
+            return req.xhr ? content : this.view("docs", { sideMenu, content });
+        }, 1000);
     }
 }

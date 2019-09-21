@@ -3,6 +3,9 @@ import { Hook } from '../tools/Hook';
 import { tryLogError } from '../tools/internal/error';
 import get = require('lodash/get');
 import { sleep } from '../tools/functions';
+import { Controller } from '../controllers/Controller';
+import { Service } from '../tools/Service';
+import moment = require('moment');
 
 declare global {
     namespace app {
@@ -168,6 +171,35 @@ app.hooks.lifeCycle.startup.bind(() => {
                 await module.instance(app.local)[method](...(data || []));
             } catch (err) {
                 tryLogError(err);
+            }
+        }
+    });
+});
+
+// Initiate the static property Controller.flow.
+app.hooks.lifeCycle.startup.bind(() => {
+    Controller.flow = new Service();
+
+    // GC
+    app.schedule.create({
+        salt: "Controller.flow.gc",
+        start: moment().unix(),
+        repeat: 30,
+        handler() {
+            let now = Date.now();
+            let throttles = Controller.flow["throttles"];
+            let queues = Controller.flow["queues"];
+
+            for (let key in throttles) {
+                if (throttles[key] < now) {
+                    delete throttles[key];
+                }
+            }
+
+            for (let key in queues) {
+                if (queues[key].length === 0) {
+                    delete queues[key];
+                }
             }
         }
     });
