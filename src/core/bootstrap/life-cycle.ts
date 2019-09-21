@@ -198,6 +198,7 @@ app.hooks.lifeCycle.startup.bind(() => {
 
             for (let key in queues) {
                 if (queues[key].length === 0) {
+                    queues[key].stop();
                     delete queues[key];
                 }
             }

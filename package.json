@@ -69,7 +69,7 @@
         "chokidar": "^3.0.2",
         "commander": "^2.20.0",
         "cookie-parser": "^1.4.4",
-        "dynamic-queue": "^0.2.0",
+        "dynamic-queue": "^0.2.1",
         "express-session": "^1.16.2",
         "fron": "^0.1.9",
         "fs-extra": "^7.0.1",
