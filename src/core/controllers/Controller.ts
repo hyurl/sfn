@@ -1,4 +1,5 @@
 import { Service } from "../tools/Service";
+import { Session } from "../tools/interfaces";
 
 export interface ControllerConstructor<T = any> {
     new(...args: any[]): T;
@@ -14,6 +15,9 @@ export abstract class Controller extends Service {
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
 
+    abstract readonly session: Session;
+    static flow = new Service();
+
     /** A reference to the class constructor. */
     get ctor(): new (...args: any[]) => this {
         return <any>this.constructor;
@@ -24,4 +28,14 @@ export abstract class Controller extends Service {
 
     /** @deprecated Use `destroy()` instead. */
     after?(): void | Promise<void>;
+
+    async throttle<T>(key: string, body: () => T | Promise<T>, interval = 0) {
+        key = this.session.id + ":" + key;
+        return Controller.flow.throttle(key, body, interval);
+    }
+
+    async queue<T>(key: string, body: () => T | Promise<T>) {
+        key = this.session.id + ":" + key;
+        return Controller.flow.queue(key, body);
+    }
 }

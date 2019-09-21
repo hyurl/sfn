@@ -3,6 +3,7 @@ import { EventEmitter } from "events";
 import HideProtectedProperties = require("hide-protected-properties");
 import get = require('lodash/get');
 import { Locale } from './interfaces';
+import { Queue } from "dynamic-queue";
 
 export interface ResultMessage {
     success: boolean;
@@ -30,6 +31,9 @@ export interface Service {
 export class Service extends EventEmitter {
     /** The language of the current service. */
     lang: string = app.config.lang;
+
+    private throttles: { [key: string]: number } = {};
+    private queues: { [key: string]: Queue } = {};
 
     /**
      * Gets a locale text according to i18n. 
@@ -61,6 +65,49 @@ export class Service extends EventEmitter {
         (stmt === undefined) && (stmt = text);
 
         return util.format(stmt, ...replacements);
+    }
+
+    /**
+     * Throttles the operation in the body associated to a unique key.
+     * @param interval default `0`.
+     */
+    async throttle<T>(key: string, body: () => T | Promise<T>, interval = 0) {
+        let result = await new Promise<T>((resolve, reject) => {
+            let now = Date.now();
+
+            if (this.throttles[key] && this.throttles[key] >= now) {
+                return reject(new Error("To many operations"));
+            } else {
+                this.throttles[key] = now + interval;
+                resolve(body.call(this));
+            }
+        });
+
+        // GC
+        if (this.throttles[key] <= Date.now()) {
+            delete this.throttles[key];
+        }
+
+        return result;
+    }
+
+    /**
+     * Queues the operation in the body associated to a unique key.
+     */
+    async queue<T>(key: string, body: () => T | Promise<T>) {
+        return new Promise<T>((resolve, reject) => {
+            if (!this.queues[key]) {
+                this.queues[key] = new Queue();
+            }
+
+            this.queues[key].push(async () => {
+                try {
+                    resolve(await body.call(this));
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
     }
 
     /** Returns a result indicates the operation is succeeded. */
