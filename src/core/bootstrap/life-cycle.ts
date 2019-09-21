@@ -5,7 +5,6 @@ import get = require('lodash/get');
 import { sleep } from '../tools/functions';
 import { Controller } from '../controllers/Controller';
 import { Service } from '../tools/Service';
-import moment = require('moment');
 
 declare global {
     namespace app {
@@ -177,31 +176,12 @@ app.hooks.lifeCycle.startup.bind(() => {
 });
 
 // Initiate the static property Controller.flow.
-app.hooks.lifeCycle.startup.bind(() => {
+app.hooks.lifeCycle.startup.bind(async () => {
     Controller.flow = new Service();
+    Controller.flow.init && (await Controller.flow.init());
+});
 
-    // GC
-    app.schedule.create({
-        salt: "Controller.flow.gc",
-        start: moment().unix(),
-        repeat: 30,
-        handler() {
-            let now = Date.now();
-            let throttles = Controller.flow["throttles"];
-            let queues = Controller.flow["queues"];
-
-            for (let key in throttles) {
-                if (throttles[key] < now) {
-                    delete throttles[key];
-                }
-            }
-
-            for (let key in queues) {
-                if (queues[key].length === 0) {
-                    queues[key].stop();
-                    delete queues[key];
-                }
-            }
-        }
-    });
+// GC static property Controller.flow.
+app.hooks.lifeCycle.startup.bind(async () => {
+    Controller.flow.destroy && (await Controller.flow.destroy());
 });

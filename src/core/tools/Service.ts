@@ -12,28 +12,47 @@ export interface ResultMessage {
     error?: string;
 }
 
-export interface Service {
-    /** If defined, this method will be called to initiate the service. */
-    init?(): void | Promise<void>;
-    /**
-     * If defined, this method will be called when the service is about to be
-     * destroyed.
-     */
-    destroy?(): void | Promise<void>;
-}
-
 /**
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
  * `cache` that you can use to do real jobs, and since it is inherited from 
  * EventEmitter, you can bind customized events if needed.
  */
 @HideProtectedProperties
-export class Service extends EventEmitter {
+export class Service extends EventEmitter implements Service {
     /** The language of the current service. */
     lang: string = app.config.lang;
 
     private throttles: { [key: string]: number } = {};
     private queues: { [key: string]: Queue } = {};
+    private gcTimer = setInterval(() => this.gc(), 1000 * 30);
+
+    protected gc() {
+        let now = Date.now();
+
+        for (let key in this.throttles) {
+            if (this.throttles[key] < now) {
+                delete this.throttles[key];
+            }
+        }
+
+        for (let key in this.queues) {
+            if (this.queues[key].length === 0) {
+                this.queues[key].stop();
+                delete this.queues[key];
+            }
+        }
+    }
+
+    /** This method will be called to initiate the service. */
+    init(): void | Promise<void> { }
+
+    /**
+     * This method will be called when the service is about to be destroyed.
+     */
+    destroy(): void | Promise<void> {
+        clearInterval(this.gcTimer);
+        this.gc();
+    }
 
     /**
      * Gets a locale text according to i18n. 
