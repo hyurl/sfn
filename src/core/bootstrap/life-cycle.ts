@@ -24,7 +24,7 @@ process.on("SIGINT", async () => {
 
         if (app.rpc.server) {
             let { services = [] } = app.config.server.rpc[app.id];
-            // If a service has a method called 'init()', call it to initiate the
+            // If a service has a 'destroy()' method, call it to destroy the
             // service.
             for (let service of services) {
                 if (typeof service.instance(app.local).destroy === "function") {
@@ -89,6 +89,13 @@ app.hooks.lifeCycle.shutdown.bind(async () => {
                 resolve();
             });
         });
+    }
+});
+
+// Try to close rpc server.
+app.hooks.lifeCycle.shutdown.bind(async () => {
+    if (app.rpc.server) {
+        await app.rpc.server.close();
     }
 });
 

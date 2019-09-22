@@ -41,7 +41,8 @@ export function define(target: any, prop: string, value: any) {
         configurable: true,
     };
 
-    if (typeof value === "function") {
+    if (typeof value === "function" &&
+        !["valueOf", "toString", "toJSON"].includes(prop)) {
         options.get = value;
     } else {
         options.value = value;
@@ -51,6 +52,14 @@ export function define(target: any, prop: string, value: any) {
     return Object.defineProperty(target, prop, options);
 }
 
+export function copyFuncProps(source: Function, target: Function) {
+    define(target, "name", source.name);
+    define(target, "length", source.length);
+    define(target, "toString", source.toString.bind(source));
+    return target;
+}
+
+/** Casts the value or its properties to the closest types. */
 export function ensureType(value: any) {
     switch (typeof value) {
         case "string": {

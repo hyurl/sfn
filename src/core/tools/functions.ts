@@ -6,6 +6,8 @@ import { WebSocketController } from "../controllers/WebSocketController";
 import { StatusException } from './StatusException';
 import { routeMap, eventMap } from './RouteMap';
 import { traceModulePath } from './internal/module';
+import { copyFuncProps } from "./internal/index";
+import { Service } from './Service';
 import {
     ControllerDecorator,
     WebSocketDecorator,
@@ -198,3 +200,40 @@ route.put = function (path: string) {
 route.sse = function (path: string) {
     return route("SSE", path);
 };
+
+/** Throttles the calling rate of the method. */
+export function throttle(
+    key: string,
+    interval = 0,
+    error = void 0
+): MethodDecorator {
+    return (proto: Service, prop: string, desc: PropertyDescriptor) => {
+        let original: (...args: any[]) => any = desc.value;
+
+        desc.value = proto[prop] = copyFuncProps(
+            original,
+            function (this: Service) {
+                return this.throttle<any>(
+                    key,
+                    original.bind(this, ...arguments),
+                    interval,
+                    error
+                );
+            }
+        );
+    };
+}
+
+/** Queues the method call. */
+export function queue(key: string): MethodDecorator {
+    return (proto: Service, prop: string, desc: PropertyDescriptor) => {
+        let original: (...args: any[]) => any = desc.value;
+
+        desc.value = proto[prop] = copyFuncProps(
+            original,
+            function (this: Service) {
+                return this.queue<any>(key, original.bind(this, ...arguments));
+            }
+        );
+    };
+}

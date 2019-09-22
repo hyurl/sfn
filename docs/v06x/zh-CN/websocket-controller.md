@@ -1,26 +1,28 @@
 <!-- title: WebSocket 控制器; order: 4 -->
-# 基本概念
+## 基本概念
 
-`WebSocketController` 处理来自 [socket.io](https://socket.io/) 客户端的消息。
+`WebSocketController` 处理来自 [socket.io](https://socket.io/) 客户端的消息，它
+本质是一个继承自 [Service](./service) 的扩展类，但和服务的单例模式不同，控制器
+属于一次性用品，一个实例会在客户端请求到达时被创建，请求完成后被销毁。因此，
+控制器也重载了一些基类的方法来使它适应这种独特的运行模式，而又能够保持与普通服务
+相似的开发体验。
 
 由于这个模块使用 socket.io，你需要提前学习它，从而能够完全处理你的工作。
 
-# 如何使用？
+## 使用示例
 
 如同 **HttpController**，你创一个文件存储在 `src/controllers` 中，这个文件应该导出
-一个默认的类并继承自 `WebSocketController`，然后它就能够在服务器启动时被自动的加载。
+一个默认的类并继承自 `WebSocketController`，然后它就能够在服务器启动时被自动加载。
 
-大多数 **HttpController** 中的特性，在 **WebSocketController** 中都可以使用，或者
+很多 **HttpController** 中的特性，在 **WebSocketController** 中都可以使用，或者
 可以找到相似的版本，所以请认真查看 [HttpController](./http-controller) 的文档。
-
-## 示例
 
 ```typescript
 import { WebSocketController, event } from "sfn";
 
 export default class extends WebSocketController {
     @event("/demo")
-    index() {
+    async index() {
         return "Hello, World!";
     }
 }
@@ -28,9 +30,9 @@ export default class extends WebSocketController {
 
 ## 事件和方法的关系
 
-当一个方法被 `@event` 修饰时，这个方法将会被绑定到一个确定的 socket.io 事件上。当
-一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被自动地以合适
-的形式返回给客户端。
+当一个方法被 `@event` 修饰时，这个方法将会被绑定到一个确定的 socket.io 事件上。
+当一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被自动
+地以合适的形式返回给客户端。
 
 
 ### 设置命名空间
@@ -82,12 +84,9 @@ export default class extends WebSocketController {
 }
 ```
 
-更多详情请查看 [依赖注入](./di#在控制器中自动注入)。
+### 构造函数签名
 
-## 构造函数
-
-有些时候你可能想要在真正的方法被调用前做一些事情，你可能想要进行一些额外的配置，在类被
-实例化前，你想要自定义类的 `constructor`。就像下面这样：
+所有的 WebSocketController 构造函数都支持一个参数，即 `socket: WebSocket`。
 
 ```typescript
 import { WebSocketController, WebSocket } from "sfn";
@@ -95,13 +94,14 @@ import { WebSocketController, WebSocket } from "sfn";
 export default class extends WebSocketController {
     constructor(socket: WebSocket) {
         super(socket);
-        
         // your stuffs...
     }
 }
 ```
 
-## 在控制器中抛出状态异常
+更多详情请查看 [依赖注入](./di#在控制器中自动注入)。
+
+## 抛出状态异常
 
 和在 HttpController 中一样，你可以使用 `StatusException` 来抛出状态异常，框架将
 会对其进行合适的处理，并自动地发送错误响应内容。
@@ -172,8 +172,3 @@ import * as RedisAdapter from "socket.io-redis";
 
 ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 ```
-
-## WebSocketController 与服务
-
-一个控制器实际上就是一个服务，你可以在一个控制器中使用任何在 [Service](./service) 
-中有效的特性。

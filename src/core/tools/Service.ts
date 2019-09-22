@@ -5,13 +5,6 @@ import get = require('lodash/get');
 import { Locale } from './interfaces';
 import { Queue } from "dynamic-queue";
 
-export interface ResultMessage {
-    success: boolean;
-    code: number;
-    data?: any;
-    error?: string;
-}
-
 /**
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
  * `cache` that you can use to do real jobs, and since it is inherited from 
@@ -24,9 +17,9 @@ export class Service extends EventEmitter implements Service {
 
     private throttles: { [key: string]: number } = {};
     private queues: { [key: string]: Queue } = {};
-    private gcTimer = setInterval(() => this.gc(), 1000 * 30);
+    private gcTimer: NodeJS.Timer = null;
 
-    protected gc() {
+    protected gc(): void | Promise<void> {
         let now = Date.now();
 
         for (let key in this.throttles) {
@@ -44,13 +37,15 @@ export class Service extends EventEmitter implements Service {
     }
 
     /** This method will be called to initiate the service. */
-    init(): void | Promise<void> { }
+    init(): void | Promise<void> {
+        this.gcTimer = setInterval(() => this.gc(), 1000 * 30);
+    }
 
     /**
      * This method will be called when the service is about to be destroyed.
      */
     destroy(): void | Promise<void> {
-        clearInterval(this.gcTimer);
+        this.gcTimer && clearInterval(this.gcTimer);
         this.gc();
     }
 
@@ -127,24 +122,5 @@ export class Service extends EventEmitter implements Service {
                 }
             });
         });
-    }
-
-    /** Returns a result indicates the operation is succeeded. */
-    success(data: any, code: number = 200): ResultMessage {
-        return {
-            success: true,
-            code,
-            data,
-        };
-    }
-
-    /** Returns a result indicates the operation is failed. */
-    error(msg: string | Error, code: number = 500): ResultMessage {
-        msg = msg instanceof Error ? msg.message : msg;
-        return {
-            success: false,
-            code,
-            error: this.i18n(msg)
-        };
     }
 }

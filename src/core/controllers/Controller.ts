@@ -1,10 +1,12 @@
 import { Service } from "../tools/Service";
 import { Session } from "../tools/interfaces";
 
-export interface ControllerConstructor<T = any> {
-    new(...args: any[]): T;
-    filename: string
-};
+export interface ResultMessage {
+    success: boolean;
+    code: number;
+    data?: any;
+    error?: string;
+}
 
 /**
  * The Controller give you a common API to return data to the underlying 
@@ -23,6 +25,12 @@ export abstract class Controller extends Service {
         return <any>this.constructor;
     };
 
+    /** @override */
+    protected gc() { }
+
+    /** @override */
+    init(): void | Promise<void> { }
+
     /** @deprecated Use `init()` instead. */
     before?(): void | Promise<void>;
 
@@ -37,5 +45,24 @@ export abstract class Controller extends Service {
     async queue<T>(key: string, body: () => T | Promise<T>) {
         key = this.session.id + ":" + key;
         return Controller.flow.queue(key, body);
+    }
+
+    /** Returns a result indicates the operation is succeeded. */
+    success(data: any, code: number = 200): ResultMessage {
+        return {
+            success: true,
+            code,
+            data,
+        };
+    }
+
+    /** Returns a result indicates the operation is failed. */
+    error(msg: string | Error, code: number = 500): ResultMessage {
+        msg = msg instanceof Error ? msg.message : msg;
+        return {
+            success: false,
+            code,
+            error: this.i18n(msg)
+        };
     }
 }

@@ -1,6 +1,7 @@
-import { WebSocketController, event, sleep } from "sfn";
+import { WebSocketController, event, sleep, queue, requireAuth } from "sfn";
 
-export default class extends WebSocketController {
+export default class iWebSocketController extends WebSocketController {
+    authorized = true;
 
     /**
      * @example
@@ -19,11 +20,11 @@ export default class extends WebSocketController {
      *  socket.emit('repeat-what-I-said', 'Hello, World!')
      */
     @event("repeat-what-I-said")
-    repeatWhatISaid(data: string) {
-        return this.queue("repeat-what-I-said", async () => {
-            await sleep(1000);
-            return data;
-        });
+    @queue("repeat-what-I-said")
+    @requireAuth
+    async repeatWhatISaid(data: string) {
+        await sleep(1000);
+        return data;
     }
 
     @event("iterator-test")

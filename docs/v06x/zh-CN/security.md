@@ -10,22 +10,19 @@
 如果操作是未授权的，框架将会自动抛出一个 HttpError（或 SocketError）
 `401 Unauthorized` 并返回到客户端。
 
-### 如何要求授权？
+## 使用示例
 
-很简单，你只需要使用装饰器 `@requireAuth` 来修饰方法即可，当这个方法被通过 URL 
-（或 WebSocket 事件）调用时，检测过程就会被自动的执行。
+要唤起授权检查，你只需要使用装饰器 `@requireAuth` 来修饰控制器方法即可，当这个
+方法被通过 URL（或 WebSocket 事件）调用时，检测过程就会被自动的执行。
 
-### 示例
 
 ```typescript
 import { HttpController, Request, Response, route, requireAuth } from "sfn";
 
 export default class extends HttpController {
-    constructor(req: Request, res: Response) {
-        super(req, res);
+    async init() {
+        super.init();
 
-        // instead of checking req.user, here I will check req.auth, HTTP 
-        // basic authentication.
         this.authorized = req.auth !== null
             && req.auth.username === "luna"
             && req.auth.password === "12345";
@@ -38,12 +35,12 @@ export default class extends HttpController {
 
     @requireAuth
     @route("/auth-example")
-    index() {
+    async index() {
         return "This message will be sent if the operation is permitted.";
     }
 
     @route("/auth")
-    auth(req: Request, res: Responce) {
+    async auth(req: Request, res: Responce) {
         if (!req.auth) {
             // res.auth() will lead you to HTTP basic authentication.
             return res.auth();
@@ -53,11 +50,6 @@ export default class extends HttpController {
     }
 }
 ```
-
-上面的示例展示了直接在构造器函数中检查授权状态，因为它们全部都是同步逻辑，但大多数情况下
-你可能会需要做一些异步的操作，如从数据获取数据等，你需要查看一下文档
-[前置和后置操作](./http-controller#前置和后置操作) 以及
-[面向切面编程](./aop-mixins#面向切面编程).
 
 ## CSRF 防护
 
@@ -131,10 +123,14 @@ export default class extends HttpController {
 ## CORS 控制
 
 允许来自不受信任的访问源进行请求会产生一些问题，虽然现代浏览器更倾向于屏蔽来自跨域的
-响应，但是在服务端，其操作已经被正常地执行，即使远程客户端永远不会意识到。
+响应，但是在大多数服务端，其操作已经被正常地执行，即使远程客户端永远不会意识到。
 
-**SFN** 框架赋予你完全控制 CORS 地能力，并且它很容易配置。如平时一样，你需要在控制器
-中开启它。
+然而在 **SFN** 框架中，CORS 检查是非常严格的，如果检查不通过，那么调用的方法永远
+不会执行。同时框架赋予你完全控制 CORS 地能力，并且它很容易配置。如平时一样，你
+需要在控制器中开启它。
+
+（**注**：自 v0.6 版本起，控制器的 `cors` 属性被更换成了 `static cors` 属性，并且
+框架将会自动设置 OPTIONS 路由。）
 
 ### CORS 示例
 
@@ -184,9 +180,6 @@ export default class extends HttpController {
 某些浏览器，如 Chrome，并不会检查 `Access-Control-Allow-Methods` 和 
 `Access-Control-Allow-Headers`，或者弱性检查，但使用这个模块，请求方法和请求头总是
 严格检查的。
-
-当访问控制检测不通过时，或者请求的方法是 `OPTIONS`（无论成功还是失败），连接将会被
-立马中断，也不会再有任何后续操作被执行。
 
 ## XSS 防御
 

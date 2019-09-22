@@ -3,7 +3,7 @@
 >This documentation is for SFN 0.6.x, for old version SFN documentation, please 
 > [click here](/docs/v0.5.x/getting-started).
 
-### Initiate Your Project
+## Initiate Project
 
 Create a directory to store files of your project, then use the command
 
@@ -14,7 +14,7 @@ npm init
 to initiate your project, assume you have some knowledge of 
 [NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
-### Prepare TypeScript Environment
+###Prepare TypeScript Environment
 
 **SFN** is written in [TypeScript](https://www.typescriptlang.org), which your
 own code should be as well.
@@ -31,7 +31,7 @@ run the program without compiling source code.
 npm i -D ts-node
 ```
 
-### Install PM2 (Optional)
+## Install PM2 (Optional)
 
 Since version 0.3.x, SFN uses [PM2](https://pm2.io) as its application manager 
 and load-balancer, so to better deploy your application, you'd also install PM2
@@ -42,7 +42,7 @@ requirement, not necessary during development).
 npm i -g pm2
 ```
 
-### Install Framework
+## Install Framework
 
 After you have initiated your project, you can now install **SFN** by using 
 this command:
@@ -61,7 +61,7 @@ to run user-defined commands. See [CLI & REPL](./cli-repl).
 sfn init
 ```
 
-### Start Demo Server
+## Start Demo Server
 
 **SFN** provides a demo, so you can now start server and see what will happen.
 

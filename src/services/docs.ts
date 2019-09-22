@@ -59,7 +59,7 @@ export default class DocumentationService extends Service {
                 metaData = meta(content)[0] || {};
 
             categoryTree.push({
-                order: parseInt(metaData.order) || 0,
+                order: parseFloat(metaData.order) || 0,
                 id: _name,
                 level: 0,
                 title: `<a href="/docs/${version}/${_name}" title="${metaData.title}">${metaData.title}</a><i class="fa fa-angle-right"></i>`,

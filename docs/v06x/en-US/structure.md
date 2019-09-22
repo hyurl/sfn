@@ -1,5 +1,5 @@
 <!-- title: Structure; order: 2 -->
-# Files and Folders
+## Files and Folders
 
 In a standard **SFN** application, there are always some files and folders 
 presented in you project directory, some of them are necessary, some of them are 
@@ -36,7 +36,7 @@ sure they'll be loaded properly.
 
 (NOTE: * indicates the files in the current item is hot-reloadable.)
 
-# Hot-reloading
+## Hot-reloading
 
 The hot-reloading feature was introduced since SFN 0.3, back then only 
 controllers that can be hot-reloaded. However, since version 0.5, SFN introduced

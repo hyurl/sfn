@@ -1,6 +1,6 @@
 <!-- title: 消息通道; order: 10.1 -->
 
-# 服务间通信
+## 服务间通信
 
 在多进程、分布式的应用中，各个程序之间无可避免的需要进行跨进程、跨服务的消息通信，这里
 将要讲的，不是远程方法在调用时通过 IPC/RPC 的 Socket 通信方案，而是在分布式的服务系统中，
@@ -37,7 +37,7 @@ app.message.subscribe("greeting", msg => {
 在上面的例子中，rpc-server-2 必须连接到 rpc-server-1，才能够接收到 `greeting` 事件发来的
 消息。
 
-# 推送 WebSocket 消息
+## 推送 WebSocket 消息
 
 同时，SFN 提供了基于 MessageChannel 的 WebSocket 消息机制（`app.message.ws`），并
 将其封装成和 Socket.io 相同的方法，因此在使用上，基本上没有任何差异。
@@ -60,7 +60,7 @@ app.message.ws.via("web-server-1")
 除了上述例子，诸如 `of(nsp: string)`, `volatile`, `local`, `binary()` 等特性也都是
 支持的。为了统一，如果不是在控制器中，请始终通过 `app.message.ws` 来推送消息。
 
-# 推送 SSE (Server-Sent Events) 消息
+## 推送 SSE (Server-Sent Events) 消息
 
 除了 `app.message.ws`，SFN 还提供了 `app.message.sse` 来进行跨服务推送 SSE 消息，
 其用法和前者类似，它提供了 `send(data: any)`、`emit(event: string, data?: any)` 和

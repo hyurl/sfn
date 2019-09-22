@@ -1,10 +1,10 @@
 <!-- title: IDE 调试; order: 7.1 -->
 
-# 基本概念
+## 基本概念
 
 在开发阶段，使用 IDE 调试应用是被建议的。SFN 支持许多的方式进行调试，并且配置也很容易设置。
 
-# 在 Visual Studio Code 中调试
+## 在 Visual Studio Code 中调试
 
 ### 配置调试
 
@@ -37,7 +37,7 @@ Visual Studio Code 调试是直接支持 TypeScript 的，因此你可以直接�
 更多关于 Visual Studio Code 调试应用的详情，请查阅
 [Debugging in Visual Studio Code](https://code.visualstudio.com/docs/editor/debugging)。
 
-# 在 WebStorm 中调试
+## 在 WebStorm 中调试
 
 ### 配置调试
 
@@ -80,7 +80,7 @@ WebStorm 窗口中打开你的项目目录，点击顶部菜单栏的 **Run** �
 
 <img src="/images/webstorm-debug5.png"/>
 
-# 在 Visual Studio 2017 中调试
+## 在 Visual Studio 2017 中调试
 
 在 Visual Studio 2017 中调试 JavaScript/TypeScript 项目是很简单的，你只需要在
 **解决方案资源管理器** 中将入口文件`dist/index.js` **设置为启动项** 即可，就像这样：

@@ -1,17 +1,13 @@
 <!-- title: 文件上传; order: 13 -->
-# 基本概念
+## 基本概念
 
 `HttpController` 提供了一个简单的文件上传方式，让你可以通过 HTTP POST 请求来上传
-文件。
+文件。上传文件就如同你做其他事情一样容易，只需要一些简单的配置，其余的工作就能够
+被框架自动处理。
 
-## 如何使用？
-
-在一个 **SFN** 应用程序中，上传文件就如同你做其他事情一样容易，你只需要配置一些选项，
-其余的工作就能够被框架自动地处理。
+## 使用示例
 
 在一个 HttpController 中，使用装饰器 `@upload` 来设置接受携带文件的字段。
-
-### 示例
 
 ```typescript
 import { HttpController, Request, route, upload } from "sfn";
@@ -29,7 +25,7 @@ export default class extends HttpController {
 }
 ```
 
-### 配置上传选项
+## 配置上传选项
 
 ```typescript
 import { HttpController, Request, Response, route, upload } from "sfn";
@@ -59,7 +55,7 @@ export default class extends HttpController {
     `auto-increment` 表示当文件名已存在时，它将会使用一个递增的数字来作为后缀，例如
     `example.txt` => `example (1).txt`。
 
-### 文件状态
+## 文件状态
 
 在构造函数中的文件状态和绑定到路由的方法中的状态是不同的，在构造函数中（以及在 
 [init()](./http-controller#前置和后置操作) 方法中），文件处于正在上传状态，而在

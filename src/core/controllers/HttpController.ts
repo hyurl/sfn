@@ -2,11 +2,10 @@ import * as path from "path";
 import get = require('lodash/get');
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
-import { Controller } from "./Controller";
+import { Controller, ResultMessage } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
 import { StatusException } from "../tools/StatusException";
 import { UploadOptions } from "../tools/upload";
-import { ResultMessage } from '../tools/Service';
 
 export { CorsOptions };
 
