@@ -26,6 +26,7 @@ export * from "./core/tools/Hook";
 export * from "./core/tools/Schedule";
 export * from "./core/tools/Service";
 export * from "./core/tools/MessageChannel";
+export * from "./core/controllers/Controller";
 export * from "./core/controllers/HttpController";
 export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
