@@ -61,22 +61,24 @@ export class Service extends EventEmitter implements Service {
      * @param replacements Values that replaces %s, %i, etc. in the `text`.
      */
     i18n(text: string, ...replacements: string[]): string {
-        let mod: ModuleProxy<Locale> = null;
+        let mod = get(app.locales, this.lang);
         let defMod = get(app.locales, app.config.lang);
         let locale: Locale = null;
         let stmt: string;
 
-        try { mod = get(app.locales, this.lang) } catch (e) { }
+        try {
+            if (mod && mod.proto) {
+                locale = mod.instance();
+                locale[text] && (stmt = locale[text]);
+            }
+        } catch (e) { }
 
-        if (mod && mod.proto) {
-            locale = mod.instance();
-            locale[text] && (stmt = locale[text]);
-        }
-
-        if (stmt === undefined && defMod && defMod.proto) {
-            locale = defMod.instance();
-            locale[text] && (stmt = locale[text]);
-        }
+        try {
+            if (stmt === undefined && defMod && defMod.proto) {
+                locale = defMod.instance();
+                locale[text] && (stmt = locale[text]);
+            }
+        } catch (e) { }
 
         (stmt === undefined) && (stmt = text);
 
