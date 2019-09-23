@@ -4,6 +4,8 @@ import * as FRON from "fron";
 import { isTsNode } from "../../../init";
 import { tryLogError, resolveErrorStack } from './error';
 import merge = require('lodash/merge');
+import { Locale } from "../interfaces";
+import get = require('lodash/get');
 
 const tryImport = createImport(require);
 
@@ -52,8 +54,8 @@ export function traceModulePath(baseDir: string) {
 }
 
 export async function importDirectory(dir: string) {
-    var ext = isTsNode ? ".ts" : ".js";
-    var files = await fs.readdir(dir);
+    let ext = isTsNode ? ".ts" : ".js";
+    let files = await fs.readdir(dir);
 
     for (let file of files) {
         let filename = path.resolve(dir, file);
@@ -68,8 +70,31 @@ export async function importDirectory(dir: string) {
     }
 }
 
+export function loadLanguagePack(filename: string) {
+    let name = app.locales.resolve(filename);
+    let ins: Locale = name && get(global, name).instance();
+
+    if (ins) {
+        let lang = path.basename(filename, path.extname(filename));
+        app.locales.translations[lang] = ins;
+
+        if (ins.$alias) {
+            let aliases = ins.$alias.split(/\s*,\s*/);
+
+            for (let alias of aliases) {
+                app.locales.translations[alias] = ins;
+            }
+        }
+    }
+}
+
+/**
+ * NOTE: This function is called in the following files:
+ * - ../../../index.ts
+ * - ../../../../index.js
+ */
 export function bootstrap() {
-    let moduleName = app.APP_PATH + "/config";
+    let configFile = app.APP_PATH + "/config";
     let tryImport = createImport(require);
     let config = require("../../../config");
 
@@ -85,12 +110,16 @@ export function bootstrap() {
         });
     }
 
-    if (moduleExists(moduleName)) {
+    if (moduleExists(configFile)) {
         // Load user-defined configurations.
-        let mod = tryImport(moduleName);
+        let mod = tryImport(configFile);
 
         if (!Object.is(mod, config) && typeof mod.default == "object") {
             merge(config.default, mod.default);
         }
+    }
+
+    if (fs.existsSync(app.locales.path)) {
+        fs.readdirSync(app.locales.path).forEach(loadLanguagePack);
     }
 }

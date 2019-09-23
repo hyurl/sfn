@@ -7,13 +7,11 @@ import pluralize = require("pluralize");
 import kebabCase = require("lodash/kebabCase");
 import camelCase = require("lodash/camelCase");
 import upperFirst = require("lodash/upperFirst");
-import cloneDeep = require('lodash/cloneDeep');
 import get = require('lodash/get');
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
 import { moduleExists, createImport } from "../core/tools/internal/module";
-import { Locale } from '../core/tools/interfaces';
 
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
@@ -163,19 +161,8 @@ try {
         }
 
         let output: string = `${SRC_PATH}/locales/${program.language}.json`;
-        let mod: ModuleProxy<Locale> = get(app.locales, app.config.lang);
-        let lang: Locale;
+        let lang = get(app.locales.translations, app.config.lang, {});
         let contents: string;
-
-        if (mod && mod.proto) {
-            lang = cloneDeep(mod.instance());
-
-            for (let x in lang) {
-                lang[x] = "";
-            }
-        } else {
-            lang = {};
-        }
 
         contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");

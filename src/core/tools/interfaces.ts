@@ -8,6 +8,7 @@ import { WebSocketController } from "../controllers/WebSocketController";
 import { UploadedFile } from "./upload";
 
 export interface Locale {
+    $alias: string;
     [statement: string]: string;
 }
 

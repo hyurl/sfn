@@ -9,7 +9,6 @@ const pluralize = require("pluralize");
 const kebabCase = require("lodash/kebabCase");
 const camelCase = require("lodash/camelCase");
 const upperFirst = require("lodash/upperFirst");
-const cloneDeep = require("lodash/cloneDeep");
 const get = require("lodash/get");
 const init_1 = require("../init");
 const color_1 = require("../core/tools/internal/color");
@@ -127,18 +126,8 @@ try {
             program.language = names[0] + "-" + names[1].toUpperCase();
         }
         let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
-        let mod = get(app.locales, app.config.lang);
-        let lang;
+        let lang = get(app.locales.translations, app.config.lang, {});
         let contents;
-        if (mod && mod.proto) {
-            lang = cloneDeep(mod.instance());
-            for (let x in lang) {
-                lang[x] = "";
-            }
-        }
-        else {
-            lang = {};
-        }
         contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
     }

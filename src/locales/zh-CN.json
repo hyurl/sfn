@@ -1,4 +1,5 @@
 {
+    "$alias": "zh,zh-hans,chinese-simplified",
     "Service Framework for NodeJS - Beyond Web": "NodeJS 服务框架 - 不止于 Web",
     "Home": "主页",
     "Documentation": "文档",

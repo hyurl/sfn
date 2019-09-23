@@ -24,6 +24,14 @@ export default class extends HttpController {
     @app.hooks.web.onView.decorate()
     async showContents(req: Request, version: string, name: string) {
         return this.throttle(req.url, async () => {
+            if (["zh", "zh-hans"].includes(this.lang)) {
+                this.lang = "zh-CN";
+            }
+            
+            if (this.lang !== "zh-CN") {
+                this.lang = "en-US";
+            }
+
             let sideMenu = await this.docSrv.getSideMenu(version, this.lang);
             let content = await this.docSrv.getContent(version, this.lang, name);
 

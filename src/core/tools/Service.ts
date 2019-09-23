@@ -2,7 +2,6 @@ import * as util from "util";
 import { EventEmitter } from "events";
 import HideProtectedProperties = require("hide-protected-properties");
 import get = require('lodash/get');
-import { Locale } from './interfaces';
 import { Queue } from "dynamic-queue";
 
 /**
@@ -61,26 +60,9 @@ export class Service extends EventEmitter implements Service {
      * @param replacements Values that replaces %s, %i, etc. in the `text`.
      */
     i18n(text: string, ...replacements: string[]): string {
-        let mod = get(app.locales, this.lang);
-        let defMod = get(app.locales, app.config.lang);
-        let locale: Locale = null;
-        let stmt: string;
-
-        try {
-            if (mod && mod.proto) {
-                locale = mod.instance();
-                locale[text] && (stmt = locale[text]);
-            }
-        } catch (e) { }
-
-        try {
-            if (stmt === undefined && defMod && defMod.proto) {
-                locale = defMod.instance();
-                locale[text] && (stmt = locale[text]);
-            }
-        } catch (e) { }
-
-        (stmt === undefined) && (stmt = text);
+        let trans = get(app.locales.translations, this.lang) ||
+            get(app.locales.translations, app.config.lang);
+        let stmt = trans[text] || text;
 
         return util.format(stmt, ...replacements);
     }
