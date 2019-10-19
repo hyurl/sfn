@@ -19,7 +19,6 @@ router.use(<any>BodyParser.text({
     if (type == "application/xml" || type == "text/xml") {
         try {
             req.body = await parseStringAsync(req.body, {
-                ignoreAttrs: true,
                 async: true,
                 explicitArray: false,
                 explicitRoot: false
