@@ -1,8 +1,8 @@
 <!-- title: CLI & REPL; order: 7 -->
 ## Purpose
 
-To making programming fast, **SFN** provides some commands, you can use them 
-in the shell or CMD, to generate needed files, to interact with the servers, etc. 
+To make programming fast, **SFN** provides some commands, you can use them 
+in the shell or CMD, to generate needed files, to interact with the servers, etc.
 They're few and easy to learn.
 
 To enable this feature, you need to configure your computer a little bit, so 

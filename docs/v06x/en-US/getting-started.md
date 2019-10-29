@@ -11,7 +11,7 @@ Create a directory to store files of your project, then use the command
 npm init
 ```
 
-to initiate your project, assume you have some knowledge of 
+to initiate your project, assuming you have some knowledge of 
 [NPM](https://www.npmjs.com/) and have [NodeJS](https://nodejs.org) installed.
 
 ## Prepare TypeScript Environment
@@ -25,7 +25,7 @@ npm i -D @types/node
 ```
 
 Optionally, you can install [ts-node](https://github.com/TypeStrong/ts-node) to
-run the program without compiling source code.
+run the program without compiling the source code.
 
 ```sh
 npm i -D ts-node
