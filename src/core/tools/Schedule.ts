@@ -114,8 +114,6 @@ export class Schedule {
         if (!end) {
             if (endIn) {
                 end = moment().unix() + endIn;
-            } else {
-                end = moment().unix();
             }
         } else {
             end = timestamp(end);
@@ -137,9 +135,9 @@ export class Schedule {
         app.services.schedule.instance(event).add({
             taskId,
             appId: app.id,
-            start,
+            start: <number>start,
+            end: <number>end,
             repeat,
-            end,
             module: module && module.name,
             handler: isMethod ? <string>handler : void 0,
             data
