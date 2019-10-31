@@ -7,9 +7,11 @@ import moment = require('moment');
 
 export interface TaskOptions<T = any> {
     /** A Unix timestamp to suggest when should the task starts running. */
-    start: number;
+    start?: number | string | Date;
+    startIn?: number;
     /** A Unix timestamp to suggest when should the task stops running. */
-    end?: number;
+    end?: number | string | Date;
+    endIn?: number;
     /**
      * A number of seconds to suggest how often should the task runs
      * repeatedly.
@@ -51,6 +53,25 @@ export interface ScheduleTask {
     data?: any[]
 }
 
+function unixTimeStamp(time: number | string | Date) {
+    if (typeof time === "number") {
+        // Compatible fix with milliseconds
+        if (String(time).length === 13) {
+            time = Math.round(time / 1000);
+        }
+
+        return time;
+    } else if (typeof time === "string") {
+        if (/\d{4}-\d{1,2}-\d{1,2}\b/.test(time)) {
+            time = new Date(time);
+        } else {
+            time = new Date(moment().format("YYYY-MM-DD ") + time);
+        }
+    }
+
+    return moment(time).unix();
+}
+
 export class Schedule {
     constructor(readonly name: string) { }
 
@@ -61,7 +82,7 @@ export class Schedule {
     create(options: TaskOptions, handler: (data: any) => void): string;
     create<T>(options: TaskOptions<T>): string;
     create(options: TaskOptions, handler?: Function | string): string {
-        let { salt, start, end, repeat, module, data } = options;
+        let { salt, start, startIn, end, endIn, repeat, module, data } = options;
         let idParam: string[] = [app.id, traceModulePath(ROOT_PATH)];
         let isMethod = false;
         let isCallable = false;
@@ -91,12 +112,28 @@ export class Schedule {
         }
 
         // Compatible fix with milliseconds
-        if (String(start).length === 13) {
-            start = Math.round(start / 1000);
+        if (typeof start === "number" && String(start).length === 13 && repeat) {
+            repeat = Math.ceil(repeat / 1000);
+        }
 
-            if (repeat) {
-                repeat = Math.ceil(repeat / 1000);
+        if (!start) {
+            if (startIn) {
+                start = moment().unix() + startIn;
+            } else {
+                start = moment().unix();
             }
+        } else {
+            start = unixTimeStamp(start);
+        }
+
+        if (!end) {
+            if (endIn) {
+                end = moment().unix() + endIn;
+            } else {
+                end = moment().unix();
+            }
+        } else {
+            end = unixTimeStamp(end);
         }
 
         let taskId = md5(idParam.join("#"));

@@ -5,9 +5,12 @@ Since version 0.5.x, SFN introduced a new distributed schedule system, and run
 as micro-service. To use this system, you have to create one or more schedule 
 server process, but don't worry, it still easy in hand as usual.
 
-Before version 0.6.0, the schedule uses a hash number as task ID, but since 
-v0.6, the task ID has been changed to a MD5 string to prevent potential
-conflicts.
+v0.6 changed three details of the `app.schedule` interface:
+
+1. Using a md5 string as task ID.
+2. Time unit change from milliseconds to seconds.
+3. `data` property changed to an array in order to pass multiple arguments into
+    the handler function.
 
 ## Create Service
 
@@ -33,20 +36,11 @@ export default <app.Config> {
 (NOTE: `app.services.schedule`) is a built-in service of the framework, you 
 don't have to write any code of this service.)
 
-### Write a Entry File
+### Start the Server
 
-Now create a new entry file in `src` directory, say, `schedule-server.ts`, its
-code should be like this:
-
-```typescript
-// src/schedule-server.ts
-import "sfn";
-
-app.rpc.serve("schedule-server");
+```sh
+node dist schedule-server
 ```
-
-Then compile and run the command `node dist/schedule-server` to start the 
-service.
 
 ## Create Schedule Task
 
@@ -63,9 +57,9 @@ var taskId = app.schedule.create({
 
 var taskId2 = app.schedule.create({
     salt: "my-schedule-2",
-    start: moment().add(5, "minutes").valueOf() // using moment library
+    start: moment().add(5, "minutes").unix() // using moment library
     repeat: 5, // running repeatedly every 5 seconds
-    end: momen().add(1, "hour").valueOf() // stops after 1 hour
+    end: momen().add(1, "hour").unix() // stops after 1 hour
 }, async () => {
     // ...
 });
