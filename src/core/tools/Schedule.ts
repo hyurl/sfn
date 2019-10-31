@@ -1,21 +1,25 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import md5 = require("md5");
+import moment = require('moment');
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
-import moment = require('moment');
+import { timestamp } from "./functions";
 
 export interface TaskOptions<T = any> {
-    /** A Unix timestamp to suggest when should the task starts running. */
+    /**
+     * A UNIX timestamp, date-time string or Date instance of when should the
+     * task starts running.
+     */
     start?: number | string | Date;
     startIn?: number;
-    /** A Unix timestamp to suggest when should the task stops running. */
+    /**
+     * A UNIX timestamp, date-time string or Date instance of when should the
+     * task stops running.
+     */
     end?: number | string | Date;
     endIn?: number;
-    /**
-     * A number of seconds to suggest how often should the task runs
-     * repeatedly.
-     */
+    /** A number of seconds of how often should the task runs repeatedly. */
     repeat?: number;
     /** 
      * The salt must be unique and predictable for each task, so that when the
@@ -51,25 +55,6 @@ export interface ScheduleTask {
     module?: string;
     handler?: string;
     data?: any[]
-}
-
-function unixTimeStamp(time: number | string | Date) {
-    if (typeof time === "number") {
-        // Compatible fix with milliseconds
-        if (String(time).length === 13) {
-            time = Math.round(time / 1000);
-        }
-
-        return time;
-    } else if (typeof time === "string") {
-        if (/\d{4}-\d{1,2}-\d{1,2}\b/.test(time)) {
-            time = new Date(time);
-        } else {
-            time = new Date(moment().format("YYYY-MM-DD ") + time);
-        }
-    }
-
-    return moment(time).unix();
 }
 
 export class Schedule {
@@ -123,7 +108,7 @@ export class Schedule {
                 start = moment().unix();
             }
         } else {
-            start = unixTimeStamp(start);
+            start = timestamp(start);
         }
 
         if (!end) {
@@ -133,7 +118,7 @@ export class Schedule {
                 end = moment().unix();
             }
         } else {
-            end = unixTimeStamp(end);
+            end = timestamp(end);
         }
 
         let taskId = md5(idParam.join("#"));

@@ -15,6 +15,7 @@ import {
 } from './interfaces';
 import { Controller } from '../controllers/Controller';
 import * as cors from "sfn-cors";
+import * as moment from "moment";
 
 // Expose some internal functions as utilities to the public API.
 export { green, grey, red, yellow } from "./internal/color";
@@ -236,4 +237,28 @@ export function queue(key: string): MethodDecorator {
             }
         );
     };
+}
+
+/**
+ * Gets the current UNIX timestamp or converts a given time to UNIX timestamp.
+ */
+export function timestamp(time?: number | string | Date) {
+    if (time === undefined) {
+        return moment().unix();
+    } else if (typeof time === "number") {
+        // Compatible fix with milliseconds
+        if (String(time).length === 13) {
+            time = Math.round(time / 1000);
+        }
+
+        return time;
+    } else if (typeof time === "string") {
+        if (/\d{4}-\d{1,2}-\d{1,2}\b/.test(time)) {
+            time = new Date(time);
+        } else {
+            time = new Date(moment().format("YYYY-MM-DD ") + time);
+        }
+    }
+
+    return moment(time).unix();
 }
