@@ -1,9 +1,15 @@
 <!-- title: HTTP Controller; order: 3 -->
 # Concept
 
-`HttpController` manages requests come from an HTTP client.
+`HttpController` manages requests come from an HTTP client. Essentially, it is a
+class inherited from [Service](./service), but unlike the singleton model of the
+service, Controllers are one-time products. An instance will be created when a
+request come, and will be destroyed when the request has gone. Therefore, the
+Controller overrides some methods from the base class to allow it fitting this
+special running model, at the mean time to keep the same development experience
+as ordinary services. 
 
-# How To Use?
+# Usage Example
 
 You just create a file in `src/controllers`, this file should export a default
 class that extends `HttpController`, and it will be auto-loaded when the 
@@ -29,7 +35,7 @@ URL route. When visiting a URL that matches the route, the method will be
 automatically called, and the returning value will be sent back to the client 
 with proper forms.
 
-The decorator `route`, is a function, and an interface. When calling as a 
+The decorator `route`, is a function, and an namespace. When calling as a 
 function, it accepts these forms:
 
 - `route(routeStr: string)` e.g. `route("GET /demo")`
