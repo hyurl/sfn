@@ -58,7 +58,11 @@ app.rpc = {
 
         let servers = app.config.server.rpc;
         let { services = [], ...options } = servers[id];
-        let service = await app.services.serve({ ...options, id });
+        let service = await app.services.serve({
+            ...options,
+            id,
+            host: "0.0.0.0"
+        });
 
         for (let mod of services) {
             service.register(mod);
