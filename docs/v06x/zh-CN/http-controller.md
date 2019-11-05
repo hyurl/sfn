@@ -129,7 +129,7 @@ export default class extends HttpController {
 
 ### 构造函数签名
 
-所有 HttpController 的构造函数都接受两个参数，`req: Request` 和 `res: Response`。
+所有 HttpController 的构造函数都接受两个参：`req: Request` 和 `res: Response`。
 
 ```typescript
 import { HttpController, Request, Response } from "sfn";
@@ -227,10 +227,12 @@ export default class extends HttpController {
         let msg: string;
         // ...
         if (!well) {
-            if (!msg)
+            if (!msg) {
                 throw new StatusException(400); // => 400 bad request
-            else
-                throw new StatusException(400, msg); // => 400 with customized message
+            } else {
+                // => 400 with customized message
+                throw new StatusException(400, msg);
+            }
         }
     }
 }

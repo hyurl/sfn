@@ -50,7 +50,7 @@ for corresponding HTTP request method.
 - `route.patch(path: string)`
 - `route.post(path: string)`
 - `route.put(path: string)`
-- `route.sse(path: string)` SSE uses GET approach, and implemented by client 
+- `route.sse(path: string)` SSE uses GET method, and connected via client's 
     EventSource.
 
 ### Route Formats
@@ -135,35 +135,33 @@ export default class extends HttpController {
 
 ## Signature of Methods
 
-From the above example you see I passed a `uid: number` to the methods that 
+In the above example you see I passed a `uid: number` to the methods that 
 bound to routes. Actually, you can do more, please have a look at
 [Dependency Injection](./di#Auto-Injection-in-Controllers).
 
-## Handle Asynchronous Operations
+### Signature of the Constructor
 
-When dealing with asynchronous operations, you can define the method with 
-modifier `async`, just like the following:
+All HttpController constructors accept two arguments: `req: Request` and
+`res: Response`.
 
 ```typescript
-import { HttpController, Request, Response, route } from "sfn";
+import { HttpController, Request, Response } from "sfn";
 
 export default class extends HttpController {
-    @route.get("/")
-    async index(req: Request, res: Response) {
-        // you can use `await` here
+    constructor(req: Request, res: Response) {
+        super(req, res);
+        // your stuffs...
     }
 }
 ```
 
 ## Before And After Operations
 
-If you want to do some asynchronous operations before calling the actual method,
-JavaScript will not allow you define an `async constructor()`, but don't worry,
-**SFN** provides you the way to do it, the framework allows you define the 
-methods `init()` and `destroy()` to control the flow.
+Just like in a service, you can override `init()` and `destroy()` methods, to
+allow the controller performing initiation and destruction operations.
 
-(**NOTE:** Before v0.6, these methods are called `before()` and `after()`, which
-are deprecated since the new methods are more consistent to the service.)
+(**NOTE:** Before v0.6, these methods are named `before()` and `after()`, 
+they're now abandoned, since the new methods are more consistent with services.)
 
 ```typescript
 import * as fs from "fs";
@@ -196,64 +194,32 @@ export default class extends HttpController {
 For more advanced usage, please see 
 [Aspect Oriented Programing](./mixins-aop#Aspect-Oriented-Programming).
 
-### Handle Non-Promise Procedures
+### Using Async Syntactical
 
-If your code includes some asynchronous functions, third-party modules that 
-doesn't support `Promise`, then you can't use `await` or `yield` to handle 
-them, to handle those asynchronous operations, you can either use the function
-[util.promisify()](https://nodejs.org/dist/latest-v8.x/docs/api/util.html#util_util_promisify_original)
-(NodeJS 8.0+) or module [es6-promisify](https://github.com/digitaldesignlabs/es6-promisify)
-to wrap them, or use them directly, and wherever you want to send data to 
-front-end, just call `res.send()`. Look this example:
+In network oriented programming, it is always recommended to use async methods,
+even there isn't any async operation inside the method, because these methods
+are invoked through network (async IO), thus using `async` will make them more
+syntactical (Of course this is a recommendation, it's not required).
+
+But if your code uses some asynchronous functions or third-party packages that 
+doesn't support `Promise`, then you can use `util.promisify()` to wrap them as
+promises. Please check the following example.
 
 ```typescript
 import { HttpController, Request, Response, route } from "sfn";
 import * as fs from "fs";
 import * as util from "util";
 
+var fileExists = util.promisify(fs.exists),
+
 export default class extends HttpController {
-    filename = "somefile";
-
     @route.get("/check-file")
-    checkFile() {
-        fs.exists(this.filename, exists => {
-            if (exists) {
-                res.send(this.success("File exists!"));
-            } else {
-                res.send(this.error("File doesn't exist!"));
-            }
-        });
-    }
-
-    @route.get("/check-file-promisify")
     async checkFilePromisify() {
-        // require NodeJs higher than 8.0
-        var fileExists = util.promisify(fs.exists),
-            exists = await fileExists(this.filename);
-
-        if (exists) {
+        if (await fileExists("somefile")) {
             return this.success("File exists!");
         } else {
             return this.error("File doesn't exist!");
         }
-    }
-}
-```
-
-## The Constructor
-
-Some times you may want to do something before the actual method is called, 
-you want to initiate some configurations before the class is instantiated, you
-want to customize the `constructor` of the class, just like this:
-
-```typescript
-import { HttpController, Request, Response } from "sfn";
-
-export default class extends HttpController {
-    constructor(req: Request, res: Response) {
-        super(req, res);
-
-        // your stuffs...
     }
 }
 ```
@@ -270,15 +236,17 @@ import { HttpController, StatusException, route } from "sfn";
 
 export default class extends HttpController {
     @route.get("/example")
-    example() {
+    async example() {
         let well: boolean = false;
         let msg: string;
         // ...
         if (!well) {
-            if (!msg)
+            if (!msg) {
                 throw new StatusException(400); // => 400 bad request
-            else
-                throw new StatusException(400, msg); // => 400 with customized message
+            } else {
+                // => 400 with customized message
+                throw new StatusException(400, msg);
+            }
         }
     }
 }
@@ -383,8 +351,3 @@ export default class extends HttpController {
     }
 }
 ```
-
-## HttpController And Service
-
-A controller is actually a service, you can use any features that works in 
-[Service](./service) in a controller.
