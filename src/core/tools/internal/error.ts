@@ -89,7 +89,7 @@ export async function tryLogError(err: any, stack?: string) {
         if (stack) {
             stack = `[${stack}]`;
         } else {
-            stack = (<Error>err).stack.split("\n")[1].trim();
+            stack = (<Error>err).stack.split("\n")[0].trim();
         }
 
         console.log(red`${err.toString()} ${stack}`);
