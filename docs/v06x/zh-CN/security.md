@@ -7,8 +7,7 @@
 允许的，`false` 则相反。自 v0.6 版本起，框架不再自动检查和设置该值，他默认为 `false`
 你需要设置检测条件以便其适合你的需要。
 
-如果操作是未授权的，框架将会自动抛出一个 HttpError（或 SocketError）
-`401 Unauthorized` 并返回到客户端。
+如果操作是未授权的，框架将会自动抛出一个 StatusException `401 Unauthorized` 并返回到客户端。
 
 ## 使用示例
 

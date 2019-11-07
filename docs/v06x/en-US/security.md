@@ -9,26 +9,22 @@ means the operation is permitted, `false` the otherwise. Since v0.6, the
 framework no longer checks and sets this property, it's `false` by default, you
 have to customize your checking condition to suit your needs.
 
-If an operation is unauthorized, the framework will throws an HttpError 
-(or SocketError) `401 Unauthorized` to the client.
+If an operation is unauthorized, the framework will throws an StatusException `401 Unauthorized` to the client.
 
-## How To Require Authentication?
+## Usage Example
 
-Very easy, you just use the decorator `@requireAuth` to decorate the method, 
-when it is call by the URL (or WebSocket events), the checking procedure will 
-be automatically performed.
-
-### Example
+To wake up authentication check, you just need to use the decorator
+`@requireAuth` to decorate the controller method, when this method is invoked
+via URL (or WebSocket event), the checking process will be automatically
+executed.
 
 ```typescript
 import { HttpController, Request, Response, route, requireAuth } from "sfn";
 
 export default class extends HttpController {
-    constructor(req: Request, res: Response) {
-        super(req, res);
+    async init() {
+        super.init();
 
-        // instead of checking req.user, here I will check req.auth, HTTP 
-        // basic authentication.
         this.authorized = req.auth !== null
             && req.auth.username === "luna"
             && req.auth.password === "12345";
@@ -41,12 +37,12 @@ export default class extends HttpController {
 
     @requireAuth
     @route("/auth-example")
-    index() {
+    async index() {
         return "This message will be sent if the operation is permitted.";
     }
 
     @route("/auth")
-    auth(req: Request, res: Responce) {
+    async auth(req: Request, res: Responce) {
         if (!req.auth) {
             // res.auth() will lead you to HTTP basic authentication.
             return res.auth();
@@ -56,13 +52,6 @@ export default class extends HttpController {
     }
 }
 ```
-
-The above example shows you directly check authorization state in the 
-constructor since it's all synchronous, but most of the case you will need to do
-some async operations before checking, say retrieving data from the database, 
-you will need to have a look at 
-[Before And After Operations](./http-controller#Before-And-After-Operations) and
-[Aspect Oriented Programing](./mixins-aop#Aspect-Oriented-Programming).
 
 # CSRF Protection
 
@@ -97,7 +86,7 @@ export default class extends HttpController {
 }
 ```
 
-### Inject CSRF Token Automatically
+### Auto-Inject CSRF Token
 
 You can use the function `injectCsrfToken()` to inject the CSRF token into 
 HTML forms for you, but you need to make sure that your view file is written 
@@ -119,7 +108,7 @@ export default class extends HttpController {
 }
 ```
 
-### Sending the CSRF Token Back To the Server
+### Sending the CSRF Token Back To Server
 
 On client side, you just need to send a field `x-csrf-token` that carries the 
 token along with your data via one of these approaches:
@@ -143,8 +132,13 @@ modern browsers more intend to block response from cross origin requests, but
 on the server side, the operation will be performed as usual, even the remote 
 client will never notice.
 
-**SFN** framework give you the ability to fully control CORS, and it is very 
-easy to configure. As usual, you just need to turn it on in the controller.
+However in the **SFN** framework, CORS check id very severe, if not pass, then
+the target function will never be called. Whist the framework give you full 
+control of CORS, and it is, as usual, very easy to be configured, you just need
+to turn on it in the controller.
+
+(**NOTE:** Since v0.6, the property `cors` has been changed to `static cors`,
+and the framework will set the OPTIONS route automatically.)
 
 ### Example of CORS
 

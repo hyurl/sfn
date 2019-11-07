@@ -1,91 +1,87 @@
-<!-- title: Service; order: 10 -->
+<!-- title: Service; order: 2.1 -->
 # Concept
 
-The `Service` class is the base class in **SFN**, classes like 
-`HttpController`, `WebSocketController` is inherited from it. It provides some
-useful features like `i18n`, `logger`, `cache` that you can use to do real 
-jobs.
+In a distributed system, **Service** is the most basic and most important 
+concept. With the RPC ability that [Alar](https://github.com/hyurl/alar) 
+framework gives, SFN provides the simplest however efficient development scheme 
+of distributed service. During the development process, you will scarcely notice 
+that you're working on a distributed system, every development task could be 
+done on a single machine, and when deploy, it is very easy to separate services, to run them distributed.
 
-# How To Use?
 
-The `Service` class, inherited from `EventEmitter`, so does usage, you can 
-define a new class then extends Service, or just use it directly. As 
-convenience, you should put your service files in the `src/services/` 
-directory.
+## Create a New Service
 
-## Example
+Write a new service file, store it under `src/services/` directory, ensure the 
+filename consists with the variable name under the namespace. Let's look at this
+simple cache service example bellow.
 
-### Use Service Directly
-
-```typescript
-import { Service } from "sfn";
-import { User } from "modelar";
-
-var srv = new Service;
-
-(async (id: number) => {
-    try {
-        let user = <User>await User.use(srv.db).get(id);
-        srv.logger.log(`Getting user (id: ${id}, name: ${user.name}) succeed.`);
-        // ...
-    } catch (e) {
-        srv.logger.error(`Getting user (id: ${id}) failed: ${e.message}.`);
-    }
-})(1);
-```
-
-### Define A New Service Class
-
-You can define a new service class to store the procedure of some frequently
-used functions.
+(NOTE: `ModuleProxy` is a global interface from Alar framework, no need to 
+import, just use it directly.)
 
 ```typescript
-// src/services/myService.ts
-import { Service } from "sfn";
-import { User } from "modelar";
+// src/services/cache.ts
+import * as fs from "fs-extra";
+import get = require("lodash/get");
+import has = require("lodash/has");
+import set = require("lodash/set");
+import unset = require("lodash/unset");
 
 declare global {
     namespace app {
         namespace services {
-            const myService: ModuleProxy<MyService>;
+            const cache: ModuleProxy<CacheService>;
         }
     }
 }
 
-export default class MyService extends Service {
-    async getUser(id: number): User {
-        let user: User = null;
+export default class CacheService {
+    protected cache: { [path: string]: any } = {};
+    protected filename = app.ROOT_PATH + "/cache/cache-service.json";
 
+    async init() {
         try {
-            let data = this.cache.get(`user[${id}]`);
+            let data = await fs.readFile(this.filename, "utf8");
+            this.cache = JSON.parse(data);
+        } catch (e) { }
+    }
 
-            if (data) {
-                user = (new User).assign(data);
-            } else {
-                user = <User>await User.use(this.db).get(id);
-                this.cache.set(`user.${id}`, user.data);
-            }
+    async destroy() {
+        let data = JSON.stringify(this.cache);
+        await fs.writeFile(this.filename, data, "utf8");
+    }
 
-            this.logger.log(`Getting user (id: ${id}, name: ${user.name}) succeed.`);
-        } catch (err) {
-            this.logger.error(`Getting user (id: ${id}) failed: ${err.message}.`);
-        }
+    async get<T>(path: string) {
+        return get(this.cache, path);
+    }
 
-        return user;
+    async has(path: string) {
+        return has(this.cache, path);
+    }
+
+    async set<T>(path: string, data: T) {
+        return set(this.cache, path, data);
+    }
+
+    async delete(path: string) {
+        return unset(this.cache, path);
     }
 }
 ```
 
-And then at where you need, use namespace to access the instance of this service.
+And then wherever you need, use namespace to access the instance of this service.
 
 ```typescript
 (async () => {
-    let user = await app.services.myService.instance().getUser(1);
+    await app.services.cache.instance().set("something", "This is a test");
     // ...
 })();
 ```
 
-# Separating Services
+For more examples about service, please check the 
+[source code](https://github.com/hyurl/sfn/tree/master/src/services) of this 
+website.
+
+## Distributed Services
 
 The framework [Alar](https://github.com/hyurl/alar) that SFN uses allows 
 services being separated and called as RPC procedures, so that to reduce the 
@@ -99,9 +95,9 @@ To separate the services, you just need to do some simple configurations.
 export default <app.Config>{
     server: {
         rpc: {
-            "cache-server-1": {
-                host: "127.0.0.1",
-                port: 8081,
+            "cache-server": {
+                host: "localhost",
+                port: 4004,
                 services: [app.services.cache]
             }
         }
@@ -109,24 +105,8 @@ export default <app.Config>{
 }
 ```
 
-Then create a new file named `rpc-server-1.ts` and save it in `src/`, the 
-contents would be like this:
+Compile the program and use the following command to start the new server.
 
-```typescript
-// src/rpc-server-1.ts
-import "sfn";
-
-app.rpc.serve("rpc-server-1");
+```sh
+node dist cache-server
 ```
-
-Compile it and use command `node dist/rpc-server-1` to start the individual 
-service, and use the `connect()` method to connect to the RPC server (You can 
-also use `connectAll()` method to connect all the servers at once.):
-
-```typescript
-app.rpc.connect("rpc-server-1");
-```
-
-Then all the reference to the service will be redirected to this remote server,
-basically you don't have to change any existing code. But be aware that all the 
-properties will not be accessible remotely, and all methods will be asynchronous.
