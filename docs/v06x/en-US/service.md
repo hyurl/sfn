@@ -110,3 +110,88 @@ Compile the program and use the following command to start the new server.
 ```sh
 node dist cache-server
 ```
+
+## Service Dependencies
+
+After start the cache service via the above command, the web server (including 
+HTTP and WebSocket) will be able to redirect all traffics to this service to
+the new server, basically you don't have to alter any code (BUT remember not all
+properties are supported, and the methods will all become asynchronous).
+
+However if you want another service running in another RPC server to be able to
+access this service, then you need to config service dependencies for that RPC
+server, just like this:
+
+```typescript
+// src/config.ts
+export default <app.Config>{
+    server: {
+        rpc: {
+            "doc-server": {
+                host: "localhost",
+                port: 4001,
+                services: [app.services.docs],
+                dependencies: [app.services.cache]
+            }
+        }
+    }
+}
+```
+
+Then all programs runs in doc-server, when calling `app.services.cache`, will be
+able to redirect all their traffics to the server that ships this service (no
+matter how many servers are configured to ship the cache service).
+
+The different designs between web server and RPC server, are because, usually,
+the web server requires more back-end services (especially for web applications).
+And an RPC service will less likely rely on another RPC service, usually only
+few functions are required. Of course, if you do not know which service might be
+needed or not, you can directly set `dependencies` property to `all`, in order 
+to connect all RPC services.
+
+## Basic Service
+
+For convenience, the framework integrated with a basic `Service` class, which
+contains some useful methods, e.g. `i18n`, `throttle`, `queue`. The developer
+can use them to achieve relevant functions, just inherit this service when
+creating a new service.
+
+```ts
+import { Service } from "sfn";
+
+export default class MyService extends Service {
+    throttledOps(...args: any[]) {
+        return this.throttle("a unique key", async () => {
+            return this.i18n("This method can only be called once for every second");
+        }, 1000);
+    }
+
+    queuedOps(...args: any[]) {
+        return this.queue("a unique key", async () => {
+            return this.i18n("All calls to this method will be queued up");
+        });
+    }
+}
+```
+
+In fact, HTTP controller and WebSocket controller are also base on this basic 
+service, which will be mentioned afterwards.
+
+## Service Initiation and Destruction
+
+When running distributed, if a service has an `init()` method, then it will be 
+invoked on the start-up, in order to perform initiation for the service. BUT do
+be noticed that it's not an ability of Alar framework, yet a custom
+functionality of SFN framework. So, it apparently has some limits, when
+initiating, these two points must be concerned:
+
+1. The service will not be able to hot-reload, since the initiation will not be
+    reloaded again, thus causing unexpected behavior.
+
+2. The web server cannot call the local version of the RPC service, since the
+    web server will not perform any initiation for the RPC service.
+
+So, when deploy distributed applications, it's better to disable the local
+version RPC service and the hot-reload functionality. To do so, before start-up,
+calling the `noLocal()` method of all RPC services, and remove `app.services`
+from the `app.config.watch` item in the config file.
