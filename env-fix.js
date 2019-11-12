@@ -1,6 +1,3 @@
-// Force the console to output colorfully.
-process.env.FORCE_COLOR = "10";
-
 const path = require("path");
 
 // When run the program in REPL, there is no mainModule defined by default, 

@@ -9,21 +9,7 @@
             "request": "launch",
             "protocol": "auto",
             "name": "Web Server",
-            "program": "${workspaceFolder}/dist/index",
-            "serverReadyAction": {
-                "pattern": "\\((http(s)?://.+)\\) started",
-                "uriFormat": "%s",
-                "action": "debugWithChrome",
-                "webRoot": "${workspaceFolder}"
-            },
-            // For preventing from the ${workspaceFolder} [BUG](https://github.com/Microsoft/vscode/issues/70004#issuecomment-486146541)
-            // when debug on Windows, use WSL instead. However, if the WSL
-            // instance won't start, make sure there is one installed and try to
-            // initiate it by starting it manually in PowerShell via running
-            // `bash` command.
-            "windows": {
-                "useWSL": true
-            }
+            "program": "${workspaceFolder}/dist/index"
         },
         {
             "type": "node",
