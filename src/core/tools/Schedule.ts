@@ -128,7 +128,9 @@ export class Schedule {
         // which listens all potential schedule task published.
         if (isCallable) {
             app.message.unsubscribe(event);
-            app.message.subscribe(event, <Function>handler);
+            app.message.subscribe(event, (data: any[]) => {
+                (<Function>handler).apply(void 0, data);
+            });
         }
 
         // Redirect the task to one of the schedule server.
