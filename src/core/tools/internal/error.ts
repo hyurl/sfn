@@ -5,6 +5,7 @@ import { isDevMode, APP_PATH, SRC_PATH } from "../../../init";
 import { StatusException } from "../StatusException";
 import { red } from './color';
 import * as util from "util";
+import pick = require('lodash/pick');
 
 const StackLine = /\((.+?):(\d+):(\d+)\)$|at\s+(.+?):(\d+):(\d+)$/;
 
@@ -76,7 +77,7 @@ export async function tryLogError(err: any, stack?: string) {
                 console.error();
                 console.error(err.toString());
                 console.error();
-                console.error(str);
+                console.error(str, pick(err, Object.keys(err)));
                 console.error();
                 return;
             } catch (e) { }
