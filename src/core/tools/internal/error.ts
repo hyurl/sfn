@@ -78,10 +78,11 @@ export async function tryLogError(err: any, stack?: string) {
                 console.error();
                 console.error(str);
                 console.error();
-            } catch (e) {
-                console.error(err);
-            }
+                return;
+            } catch (e) { }
         }
+
+        console.error(err);
     } else {
         if (!(err instanceof Error)) {
             stack = err;
