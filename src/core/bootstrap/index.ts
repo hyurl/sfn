@@ -125,7 +125,7 @@ app.serve = async function serve(id?: string) {
 
     return new Promise((resolve, reject) => {
         http.on("error", (err: Error) => {
-            console.log(red`${err.toString()}`);
+            console.error(red`${err.toString()}`);
 
             if (err.message.includes("listen")) {
                 process.exit(1);

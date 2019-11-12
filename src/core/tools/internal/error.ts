@@ -4,6 +4,7 @@ import startsWith = require('lodash/startsWith');
 import { isDevMode, APP_PATH, SRC_PATH } from "../../../init";
 import { StatusException } from "../StatusException";
 import { red } from './color';
+import * as util from "util";
 
 const StackLine = /\((.+?):(\d+):(\d+)\)$|at\s+(.+?):(\d+):(\d+)$/;
 
@@ -72,26 +73,25 @@ export async function tryLogError(err: any, stack?: string) {
             try {
                 let str = await csr.render({});
 
-                console.log();
-                console.log(err.toString());
-                console.log();
-                console.log(str);
-                console.log();
-            } catch (e) {
-                console.log(err);
-            }
+                console.error();
+                console.error(err.toString());
+                console.error();
+                console.error(str);
+                console.error();
+                return;
+            } catch (e) { }
         }
+
+        console.error(err);
     } else {
         if (!(err instanceof Error)) {
             stack = err;
         }
 
         if (stack) {
-            stack = `[${stack}]`;
+            console.error(red`${String(err)} ${stack}`);
         } else {
-            stack = (<Error>err).stack.split("\n")[0].trim();
+            console.error(red`${util.format(err)}`);
         }
-
-        console.log(red`${err.toString()} ${stack}`);
     }
 }

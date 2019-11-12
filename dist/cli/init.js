@@ -66,6 +66,6 @@ try {
     console.log(color_1.green `Initiation succeed!`);
 }
 catch (err) {
-    console.log(color_1.red `Initiation failed!`, String(err));
+    console.error(color_1.red `Initiation failed!`, String(err));
 }
 //# sourceMappingURL=init.js.map

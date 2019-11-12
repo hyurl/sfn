@@ -84,7 +84,7 @@ function openREPLSession(appId: string, options: { stdout: boolean }) {
     if (replSessionOpen) return;
 
     if (!appId) {
-        console.log(red`trying to open REPL session without appId`);
+        console.error(red`Cannot open REPL session without appId`);
         process.exit(1);
     } else {
         replSessionOpen = true;
@@ -96,9 +96,9 @@ function openREPLSession(appId: string, options: { stdout: boolean }) {
 
     connectRepl(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
-            console.log(red`(code: ${err["code"]}) failed to connect [${appId}]`);
+            console.error(red`(code: ${err["code"]}) failed to connect [${appId}]`);
         } else {
-            console.log(red`${err.toString()}`);
+            console.error(red`${err.toString()}`);
         }
 
         process.exit(1);
@@ -176,6 +176,6 @@ try {
         process.exit();
     }
 } catch (err) {
-    console.log(red`${err.toString()}`);
+    console.error(red`${err.toString()}`);
     process.exit(1);
 }

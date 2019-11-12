@@ -2,7 +2,6 @@ import { RpcServer, RpcClient } from "alar";
 import { serveTip, inspectAs } from "../tools/internal";
 import { green } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
-import { Service } from "../tools/Service";
 
 declare global {
     namespace app {
@@ -43,11 +42,63 @@ declare global {
 }
 
 const tasks: { [id: string]: string } = {};
-let baseSrv: Service;
+const connectings = new Set<string>();
 
 function ensureAppId(id: string): void {
     if (!app.config.server.rpc[id]) {
-        throw new Error("The app ID is invalid");
+        throw new Error(`The app ID '${id}' is invalid`);
+    }
+}
+
+async function tryConnect(id: string, supressError = false) {
+    ensureAppId(id);
+
+    // prevent duplicated connect.
+    if (connectings.has(id)) {
+        return;
+    } else {
+        connectings.add(id);
+    }
+
+    try {
+        let servers = app.config.server.rpc;
+        let { services, ...options } = servers[id];
+        let service = await app.services.connect({
+            ...options,
+            id: app.id
+        });
+
+        app.rpc.connections[id] = service;
+
+        for (let mod of services) {
+            service.register(mod);
+
+            // If detects the schedule service is served by other
+            // processes and being connected, stop the local schedule
+            // service.
+            if (id !== app.id && mod === app.services.schedule) {
+                await app.services.schedule.instance(app.local)
+                    .stop(true);
+            }
+        }
+
+        if (tasks[id]) {
+            app.schedule.cancel(tasks[id]);
+            delete tasks[id];
+        }
+
+        // Link all the subscriber listeners from the message channel to
+        // the RPC channel.
+        app.message.linkRpcChannel(service);
+
+        connectings.delete(id);
+        console.log(green`RPC server [${id}] connected.`);
+    } catch (err) {
+        connectings.delete(id);
+
+        if (!supressError) {
+            throw err;
+        }
     }
 }
 
@@ -100,62 +151,17 @@ app.rpc = {
         }
     },
     async connect(id: string, defer = false) {
-        ensureAppId(id);
-        baseSrv || (baseSrv = new Service()); // delay instantiation
-
-        return await baseSrv.queue(id, async () => {
-            // prevent duplicated connect.
-            if (app.rpc.hasConnect(id))
-                return;
-
-            try {
-                let servers = app.config.server.rpc;
-                let { services, ...options } = servers[id];
-                let service = await app.services.connect({
-                    ...options,
-                    id: app.id
-                });
-
-                app.rpc.connections[id] = service;
-
-                for (let mod of services) {
-                    service.register(mod);
-
-                    // If detects the schedule service is served by other
-                    // processes and being connected, stop the local schedule
-                    // service.
-                    if (id !== app.id && mod === app.services.schedule) {
-                        await app.services.schedule.instance(app.local)
-                            .stop(true);
-                    }
-                }
-
-                if (tasks[id]) {
-                    app.schedule.cancel(tasks[id]);
-                    delete tasks[id];
-                }
-
-                // Link all the subscriber listeners from the message channel to
-                // the RPC channel.
-                app.message.linkRpcChannel(service);
-
-                console.log(green`RPC server [${id}] connected.`);
-            } catch (err) {
-                if (defer) {
-                    if (!tasks[id]) {
-                        tasks[id] = app.schedule.create({
-                            salt: `connect-${id}`,
-                            startIn: 1,
-                            repeat: 1,
-                        }, () => {
-                            app.rpc.connect(id, defer);
-                        });
-                    }
-                } else {
-                    throw err;
-                }
-            }
-        });
+        if (!defer) {
+            return tryConnect(id);
+        } else {
+            tasks[id] = app.schedule.create({
+                salt: `connect-${id}`,
+                startIn: 1,
+                repeat: 1,
+                handler: tryConnect,
+                data: [id, defer]
+            });
+        }
     },
     async connectAll(defer = false) {
         let servers = app.config.server.rpc;
