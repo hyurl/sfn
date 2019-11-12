@@ -72,13 +72,13 @@ export async function tryLogError(err: any, stack?: string) {
             try {
                 let str = await csr.render({});
 
-                console.log();
-                console.log(err.toString());
-                console.log();
-                console.log(str);
-                console.log();
+                console.error();
+                console.error(err.toString());
+                console.error();
+                console.error(str);
+                console.error();
             } catch (e) {
-                console.log(err);
+                console.error(err);
             }
         }
     } else {
@@ -87,12 +87,9 @@ export async function tryLogError(err: any, stack?: string) {
         }
 
         if (stack) {
-            stack = `[${stack}]`;
+            console.error(red`${String(err)} ${stack}`);
         } else {
-            let stacks = (<Error>err).stack.split("\n");
-            stack = (stacks[1] || stacks[0]).trim();
+            console.error(red`${(<Error>err).stack}`);
         }
-
-        console.log(red`${err.toString()} ${stack}`);
     }
 }

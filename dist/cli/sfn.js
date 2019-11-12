@@ -72,7 +72,7 @@ function openREPLSession(appId, options) {
     if (replSessionOpen)
         return;
     if (!appId) {
-        console.log(color_1.red `trying to open REPL session without appId`);
+        console.error(color_1.red `Cannot open REPL session without appId`);
         process.exit(1);
     }
     else {
@@ -82,10 +82,10 @@ function openREPLSession(appId, options) {
     module_1.moduleExists(bootstrap) && tryImport(bootstrap);
     repl_1.connect(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
-            console.log(color_1.red `(code: ${err["code"]}) failed to connect [${appId}]`);
+            console.error(color_1.red `(code: ${err["code"]}) failed to connect [${appId}]`);
         }
         else {
-            console.log(color_1.red `${err.toString()}`);
+            console.error(color_1.red `${err.toString()}`);
         }
         process.exit(1);
     });
@@ -142,7 +142,7 @@ try {
     }
 }
 catch (err) {
-    console.log(color_1.red `${err.toString()}`);
+    console.error(color_1.red `${err.toString()}`);
     process.exit(1);
 }
 //# sourceMappingURL=sfn.js.map

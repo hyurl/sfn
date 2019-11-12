@@ -79,5 +79,5 @@ try {
 
     console.log(green`Initiation succeed!`);
 } catch (err) {
-    console.log(red`Initiation failed!`, String(err));
+    console.error(red`Initiation failed!`, String(err));
 }
