@@ -118,8 +118,3 @@ Object.defineProperty(app, "serverId", {
     get: () => app.id,
     set: (id) => { app.id = id }
 });
-
-if (isDebugMode) {
-    // Force the console to output colorfully.
-    process.env.FORCE_COLOR = "10";
-}
