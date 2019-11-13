@@ -73,11 +73,18 @@ export async function tryLogError(err: any, stack?: string) {
         if (csr) {
             try {
                 let str = await csr.render({});
+                let props = Object.keys(err);
 
                 console.error();
                 console.error(err.toString());
                 console.error();
-                console.error(str, pick(err, Object.keys(err)));
+
+                if (props.length > 0) {
+                    console.error(str, pick(err, props));
+                } else {
+                    console.error(str);
+                }
+
                 console.error();
                 return;
             } catch (e) { }
