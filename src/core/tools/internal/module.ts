@@ -120,6 +120,8 @@ export function bootstrap() {
     }
 
     if (fs.existsSync(app.locales.path)) {
-        fs.readdirSync(app.locales.path).forEach(loadLanguagePack);
+        fs.readdirSync(app.locales.path).forEach(filename => {
+            loadLanguagePack(app.locales.path + "/" + filename);
+        });
     }
 }
