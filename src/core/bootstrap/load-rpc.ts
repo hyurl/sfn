@@ -3,6 +3,18 @@ import { serveTip, inspectAs } from "../tools/internal";
 import { green } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
 
+let isMainThread: boolean;
+
+try {
+    isMainThread = require("go-routine").isMainThread;
+} catch (e) {
+    try {
+        isMainThread = require("worker_threads").isMainThread;
+    } catch (e) {
+        isMainThread = !process.send || !!process.env.NODE_APP_INSTANCE;
+    }
+}
+
 declare global {
     namespace app {
         namespace rpc {
@@ -93,7 +105,7 @@ async function tryConnect(id: string, supressError = false) {
 
         connectings.delete(id);
 
-        if (!process.send || !app.isDevMode) {
+        if (isMainThread) {
             console.log(green`RPC server [${id}] connected.`);
         }
     } catch (err) {
