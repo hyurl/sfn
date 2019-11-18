@@ -100,7 +100,8 @@ export const SRC_PATH: string = srcPath;
 export const APP_PATH: string = isTsNode ? SRC_PATH : appPath;
 
 /** Whether the program is running in development mode. */
-export const isDevMode = isDebugMode || !process.send;
+export const isDevMode = isDebugMode ||
+    !(process.send && process.env.NODE_APP_INSTANCE); // PM2 special
 
 global.app = {
     ROOT_PATH,

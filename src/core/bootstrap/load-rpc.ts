@@ -92,7 +92,10 @@ async function tryConnect(id: string, supressError = false) {
         app.message.linkRpcChannel(service);
 
         connectings.delete(id);
-        console.log(green`RPC server [${id}] connected.`);
+
+        if (!process.send || !app.isDevMode) {
+            console.log(green`RPC server [${id}] connected.`);
+        }
     } catch (err) {
         connectings.delete(id);
 
@@ -145,7 +148,7 @@ app.rpc = {
         // try to serve the REPL server.
         await serveRepl(app.id);
 
-        if (typeof process.send == "function") {
+        if (!app.isDevMode) {
             // notify PM2 that the service is available.
             process.send("ready");
         }

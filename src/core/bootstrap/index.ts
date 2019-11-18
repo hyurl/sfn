@@ -157,7 +157,7 @@ app.serve = async function serve(id?: string) {
                 // try to serve the REPL server.
                 await serveRepl(app.id);
 
-                if (typeof process.send == "function") {
+                if (!app.isDevMode) {
                     // notify PM2 that the service is available.
                     process.send("ready");
                 }
