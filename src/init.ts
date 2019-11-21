@@ -2,6 +2,8 @@ import * as path from "path";
 import * as fs from "fs";
 import * as FRON from "fron";
 import * as alar from "alar";
+import parseArgv = require("minimist");
+import { ensureType } from './core/tools/internal';
 
 declare global {
     namespace NodeJS {
@@ -18,6 +20,7 @@ declare global {
         const isDevMode: boolean;
         const isTsNode: boolean;
         const isCli: boolean;
+        const argv: parseArgv.ParsedArgs;
 
         /**
          * In the web server, the app ID would be either `web-server`, or 
@@ -111,6 +114,7 @@ global.app = {
     isDevMode,
     isTsNode,
     isCli,
+    argv: ensureType(parseArgv(process.argv)),
     local: alar.util.local,
     isWebServer: false
 };

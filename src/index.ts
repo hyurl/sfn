@@ -39,7 +39,7 @@ global.app.config = config;
 if (isMain) {
     require("./core/tools/internal/module").bootstrap();
 
-    let appId = process.argv[2];
+    let appId = app.argv["app-id"] || app.argv._[2];
 
     if (appId) {
         app.serve(appId);

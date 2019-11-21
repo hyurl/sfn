@@ -50,7 +50,7 @@ router.use(async (req: Request, res: Response, next) => {
 });
 
 export function logRequest(reqTime: number, type: string, code: number, url: string): void {
-    if (isDevMode || code >= 500) {
+    if (isDevMode || code >= 500 || app.argv["log-request"] === true) {
         // dev mode log out request info.
         var cost: number | string = Date.now() - reqTime,
             codeStr = code.toString(),

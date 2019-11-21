@@ -159,7 +159,7 @@ async function handleError(err: any, ctrl: HttpController, stack?: string) {
 
             res.type = "text/html";
             res.send(content);
-        } catch (err) {
+        } catch (e) {
             res.type = "text/plain";
             res.send(_err.message);
         }
