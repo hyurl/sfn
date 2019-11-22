@@ -59,6 +59,13 @@ var taskId2 = app.schedule.create({
 }, async () => {
     // ...
 });
+
+var taskId3 = app.schedule.create({
+    salt: "my-schedule-3",
+    timetable: ["18:00", "19:00", "20:00"] // using timetable
+}, async () => {
+    // ...
+});
 ```
 
 如果你想要取消一个定时任务，只需要调用 `app.schedule.cancel()` 方法即可。

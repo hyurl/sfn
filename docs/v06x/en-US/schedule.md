@@ -63,6 +63,13 @@ var taskId2 = app.schedule.create({
 }, async () => {
     // ...
 });
+
+var taskId3 = app.schedule.create({
+    salt: "my-schedule-3",
+    timetable: ["18:00", "19:00", "20:00"] // using timetable
+}, async () => {
+    // ...
+});
 ```
 
 If you want to cancel a task, just call the method `app.schedule.cancel()` to do
