@@ -12,22 +12,26 @@ export interface TaskOptions<T = any> {
      * task starts running.
      */
     start?: number | string | Date;
+    /** If set, add the current UNIX timestamp and used as the start time. */
     startIn?: number;
     /**
      * A UNIX timestamp, date-time string or Date instance of when should the
      * task stops running.
      */
     end?: number | string | Date;
+    /** If set, add the current UNIX timestamp and used as the end time. */
     endIn?: number;
-    /** A number of seconds of how often should the task runs repeatedly. */
-    repeat?: number;
     /**
-     * A list of certern times in a day when should the task be running.
+     * A list of certain times of when should the task be running.
      * 
-     * This property conflicts with `start`, `startIn` and `repeat` properties,
-     * and is of the most priority.
+     * This property conflicts with `start` and `startIn` properties, and is of
+     * the most priority.
      */
-    timetable?: string[];
+    timetable?: (number | string | Date)[];
+    /**
+     * A number of seconds of how often should the task be running repeatedly.
+     */
+    repeat?: number;
     /** 
      * The salt must be unique and predictable for each task, so that when the
      * module is reloaded, the new task can override the ole one, to keep there 
@@ -130,7 +134,23 @@ export class Schedule {
                 start = timestamp(start);
             }
         } else {
-            repeat = void 0;
+            let now = moment().unix();
+
+            timetable = timetable
+                .map(timestamp)
+                .sort()
+                .filter((time, i, table) => {
+                    if (time < now) {
+                        if (repeat) {
+                            table[i] += repeat;
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return true;
+                    }
+                });
         }
 
         if (!end) {
@@ -161,8 +181,8 @@ export class Schedule {
             appId: app.id,
             start: <number>start,
             end: <number>end,
+            timetable: <number[]>timetable,
             repeat,
-            timetable: timetable ? timetable.map(timestamp).sort() : void 0,
             module: module && module.name,
             handler: isMethod ? <string>handler : void 0,
             data
@@ -268,11 +288,21 @@ export class ScheduleService {
                 if (!expired) {
                     if (!end || now < end) {
                         if (timetable) {
-                            for (let i = timetable.length; i--;) {
-                                if (now >= timetable[i]) {
-                                    this.dispatch(task);
-                                    timetable[i] += 86400; // add one day
-                                    break;
+                            if (timetable.length === 0) {
+                                task.expired = true;
+                            } else {
+                                for (let i = timetable.length; i--;) {
+                                    if (now >= timetable[i]) {
+                                        this.dispatch(task);
+
+                                        if (repeat) {
+                                            timetable[i] += repeat;
+                                        } else {
+                                            timetable.splice(i, 1);
+                                        }
+
+                                        break;
+                                    }
                                 }
                             }
                         } else if (now >= start) {
