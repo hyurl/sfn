@@ -67,7 +67,7 @@ async function tryConnect(id: string, supressError = false) {
 
     // prevent duplicated connect.
     if (connectings.has(id)) {
-        return;
+        return false;
     } else {
         connectings.add(id);
     }
@@ -75,23 +75,15 @@ async function tryConnect(id: string, supressError = false) {
     try {
         let servers = app.config.server.rpc;
         let { services, ...options } = servers[id];
-        let service = await app.services.connect({
-            ...options,
-            id: app.id
-        });
+        let service = await app.services.connect({ ...options, id: app.id });
 
         app.rpc.connections[id] = service;
+        services.forEach(mod => service.register(mod));
 
-        for (let mod of services) {
-            service.register(mod);
-
-            // If detects the schedule service is served by other
-            // processes and being connected, stop the local schedule
-            // service.
-            if (id !== app.id && mod === app.services.schedule) {
-                await app.services.schedule.instance(app.local)
-                    .stop(true);
-            }
+        // If detects the schedule service is served by other processes and
+        // being connected, stop the local schedule service.
+        if (id !== app.id && services.includes(app.services.schedule)) {
+            await app.services.schedule.instance(app.local).stop(true);
         }
 
         if (tasks[id]) {
@@ -108,11 +100,15 @@ async function tryConnect(id: string, supressError = false) {
         if (isMainThread) {
             console.log(green`RPC server [${id}] connected.`);
         }
+
+        return true;
     } catch (err) {
         connectings.delete(id);
 
         if (!supressError) {
             throw err;
+        } else {
+            return false;
         }
     }
 }
@@ -131,44 +127,36 @@ app.rpc = {
             host: "0.0.0.0"
         });
 
-        for (let mod of services) {
-            service.register(mod);
-        }
-
+        services.forEach(mod => service.register(mod));
         app.rpc.server = service;
         app.id = id;
 
         // invoke all start-up hooks.
         await app.hooks.lifeCycle.startup.invoke();
 
-        // If a service has a method called 'init()', call it to initiate the
-        // service.
-        for (let service of services) {
-            if (typeof service.instance(app.local).init === "function") {
-                await service.instance(app.local).init();
-            }
-        }
-
         console.log(serveTip("RPC", id, service.dsn));
 
         // self-connect after serving.
         await app.rpc.connect(id);
-
         // connect to dependency services.
         await app.rpc.connectDependencies(id);
 
         // try to serve the REPL server.
         await serveRepl(app.id);
 
-        if (!app.isDevMode) {
-            // notify PM2 that the service is available.
+        // Invoke the custom `init()` methods is presented.
+        await Promise.all(services.filter(mod => {
+            return typeof mod.instance(app.local).init === "function";
+        }).map(mod => mod.instance(app.local).init()))
+
+        if (!app.isDevMode) { // notify PM2 that the service is available.
             process.send("ready");
         }
     },
     async connect(id: string, defer = false) {
-        if (!defer) {
-            return tryConnect(id);
-        } else {
+        let ok = await tryConnect(id, defer);
+
+        if (!ok && defer) {
             tasks[id] = app.schedule.create({
                 salt: `connect-${id}`,
                 startIn: 1,
@@ -179,16 +167,11 @@ app.rpc = {
         }
     },
     async connectAll(defer = false) {
-        let servers = app.config.server.rpc;
-        let connections: Promise<void>[] = [];
-
-        for (let id in servers) {
-            if (id !== app.id) {
-                connections.push(app.rpc.connect(id, defer));
-            }
-        }
-
-        await Promise.all(connections);
+        await Promise.all(
+            Object.keys(app.config.server.rpc || {})
+                .filter(id => id !== app.id)
+                .map(id => app.rpc.connect(id, defer))
+        );
     },
     async connectDependencies(id?: string) {
         id = id || app.id;
@@ -197,24 +180,25 @@ app.rpc = {
             ? servers[id].dependencies
             : null;
 
-        if (dependencies) {
-            if (dependencies === "all") {
-                await app.rpc.connectAll(true);
-            } else {
-                // used to prevent duplicated connections.
-                let metServers: string[] = [];
+        if (dependencies === "all") {
+            await app.rpc.connectAll(true);
+        } else if (Array.isArray(dependencies)) {
+            // used to prevent duplicated connections.
+            let metServers: string[] = [];
+            let connections: Promise<void>[] = [];
 
-                for (let dependency of dependencies) {
-                    for (let id in servers) {
-                        if (id !== app.id && !metServers.includes(id)) {
-                            if (servers[id].services.includes(dependency)) {
-                                metServers.push(id);
-                                await app.rpc.connect(id, true);
-                            }
-                        }
+            for (let dependency of dependencies) {
+                for (let id in servers) {
+                    if (id !== app.id &&
+                        !metServers.includes(id) &&
+                        servers[id].services.includes(dependency)) {
+                        metServers.push(id);
+                        connections.push(app.rpc.connect(id, true));
                     }
                 }
             }
+
+            await Promise.all(connections);
         }
     },
     hasConnect(id: string) {
