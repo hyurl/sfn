@@ -195,3 +195,49 @@ So, when deploy distributed applications, it's better to disable the local
 version RPC service and the hot-reload functionality. To do so, before start-up,
 calling the `noLocal()` method of all RPC services, and remove `app.services`
 from the `app.config.watch` item in the config file.
+
+Just like the initiation, if a service has a `destroy()` method, it will be
+called when the system shuts down, in order to release resources, do garbage
+collection, etc.
+
+The basic `Service` class already includes these methods, in order to perform
+some elementary tasks, for instance, the auto garbage collection for internal
+data. If an extended class wish needs to override these methods, it should call
+the parent method inside the new method.
+
+```ts
+import { Service } from "sfn";
+
+export default class MyService extends Service {
+    async init() {
+        await super.init();
+        // ...
+    }
+
+    async destroy() {
+        await super.destroy();
+        // ...
+    }
+}
+```
+
+## Customize Garbage Collection
+
+As pointed out above, the basic `Service` class contains an internal garbage
+collector, and of course an extended class can use and extend this method to
+clean custom data periodically. To do so, just override the `gc()` method like
+this:
+
+```ts
+import { Service } from "sfn";
+
+export default class MyService extends Service {
+    protected async gc() {
+        super.gc(); // make sure the parent's gc is applied.
+        // ...
+    }
+}
+```
+
+The timing of invoking `gc()` is decided by an internal timer, however, when
+`destroy()` is called, the `gc()` will always be called alongside.
