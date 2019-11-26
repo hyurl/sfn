@@ -14,11 +14,11 @@ export function serveTip(type: string, id: string, url: string) {
     return green`${type} server [${id}](${url}) started.`;
 }
 
+/** The base URL of the server (calculated according to the config). */
 export function baseUrl(): string {
     let { server: { hostname, http: { port, type } } } = app.config,
         host = hostname + (port == 80 || port == 443 ? "" : ":" + port);
 
-    /** The base URL of the server (calculated according to the config). */
     return (type == "http2" ? "https" : type) + "://" + host;
 }
 
