@@ -1,8 +1,8 @@
 import * as util from "util";
 import { green } from './color';
 
-const truePattern = /^\s*(true|yes)\s*$/i;
-const falsePattern = /^\s*(false|no)\s*$/i;
+const truePattern = /^\s*(true|yes|on)\s*$/i;
+const falsePattern = /^\s*(false|no|off)\s*$/i;
 const nullPattern = /^\s*(null|nil|none|void)\s*$/i;
 
 export function isOwnMethod(obj: any, method: string): boolean {
