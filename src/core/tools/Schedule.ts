@@ -6,7 +6,7 @@ import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
 import { timestamp } from "./functions";
 
-export interface TaskOptions<T = any> {
+export interface TaskOptions<T = any, D extends any[] = any[]> {
     /**
      * A UNIX timestamp, date-time string or Date instance of when should the
      * task starts running.
@@ -47,13 +47,14 @@ export interface TaskOptions<T = any> {
      * A callback function or a method name of the `module` instance (if 
      * provided). 
      */
-    handler?: ((data: any) => void) | keyof FunctionProperties<T>;
+    handler?: ((...data: D) => void) | keyof FunctionProperties<T>;
+    onEnd?: ((...data: D) => void) | keyof FunctionProperties<T>
     /**
      * The data passed to the handler as arguments, note that the data will be
      * jsonified for transmission, anything that cannot be jsonified will be
      * lost during transmission.
      */
-    data?: any[]
+    data?: D
 }
 
 export interface ScheduleTask {
@@ -66,6 +67,7 @@ export interface ScheduleTask {
     expired?: boolean;
     module?: string;
     handler?: string;
+    onEnd?: string;
     data?: any[]
 }
 
@@ -76,9 +78,10 @@ export class Schedule {
      * Creates a new schedule task according to the options and returns the task
      * ID. NOTE: the minimum tick interval of the schedule service is `1000`ms. 
      */
-    create(options: TaskOptions, handler: (data: any) => void): string;
-    create<T>(options: TaskOptions<T>): string;
-    create(options: TaskOptions, handler?: Function | string): string {
+    create<D extends any[]>(
+        options: TaskOptions, handler: (...data: D) => void): string;
+    create<T, D extends any[]>(options: TaskOptions<T, D>): string;
+    create(options: TaskOptions, handler: Function | string = null): string {
         let {
             salt,
             start,
@@ -88,33 +91,44 @@ export class Schedule {
             repeat,
             timetable,
             module,
-            data
+            data,
+            onEnd
         } = options;
-        let idParam: string[] = [app.id, traceModulePath(ROOT_PATH)];
-        let isMethod = false;
-        let isCallable = false;
+        let params: string[] = [app.id, traceModulePath(ROOT_PATH)];
 
-        salt && idParam.push(salt);
-        module && idParam.push(module.name);
+        salt && params.push(salt);
+        module && params.push(module.name);
         handler = handler || options.handler;
 
         if (handler) {
             if (typeof handler === "string") {
-                isMethod = true;
-                idParam.push(handler);
+                if (module) {
+                    params.push(handler);
+                } else {
+                    throw new TypeError(
+                        "'module' option must be provided " +
+                        "when 'handler' is provided a string"
+                    );
+                }
+            } else if (handler.name) {
+                params.push(handler.name);
             } else {
-                isCallable = true;
-                handler.name && idParam.push(handler.name);
+                let hash = md5(String(handler));
+
+                if (!salt) {
+                    salt = hash;
+                    params.unshift(salt);
+                }
+
+                params.push(hash);
             }
+        } else {
+            throw new TypeError("'handler' must be provided for scheduling");
         }
 
-        if (idParam.length < 3) {
+        if (params.length < 3) {
             throw new TypeError(
-                "not enough options for scheduling, try providing a salt"
-            );
-        } else if (module && typeof handler !== "string") {
-            throw new TypeError(
-                "handler is missing or not a method of the module"
+                "not enough options for scheduling, try providing a 'salt'"
             );
         }
 
@@ -161,22 +175,28 @@ export class Schedule {
             end = timestamp(end);
         }
 
-        let taskId = md5(idParam.join("#"));
-        let event = String(taskId);
+        let taskId = md5(params.join("#"));
 
         // If the handler is provided a callable function, directly subscribe 
         // the event using the handler.
         // Otherwise, the schedule will be delivered to an internal subscriber
         // which listens all potential schedule task published.
-        if (isCallable) {
-            app.message.unsubscribe(event);
-            app.message.subscribe(event, (data: any[]) => {
+        if (typeof handler === "function") {
+            app.message.unsubscribe(taskId);
+            app.message.subscribe(taskId, (data: any[]) => {
                 (<Function>handler).apply(void 0, data);
             });
         }
 
+        if (typeof onEnd === "function") {
+            app.message.unsubscribe(taskId + ".onEnd");
+            app.message.subscribe(taskId + ".onEnd", (data: any[]) => {
+                (<Function>onEnd).apply(void 0, data);
+            });
+        }
+
         // Redirect the task to one of the schedule server.
-        app.services.schedule.instance(event).add({
+        app.services.schedule.instance(taskId).add({
             taskId,
             appId: app.id,
             start: <number>start,
@@ -184,7 +204,8 @@ export class Schedule {
             timetable: <number[]>timetable,
             repeat,
             module: module && module.name,
-            handler: isMethod ? <string>handler : void 0,
+            handler: typeof handler === "string" ? handler : void 0,
+            onEnd: typeof onEnd === "string" ? onEnd : void 0,
             data
         });
 
@@ -193,12 +214,8 @@ export class Schedule {
 
     /** Cancels a task according to the given task ID. */
     cancel(taskId: string) {
-        if (!taskId)
-            return;
-
-        let event = String(taskId);
-        app.message.unsubscribe(event);
-        app.services.schedule.instance(event).delete(taskId);
+        app.message.unsubscribe(taskId);
+        app.services.schedule.instance(taskId).delete(taskId);
     }
 }
 
@@ -283,9 +300,9 @@ export class ScheduleService {
             let now = moment().unix();
 
             for (let [, task] of this.tasks) {
-                let { expired, start, end, repeat, timetable } = task;
+                let { start, end, repeat, timetable } = task;
 
-                if (!expired) {
+                if (!task.expired) {
                     if (!end || now < end) {
                         if (timetable) {
                             if (timetable.length === 0) {
@@ -309,13 +326,17 @@ export class ScheduleService {
                             this.dispatch(task);
 
                             if (repeat) {
-                                task.start = now + task.repeat;
+                                task.start = now + repeat;
                             } else {
                                 task.expired = true;
                             }
                         }
                     } else {
                         task.expired = true;
+                    }
+
+                    if (task.expired) {
+                        this.dispatch(task, "onEnd");
                     }
                 }
             }
@@ -339,19 +360,18 @@ export class ScheduleService {
         }
     }
 
-    private dispatch(task: ScheduleTask) {
-        let {
-            taskId,
-            appId,
-            module,
-            handler,
-            data
-        } = task;
+    private dispatch(task: ScheduleTask, fn: "handler" | "onEnd" = "handler") {
+        let { taskId, appId, module, data } = task;
+        let handler = task[fn];
 
         if (taskId === this.gcTaskId && appId === app.id) {
             this.gc();
         } else if (!handler) {
-            app.message.publish(String(taskId), data, [appId]);
+            if (fn === "onEnd") {
+                app.message.publish(taskId + ".onEnd", data, [appId]);
+            } else {
+                app.message.publish(taskId, data, [appId]);
+            }
         } else {
             app.message.publish(app.schedule.name, [
                 module,
