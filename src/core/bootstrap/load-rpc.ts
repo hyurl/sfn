@@ -144,10 +144,8 @@ app.rpc = {
         // try to serve the REPL server.
         await serveRepl(app.id);
 
-        // Invoke the custom `init()` methods is presented.
-        await Promise.all(services.filter(mod => {
-            return typeof mod.instance(app.local).init === "function";
-        }).map(mod => mod.instance(app.local).init()))
+        // initiating registered services.
+        await service.init();
 
         if (!app.isDevMode) { // notify PM2 that the service is available.
             process.send("ready");

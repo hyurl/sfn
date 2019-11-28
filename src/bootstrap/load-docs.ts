@@ -19,8 +19,9 @@ app.docs.setLoader({
     load(file) {
         if (!this.cache[file]) {
             let contents = fs.readFileSync(file, "utf8");
+            let markdown = app.utils.markdown.create();
 
-            contents = app.utils.markdown.instance().parse(contents);
+            contents = markdown.parse(contents);
             this.cache[file] = {
                 render: () => {
                     return contents;

@@ -115,7 +115,7 @@ global.app = {
     isTsNode,
     isCli,
     argv: ensureType(parseArgv(process.argv)),
-    local: alar.util.local,
+    local: alar.local,
     isWebServer: false
 };
 

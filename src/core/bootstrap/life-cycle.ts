@@ -21,18 +21,6 @@ declare global {
 process.on("SIGINT", async () => {
     try {
         await app.hooks.lifeCycle.shutdown.invoke();
-
-        if (app.rpc.server) {
-            let { services = [] } = app.config.server.rpc[app.id];
-            // If a service has a 'destroy()' method, call it to destroy the
-            // service.
-            for (let service of services) {
-                if (typeof service.instance(app.local).destroy === "function") {
-                    await service.instance(app.local).destroy();
-                }
-            }
-        }
-
         process.exit();
     } catch (err) {
         process.exit(1);
