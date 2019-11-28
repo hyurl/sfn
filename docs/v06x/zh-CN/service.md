@@ -166,17 +166,47 @@ export default class MyService extends Service {
 
 ## 服务初始化和销毁
 
-在分布式运行时，如果一个服务实例中存在一个 `init()` 方法，那么它将会在服务器启动时
-被调用，从而对服务进行初始化工作。但需要注意的是，这并不是 Alar 框架的功能，而是
-SFN 框架特别定制的功能，因此，它很显然地存在一些局限，在使用服务初始化时，一定要
-特别注意下面这两点：
+SFN 0.6 运行在 Alar v5.0 之上，它提供了服务生命周期控制的能力。当一个服务存在一个 `init()`
+方法的时候，它将会在系统启动时被自动调用，用以为服务进行一些初始化工作，例如进行数据库连接等。但
+需要注意这个特性也存在着一个缺点，即：
 
-1. 服务将无法良好地进行热重载，因为热重载时无法再次初始化，会导致程序异常；
-2. Web 服务器将无法正常调用该服务的本地版本，因为 Web 服务器并不会对服务进行初始化。
+> 它只工作在分布式的服务上，这意味着调用（或者回滚到）本地实例时会造成一些明显的问题，因为这些
+> 本地的服务并不会触发生命周期函数。
 
-因此，在进行分布式系统开发时，最好禁用服务的本地化和热重载功能。方法是，在服务器
-启动前调用所有服务的 `noLocal()` 方法，并且将 `app.services` 从配置文件的
-`app.config.watch` 项目中移除。
+因此，在进行分布式系统开发时，最好禁用服务的本地版本。其方法是，在
+`app.hooks.lifeCycle.startup` 钩子中，调用所依赖服务的 `noLocal()` 方法，就像这个示例
+一样：
+
+```ts
+// Disable the local replica of dependency services.
+app.hooks.lifeCycle.startup.bind(async () => {
+    let dependencies: app.Config["server"]["rpc"]["any"]["dependencies"];
+
+    if (app.isWebServer) {
+        dependencies = "all";
+    } else {
+        dependencies = app.config.server.rpc[app.id].dependencies;
+    }
+
+    if (dependencies === "all") {
+        let servers = app.config.server.rpc;
+
+        for (let id in servers) {
+            if (id !== app.id) {
+                let { services } = servers[id];
+
+                services.forEach(service => {
+                    service.noLocal();
+                });
+            }
+        }
+    } else if (Array.isArray(dependencies)) {
+        dependencies.forEach(service => {
+            service.noLocal();
+        });
+    }
+});
+```
 
 和初始化一样，如果一个服务中存在 `destroy()` 方法，那么它会在服务器关闭时被调用，
 从而进行释放资源，垃圾回收等操作。

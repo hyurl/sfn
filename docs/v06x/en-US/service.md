@@ -179,22 +179,50 @@ service, which will be mentioned afterwards.
 
 ## Service Initiation and Destruction
 
-When running distributed, if a service has an `init()` method, then it will be 
-invoked on the start-up, in order to perform initiation for the service. BUT do
-be noticed that it's not an ability of Alar framework, yet a custom
-functionality of SFN framework. So, it apparently has some limits, when
-initiating, these two points must be concerned:
+SFN v0.6 ships with Alar v5.0, which provides the ability to support life cycle
+controls of the service. When running distributed, if a service has an `init()`
+method, then it will be invoked on the start-up, in order to perform initiation
+for the service， for example, connecting to a database. BUT do be noticed there
+is a disadvantage of this feature, that:
 
-1. The service will not be able to hot-reload, since the initiation will not be
-    reloaded again, thus causing unexpected behavior.
+> It only works with the distributed services, that means calling (or falling
+> back to) the local instances would cause certain problems, since they will not
+> trigger life cycle functions.
 
-2. The web server cannot call the local version of the RPC service, since the
-    web server will not perform any initiation for the RPC service.
+So, when deploying distributed applications, it's better to disable the local
+version of service. To do so, just call the `noLocal()` method of all the
+dependency services in `app.hooks.lifeCycle.startup` hook. Like this example:
 
-So, when deploy distributed applications, it's better to disable the local
-version RPC service and the hot-reload functionality. To do so, before start-up,
-calling the `noLocal()` method of all RPC services, and remove `app.services`
-from the `app.config.watch` item in the config file.
+```ts
+// Disable the local replica of dependency services.
+app.hooks.lifeCycle.startup.bind(async () => {
+    let dependencies: app.Config["server"]["rpc"]["any"]["dependencies"];
+
+    if (app.isWebServer) {
+        dependencies = "all";
+    } else {
+        dependencies = app.config.server.rpc[app.id].dependencies;
+    }
+
+    if (dependencies === "all") {
+        let servers = app.config.server.rpc;
+
+        for (let id in servers) {
+            if (id !== app.id) {
+                let { services } = servers[id];
+
+                services.forEach(service => {
+                    service.noLocal();
+                });
+            }
+        }
+    } else if (Array.isArray(dependencies)) {
+        dependencies.forEach(service => {
+            service.noLocal();
+        });
+    }
+});
+```
 
 Just like the initiation, if a service has a `destroy()` method, it will be
 called when the system shuts down, in order to release resources, do garbage
