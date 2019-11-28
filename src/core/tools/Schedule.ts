@@ -220,82 +220,12 @@ export class Schedule {
 }
 
 export class ScheduleService {
-    private timer: NodeJS.Timer = null;
+    private timer: NodeJS.Timer;
+    private state: "running" | "stopped" = "running";
     private tasks = new Map<string, ScheduleTask>();
     private filename = app.ROOT_PATH + `/cache/schedules-${app.id}.json`;
-    private state: "running" | "stopped";
-    private gcTaskId = md5("");
 
     constructor() {
-        this.setup().add({
-            taskId: this.gcTaskId,
-            appId: app.id,
-            start: moment().unix(),
-            repeat: 60 * 30
-        });
-    }
-
-    async add(task: ScheduleTask) {
-        this.tasks.set(task.taskId, { ...task, expired: false });
-        return true;
-    }
-
-    async delete(taskId: string) {
-        return this.tasks.delete(taskId);
-    }
-
-    /** Stops the schedule service. */
-    async stop(transferTasks = false) {
-        if (this.state === "stopped") {
-            return;
-        } else {
-            this.state = "stopped";
-        }
-
-        // Run garbage collection to remove expired tasks before caching.
-        await this.clear().gc();
-
-        let tasks: ScheduleTask[] = [];
-        let mod = app.services.schedule;
-        let { local } = app;
-
-        for (let [taskId, task] of this.tasks) {
-            if (taskId === this.gcTaskId) // do not deal with internal tasks
-                continue;
-
-            this.tasks.delete(taskId);
-
-            if (transferTasks && mod.instance(taskId) !== mod.instance(local)) {
-                mod.instance(taskId).add(task);
-            } else {
-                tasks.push(task);
-            }
-        }
-
-        if (!transferTasks) {
-            await fs.ensureDir(path.dirname(this.filename));
-            await fs.writeJSON(this.filename, tasks);
-        }
-    }
-
-    /** Recovers cached schedules from the previous shutdown. */
-    async resume() {
-        this.state === "stopped" && this.setup();
-
-        try {
-            let tasks: ScheduleTask[] = await fs.readJSON(this.filename);
-
-            for (let task of tasks) {
-                // compatible with old version
-                Array.isArray(task) && (task = task[1]);
-
-                this.tasks.set(task.taskId, task);
-            }
-        } catch (e) { }
-    }
-
-    private setup() {
-        this.clear().state = "running";
         this.timer = setInterval(() => {
             let now = moment().unix();
 
@@ -341,22 +271,70 @@ export class ScheduleService {
                 }
             }
         }, 1000);
-
-        return this;
     }
 
-    private clear() {
-        this.timer && clearInterval(this.timer);
-        return this;
+    async add(task: ScheduleTask) {
+        this.tasks.set(task.taskId, { ...task, expired: false });
+        return true;
     }
 
-    private async gc(now?: number) {
-        now = now || moment().unix();
+    async delete(taskId: string) {
+        let task = this.tasks.get(taskId);
+
+        if (task) {
+            // Mark the task expired and emit onEnd event.
+            task.expired = true;
+            this.dispatch(task, "onEnd");
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /** Recovers cached schedules from the previous shutdown. */
+    async init() {
+        if (app.config.saveSchedules) {
+            try {
+                let tasks: ScheduleTask[] = await fs.readJSON(this.filename);
+
+                for (let task of tasks) {
+                    // compatible with old version
+                    Array.isArray(task) && (task = task[1]);
+
+                    this.tasks.set(task.taskId, task);
+                }
+            } catch (e) { }
+        }
+    }
+
+    /** Stops the schedule service. */
+    async destroy(transferTasks = false) {
+        if (this.state === "stopped") {
+            return;
+        } else {
+            this.state = "stopped";
+        }
+
+        clearInterval(this.timer);
+
+        let tasks: ScheduleTask[] = [];
+        let mod = app.services.schedule;
+        let { local } = app;
 
         for (let [taskId, task] of this.tasks) {
-            if (task.expired || (task.end && now >= task.end)) {
-                this.tasks.delete(taskId);
+            this.tasks.delete(taskId);
+
+            if (transferTasks && mod.instance(taskId) !== mod.instance(local)) {
+                mod.instance(taskId).add(task);
+            } else {
+                tasks.push(task);
             }
+        }
+
+        if (!transferTasks && app.config.saveSchedules) {
+            await fs.ensureDir(path.dirname(this.filename));
+            await fs.writeJSON(this.filename, tasks);
         }
     }
 
@@ -364,9 +342,7 @@ export class ScheduleService {
         let { taskId, appId, module, data } = task;
         let handler = task[fn];
 
-        if (taskId === this.gcTaskId && appId === app.id) {
-            this.gc();
-        } else if (!handler) {
+        if (!handler) {
             if (fn === "onEnd") {
                 app.message.publish(taskId + ".onEnd", data, [appId]);
             } else {
@@ -378,6 +354,11 @@ export class ScheduleService {
                 handler,
                 data
             ], [appId]);
+        }
+
+        // If an task is expired or canceled, remove it from the queue.
+        if (fn === "onEnd") {
+            this.tasks.delete(taskId);
         }
     }
 }
