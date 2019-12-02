@@ -89,6 +89,7 @@
         "sfn-cors": "^0.1.5",
         "sfn-sse": "^0.3.4",
         "sfn-xss": "^0.1.1",
+        "sift": "^9.0.0",
         "socket.io": "^2.3.0",
         "source-map-support": "^0.5.16",
         "thenable-generator": "^0.4.0",

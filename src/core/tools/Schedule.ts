@@ -5,6 +5,7 @@ import moment = require('moment');
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
 import { timestamp } from "./functions";
+import sift from "sift";
 
 export interface TaskOptions<T = any, D extends any[] = any[]> {
     /**
@@ -273,11 +274,13 @@ export class ScheduleService {
         }, 1000);
     }
 
+    /** @inner Use `app.schedule.create()` instead. */
     async add(task: ScheduleTask) {
         this.tasks.set(task.taskId, { ...task, expired: false });
         return true;
     }
 
+    /** @inner Use `app.schedule.delete()` instead. */
     async delete(taskId: string) {
         let task = this.tasks.get(taskId);
 
@@ -289,6 +292,26 @@ export class ScheduleService {
             return true;
         } else {
             return false;
+        }
+    }
+
+    async query(taskId: string): Promise<ScheduleTask>;
+    async query(condition: object): Promise<ScheduleTask[]>;
+    async query(condition: string | object) {
+        if (typeof condition === "string") {
+            return this.tasks.get(condition);
+        } else {
+            return ([...this.tasks])
+                .map(([, task]) => task)
+                .filter(sift(condition));
+        }
+    }
+
+    async count(condition: object = null) {
+        if (!condition) {
+            return this.tasks.size;
+        } else {
+            return this.query(condition).then(tasks => tasks.length);
         }
     }
 
