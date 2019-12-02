@@ -298,8 +298,8 @@ export class ScheduleService {
     /** Retrieves a specific task according to the taskId. */
     async query(taskId: string): Promise<ScheduleTask>;
     /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
-    async query(condition: object): Promise<ScheduleTask[]>;
-    async query(condition: string | object) {
+    async query(condition?: object): Promise<ScheduleTask[]>;
+    async query(condition: string | object = {}) {
         if (typeof condition === "string") {
             return this.tasks.get(condition);
         } else {
