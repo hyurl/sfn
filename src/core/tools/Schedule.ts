@@ -295,7 +295,9 @@ export class ScheduleService {
         }
     }
 
+    /** Retrieves a specific task according to the taskId. */
     async query(taskId: string): Promise<ScheduleTask>;
+    /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
     async query(condition: object): Promise<ScheduleTask[]>;
     async query(condition: string | object) {
         if (typeof condition === "string") {
@@ -307,6 +309,10 @@ export class ScheduleService {
         }
     }
 
+    /**
+     * Counts the size of the task queue, or specific tasks matched the queries
+     * (using mongodb syntax).
+     */
     async count(condition: object = null) {
         if (!condition) {
             return this.tasks.size;
