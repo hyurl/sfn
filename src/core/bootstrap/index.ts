@@ -105,7 +105,7 @@ app.serve = async function serve(id?: string) {
     await import("../handlers/https-redirector");
     await import("../handlers/http-init");
     await import("../handlers/http-static");
-    await import("../handlers/http-xml");
+    await import("../handlers/http-body");
     await import("../handlers/http-session");
 
     // Load user-defined bootstrap procedures.

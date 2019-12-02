@@ -71,7 +71,7 @@
         "cookie-parser": "^1.4.4",
         "dynamic-queue": "^0.2.1",
         "express-session": "^1.17.0",
-        "fron": "^0.2.1",
+        "fron": "^0.2.2",
         "fs-extra": "^7.0.1",
         "function-intercepter": "^1.0.2",
         "hide-protected-properties": "^0.1.1",
