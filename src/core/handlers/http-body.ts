@@ -22,7 +22,7 @@ router.use(<any>BodyParser.text({
     res.xml = xml;
 
     if (!req.type)
-        return;
+        return next();
 
     // Parse XML request body.
     let [prefix, type] = req.type.split("/");
