@@ -7,8 +7,8 @@
     "bin": "dist/cli/sfn.js",
     "scripts": {
         "start": "ts-node --files src",
-        "prepublish": "tsc",
         "postpublish": "rm -rf dist",
+        "postinstall": "tsc",
         "test": "echo No Test"
     },
     "keywords": [
