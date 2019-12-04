@@ -1,5 +1,5 @@
 import * as moment from "moment";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 function color(
     color: string,

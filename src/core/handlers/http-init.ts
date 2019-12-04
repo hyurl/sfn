@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { SSE } from "sfn-sse";
 import { router } from "../bootstrap/index";
 import { version, isDevMode } from "../../init";
