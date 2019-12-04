@@ -6,7 +6,7 @@ import { serve as serveRepl } from "../tools/internal/repl";
 let isMainThread: boolean;
 
 try {
-    isMainThread = require("go-routine").isMainThread;
+    isMainThread = require("@hyurl/goroutine").isMainThread;
 } catch (e) {
     try {
         isMainThread = require("worker_threads").isMainThread;
