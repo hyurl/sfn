@@ -27,7 +27,6 @@
         "src/*.ts",
         "src/controllers/*.ts",
         "src/bootstrap/*.ts",
-        "src/schedules/*.ts",
         "src/services/*.ts",
         "src/locales/*.ts",
         "src/hooks/*.ts",
@@ -36,8 +35,5 @@
         "src/core/*/*.ts",
         "src/core/*/*/*.ts",
         "src/cli/*.ts"
-    ],
-    "exclude": [
-        "./node_modules/*"
     ]
 }

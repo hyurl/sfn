@@ -25,3 +25,4 @@ ecosystem.config.js
 package-lock.json
 /repl.js
 /.*
+*.bak
