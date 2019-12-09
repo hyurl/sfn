@@ -3,9 +3,9 @@
 
 
 "@hyurl/goroutine@^1.0.1":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@hyurl/goroutine/-/goroutine-1.0.3.tgz#a94b0aaaca524bdb6990f454e418be7c2d224bf8"
-  integrity sha512-mrHnnkebQx1kizZ+rLkhMbIrZI2VU29FkMN49ETyqC6FyASv7YCZF0wAw/lqGAJgHvKzVSkCltJM81xSyEHayw==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@hyurl/goroutine/-/goroutine-1.0.4.tgz#c1632654ec2bef402e0128128a82f44dd14efba9"
+  integrity sha512-EfdpJqfGhM2nduvEzl/4B1O+j3mDiXsUZnAnnujEOMTcl6f5azumSByPtPfmurHdF2/1t0peZ6Ku4QjIcrK4bA==
   dependencies:
     "@types/fs-extra" "^8.0.1"
     decircularize "^1.0.0"
