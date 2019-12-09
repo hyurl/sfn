@@ -81,7 +81,9 @@ export function ensureType(value: any) {
         }
 
         case "object": {
-            if (Array.isArray(value)) {
+            if (value === null) {
+                return null;
+            } else if (Array.isArray(value)) {
                 let arr = [];
 
                 for (let item of value) {
