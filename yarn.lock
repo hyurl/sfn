@@ -273,9 +273,9 @@ alar-ejs-loader@^1.1.3:
     ejs "^2.6.2"
 
 alar@^5.1.1:
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/alar/-/alar-5.1.3.tgz#3e9a0afc17991424ea8e7faf9b8a59c9ffc4e8cb"
-  integrity sha512-UCR6l9yMAFXgDy7cK+qaa6UXRv6im4Waxi33/n5P8kEiBS9UMUFCOlygsxavSzCscS2ktx0rQ/34/ddkgOC7YQ==
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/alar/-/alar-5.1.4.tgz#c11268141c0418c8d699a7a54edf241785a10378"
+  integrity sha512-kLfseU2+AoIVaIO/L3g58FjHKUM2U9iUG7qC8FAOrXV10+G0p8/MP773J+Y+IaGDFElhVD3Hqq9wlGy9lgDRqA==
   dependencies:
     "@types/backoff" "^2.5.1"
     "@types/fs-extra" "^8.0.1"
@@ -1569,9 +1569,9 @@ pluralize@^8.0.0:
   integrity sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==
 
 power-repl@^0.1.9:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/power-repl/-/power-repl-0.1.10.tgz#d80c100c4480d4b1ea2bc6f386c0ca1c89a52d79"
-  integrity sha512-oExsiLvm/um8qwSVZM91+OLPmb0J4GCGQgEuCQwBrmchPBmKqfB2p8e2L4udrfdrmFW+TF86FhXyAb9YzSMuHw==
+  version "0.1.11"
+  resolved "https://registry.yarnpkg.com/power-repl/-/power-repl-0.1.11.tgz#7a1f672a7f91824c5fd95e9a435ef54fc21ffb4d"
+  integrity sha512-yZk5EDZH4HAvbdhui1lBpai8iE2vpZSFRbvsMGhSgYU6pvF8P6VMugkWCq6BBZjFOjNUE8D4jaYQOvs6V4aHgQ==
   dependencies:
     "@types/fs-extra" "^8.0.1"
     "@types/node" "^12.12.14"
