@@ -5,7 +5,9 @@ node_modules/
 logs/
 cache/
 sessions/
-dist/
+!dist/
+dist/*
+!dist/cli/
 *.db
 *.tgz
 .*history
