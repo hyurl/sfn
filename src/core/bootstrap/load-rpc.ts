@@ -77,8 +77,7 @@ async function tryConnect(id: string, supressError = false) {
         let { services, ...options } = servers[id];
         let service = await app.services.connect({
             ...options,
-            id: app.id,
-            codec: app.config.rpcCodec
+            id: app.id
         });
 
         app.rpc.connections[id] = service;
@@ -128,8 +127,7 @@ app.rpc = {
         let service = await app.services.serve({
             ...options,
             id,
-            host: "0.0.0.0",
-            codec: app.config.rpcCodec
+            host: "0.0.0.0"
         });
 
         services.forEach(mod => service.register(mod));

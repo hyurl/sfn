@@ -20,17 +20,6 @@ declare global {
              */
             saveSchedules?: boolean;
             /**
-             * if set `BSON` or `FRON`, the corresponding package must be
-             * installed.
-             * - BSON: `bson` or `bson-ext`
-             * - FRON: `fron`
-             * 
-             * @see https://github.com/mongodb/js-bson
-             * @see https://github.com/mongodb-js/bson-ext
-             * @see https://github.com/hyurl/fron
-             */
-            rpcCodec?: "JSON" | "BSON" | "FRON";
-            /**
              * The directories that serve static resources.
              * @see https://www.npmjs.com/package/serve-static
              */
@@ -132,7 +121,6 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
 export default <app.Config>{
     lang: "en-US",
     saveSchedules: false,
-    rpcCodec: "JSON",
     statics: ["assets"],
     watch: [],
     server: {
