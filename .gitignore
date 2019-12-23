@@ -12,3 +12,4 @@ dist/*
 *.tgz
 .*history
 *.bak
+tsconfig.tsbuildinfo
