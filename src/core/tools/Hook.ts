@@ -39,6 +39,7 @@ export class Hook<I = void, O = void> {
         for (let handler of this.getHandlers()) {
             let res = await handler(input, output);
             res === undefined || (result = res);
+            await new Promise(setImmediate); // Ensure asynchronous call.
         }
 
         return result === undefined ? output : result;
