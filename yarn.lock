@@ -16,17 +16,10 @@
     string-hash "^1.1.3"
     tslib "^1.10.0"
 
-<<<<<<< HEAD
 "@hyurl/structured-clone@^0.1.3", "@hyurl/structured-clone@^0.1.4":
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/@hyurl/structured-clone/-/structured-clone-0.1.4.tgz#dd081fbb071d1f05b5d06251a283df9966b49f96"
   integrity sha512-dQndcIz+ncfZTrq0XQfWUIzc4LJckhfs+58N3uC6AN+2Q/7MjDfOSEJwRrUJGueDSANrZ/3IhVkSUW4mYrGxYg==
-=======
-"@hyurl/structured-clone@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@hyurl/structured-clone/-/structured-clone-0.1.3.tgz#52a6f1a3e2f6532cd526b377c67e9b72efced9e1"
-  integrity sha512-QWBWiilQxj3U1pCqdE72OI6KsSmutmUDHyc6hF/PbUJ2kE3dzTz7Gr1qffHPFkuZFrZijORk0OhAVRYeEV7Hhg==
->>>>>>> 0e44b912af53e9edd981c6545d89f2171aaafc4a
 
 "@types/backoff@^2.5.1":
   version "2.5.1"
@@ -150,7 +143,6 @@
   dependencies:
     "@types/express" "*"
 
-<<<<<<< HEAD
 "@types/node@*":
   version "13.1.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.0.tgz#225cbaac5fdb2b9ac651b02c070d8aa3c37cc812"
@@ -165,17 +157,6 @@
   version "12.12.22"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.22.tgz#b8d9eae3328b96910a373cf06ac8d3c5abe9c200"
   integrity sha512-r5i93jqbPWGXYXxianGATOxTelkp6ih/U0WVnvaqAvTqM+0U6J3kw6Xk6uq/dWNRkEVw/0SLcO5ORXbVNz4FMQ==
-=======
-"@types/node@*", "@types/node@^12.12.14":
-  version "12.12.21"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.21.tgz#aa44a6363291c7037111c47e4661ad210aded23f"
-  integrity sha512-8sRGhbpU+ck1n0PGAUgVrWrWdjSW2aqNeyC15W88GRsMpSwzv6RJGlLhE7s2RhVSOdyDmxbqlWSeThq4/7xqlA==
-
-"@types/node@^10.5.6", "@types/node@^10.7.0":
-  version "10.17.11"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.11.tgz#46ba035fb917b31c948280dbea22ab8838f386a4"
-  integrity sha512-dNd2pp8qTzzNLAs3O8nH3iU9DG9866KHq9L3ISPB7DOGERZN81nW/5/g/KzMJpCU8jrbCiMRBzV9/sCEdRosig==
->>>>>>> 0e44b912af53e9edd981c6545d89f2171aaafc4a
 
 "@types/nodemailer@^4.6.0":
   version "4.6.8"
@@ -301,19 +282,11 @@ alar-ejs-loader@^1.1.3:
     ejs "^2.6.2"
 
 alar@^5.2.1:
-<<<<<<< HEAD
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/alar/-/alar-5.3.0.tgz#f4f313ffbd88bdfcb5ce024ee4c99b8649635a70"
   integrity sha512-6M3smR+4fiOYnCHNy2gFpsnIS5Oo1+B0u3Z9XDbE6lLdrwiQldd+iLEzYPjRZC3k9+wu9nvLsrb6MUjhZI6iKA==
   dependencies:
     "@hyurl/structured-clone" "^0.1.4"
-=======
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/alar/-/alar-5.2.2.tgz#8ec4c26c64d92d174440a746fce6f408127692f0"
-  integrity sha512-Gx5mGvAgB68s6YbIHaKxck1aF0gm0vx1PIhp37zMlgvR7pxGj3yEWivhPyA1ckrwAt01/r12vedQQInrDhF1ow==
-  dependencies:
-    "@hyurl/structured-clone" "^0.1.3"
->>>>>>> 0e44b912af53e9edd981c6545d89f2171aaafc4a
     "@types/backoff" "^2.5.1"
     "@types/fs-extra" "^8.0.1"
     advanced-collections "^0.1.2"
@@ -1979,17 +1952,10 @@ util-deprecate@~1.0.1:
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
 
-<<<<<<< HEAD
-webium@^0.5.8:
-  version "0.5.8"
-  resolved "https://registry.yarnpkg.com/webium/-/webium-0.5.8.tgz#e6aebb91a39f4e57df394f33ef822c58e0d46fd8"
-  integrity sha512-xtzrepGyXE4JRVxTSoPvyNdnIltaDlr0oH/YBWrmK4xXAdOnJgY4LmYL8PXLoinNahr/yxo3PDrVLfA+X2moVg==
-=======
 webium@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/webium/-/webium-0.6.1.tgz#5831b34d9d9face4d1ac91b64e195762375415d1"
   integrity sha512-L8UFzlOgfWy7v7ASZOptGLPByGTqmC/vd3FU1Evw1SGH6srr/IhGtM8U2u+8M+KrdCJ0jFpsdVHmqgabtkhvNg==
->>>>>>> 0e44b912af53e9edd981c6545d89f2171aaafc4a
   dependencies:
     "@types/body-parser" "^1.17.1"
     body-parser "^1.19.0"
