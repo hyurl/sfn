@@ -321,6 +321,19 @@ export class ScheduleService {
         }
     }
 
+    private isScheduleServer() {
+        let servers = app.config.server.rpc || {};
+
+        for (let id in servers) {
+            let services = servers[id].services || [];
+            if (id === app.id && services.includes(app.services.schedule)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** Recovers cached schedules from the previous shutdown. */
     async init() {
         if (app.config.saveSchedules) {
@@ -334,6 +347,18 @@ export class ScheduleService {
                     this.tasks.set(task.taskId, task);
                 }
             } catch (e) { }
+
+            if (this.isScheduleServer()) {
+                // Continuously flush tasks to disk file for backup.
+                this.add({
+                    taskId: "d41d8cd98f00b204e9800998ecf8427e", // empty string
+                    appId: app.id,
+                    start: moment().unix() + 900, // in 15 minutes
+                    repeat: 900, // every 15 minutes
+                    module: app.services.schedule.name,
+                    handler: "flush"
+                });
+            }
         }
     }
 
@@ -347,24 +372,29 @@ export class ScheduleService {
 
         clearInterval(this.timer);
 
-        let tasks: ScheduleTask[] = [];
-        let mod = app.services.schedule;
-        let { local } = app;
+        let isScheduleServer = this.isScheduleServer();
+        let jobs: Promise<any>[] = [];
 
         for (let [taskId, task] of this.tasks) {
-            this.tasks.delete(taskId);
-
-            if (transferTasks && mod.instance(taskId) !== mod.instance(local)) {
-                mod.instance(taskId).add(task);
-            } else {
-                tasks.push(task);
+            if (transferTasks && !isScheduleServer) {
+                this.tasks.delete(taskId);
+                jobs.push(app.services.schedule.instance(taskId).add(task));
             }
         }
 
-        if (!transferTasks && app.config.saveSchedules) {
-            await fs.ensureDir(path.dirname(this.filename));
-            await fs.writeJSON(this.filename, tasks);
+        await Promise.all(jobs);
+
+        if (app.config.saveSchedules && isScheduleServer) {
+            await this.flush();
         }
+    }
+
+    async flush() {
+        let tasks = [...this.tasks.values()].filter(task => {
+            return task.taskId !== "d41d8cd98f00b204e9800998ecf8427e";
+        });
+        await fs.emptyDir(path.dirname(this.filename));
+        await fs.writeJSON(this.filename, tasks);
     }
 
     private dispatch(task: ScheduleTask, fn: "handler" | "onEnd" = "handler") {

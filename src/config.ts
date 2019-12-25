@@ -131,7 +131,7 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
  */
 export default <app.Config>{
     lang: "en-US",
-    saveSchedules: false,
+    saveSchedules: true,
     rpcCodec: "JSON",
     statics: ["assets"],
     watch: [],
