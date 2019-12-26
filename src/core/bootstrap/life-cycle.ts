@@ -66,7 +66,7 @@ app.hooks.lifeCycle.shutdown.bind(async () => {
     }
 });
 
-// Try tp disconnect all RPC clients.
+// Try to disconnect all RPC clients.
 app.hooks.lifeCycle.shutdown.bind(async () => {
     for (let id in app.rpc.connections) {
         let client = app.rpc.connections[id];

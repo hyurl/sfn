@@ -53,8 +53,8 @@ declare global {
     }
 }
 
-const tasks: { [id: string]: string } = {};
-const connectings = new Set<string>();
+const tasks: { [id: string]: NodeJS.Timer } = {};
+const pendingConnections = new Set<string>();
 
 function ensureAppId(id: string): void {
     if (!app.config.server.rpc[id]) {
@@ -62,14 +62,14 @@ function ensureAppId(id: string): void {
     }
 }
 
-async function tryConnect(id: string, supressError = false) {
+async function tryConnect(id: string, suppressError = false) {
     ensureAppId(id);
 
     // prevent duplicated connect.
-    if (connectings.has(id)) {
+    if (pendingConnections.has(id)) {
         return false;
     } else {
-        connectings.add(id);
+        pendingConnections.add(id);
     }
 
     try {
@@ -90,7 +90,7 @@ async function tryConnect(id: string, supressError = false) {
         }
 
         if (tasks[id]) {
-            app.schedule.cancel(tasks[id]);
+            clearInterval(tasks[id]);
             delete tasks[id];
         }
 
@@ -98,7 +98,7 @@ async function tryConnect(id: string, supressError = false) {
         // the RPC channel.
         app.message.linkRpcChannel(service);
 
-        connectings.delete(id);
+        pendingConnections.delete(id);
 
         if (isMainThread) {
             console.log(green`RPC server [${id}] connected.`);
@@ -106,9 +106,9 @@ async function tryConnect(id: string, supressError = false) {
 
         return true;
     } catch (err) {
-        connectings.delete(id);
+        pendingConnections.delete(id);
 
-        if (!supressError) {
+        if (!suppressError) {
             throw err;
         } else {
             return false;
@@ -158,13 +158,7 @@ app.rpc = {
         let ok = await tryConnect(id, defer);
 
         if (!ok && defer) {
-            tasks[id] = app.schedule.create({
-                salt: `connect-${id}`,
-                startIn: 1,
-                repeat: 1,
-                handler: tryConnect,
-                data: [id, defer]
-            });
+            tasks[id] = setInterval(tryConnect, 1000, id, defer);
         }
     },
     async connectAll(defer = false) {

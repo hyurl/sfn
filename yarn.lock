@@ -3,9 +3,9 @@
 
 
 "@hyurl/goroutine@^1.0.1":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@hyurl/goroutine/-/goroutine-1.1.4.tgz#91b01fc5935a279ecc6d32f69204cfaadf54b38e"
-  integrity sha512-6esTDqhKT57ChZSaWARMhtlk3WRbtxS+6FJEXMgOSXIxB5AXWAZt41tjIM8G1XAGluJhNV8KyEuA8yqRwovHsg==
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@hyurl/goroutine/-/goroutine-1.2.0.tgz#a0b6d743687d0019d41621f158fdc4b0cc406ce5"
+  integrity sha512-xpg4LG2E2X7JqBYYXrmVoM9E5Cga5BdyHsggl8qD8YUvQKxHE9OLfsV4aWvSiXWlUvCLro2GATdEorDN4d+R4g==
   dependencies:
     "@hyurl/structured-clone" "^0.1.3"
     "@types/fs-extra" "^8.0.1"
@@ -282,9 +282,9 @@ alar-ejs-loader@^1.1.3:
     ejs "^2.6.2"
 
 alar@^5.2.1:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/alar/-/alar-5.3.0.tgz#f4f313ffbd88bdfcb5ce024ee4c99b8649635a70"
-  integrity sha512-6M3smR+4fiOYnCHNy2gFpsnIS5Oo1+B0u3Z9XDbE6lLdrwiQldd+iLEzYPjRZC3k9+wu9nvLsrb6MUjhZI6iKA==
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/alar/-/alar-5.3.1.tgz#3170da3450b554741d86aa4e40dbf956facfcd96"
+  integrity sha512-RjQkHjEilcq7S51xq6vVGY0YTyj2LzV+iD27aQ1av/npkyB3TJtzFB6KEoS6remO/BTpSw5g59HObUpzOPWXew==
   dependencies:
     "@hyurl/structured-clone" "^0.1.4"
     "@types/backoff" "^2.5.1"
@@ -294,6 +294,7 @@ alar@^5.2.1:
     bsp "^1.2.0"
     check-iterable "^1.0.2"
     chokidar "^3.3.1"
+    could-be-class "^0.1.4"
     fs-extra "^8.1.0"
     is-socket-reset-error "^0.1.1"
     js-magic "^1.0.0"
@@ -677,6 +678,11 @@ core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
+
+could-be-class@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/could-be-class/-/could-be-class-0.1.4.tgz#112e0d3c0d21ba952734bfc1581dbca78029f858"
+  integrity sha512-JlE20s9XuAR6kgRMwEQ1hy17Eucpv7ZXWYoxfK7Mo42Il1i+oqsG1nLj17GdJZfbeKD0wDO4Iggn9BvK6ZGk/w==
 
 crypt@~0.0.1:
   version "0.0.2"

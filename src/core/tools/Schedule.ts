@@ -221,61 +221,14 @@ export class Schedule {
 }
 
 export class ScheduleService {
-    private timer: NodeJS.Timer;
-    private state: "running" | "stopped" = "running";
+    private timer: NodeJS.Timer = null;
+    private state: "uninitiated" | "running" | "stopped" = "uninitiated";
     private tasks = new Map<string, ScheduleTask>();
     private filename = app.ROOT_PATH + `/cache/schedules-${app.id}.json`;
 
-    constructor() {
-        this.timer = setInterval(() => {
-            let now = moment().unix();
-
-            for (let [, task] of this.tasks) {
-                let { start, end, repeat, timetable } = task;
-
-                if (!task.expired) {
-                    if (!end || now < end) {
-                        if (timetable) {
-                            if (timetable.length === 0) {
-                                task.expired = true;
-                            } else {
-                                for (let i = timetable.length; i--;) {
-                                    if (now >= timetable[i]) {
-                                        this.dispatch(task);
-
-                                        if (repeat) {
-                                            timetable[i] += repeat;
-                                        } else {
-                                            timetable.splice(i, 1);
-                                        }
-
-                                        break;
-                                    }
-                                }
-                            }
-                        } else if (now >= start) {
-                            this.dispatch(task);
-
-                            if (repeat) {
-                                task.start = now + repeat;
-                            } else {
-                                task.expired = true;
-                            }
-                        }
-                    } else {
-                        task.expired = true;
-                    }
-
-                    if (task.expired) {
-                        this.dispatch(task, "onEnd");
-                    }
-                }
-            }
-        }, 1000);
-    }
-
     /** @inner Use `app.schedule.create()` instead. */
     async add(task: ScheduleTask) {
+        this.state === "uninitiated" && await this.init();
         this.tasks.set(task.taskId, { ...task, expired: false });
         return true;
     }
@@ -336,6 +289,53 @@ export class ScheduleService {
 
     /** Recovers cached schedules from the previous shutdown. */
     async init() {
+        this.state = "running";
+        this.timer = setInterval(() => {
+            let now = moment().unix();
+
+            for (let [, task] of this.tasks) {
+                let { start, end, repeat, timetable } = task;
+
+                if (!task.expired) {
+                    if (!end || now < end) {
+                        if (timetable) {
+                            if (timetable.length === 0) {
+                                task.expired = true;
+                            } else {
+                                for (let i = timetable.length; i--;) {
+                                    if (now >= timetable[i]) {
+                                        this.dispatch(task);
+
+                                        if (repeat) {
+                                            timetable[i] += repeat;
+                                        } else {
+                                            timetable.splice(i, 1);
+                                        }
+
+                                        break;
+                                    }
+                                }
+                            }
+                        } else if (now >= start) {
+                            this.dispatch(task);
+
+                            if (repeat) {
+                                task.start = now + repeat;
+                            } else {
+                                task.expired = true;
+                            }
+                        }
+                    } else {
+                        task.expired = true;
+                    }
+
+                    if (task.expired) {
+                        this.dispatch(task, "onEnd");
+                    }
+                }
+            }
+        }, 1000);
+
         if (app.config.saveSchedules) {
             try {
                 let tasks: ScheduleTask[] = await fs.readJSON(this.filename);
@@ -364,7 +364,7 @@ export class ScheduleService {
 
     /** Stops the schedule service. */
     async destroy(transferTasks = false) {
-        if (this.state === "stopped") {
+        if (this.state !== "running") {
             return;
         } else {
             this.state = "stopped";
