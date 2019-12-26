@@ -233,7 +233,7 @@ export class ScheduleService {
         return true;
     }
 
-    /** @inner Use `app.schedule.delete()` instead. */
+    /** @inner Use `app.schedule.cancel()` instead. */
     async delete(taskId: string) {
         let task = this.tasks.get(taskId);
 
