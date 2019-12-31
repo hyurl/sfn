@@ -53,7 +53,7 @@ function reload(file: string) {
     ) {
         let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 
-        app.services.cache.instance().delete(path);
+        app.services.cache().delete(path);
     }
 
     if (startsWith(app.id, "web-server")) {

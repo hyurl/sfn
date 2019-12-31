@@ -197,7 +197,7 @@ export class Schedule {
         }
 
         // Redirect the task to one of the schedule server.
-        app.services.schedule.instance(taskId).add({
+        app.services.schedule(taskId).add({
             taskId,
             appId: app.id,
             start: <number>start,
@@ -216,7 +216,7 @@ export class Schedule {
     /** Cancels a task according to the given task ID. */
     cancel(taskId: string) {
         app.message.unsubscribe(taskId);
-        app.services.schedule.instance(taskId).delete(taskId);
+        app.services.schedule(taskId).delete(taskId);
     }
 }
 
@@ -287,7 +287,6 @@ export class ScheduleService {
         return false;
     }
 
-    /** Recovers cached schedules from the previous shutdown. */
     async init() {
         this.state = "running";
         this.timer = setInterval(() => {
@@ -362,7 +361,6 @@ export class ScheduleService {
         }
     }
 
-    /** Stops the schedule service. */
     async destroy(transferTasks = false) {
         if (this.state !== "running") {
             return;
@@ -378,7 +376,7 @@ export class ScheduleService {
         for (let [taskId, task] of this.tasks) {
             if (transferTasks && !isScheduleServer) {
                 this.tasks.delete(taskId);
-                jobs.push(app.services.schedule.instance(taskId).add(task));
+                jobs.push(app.services.schedule(taskId).add(task));
             }
         }
 

@@ -106,7 +106,7 @@ export class HttpController extends Controller {
 
             this.res.type = "text/html";
 
-            return view.instance(path).render(vars);
+            return view(path).render(vars);
         } catch (err) {
             if (err instanceof TypeError)
                 throw new StatusException(404);

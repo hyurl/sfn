@@ -17,12 +17,12 @@ declare global {
 export default class DocumentationService extends Service {
     async getSideMenu(version: string, lang: string) {
         let path = `app.docs.sideMenu.${version.replace(/\./g, "")}.${lang}`;
-        let sideMenu: string = await app.services.cache.instance().get(path);
+        let sideMenu: string = await app.services.cache().get(path);
 
         if (!sideMenu) {
             let categoryTree = await this.getCategoryTree(version, lang);
             sideMenu = renderHtml(categoryTree, "categories", "    ");
-            await app.services.cache.instance().set(path, sideMenu);
+            await app.services.cache().set(path, sideMenu);
         }
 
         return sideMenu;

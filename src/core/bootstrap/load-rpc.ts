@@ -86,7 +86,7 @@ async function tryConnect(id: string, suppressError = false) {
         // If detects the schedule service is served by other processes and
         // being connected, stop the local schedule service.
         if (id !== app.id && services.includes(app.services.schedule)) {
-            await app.services.schedule.instance(app.local).destroy(true);
+            await app.services.schedule(app.local).destroy(true);
         }
 
         if (tasks[id]) {

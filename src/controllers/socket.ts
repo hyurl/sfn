@@ -29,7 +29,7 @@ export default class iWebSocketController extends WebSocketController {
 
     @event("iterator-test")
     async *test() {
-        for await (let result of app.services.test.instance().asyncIterator()) {
+        for await (let result of app.services.test().asyncIterator()) {
             yield result;
         }
     }

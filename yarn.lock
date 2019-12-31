@@ -144,9 +144,9 @@
     "@types/express" "*"
 
 "@types/node@*":
-  version "13.1.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.0.tgz#225cbaac5fdb2b9ac651b02c070d8aa3c37cc812"
-  integrity sha512-zwrxviZS08kRX40nqBrmERElF2vpw4IUTd5khkhBTfFH8AOaeoLVx48EC4+ZzS2/Iga7NevncqnsUSYjM4OWYA==
+  version "13.1.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.2.tgz#fe94285bf5e0782e1a9e5a8c482b1c34465fa385"
+  integrity sha512-B8emQA1qeKerqd1dmIsQYnXi+mmAzTB7flExjmy5X1aVAKFNNNDubkavwR13kR6JnpeLp3aLoJhwn9trWPAyFQ==
 
 "@types/node@^10.5.6", "@types/node@^10.7.0":
   version "10.17.12"
@@ -281,10 +281,10 @@ alar-ejs-loader@^1.1.3:
     "@types/ejs" "^2.6.3"
     ejs "^2.6.2"
 
-alar@^5.2.1:
-  version "5.3.1"
-  resolved "https://registry.yarnpkg.com/alar/-/alar-5.3.1.tgz#3170da3450b554741d86aa4e40dbf956facfcd96"
-  integrity sha512-RjQkHjEilcq7S51xq6vVGY0YTyj2LzV+iD27aQ1av/npkyB3TJtzFB6KEoS6remO/BTpSw5g59HObUpzOPWXew==
+alar@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/alar/-/alar-5.4.1.tgz#aabfbe6e1a05238328134cc3c10998f37f1e0418"
+  integrity sha512-qaBTtGOHZ/ELxaybd1JcSXiBwrc2RL3S9k+TVfH1g00x2kEGDMgxQ6d6ls/gQhl77i6DrYEyKtzF4rrhyX8JkA==
   dependencies:
     "@hyurl/structured-clone" "^0.1.4"
     "@types/backoff" "^2.5.1"
@@ -297,7 +297,7 @@ alar@^5.2.1:
     could-be-class "^0.1.4"
     fs-extra "^8.1.0"
     is-socket-reset-error "^0.1.1"
-    js-magic "^1.0.0"
+    js-magic "^1.1.1"
     lodash "^4.17.15"
     sequid "^1.0.1"
     string-hash "^1.1.3"
@@ -1164,6 +1164,11 @@ js-magic@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/js-magic/-/js-magic-1.0.0.tgz#e8f42630c94958b33345bc5d0b558547667a4fed"
   integrity sha512-iRLg4oNaojUNwiE5Uf1OTLCzd1/gQjYHcvc+BBz934Wb0nJ7lFQ1Lj2hIPK7jqcmJNVOaikB3xJovKLUyipofQ==
+
+js-magic@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/js-magic/-/js-magic-1.1.1.tgz#c0b9cc76f1c3d8588362d3953d791fa746033690"
+  integrity sha512-2Hc+A8cKwINALUTGOBttpR5wQJUHyb/hjerQv8w4nP0MJRucY3S4lRCyC1T1Iu4lzETb1f6RtXXoemP9qT+RKw==
 
 js-tokens@^3.0.0:
   version "3.0.2"
