@@ -3,7 +3,7 @@
         "module": "commonjs",
         "target": "es2017",
         "preserveConstEnums": true,
-        "rootDir": "src",
+        "rootDir": "./src/",
         "outDir": "dist",
         "newLine": "LF",
         "experimentalDecorators": true,

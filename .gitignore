@@ -13,3 +13,4 @@ dist/*
 .*history
 *.bak
 tsconfig.tsbuildinfo
+yarn-error.log

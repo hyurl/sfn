@@ -18,6 +18,7 @@ src/views/
 ecosystem.config.js
 package-lock.json
 yarn.lock
+yarn-error.log
 /repl.js
 /.*
 *.bak

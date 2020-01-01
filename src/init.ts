@@ -4,6 +4,7 @@ import * as FRON from "fron";
 import * as alar from "alar";
 import parseArgv = require("minimist");
 import { ensureType } from './core/tools/internal';
+import trimEnd = require("lodash/trimEnd");
 
 declare global {
     namespace NodeJS {
@@ -88,9 +89,9 @@ try {
         { rootDir, outDir } = compilerOptions || <any>{};
 
     if (rootDir)
-        srcPath = path.normalize(ROOT_PATH + "/" + rootDir);
+        srcPath = path.normalize(ROOT_PATH + "/" + trimEnd(rootDir, "/"));
     if (outDir)
-        appPath = path.normalize(ROOT_PATH + "/" + outDir);
+        appPath = path.normalize(ROOT_PATH + "/" + trimEnd(outDir, "/"));
 } catch (e) {
     srcPath = path.normalize(ROOT_PATH + "/src");
     appPath = path.normalize(ROOT_PATH + "/dist");
