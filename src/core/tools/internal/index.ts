@@ -63,7 +63,9 @@ export function copyFuncProps(source: Function, target: Function) {
 export function ensureType(value: any) {
     switch (typeof value) {
         case "string": {
-            if (truePattern.test(value)) {
+            if (value.trim().length === 0) {
+                return value;
+            } else if (truePattern.test(value)) {
                 return true;
             } else if (falsePattern.test(value)) {
                 return false;
