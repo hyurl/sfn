@@ -62,51 +62,50 @@ function ensureAppId(id: string): void {
     }
 }
 
-async function tryConnect(id: string, suppressError = false) {
-    ensureAppId(id);
+async function tryConnect(
+    service: RpcClient,
+    serverId: string,
+    suppressError = false
+) {
+    ensureAppId(serverId);
 
     // prevent duplicated connect.
-    if (pendingConnections.has(id)) {
+    if (pendingConnections.has(serverId)) {
         return false;
     } else {
-        pendingConnections.add(id);
+        pendingConnections.add(serverId);
     }
 
     try {
-        let servers = app.config.server.rpc;
-        let { services, ...options } = servers[id];
-        let service = await app.services.connect({
-            ...options,
-            id: app.id
-        });
+        let { services } = app.config.server.rpc[serverId];
 
-        app.rpc.connections[id] = service;
-        services.forEach(mod => service.register(mod));
+        await service.open();
+        app.rpc.connections[serverId] = service;
 
         // If detects the schedule service is served by other processes and
         // being connected, stop the local schedule service.
-        if (id !== app.id && services.includes(app.services.schedule)) {
-            await app.services.schedule(app.local).destroy(true);
+        if (serverId !== app.id && services.includes(app.services.schedule)) {
+            await app.services.schedule().destroy(true);
         }
 
-        if (tasks[id]) {
-            clearInterval(tasks[id]);
-            delete tasks[id];
+        if (tasks[serverId]) {
+            clearInterval(tasks[serverId]);
+            delete tasks[serverId];
         }
 
         // Link all the subscriber listeners from the message channel to
         // the RPC channel.
         app.message.linkRpcChannel(service);
 
-        pendingConnections.delete(id);
+        pendingConnections.delete(serverId);
 
         if (isMainThread) {
-            console.log(green`RPC server [${id}] connected.`);
+            console.log(green`RPC server [${serverId}] connected.`);
         }
 
         return true;
     } catch (err) {
-        pendingConnections.delete(id);
+        pendingConnections.delete(serverId);
 
         if (!suppressError) {
             throw err;
@@ -155,10 +154,14 @@ app.rpc = {
         }
     },
     async connect(id: string, defer = false) {
-        let ok = await tryConnect(id, defer);
+        let servers = app.config.server.rpc;
+        let { services, ...options } = servers[id];
+        let service = new RpcClient({ ...options, id: app.id });
 
-        if (!ok && defer) {
-            tasks[id] = setInterval(tryConnect, 1000, id, defer);
+        services.forEach(mod => service.register(mod));
+
+        if (!(await tryConnect(service, id, defer)) && defer) {
+            tasks[id] = setInterval(tryConnect, 1000, service, id, defer);
         }
     },
     async connectAll(defer = false) {

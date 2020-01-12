@@ -81,5 +81,5 @@ export class RouteMap<T> {
     }
 }
 
-export const routeMap = new RouteMap<HttpController>();
-export const eventMap = new RouteMap<WebSocketController>();
+export const routeMap = new RouteMap<typeof HttpController>();
+export const eventMap = new RouteMap<typeof WebSocketController>();

@@ -102,11 +102,9 @@ export class HttpController extends Controller {
         }
 
         try {
-            let view: ModuleProxy<View> = get(global, app.views.resolve(path));
-
             this.res.type = "text/html";
-
-            return view(path).render(vars);
+            let view: ModuleProxy<View> = get(global, app.views.resolve(path));
+            return view().render(vars);
         } catch (err) {
             if (err instanceof TypeError)
                 throw new StatusException(404);

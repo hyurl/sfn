@@ -33,9 +33,9 @@ export default class DocumentationService extends Service {
         let filename = resolvePath(dir, name + ".md");
 
         try {
-            return (<ModuleProxy<View>>get(global, app.docs.resolve(filename)))
-                .instance(filename)
-                .render();
+            let name = app.docs.resolve(filename);
+            let view = <ModuleProxy<View>>get(global, name);
+            return view().render();
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
             throw new StatusException(code, isDevMode ? e.message : null);

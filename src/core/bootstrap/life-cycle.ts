@@ -156,7 +156,11 @@ app.hooks.lifeCycle.startup.bind(() => {
 
         if (module) {
             try {
-                await module.instance(app.local)[method](...(data || []));
+                let ins = module();
+                
+                if (typeof ins[method] === "function") {
+                    await ins[method](...(data || []));
+                }
             } catch (err) {
                 tryLogError(err);
             }

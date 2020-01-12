@@ -53,6 +53,7 @@ declare global {
         /**
          * Pass this symbol to `ModuleProxy<any>.instance()` method so that it
          * can always resolve the local instance of the module.
+         * @deprecated Alar v6.0 by default uses the local singleton.
          */
         const local: symbol;
     }

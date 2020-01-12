@@ -19,9 +19,8 @@ app.docs.setLoader({
     load(file) {
         if (!this.cache[file]) {
             let contents = fs.readFileSync(file, "utf8");
-            let markdown = app.utils.markdown.create();
 
-            contents = markdown.parse(contents);
+            contents = app.utils.markdown().parse(contents);
             this.cache[file] = {
                 render: () => {
                     return contents;
@@ -44,7 +43,7 @@ app.docs.watch = () => {
 };
 
 
-function reload(file: string) {
+async function reload(file: string) {
     let parts = file.slice(app.docs.path.length + 1).split(/\\|\//);
     let lang = parts[1];
 
@@ -59,7 +58,8 @@ function reload(file: string) {
     if (startsWith(app.id, "web-server")) {
         // Use WebSocket to reload the web page.
         let name = app.docs.resolve(file);
-        let data = (<ModuleProxy<View>>get(global, name)).instance(file).render();
+        let view: ModuleProxy<View> = get(global, name);
+        let data = await view().render();
         let pathname = `/docs/${parts[0]}/${parts.slice(2).join("/").slice(0, -3)}`;
 
         app.message.ws.local.emit("renew-doc-contents", pathname, lang, data);

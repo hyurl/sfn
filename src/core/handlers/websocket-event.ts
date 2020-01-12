@@ -50,7 +50,7 @@ export function tryImport(nsp: string) {
 }
 
 async function handleEvent(key: string, socket: WebSocket, data: any[]) {
-    let mod = eventMap.resolve(key),
+    let Controller = eventMap.resolve(key),
         methods = eventMap.methods(key),
         { prefix: nsp, route: event } = eventMap.get(key),
         ctrl: WebSocketController = null,
@@ -59,7 +59,7 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
 
     try {
         socket[activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
-        ctrl = mod.create(socket);
+        ctrl = new Controller(socket);
 
         for (let method of methods) {
             if (!isOwnMethod(ctrl, method)) {

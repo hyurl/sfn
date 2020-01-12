@@ -43,7 +43,7 @@ router.onerror = function onerror(err: any, req: Request, res: Response) {
 
 export function getRouteHandler(key: string): RouteHandler {
     return async (req: Request, res: Response) => {
-        let mod = routeMap.resolve(key),
+        let Controller = routeMap.resolve(key),
             methods = routeMap.methods(key),
             ctrl: HttpController = null,
             initiated = false;
@@ -53,7 +53,7 @@ export function getRouteHandler(key: string): RouteHandler {
         });
 
         try {
-            ctrl = mod.create(req, res);
+            ctrl = new Controller(req, res);
 
             for (let method of methods) {
                 if (!isOwnMethod(ctrl, method)) {

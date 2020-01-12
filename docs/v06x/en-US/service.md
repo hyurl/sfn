@@ -72,7 +72,7 @@ And then wherever you need, use namespace to access the instance of this service
 
 ```typescript
 (async () => {
-    await app.services.cache.instance().set("something", "This is a test");
+    await app.services.cache("some route").set("something", "This is a test");
     // ...
 })();
 ```
@@ -179,50 +179,11 @@ service, which will be mentioned afterwards.
 
 ## Service Initiation and Destruction
 
-SFN v0.6 ships with Alar v5.0, which provides the ability to support life cycle
+SFN v0.6 ships with Alar v6, which provides the ability to support life cycle
 controls of the service. When running distributed, if a service has an `init()`
 method, then it will be invoked on the start-up, in order to perform initiation
-for the service， for example, connecting to a database. BUT do be noticed there
-is a disadvantage of this feature, that:
-
-> It only works with the distributed services, that means calling (or falling
-> back to) the local instances would cause certain problems, since they will not
-> trigger life cycle functions.
-
-So, when deploying distributed applications, it's better to disable the local
-version of service. To do so, just call the `noLocal()` method of all the
-dependency services in `app.hooks.lifeCycle.startup` hook. Like this example:
-
-```ts
-// Disable the local replica of dependency services.
-app.hooks.lifeCycle.startup.bind(async () => {
-    let dependencies: app.Config["server"]["rpc"]["any"]["dependencies"];
-
-    if (app.isWebServer) {
-        dependencies = "all";
-    } else {
-        dependencies = app.config.server.rpc[app.id].dependencies;
-    }
-
-    if (dependencies === "all") {
-        let servers = app.config.server.rpc;
-
-        for (let id in servers) {
-            if (id !== app.id) {
-                let { services } = servers[id];
-
-                services.forEach(service => {
-                    service.noLocal();
-                });
-            }
-        }
-    } else if (Array.isArray(dependencies)) {
-        dependencies.forEach(service => {
-            service.noLocal();
-        });
-    }
-});
-```
+for the service， for example, connecting to a database. BUT it should be aware
+that this feature only works with the services that was served as RPC services.
 
 Just like the initiation, if a service has a `destroy()` method, it will be
 called when the system shuts down, in order to release resources, do garbage

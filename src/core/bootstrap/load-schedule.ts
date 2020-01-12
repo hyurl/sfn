@@ -22,7 +22,7 @@ declare global {
 
 
 global.app.schedule = new Schedule("app.schedule");
-global.app.services.schedule = alar.createModuleProxy<ScheduleService>(
+global.app.services.schedule = alar.createModuleProxy(
     "app.services.schedule",
     __dirname + "/../tools/Schedule"
 );

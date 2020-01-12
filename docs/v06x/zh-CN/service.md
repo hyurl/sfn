@@ -68,7 +68,7 @@ export default class CacheService {
 
 ```typescript
 (async () => {
-    await app.services.cache.instance().set("something", "This is a test");
+    await app.services.cache("some route").set("something", "This is a test");
     // ...
 })();
 ```
@@ -166,47 +166,9 @@ export default class MyService extends Service {
 
 ## 服务初始化和销毁
 
-SFN 0.6 运行在 Alar v5.0 之上，它提供了服务生命周期控制的能力。当一个服务存在一个 `init()`
+SFN 0.6 运行在 Alar v6 之上，它提供了服务生命周期控制的能力。当一个服务存在一个 `init()`
 方法的时候，它将会在系统启动时被自动调用，用以为服务进行一些初始化工作，例如进行数据库连接等。但
-需要注意这个特性也存在着一个缺点，即：
-
-> 它只工作在分布式的服务上，这意味着调用（或者回滚到）本地实例时会造成一些明显的问题，因为这些
-> 本地的服务并不会触发生命周期函数。
-
-因此，在进行分布式系统开发时，最好禁用服务的本地版本。其方法是，在
-`app.hooks.lifeCycle.startup` 钩子中，调用所依赖服务的 `noLocal()` 方法，就像这个示例
-一样：
-
-```ts
-// Disable the local replica of dependency services.
-app.hooks.lifeCycle.startup.bind(async () => {
-    let dependencies: app.Config["server"]["rpc"]["any"]["dependencies"];
-
-    if (app.isWebServer) {
-        dependencies = "all";
-    } else {
-        dependencies = app.config.server.rpc[app.id].dependencies;
-    }
-
-    if (dependencies === "all") {
-        let servers = app.config.server.rpc;
-
-        for (let id in servers) {
-            if (id !== app.id) {
-                let { services } = servers[id];
-
-                services.forEach(service => {
-                    service.noLocal();
-                });
-            }
-        }
-    } else if (Array.isArray(dependencies)) {
-        dependencies.forEach(service => {
-            service.noLocal();
-        });
-    }
-});
-```
+需要注意这个特性仅支持作为 RPC 服务运行的一类服务。
 
 和初始化一样，如果一个服务中存在 `destroy()` 方法，那么它会在服务器关闭时被调用，
 从而进行释放资源，垃圾回收等操作。

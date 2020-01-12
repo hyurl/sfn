@@ -175,7 +175,7 @@ export default class extends HttpController {
         // apply the hook and handle data in the hook instead of doing it 
         // in the controller.
         let data = req.body || {};
-        let user = app.models.user.create();
+        let user = new app.models.user();
 
         user = await app.hooks.user.onAdd.invoke(data, user);
 
@@ -194,7 +194,7 @@ SFN 框架内置使用了一个名为 `lifeCycle` 的钩子接口，用以控制
 // src/logger-server.ts
 // Try to safely close the logger service.
 app.hooks.lifeCycle.shutdown.bind(async () => {
-    await app.services.logger.instance(app.services.local).close();
+    await app.services.logger().close();
 });
 ```
 

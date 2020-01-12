@@ -183,7 +183,7 @@ export default class extends HttpController {
         // apply the hook and handle data in the hook instead of doing it 
         // in the controller.
         let data = req.body || {};
-        let user = app.models.user.create();
+        let user = new app.models.user();
 
         user = await app.hooks.user.onAdd.invoke(data, user);
 
@@ -203,7 +203,7 @@ following example comes from the SFN website itself.
 // src/logger-server.ts
 // Try to safely close the logger service.
 app.hooks.lifeCycle.shutdown.bind(async () => {
-    await app.services.logger.instance(app.services.local).close();
+    await app.services.logger().close();
 });
 ```
 

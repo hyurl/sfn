@@ -72,7 +72,7 @@ export async function importDirectory(dir: string) {
 
 export function loadLanguagePack(filename: string) {
     let name = app.locales.resolve(filename);
-    let ins: Locale = name && get(global, name).instance();
+    let ins = name ? (<ModuleProxy<Locale>>get(global, name))() : null;
 
     if (ins) {
         let lang = path.basename(filename, path.extname(filename));
