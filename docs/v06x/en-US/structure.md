@@ -14,22 +14,22 @@ just recommended.
 - `src/` The directory that stores all source files.
     - `assets/` The directory that stores static files.
     - `bootstrap/` The directory that stores bootstrap files.
-        - `index.ts` The default bootstrap file.
-        - `http.ts` Bootstrap files related to HTTP controllers.
-        - `websocket.ts` Bootstrap files related to WebSocket controllers.
+        - `index.ts` The default user-defined bootstrap file.
+        - `http.ts`  User-defined bootstrap file related to HTTP controllers.
+        - `websocket.ts` User-defined bootstrap file related to WebSocket controllers.
         - Other files must be loaded by `index.ts`.
     - `controllers/`* The directory the stores controller files.
-    - `locales/`* The directory that stores language packs.
-    - `models/`* The directory that stores models files.
+    - `locales/`* The directory that stores language packages.
+    - `models/`* The directory that stores model files.
     - `hooks`* The directory that stores hook files. 
     - `services/`* The directory that stores service files.
     - `utils/`* The directory that stores utility module files.
     - `views/`* The directory that stores view files.
     - `config.ts` The file of configurations.
-    - `index.ts` The entry file of the project.
+    - `index.ts` The entry file of the server.
 - `package.json` The specification file of the project.
 - `package-lock.json`
-- `tsconfig.json` The configuration file of TypeScript compiler.
+- `tsconfig.json` The configuration file for TypeScript compiler.
 
 Apart from these, you can create any files and folders you want, just make 
 sure they'll be loaded properly.

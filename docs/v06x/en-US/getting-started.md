@@ -51,14 +51,11 @@ this command:
 npm i sfn
 ```
 
-After all files downloaded, type the following command to initiate your project,
-it will create needed files and directories for you automatically.
-
-But before running this procedure, you have to setup the environment for NodeJS 
-to run user-defined commands. See [CLI & REPL](./cli-repl).
+After all files downloaded, type the following command to create needed files
+and directories for you project automatically.
 
 ```sh
-sfn init
+npx sfn init
 ```
 
 ## Start Demo Server

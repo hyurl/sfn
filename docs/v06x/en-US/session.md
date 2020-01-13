@@ -42,7 +42,7 @@ Also, you can change to other available storage engine if you want to.
 
 This feature is very important in **SFN** framework, session sharing allows 
 you changing the state in one end and affecting the other without doing 
-repeated work, it guarantees that once you logged in from a HTTP request, 
+repeated work, it guarantees that once you logged in from an HTTP request, 
 and your WebSocket will be logged in as well (and vice versa).
 
 ## How To Use?

@@ -84,6 +84,8 @@ export default class extends WebSocketController {
 }
 ```
 
+更多详情请查看 [依赖注入](./di#在控制器中自动注入)。
+
 ### 构造函数签名
 
 所有的 WebSocketController 构造函数都支持一个参数，即 `socket: WebSocket`。
@@ -98,8 +100,6 @@ export default class extends WebSocketController {
     }
 }
 ```
-
-更多详情请查看 [依赖注入](./di#在控制器中自动注入)。
 
 ## 抛出状态异常
 

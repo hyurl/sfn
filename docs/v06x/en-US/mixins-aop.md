@@ -9,7 +9,7 @@ that suits for many scenarios and you don't have to expand your class.
 **Mixins** allows you inherit methods and properties from multiple classes 
 instead of only the supper class. To use mixins, you will need to install 
 another package [class-mixins](https://github.com/hyurl/class-mixins), you 
-should check out its documentation to be more understood of it features.
+should check out its documentation to be more understood of its features.
 
 ```typescript
 // <SRC_PATH>/mixins/CheckUserState.ts
@@ -105,10 +105,34 @@ export class AnotherController extends HttpController {
 ```
 
 Other than directly calling `before` and `after`, you can define any functions 
-to use as decorators as you want, and for convenience, you can define the 
-intercepter function as decorator and manually call `before` and `after` inside 
-it, please check the example of module 
-[sfn-validate-decorator](https://github.com/hyurl/sfn-validate-decorator).
+to be used as decorators as you want by wrapping it in side of
+`interceptAsync().before()`. Actually, `@requireAuth` also uses this technique
+under the hood.
+
+```ts
+import { interceptAsync, intercept } from 'function-intercepter';
+
+/** Requires authentication when calling the method. */
+export const requireAuth: ControllerDecorator = interceptAsync().before(
+    function (this: Controller) {
+        if (!this.authorized) {
+            if (this instanceof HttpController) {
+                if (typeof this.fallbackTo === "string") {
+                    this.res.redirect(this.fallbackTo, 302);
+                } else if (this.fallbackTo) {
+                    this.res.send(this.fallbackTo);
+                } else {
+                    throw new StatusException(401);
+                }
+
+                return intercept.BREAK;
+            } else {
+                throw new StatusException(401);
+            }
+        }
+    }
+);
+```
 
 ## Hooks
 
@@ -196,7 +220,7 @@ export default class extends HttpController {
 
 SFN reserved a hook interface `lifeCycle`, used to control all activities
 related to server startup and shutdown, also you can add your own logic to this 
-interface, to open or close some activity during startup and shutdown. The
+interface, to open or close some resources during startup and shutdown. The
 following example comes from the SFN website itself.
 
 ```typescript
@@ -213,4 +237,4 @@ if you want to remove some function, you just need to remove that corresponding
 handler from the hook interface, and take advantage of the hot-reloading 
 feature to automatically apply any changes. By doing this, you're able to write 
 highly extendable software by just building a hook system that covers all the
-entries of your program life cycle.
+entries of your program's life cycle.

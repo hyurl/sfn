@@ -109,7 +109,7 @@ export default class extends HttpController {
 
 - `HTTP request header` for Ajax.
 - `URL search string` e.g. `?x-csrf-token={token}`
-- `request body` a.k.a. HTML forms.
+- `request body` a.k.a. HTML form-data.
 
 当你使用任何一个以下的请求方法时，你必须发送 token，否则一个 `403 Forbidden` 错误将会
 被抛出。
@@ -157,7 +157,7 @@ export default class extends HttpController {
     - `credentials?: boolean` allow credentials.
     - `maxAge?: number` how long the results of a preflight request can be 
         cached.
-    - `exposeHeaders?: string | string[]` lets a server whitelist headers 
+    - `exposeHeaders?: string | string[]` lets the server whitelist headers 
         that browsers are allowed to access.
 
 更多细节请查看 

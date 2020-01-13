@@ -86,13 +86,11 @@ export default class extends WebSocketController {
 }
 ```
 
-For more details, please check [Dependency Injection](./di3
+For more details, please check [Dependency Injection](./di3)
 
-### The Constructor
+### Signature of the Constructor
 
-Some times you may want to do something before the actual method is called, 
-you want to initiate some configurations before the class is instantiated, you
-want to customize the `constructor` of the class. So this is how:
+All WebSocketController constructors accept one argument: `socket: WebSocket`.
 
 ```typescript
 import { WebSocketController, WebSocket } from "sfn";
@@ -139,18 +137,18 @@ specification of the controller method [error()](./http-controller#Common-API-Re
 In a WebSocketController, if several methods are bound to the same event, these 
 methods will be called accordingly, and all returning values will be sent to the
 client. Even multiple methods are bound, a controller will only be instantiated
-once, `before()` and `after()` methods will also be called only once. However,
+once, `init()` and `destroy()` methods will also be called only once. However,
 if an event is bound to multiple controllers, they will all be instantiated 
-accordingly, and their `before()` and `after()` methods will be called as 
+accordingly, and their `init()` and `destroy()` methods will be called as 
 expected. And, if the method is a generator, any values `yield`ed by it will be
 sent as well. that means you can use a generator to send data continuously.
 
 ```typescript
-import { HttpController, Request, Response, route } from "sfn";
+import { WebSocketController, WebSocket, event } from "sfn";
 
-export default class extends HttpController {
-    @route.sse("/generator-example")
-    async *index(req: Request, res: Response) {
+export default class extends WebSocketController {
+    @event("generator-example")
+    async *index(socket: WebSocket) {
         let i = 0;
 
         while (true) {
@@ -181,8 +179,3 @@ import * as RedisAdapter from "socket.io-redis";
 
 ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 ```
-
-## WebSocketController and Service
-
-A controller is actually a service, you can use any features that works in 
-[Service](./service) in a controller.

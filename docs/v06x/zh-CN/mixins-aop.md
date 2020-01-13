@@ -102,10 +102,33 @@ export class AnotherController extends HttpController {
 }
 ```
 
-除了直接调用 `before` 和 `after` 外，你可以定义任何你想要的函数并作为装饰器来使用。
-为了方便，你也可以定义一个拦截器函数并在内部调用 `before` 和 `after`，请查看模块
-[sfn-validate-decorator](https://github.com/hyurl/sfn-validate-decorator) 作为
-示例。
+除了直接调用 `before` 和 `after` 外，你可以定义任何你想要的函数并作为装饰器来使用，只需要把它
+包裹在 `interceptAsync().before()` 中。实际上，`@requireAuth` 就是通过这种技巧实现的。
+
+```ts
+import { interceptAsync, intercept } from 'function-intercepter';
+
+/** Requires authentication when calling the method. */
+export const requireAuth: ControllerDecorator = interceptAsync().before(
+    function (this: Controller) {
+        if (!this.authorized) {
+            if (this instanceof HttpController) {
+                if (typeof this.fallbackTo === "string") {
+                    this.res.redirect(this.fallbackTo, 302);
+                } else if (this.fallbackTo) {
+                    this.res.send(this.fallbackTo);
+                } else {
+                    throw new StatusException(401);
+                }
+
+                return intercept.BREAK;
+            } else {
+                throw new StatusException(401);
+            }
+        }
+    }
+);
+```
 
 ## 钩子
 
@@ -187,7 +210,7 @@ export default class extends HttpController {
 ### 内置的钩子接口
 
 SFN 框架内置使用了一个名为 `lifeCycle` 的钩子接口，用以控制服务启动和关闭有关的活动，
-你也可以将自己的一些逻辑绑定到该接口上，来在系统启动或关闭时打开或关闭一些活动。下面的
+你也可以将自己的一些逻辑绑定到该接口上，来在系统启动或关闭时打开或关闭一些资源。下面的
 示例来自 SFN 网站自己的逻辑：
 
 ```typescript

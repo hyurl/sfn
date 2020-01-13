@@ -58,16 +58,6 @@ sfn -c ArticleSocket -t websocket
 
 这个命令将创建一个 WebSocketController。
 
-### `sfn -m <name>`
-
-根据给定的名称创建一个新的模型。**SFN** 使用 
-[Modelar](https://github.com/hyurl/modelar) 作为它的 ORM 系统，因此你应该先去学习
-如何使用它。
-
-```sh
-sfn -m User
-```
-
 ### `sfn -s <name>`
 
 根据给定的名称创建一个新的服务。
@@ -97,8 +87,8 @@ sfn -l zh-CN
 执行代码不同，SFN REPL 会将输入重定向到你想要的指定服务器进程中，来直接和该进程进行交互。
 
 要打开这个 REPL 窗口，只需要在终端输入命令 `sfn repl <appId>` 即可，`<appId>` 则
-表示你希望连接的服务器，例如 `sfn repl web-server-1` 将会把 REPL 会话连接到
-web-server-1。一旦 REPL 准备完成，你就可以做任何你在内置 REPL 中所熟悉的事情。
+表示你希望连接的服务器，例如 `sfn repl web-server` 将会把 REPL 会话连接到
+web-server。一旦 REPL 准备完成，你就可以做任何你在内置 REPL 中所熟悉的事情。
 
 另外，如果你不希望标准输入输出被传送到 REPL 中，则可以使用 `--no-stdout` 参数来规避，
 通常情况下这很有用，因为在项目运行时，可能会有很多内容被输出到 stdout 中，例如 `console.log`。

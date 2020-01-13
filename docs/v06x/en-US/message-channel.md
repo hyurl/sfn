@@ -4,15 +4,15 @@
 
 When it comes to multi-processing and distributed applications, each program 
 must face the need of communication across processes and across services. What 
-I'm about to say, is not about the IPC/RPC scheme that remote methods work
-inside, instead, it's the about how the services are communicated individually 
+I'm about to discuss, is not the IPC/RPC scheme that remote methods work
+inside, instead, it's about how the services are communicated individually 
 with each other. e.g. one obvious problem is, the front end web server can push 
 message to browser clients via WebSocket, but the RPC server works in the 
 background cannot communicate with clients directly.
 
 To solve the problem of inner-service communication, SFN integrated a massage 
 channel, via a message queue named `MessageChannel`, the system can broadcast 
-messages using a **pub-sub** model, and any service process subscribes the event,
+messages using a **pub-sub** model, and any service process subscribes the topic,
 the message can be received by its listeners.
 
 By default, you don't have to create the instance of MessageChannel, SFN 
@@ -38,9 +38,9 @@ app.message.subscribe("greeting", msg => {
 Unlike the traditional message queue mechanism, the MessageChannel that SFN 
 provided doesn't run on a specific server, it's distributed, decentralized and 
 exists on every individual server, any other services connected to the server 
-can subscribe its events. Which means, not every service could receive the 
+can subscribe its topics. Which means, not every service could receive the 
 messages published by the MessageChannel. In the above example, rpc-server-2 
-must connect to rpc-server-1 in order to receive the `greeting` event.
+must connect to rpc-server-1 in order to receive the `greeting` topic.
 
 # Push WebSocket Messages
 

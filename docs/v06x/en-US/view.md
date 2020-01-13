@@ -7,9 +7,9 @@ modules in order to auto-load and hot-reload them.
 
 # How To Use?
 
-In a HttpController, you can use `view()` method to display a template. (By 
-default, the framework will not use any template engine, just import and HTML 
-file looked up directly.)
+In an HttpController, you can use `view()` method to display a template. (By 
+default, the framework will not use any template engine, just import the HTML 
+file directly.)
 
 ## Example
 
@@ -27,8 +27,8 @@ export default class extends HttpController {
 
 ## Template Engines Loader
 
-Since in modern web development, template engines are less important, since 
-0.5.x, SFN only provides two template engine based on Alar framework.
+In modern web development, template engines are less important, so since 
+0.5.x, SFN only provides two template engines based on Alar framework.
 
 - [alar-ejs-loader](https://github.com/Hyurl/alar-ejs-loader)
 - [alar-pug-loader](https://github.com/Hyurl/alar-ejs-loader)

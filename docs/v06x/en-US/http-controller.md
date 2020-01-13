@@ -4,7 +4,7 @@
 `HttpController` manages requests come from an HTTP client. Essentially, it is a
 class inherited from [Service](./service), but unlike the singleton model of the
 service, Controllers are one-time products. An instance will be created when a
-request come, and will be destroyed when the request has gone. Therefore, the
+request come, and will be destroyed after the request has gone. Therefore, the
 Controller overrides some methods from the base class to allow it fitting this
 special running model, at the mean time to keep the same development experience
 as ordinary services. 
@@ -41,7 +41,7 @@ function, it accepts these forms:
 - `route(routeStr: string)` e.g. `route("GET /demo")`
 - `route(httpMethod: string, path: string)` e.g. `route("GET", "/demo")`
 
-When using as interface, it contains these methods, each one is a short-hand 
+When using as a namespace, it contains these methods, each one is a short-hand 
 for corresponding HTTP request method.
 
 - `route.delete(path: string)`
@@ -94,7 +94,7 @@ export default class extends HttpController {
 
     /**
      * The '+' indicates one or more parameter matches
-     * This route path will macth any URL that starts with /user/, 
+     * This route path will match any URL that starts with /user/, 
      * e.g /user/, /user/1, /user/1/edit, and so on.
      */
     @route.get("/user/:path+")
@@ -104,7 +104,7 @@ export default class extends HttpController {
 
     /**
      * The '+' indicates one or more parameter matches
-     * This route path will macth any URL that starts with /user, 
+     * This route path will match any URL that starts with /user, 
      * e.g /user, /user/, /user/1, /user/1/edit, and so on.
      */
     @route.get("/user/:path*")
@@ -289,7 +289,7 @@ HttpController.httpErrorView = function (err, instance) {
 ## Common API Response
 
 Either in an HttpController or in a WebSocketController, you can always use 
-method `succes()` and method `error()` to send a structured response that 
+method `success()` and method `error()` to send a structured response that 
 indicates a successful or failed operation.
 
 ```typescript

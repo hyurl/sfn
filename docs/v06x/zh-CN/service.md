@@ -5,7 +5,7 @@
 [Alar](https://github.com/hyurl/alar) 框架所提供的 RPC 能力，SFN 提供了极其简单
 而高效的分布式服务开发方案。在开发过程中，你几乎不会感觉到你在做分布式系统，一切
 开发任务都在单机单进程中进行，然而在实际部署时，却能够轻松地将服务分离开来，实现
-分布式运行。
+跨网络运行。
 
 ## 创建新服务
 
@@ -77,7 +77,7 @@ export default class CacheService {
 
 ## 分布式服务
 
-SFN 所使用的 [Alar](https://github.com/hyurl/alar) 框架允许将服务分离出来并作为
+Alar](https://github.com/hyurl/alar) 框架允许将服务分离出来并作为
 RPC 调用，这样并可以将 Web 服务器所承载的压力尽可能减小，从而提高稳定性。这个特性
 也是 SFN 分布式系统的核心。
 
@@ -135,7 +135,7 @@ export default <app.Config>{
 Web 服务器和 RPC 服务器上的设计不同是因为，通常地，Web 服务器需要连接的后端 RPC 
 服务会更多（尤其是对于 Web 应用程序而言），而一个 RPC 服务器上对另外的 RPC 服务的
 依赖则会少很多，通常只会用到少部分的服务和功能。当然，如果你不清楚到底会有哪些
-服务被依赖，也可以直接将 `dependencies` 属性设置成 `all`，从而连接所有的 RPC 服务。
+服务被依赖，也可以直接将 `dependencies` 选项设置成 `all`，从而连接所有的 RPC 服务。
 
 ## 基本服务
 
@@ -204,7 +204,7 @@ import { Service } from "sfn";
 
 export default class MyService extends Service {
     protected async gc() {
-        super.gc(); // make sure the parent's gc is applied.
+        await super.gc(); // make sure the parent's gc is applied.
         // ...
     }
 }

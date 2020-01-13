@@ -11,9 +11,7 @@
 
 ### HttpController 中的注入
 
-在 HttpController 中，这个特性支持继承自 `modelar.Model` 的类，以及 `Request`、
-`Response` 和 `Session` 接口。
-
+在 HttpController 中，这个特性支持 `Request`、`Response` 和 `Session` 接口。
 同时，你还可以直接把 URL 参数设置为方法的参数，它们也会被注入。
 
 ```typescript
@@ -30,7 +28,7 @@ export default class extends HttpController {
 
     @route.get("/user/get/:id")
     async getUserById(id: number) {
-        // `id` will be auto-converted to number since it's declared as a number
+        // `id` will be auto-casted to number since it's declared as a number
         var user = await User.get<User>(id);
         return user;
     }
@@ -38,21 +36,6 @@ export default class extends HttpController {
     @route.get("/user/get/:name")
     async getUserByName(name: string) {
         var user = await User.where<User>("name", name).get();
-        return user;
-    }
-
-    @route.get("/user/get/:id")
-    async getUserDirectly(user: User) {
-        // user will be auto-fetched from the database according to the given 
-        // `id`, this feature only support modelar models, and must provide the 
-        // param `id`.
-        return user;
-    }
-
-    @route.post("/user/create")
-    async createUser(req: Request, user: User) {
-        user.assign(req.body);
-        await user.save();
         return user;
     }
 }
@@ -98,11 +81,3 @@ export default class extends HttpController {
     }
 }
 ```
-
-## Alar 框架提供的依赖注入
-
-Alar 3.5 增加了 `inject()` 方法来实现基于属性访问器的依赖注入，但需要注意：该
-方案仅支持注入服务单例，并且会造成所依赖模块在使用之前就进行一次加载，虽然并不
-影响热重载。
-
-详情请查看：https://github.com/hyurl/alar#dependency-injection.

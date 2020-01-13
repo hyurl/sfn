@@ -6,7 +6,8 @@ concept. With the RPC ability that [Alar](https://github.com/hyurl/alar)
 framework gives, SFN provides the simplest however efficient development scheme 
 of distributed service. During the development process, you will scarcely notice 
 that you're working on a distributed system, every development task could be 
-done on a single machine, and when deploy, it is very easy to separate services, to run them distributed.
+done on a single machine, and when deploy, it is very easy to separate services,
+to run them across networks.
 
 
 ## Create a New Service
@@ -83,7 +84,7 @@ website.
 
 ## Distributed Services
 
-The framework [Alar](https://github.com/hyurl/alar) that SFN uses allows 
+The [Alar](https://github.com/hyurl/alar) framework allows 
 services being separated and called as RPC procedures, so that to reduce the 
 pressure of the web server, and improve the stability. This mechanism is also 
 used to easily build a distributed service system.
@@ -146,7 +147,7 @@ The different designs between web server and RPC server, are because, usually,
 the web server requires more back-end services (especially for web applications).
 And an RPC service will less likely rely on another RPC service, usually only
 few functions are required. Of course, if you do not know which service might be
-needed or not, you can directly set `dependencies` property to `all`, in order 
+needed or not, you can directly set `dependencies` option to `all`, in order 
 to connect all RPC services.
 
 ## Basic Service
@@ -191,7 +192,7 @@ collection, etc.
 
 The basic `Service` class already includes these methods, in order to perform
 some elementary tasks, for instance, the auto garbage collection for internal
-data. If an extended class wish needs to override these methods, it should call
+data. If an extended class needs to override these methods, it should call
 the parent method inside the new method.
 
 ```ts
@@ -222,7 +223,7 @@ import { Service } from "sfn";
 
 export default class MyService extends Service {
     protected async gc() {
-        super.gc(); // make sure the parent's gc is applied.
+        await super.gc(); // make sure the parent's gc is applied.
         // ...
     }
 }

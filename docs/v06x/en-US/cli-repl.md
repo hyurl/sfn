@@ -67,21 +67,6 @@ sfn -c ArticleSocket -t websocket
 
 This command will create a WebSocketController.
 
-### `sfn -m <name>`
-
-Creates a new model according to the specified name. **SFN** uses 
-[Modelar](https://github.com/hyurl/modelar) as its ORM system, so you need to 
-learn it as well.
-
-```sh
-sfn -m User
-```
-
-This command should create a file named `User.ts` in `src/models/` directory.
-Be aware, the **User** class has special meaning in **SFN**, it is internally 
-used by the auto-authorization system of the framework, which gives you the 
-ability to accept or reject requests from a client.
-
 ### `sfn -s <name>`
 
 Creates a new service according to the specified name.
@@ -114,7 +99,7 @@ process you wished, to interact directly with that process.
 
 To open the REPL window, simply type the command `sfn repl <appId>` in the
 terminal, where the `<appId>` is the server you wish to attach, e.g. 
-`sfn repl web-server-1` will attach the REPL session to the web-server-1. Once
+`sfn repl web-server` will attach the REPL session to the web-server. Once
 the REPL is ready, you can do almost everything you familiar with the built-in
 REPL.
 
@@ -125,6 +110,6 @@ since there may be many data being written to the stdout during runtime, e.g.
 
 ### `await` Operator Support
 
-SFN REPL provide fully support of top level `await` operator, so you're free
+SFN REPL provides fully support of top level `await` operator, so you're free
 to use this keyword to resolve any async operation and prints the final result
 just like you would do in the Chrome Console.

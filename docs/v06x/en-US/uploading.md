@@ -1,8 +1,8 @@
 <!-- title: Uploading; order: 13 -->
 # Concept
 
-The `HttpController` provides simple uploading approach that let you upload 
-files via an HTTP POST request.
+The `HttpController` provides a simple uploading method that let you upload 
+files via a POST request.
 
 ## How To Use?
 
@@ -10,7 +10,7 @@ Uploading a file is just easy as you doing other stuffs in an **SFN**
 application, you just need to configure some options, and the rest work will 
 be handled by the framework automatically.
 
-In a HttpController, use the decorator `@upload` to set accept fields that may
+In an HttpController, use the decorator `@upload` to set accept fields that may
 contain files.
 
 ### Example

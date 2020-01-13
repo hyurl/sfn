@@ -17,7 +17,7 @@ the given data sent by the client.
 In HttpController, this feature supports the interfaces `Request`, `Response`
 and `Session`.
 
-In an HttpController, you can directly set the URL parameters as the parameters 
+At the mean time, you can directly set the URL parameters as the parameters 
 of the method, and they will be injected as well.
 
 ```typescript
@@ -34,7 +34,7 @@ export default class extends HttpController {
 
     @route.get("/user/get/:id")
     async getUserById(id: number) {
-        // `id` will be auto-converted to number since it's declared as a number
+        // `id` will be auto-casted to number since it's declared as a number
         var user = await User.get<User>(id);
         return user;
     }
@@ -88,12 +88,3 @@ export default class extends HttpController {
     }
 }
 ```
-
-## The Dependency Alar Provided
-
-Alar 3.5 added a new method `inject()` to implement a property accessor based
-dependency injection, but be noticed that this approach only supports injecting
-singleton instances, and will cause the dependency module being loaded before
-actually using it, though it doesn't affect hot-reloading.
-
-Please check: https://github.com/hyurl/alar#dependency-injection.

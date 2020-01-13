@@ -24,7 +24,7 @@
     - `utils/`* 存储功能模块文件的目录。
     - `views/`* 存储视图文件的目录。
     - `config.ts` 项目配置文件。
-    - `index.ts` 项目入口文件。
+    - `index.ts` 服务器入口文件。
 - `package.json` 项目的说明文件。
 - `package-lock.json`
 - `tsconfig.json` TypeScript 编译器配置文件。

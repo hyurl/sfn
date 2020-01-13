@@ -23,7 +23,7 @@ export default class extends HttpController {
 
 ## 模板引擎加载器
 
-由于现代化 Web 开发中模板引擎已经不再重要，因此自 0.5.x 版本起，SFN 仅提供了两个
+现代化 Web 开发中模板引擎已经不再重要，因此自 0.5.x 版本起，SFN 仅提供了两个
 基于 Alar 框架的模板引擎加载器。
 
 - [alar-ejs-loader](https://github.com/Hyurl/alar-ejs-loader)

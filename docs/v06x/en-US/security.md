@@ -9,7 +9,8 @@ means the operation is permitted, `false` the otherwise. Since v0.6, the
 framework no longer checks and sets this property, it's `false` by default, you
 have to customize your checking condition to suit your needs.
 
-If an operation is unauthorized, the framework will throws an StatusException `401 Unauthorized` to the client.
+If an operation is unauthorized, the framework will throws a StatusException
+`401 Unauthorized` to the client.
 
 ## Usage Example
 
@@ -115,7 +116,7 @@ token along with your data via one of these approaches:
 
 - `HTTP request header` for Ajax.
 - `URL search string` e.g. `?x-csrf-token={token}`
-- `request body` a.k.a. HTML forms.
+- `request body` a.k.a. HTML form-data.
 
 When you're request with these HTTP methods, you must send the token, otherwise
 a `403 Forbidden` will be thrown.
@@ -127,12 +128,12 @@ a `403 Forbidden` will be thrown.
 
 ## CORS Control
 
-Allowing requests from untrusted origins will make some troubles, although 
+Allowing requests from untrusted origins will cause some troubles, although 
 modern browsers more intend to block response from cross origin requests, but 
 on the server side, the operation will be performed as usual, even the remote 
 client will never notice.
 
-However in the **SFN** framework, CORS check id very severe, if not pass, then
+However in the **SFN** framework, CORS check is very severe, if not pass, then
 the target function will never be called. Whist the framework give you full 
 control of CORS, and it is, as usual, very easy to be configured, you just need
 to turn on it in the controller.
@@ -152,7 +153,7 @@ export default class extends HttpController {
 }
 ```
 
-In this example, only the trusted origin `example.com` can now access the URLs
+In this example, only the trusted origin `example.com` can access the URLs
 bound to the controller.
 
 `cors` property can be set these values:
@@ -167,10 +168,10 @@ bound to the controller.
     - `credentials?: boolean` allow credentials.
     - `maxAge?: number` how long the results of a preflight request can be 
         cached.
-    - `exposeHeaders?: string | string[]` lets a server whitelist headers 
+    - `exposeHeaders?: string | string[]` lets the server whitelist headers 
         that browsers are allowed to access.
 
-More details, see 
+For more details, see 
 [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
 The framework uses [sfn-cors](https://github.com/Hyurl/sfn-cors) module to 
@@ -203,7 +204,7 @@ hacker may inject dangerous code in your website, and do harm when other users
 visit the dangerous page.
 
 To protect your website being hacked from an XSS attack, **SFN** provides some
-useful functions that allow you escape unsafe code in the user input.
+useful functions that help you escaping unsafe code in the user input.
 
 The framework uses [sfn-xss](https://github.com/Hyurl/sfn-xss) module to back 
 these escapes.

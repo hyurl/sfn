@@ -84,7 +84,7 @@ export default class extends HttpController {
 
     /**
      * The '+' indicates one or more parameter matches
-     * This route path will macth any URL that starts with /user/, 
+     * This route path will match any URL that starts with /user/, 
      * e.g /user/, /user/1, /user/1/edit, and so on.
      */
     @route.get("/user/:path+")
@@ -94,7 +94,7 @@ export default class extends HttpController {
 
     /**
      * The '+' indicates one or more parameter matches
-     * This route path will macth any URL that starts with /user, 
+     * This route path will match any URL that starts with /user, 
      * e.g /user, /user/, /user/1, /user/1/edit, and so on.
      */
     @route.get("/user/:path*")
