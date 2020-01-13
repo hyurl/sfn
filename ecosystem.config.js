@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
         {
-            name: "web-server",
+            name: "sfn-server",
             script: "dist/index.js",
             exec_mode: "cluster",
             instances: "max",
