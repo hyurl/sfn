@@ -1,11 +1,9 @@
-!.vscode/
 .vscode/*
 !.vscode/launch.json
 node_modules/
 logs/
 cache/
 sessions/
-!dist/
 dist/*
 !dist/cli/
 *.db

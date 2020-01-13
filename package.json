@@ -1,14 +1,13 @@
 {
     "name": "sfn",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "description": "An easy and elegant web based service framework for Node.js",
     "main": "dist/index.js",
     "types": "src/index.ts",
     "bin": "dist/cli/sfn.js",
     "scripts": {
         "compile": "tsc --incremental",
-        "start": "ts-node --files src",
-        "postpublish": "rm -rf dist",
+        "start": "node dist",
         "postinstall": "tsc --build tsconfig-postinstall.json",
         "test": "echo No Test"
     },
