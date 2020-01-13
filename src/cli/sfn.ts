@@ -3,28 +3,22 @@ import "source-map-support/register";
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as program from "commander";
-import pluralize = require("pluralize");
-import kebabCase = require("lodash/kebabCase");
 import camelCase = require("lodash/camelCase");
 import upperFirst = require("lodash/upperFirst");
-import cloneDeep = require('lodash/cloneDeep');
 import get = require('lodash/get');
 import { version, APP_PATH, SRC_PATH } from "../init";
-import { config } from "../core/bootstrap/load-config";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
 import { moduleExists, createImport } from "../core/tools/internal/module";
-import { Locale } from '../core/tools/interfaces';
 
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
 var replSessionOpen = false;
 
-program.description("create new controllers, models. etc.")
+program.description("create new controllers, services. etc.")
     .version(version, "-v, --version")
     .option("-c, --controller <name>", "create a new controller with a specified name")
-    .option("-m, --model <name>", "create a new model with a specified name")
     .option("-s, --service <name>", "create a new service with a specified name")
     .option("-l, --language <name>", "create a new language pack with a specified name")
     .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
@@ -32,10 +26,9 @@ program.description("create new controllers, models. etc.")
         console.log("\nExamples:");
         console.log("  sfn -c article                   create an http controller of article");
         console.log("  sfn -c article -t websocket      create a websocket controller of article");
-        console.log("  sfn -m article                   create an article model");
         console.log("  sfn -s article                   create an article service");
         console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
-        console.log("  sfn repl web-server-1            open REPL session to web-server-1");
+        console.log("  sfn repl web-server              open REPL session to web-server");
         console.log("");
     });
 
@@ -47,8 +40,8 @@ program.command("init")
         process.exit();
     });
 
-// Command `sfn repl <serverId>` is used to open REPL session.
-program.command("repl <serverId>")
+// Command `sfn repl <appId>` is used to open REPL session.
+program.command("repl <appId>")
     .option("--no-stdout", "do not display any data output to process.stdout")
     .description("open REPL session to the given server")
     .action(openREPLSession);
@@ -83,11 +76,11 @@ function checkSource(filename: string): void {
         throw new Error(`Source file '${path.normalize(filename)}' is missing.`);
 }
 
-function openREPLSession(serverId: string, options: { stdout: boolean }) {
+function openREPLSession(appId: string, options: { stdout: boolean }) {
     if (replSessionOpen) return;
 
-    if (!serverId) {
-        console.log(red`trying to open REPL session without serverId`);
+    if (!appId) {
+        console.error(red`Cannot open REPL session without appId`);
         process.exit(1);
     } else {
         replSessionOpen = true;
@@ -97,11 +90,11 @@ function openREPLSession(serverId: string, options: { stdout: boolean }) {
     let bootstrap = APP_PATH + "/bootstrap/index";
     moduleExists(bootstrap) && tryImport(bootstrap);
 
-    connectRepl(serverId, !options.stdout).catch((err) => {
+    connectRepl(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
-            console.log(red`(code: ${err["code"]}) failed to connect [${serverId}]`);
+            console.error(red`(code: ${err["code"]}) failed to connect [${appId}]`);
         } else {
-            console.log(red`${err.toString()}`);
+            console.error(red`${err.toString()}`);
         }
 
         process.exit(1);
@@ -126,22 +119,6 @@ try {
             .replace(/__Controller__/g, ControllerName);
 
         outputFile(output, contents, "controller");
-    } else if (program.model) { // create model.
-        let ModelName = upperFirst(path.basename(program.model)),
-            table = pluralize(kebabCase(ModelName)),
-            mod = camelCase(ModelName),
-            filename = path.dirname(program.model) + "/" + mod,
-            input = `${tplDir}/Model.ts`,
-            output = `${SRC_PATH}/models/${filename}.ts`;
-
-        checkSource(input);
-
-        let contents = fs.readFileSync(input, "utf8")
-            .replace(/__Model__/g, ModelName)
-            .replace(/__table__/g, table)
-            .replace(/__mod__/g, mod);
-
-        outputFile(output, contents, "Model");
     } else if (program.service) { // create service
         let ServiceName = upperFirst(path.basename(program.service)),
             mod = camelCase(ServiceName),
@@ -164,19 +141,8 @@ try {
         }
 
         let output: string = `${SRC_PATH}/locales/${program.language}.json`;
-        let mod: ModuleProxy<Locale> = get(app.locales, config.lang);
-        let lang: Locale;
+        let lang = get(app.locales.translations, app.config.lang, {});
         let contents: string;
-
-        if (mod && mod.proto) {
-            lang = cloneDeep(mod.instance());
-
-            for (let x in lang) {
-                lang[x] = "";
-            }
-        } else {
-            lang = {};
-        }
 
         contents = JSON.stringify(lang, null, "    ");
         outputFile(output, contents, "Language pack");
@@ -190,6 +156,6 @@ try {
         process.exit();
     }
 } catch (err) {
-    console.log(red`${err.toString()}`);
+    console.error(red`${err.toString()}`);
     process.exit(1);
 }

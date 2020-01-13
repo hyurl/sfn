@@ -1,12 +1,11 @@
 import * as path from "path";
-import { DB, User } from "modelar";
+import get = require('lodash/get');
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
-import { Controller } from "./Controller";
+import { Controller, ResultMessage } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
 import { StatusException } from "../tools/StatusException";
 import { UploadOptions } from "../tools/upload";
-import get = require('lodash/get');
 
 export { CorsOptions };
 
@@ -37,8 +36,17 @@ export class HttpController extends Controller {
     /** Sets a specified base URI for route paths. */
     static baseURI: string;
 
-    /** If set, when unauthorized, fallback to the given URL. */
-    fallbackTo: string;
+    /**
+     * Enables Cross-Origin Resource Sharing, set an array to accept multiple 
+     * origins, an `*` to accept all, or an object for more complicated needs.
+     */
+    static cors: string | string[] | CorsOptions = null;
+
+    /**
+     * If set, when unauthorized, fallback to the given URL or response an
+     * error message.
+     */
+    fallbackTo: string | ResultMessage;
     /** Whether the response data should be compressed to GZip. */
     gzip: boolean = true;
     /**
@@ -53,11 +61,6 @@ export class HttpController extends Controller {
      * pass it to a view.
      */
     csrfProtection: boolean = false;
-    /**
-     * Enables Cross-Origin Resource Sharing, set an array to accept multiple 
-     * origins, an `*` to accept all, or an object for more complicated needs.
-     */
-    cors: string | string[] | CorsOptions | false = false;
     /** Configurations for uploading files. */
     uploadOptions: UploadOptions = Object.assign({}, UploadOptions);
     /** Reference to the corresponding request context. */
@@ -67,7 +70,6 @@ export class HttpController extends Controller {
 
     constructor(req: Request, res: Response) {
         super();
-        this.authorized = req.user !== null;
         this.req = req;
         this.res = res;
         this.lang = (req.query && req.query.lang)
@@ -100,11 +102,9 @@ export class HttpController extends Controller {
         }
 
         try {
-            let view: ModuleProxy<View> = get(global, app.views.resolve(path));
-
             this.res.type = "text/html";
-
-            return view.instance(path).render(vars);
+            let view: ModuleProxy<View> = get(global, app.views.resolve(path));
+            return view().render(vars);
         } catch (err) {
             if (err instanceof TypeError)
                 throw new StatusException(404);
@@ -118,27 +118,9 @@ export class HttpController extends Controller {
         return this.res.send(data);
     }
 
-    /** Gets/Sets the DB instance. */
-    get db(): DB {
-        return this.req.db;
-    }
-
-    set db(v: DB) {
-        this.req.db = v;
-    }
-
     /** Alias of `req.session`. */
     get session(): Session {
         return this.req.session;
-    }
-
-    /** Alias of `req.user`. */
-    get user(): User {
-        return this.req.user;
-    }
-
-    set user(v: User) {
-        this.req.user = v;
     }
 
     /** Alias of `req.url`. */

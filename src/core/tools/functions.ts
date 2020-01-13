@@ -1,16 +1,28 @@
 import random = require("lodash/random");
-import { App, RouteHandler } from "webium";
-import { interceptAsync } from 'function-intercepter';
+import { App, RouteHandler, HttpMethods } from "webium";
+import { interceptAsync, intercept } from 'function-intercepter';
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { StatusException } from './StatusException';
 import { routeMap, eventMap } from './RouteMap';
 import { traceModulePath } from './internal/module';
+import { copyFuncProps } from "./internal/index";
+import { Service } from './Service';
 import {
     ControllerDecorator,
     WebSocketDecorator,
     HttpDecorator
 } from './interfaces';
+import { Controller } from '../controllers/Controller';
+import * as cors from "sfn-cors";
+import * as moment from "moment";
+
+// Expose some internal functions as utilities to the public API.
+export { green, grey, red, yellow } from "./internal/color";
+export { tryLogError } from "./internal/error";
+export { isOwnMethod, isSubClassOf, ensureType, define } from "./internal/index";
+export { moduleExists, createImport } from "./internal/module";
+export { serve as serveRepl, connect as connectRepl } from "./internal/repl";
 
 /** Pauses the execution in an asynchronous operation. */
 export function sleep(timeout: number): Promise<void> {
@@ -51,16 +63,25 @@ export function injectCsrfToken(html: string, token: string): string {
 }
 
 /** Requires authentication when calling the method. */
-export const requireAuth: ControllerDecorator = interceptAsync().before(function () {
-    if (!this.authorized) {
-        if (this instanceof HttpController && this.fallbackTo) {
-            this.res.redirect(this.fallbackTo, 302);
-            return false;
-        } else {
-            throw new StatusException(401);
+export const requireAuth: ControllerDecorator = interceptAsync().before(
+    function (this: Controller) {
+        if (!this.authorized) {
+            if (this instanceof HttpController) {
+                if (typeof this.fallbackTo === "string") {
+                    this.res.redirect(this.fallbackTo, 302);
+                } else if (this.fallbackTo) {
+                    this.res.send(this.fallbackTo);
+                } else {
+                    throw new StatusException(401);
+                }
+
+                return intercept.BREAK;
+            } else {
+                throw new StatusException(401);
+            }
         }
     }
-});
+);
 
 let router: App,
     handle: (route: string) => RouteHandler,
@@ -74,7 +95,12 @@ export function event(name: string): WebSocketDecorator {
         if (!modPath)
             return;
 
-        let { nsp = "/" } = <typeof WebSocketController>proto.ctor;
+        let nsp: string = "";
+
+        if (proto.ctor.hasOwnProperty("nsp")) {
+            nsp = proto.ctor["nsp"];
+        }
+
         let data = {
             prefix: nsp,
             route: name,
@@ -96,11 +122,15 @@ export function event(name: string): WebSocketDecorator {
 
 /** Binds the method to a specified URL route. */
 export function route(path: string): HttpDecorator;
-export function route(method: string, path: string): HttpDecorator;
+export function route(method: HttpMethods | "SSE", path: string): HttpDecorator;
 export function route(method: string, path?: string): HttpDecorator {
     return (proto: HttpController, prop: string) => {
         let modPath = traceModulePath(app.controllers.path);
-        let { baseURI = "" } = <typeof HttpController>proto.ctor;
+        let baseURI: string = "";
+
+        if (proto.ctor.hasOwnProperty("baseURI")) {
+            baseURI = proto.ctor["baseURI"];
+        }
 
         if (!modPath)
             return;
@@ -131,7 +161,15 @@ export function route(method: string, path?: string): HttpDecorator {
 
         if (!routeMap.isLocked(key)) {
             routeMap.lock(key);
-            router.method(method, path, handle(key));
+            router.method(<HttpMethods>method, path, handle(key));
+
+            if (method === "POST" && proto.ctor.hasOwnProperty("cors") &&
+                !router.contains("OPTIONS", path)) {
+                router.method("OPTIONS", path, (req, res) => {
+                    cors(proto.ctor["cors"], req, res);
+                    res.end();
+                }, true);
+            }
         }
     };
 }
@@ -163,3 +201,64 @@ route.put = function (path: string) {
 route.sse = function (path: string) {
     return route("SSE", path);
 };
+
+/** Throttles the calling rate of the method. */
+export function throttle(
+    key: string,
+    interval = 0,
+    error = void 0
+): MethodDecorator {
+    return (proto: Service, prop: string, desc: PropertyDescriptor) => {
+        let original: (...args: any[]) => any = desc.value;
+
+        desc.value = proto[prop] = copyFuncProps(
+            original,
+            function (this: Service) {
+                return this.throttle<any>(
+                    key,
+                    original.bind(this, ...arguments),
+                    interval,
+                    error
+                );
+            }
+        );
+    };
+}
+
+/** Queues the method call. */
+export function queue(key: string): MethodDecorator {
+    return (proto: Service, prop: string, desc: PropertyDescriptor) => {
+        let original: (...args: any[]) => any = desc.value;
+
+        desc.value = proto[prop] = copyFuncProps(
+            original,
+            function (this: Service) {
+                return this.queue<any>(key, original.bind(this, ...arguments));
+            }
+        );
+    };
+}
+
+/**
+ * Gets the current UNIX timestamp or converts a given time to UNIX timestamp.
+ */
+export function timestamp(time?: number | string | Date) {
+    if (time === undefined) {
+        return Math.round(Date.now() / 1000);
+    } else if (typeof time === "number") {
+        // Compatible fix with milliseconds
+        if (String(time).length === 13) {
+            time = Math.round(time / 1000);
+        }
+
+        return time;
+    } else if (typeof time === "string") {
+        if (/\d{4}-\d{1,2}-\d{1,2}\b/.test(time)) {
+            time = new Date(time);
+        } else {
+            time = new Date(moment().format("YYYY-MM-DD ") + time);
+        }
+    }
+
+    return moment(time).unix();
+}

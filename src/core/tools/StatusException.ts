@@ -29,12 +29,4 @@ export class StatusException extends Error {
     }
 }
 
-/** @deprecated A synonym of `StatusException`. */
-export class HttpError extends StatusException { };
-
-/** @deprecated A synonym of `StatusException`. */
-export class SocketError extends StatusException { };
-
 RpcChannel.registerError(StatusException);
-RpcChannel.registerError(HttpError);
-RpcChannel.registerError(SocketError);

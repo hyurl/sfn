@@ -2,45 +2,38 @@ import * as Session from "express-session";
 import { ServerResponse } from "http";
 import { Stats } from "fs";
 import serveStatic = require("serve-static");
-import { DBConfig } from "modelar";
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { RpcOptions } from 'alar';
-import { transRecordTypes } from './core/tools/internal';
+import { RpcOptions, ClientOptions } from 'alar';
+import { FSWatcher } from "chokidar";
 
 declare global {
     namespace app {
+        const config: Config;
         interface Config {
-            [x: string]: any;
             /** Default language of the application. */
             lang?: string;
+            /**
+             * Save schedules when the system shuts down and rebuild after
+             * reboot.
+             */
+            saveSchedules?: boolean;
             /**
              * The directories that serve static resources.
              * @see https://www.npmjs.com/package/serve-static
              */
             statics?: string[] | { [path: string]: StaticOptions };
             /**
-             * When any module file has been modified, rather than restart the 
-             * whole server, try to refresh the memory cache instead. NOTE: 
-             * **DO NOT** import the module statically in anywhere, otherwise it
-             * may not be reloaded as expected.
+             * Watch modules and when files changed, refresh the memory cache
+             * and hot-reload the module.
              * 
-             * Currently, these entities can be hot-reloaded:
-             * - `controllers`
-             * - `services`
-             * - `models`
-             * - `utils`
-             * - `locales`
-             * - `views`
-             * - `plugins`
-             * 
-             * During development, when hot-reloading is enabled, you should 
-             * start typescript compiler in watch mode (`tsc --watch`).
+             * NOTE: **DO NOT** import the module statically in anywhere,
+             * otherwise it may not be reloaded as expected.
              * 
              * @see https://github.com/hyurl/alar
              */
-            hotReloading?: boolean;
+            watch?: { watch: (...args: any[]) => FSWatcher }[];
             server: {
                 /** Host name(s), used for calculating the sub-domain. */
                 hostname?: string | string[];
@@ -86,8 +79,21 @@ declare global {
                  * @see https://github.com/hyurl/alar
                  */
                 rpc?: {
-                    [serverId: string]: RpcOptions & {
-                        modules: ModuleProxy<any>[]
+                    [id: string]: RpcOptions & ClientOptions & {
+                        [x: string]: any;
+                        /** The services that should be hosted by this server. */
+                        services: ModuleProxy<any>[];
+                        /**
+                         * The services that this server depended on. (hosted 
+                         * ones excluded.)
+                         */
+                        dependencies?: "all" | ModuleProxy<any>[];
+                        /**
+                         * Whether to allow services fallback to their local
+                         * instances when the remote instance is not available.
+                         * @default true
+                         */
+                        fallbackToLocal?: boolean;
                     }
                 };
             };
@@ -96,11 +102,6 @@ declare global {
              * @see https://www.npmjs.com/package/express-session
              */
             session?: Session.SessionOptions;
-            /**
-             * Configurations for Modelar ORM.
-             * @see https://github.com/hyurl/modelar
-             */
-            database?: DBConfig;
         }
     }
 }
@@ -119,27 +120,20 @@ export interface StaticOptions extends serveStatic.ServeStaticOptions {
 };
 
 /**
- * @deprecated Use `app.Config` instead and share the benefits of declaration
- * merging.
- */
-export type SFNConfig = app.Config;
-
-const env = transRecordTypes(process.env);
-
-/**
  * The configuration of the program.
  * Some of these settings are for their dependencies, you may check out all 
  * supported options on their official websites.
  */
 export default <app.Config>{
     lang: "en-US",
+    saveSchedules: false,
     statics: ["assets"],
-    hotReloading: true,
+    watch: [],
     server: {
         hostname: "localhost",
         http: {
-            type: <app.Config["server"]["http"]["type"]>env.HTTP_TYPE || "http",
-            port: env.HTTP_PORT || 80,
+            type: "http",
+            port: 4000,
             timeout: 120000, // 2 min.
             options: null
         },
@@ -162,13 +156,5 @@ export default <app.Config>{
         cookie: {
             maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
         }
-    },
-    database: {
-        type: env.DB_TYPE || "mysql",
-        host: env.DB_HOST || "localhost",
-        port: env.DB_PORT || 3306,
-        database: env.DB_NAME || "sfn",
-        user: env.DB_USER || "root",
-        password: env.DB_PASS || "123456"
     }
 };

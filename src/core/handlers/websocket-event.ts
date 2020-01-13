@@ -1,19 +1,18 @@
 import { ws } from "../bootstrap/index";
 import { StatusException } from "../tools/StatusException";
 import { WebSocket, Session } from "../tools/interfaces";
-import { realDB, activeEvent } from "../tools/symbols";
+import { activeEvent } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { logRequest } from "./http-init";
 import initHandler from "./websocket-init";
 import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
-import dbHandler from "./websocket-db";
-import authHandler from "./websocket-auth";
 import { isOwnMethod } from "../tools/internal";
 import { tryLogError } from "../tools/internal/error";
 import { eventMap } from '../tools/RouteMap';
 import { ThenableAsyncGenerator } from "thenable-generator";
 import last = require("lodash/last");
+import { applyInit, applyDestroy } from './http-route';
 
 let importedNamesapces: string[] = [];
 type SocketEventInfo = {
@@ -32,8 +31,6 @@ export function tryImport(nsp: string) {
         .use(cookieHandler2)
         .use(sessionHandler)
         .use(sessionHandler2)
-        .use(dbHandler)
-        .use(authHandler)
         .on("connection", (socket: WebSocket) => {
             for (let item of eventMap.values()) {
                 socket.on(item.route, (...data) => {
@@ -53,7 +50,7 @@ export function tryImport(nsp: string) {
 }
 
 async function handleEvent(key: string, socket: WebSocket, data: any[]) {
-    let mod = eventMap.resolve(key),
+    let Controller = eventMap.resolve(key),
         methods = eventMap.methods(key),
         { prefix: nsp, route: event } = eventMap.get(key),
         ctrl: WebSocketController = null,
@@ -62,7 +59,7 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
 
     try {
         socket[activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
-        ctrl = mod.create(socket);
+        ctrl = new Controller(socket);
 
         for (let method of methods) {
             if (!isOwnMethod(ctrl, method)) {
@@ -72,8 +69,10 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 // If the socket has been disconnected before calling the actual
                 // method, return immediately without running any checking 
                 // procedure, and don't call the method.
-                if (socket.disconnected || false === (await ctrl.before()))
+                if (socket.disconnected)
                     return;
+
+                await applyInit(ctrl);
 
                 initiated = true;
             }
@@ -96,7 +95,7 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
         }
 
         if (initiated) {
-            await ctrl.after();
+            await applyDestroy(ctrl);
             finish(ctrl, info);
         }
     } catch (err) {
@@ -129,10 +128,6 @@ function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
 
 function finish(ctrl: WebSocketController, info: SocketEventInfo) {
     let socket = ctrl.socket;
-
-    // If has db connection bound to the socket, release.
-    if (socket[realDB])
-        socket[realDB].release();
 
     ctrl.emit("finish", socket);
     logRequest(info.time, socket.protocol.toUpperCase(), info.code, info.event);

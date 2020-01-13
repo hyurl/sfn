@@ -7,7 +7,10 @@ cache/
 sessions/
 !dist/
 dist/*
-!dist/cli
+!dist/cli/
 *.db
 *.tgz
 .*history
+*.bak
+tsconfig.tsbuildinfo
+yarn-error.log

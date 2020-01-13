@@ -1,110 +1,85 @@
 import { RpcClient } from 'alar';
-import clusterChannel from "ipchannel";
 import values = require("lodash/values")
 
 export class MessageChannel {
-    private events: { [name: string]: Function[] } = {};
-    private clusterListenerMap = new Map<Function, Function>();
+    private topics: { [name: string]: ((data: any) => void)[] } = {};
 
     constructor(readonly name: string) { }
 
     /**
-     * Publishes `data` to the given `event` in the channel, if `servers` are
-     * provided, the event will only be emitted to them.
+     * Publishes `data` to the given `topic` in the channel, if `servers` are
+     * provided, the topic will only be emitted to them.
      */
-    publish(event: string, data?: any, servers?: string[]) {
-        event = this.name + "#" + event;
+    publish(topic: string, data?: any, servers?: string[]): boolean {
+        topic = this.name + "#" + topic;
 
         if (app.rpc.server) {
-            // If the current server is an RPC server, publish the event via the
+            // If the current server is an RPC server, publish the topic via the
             // RPC channel.
-            return app.rpc.server.publish(event, data, servers);
-        } else if (!servers) {
-            // Publish event to all cluster members.
-            return clusterChannel.to("all").emit(event, data);
+            return app.rpc.server.publish(topic, data, servers);
+        } else if (this.topics[topic] && this.topics[topic].length > 0) {
+            // Invoke the listeners asynchronously.
+            (async () => {
+                for (let listener of this.topics[topic]) {
+                    listener.call(void 0, data);
+                }
+            })().catch(() => null);
+
+            return true;
         } else {
-            // Publish event to specified cluster members.
-            let ok = false;
-
-            for (let receiver of servers) {
-                receiver = receiver.match(/\d+/)[0];
-                ok = true;
-
-                clusterChannel.to(parseInt(receiver)).emit(event, data);
-            }
-
-            return ok;
+            return false;
         }
     }
 
-    /** Subscribes a `listener` to the given `event` of the channel. */
-    subscribe(event: string, listener: Function) {
-        event = this.name + "#" + event;
+    /** Subscribes a `listener` to the given `topic` of the channel. */
+    subscribe(topic: string, listener: (data: any) => void) {
+        topic = this.name + "#" + topic;
 
-        if (!this.events[event]) {
-            this.events[event] = [];
+        if (!this.topics[topic]) {
+            this.topics[topic] = [];
         }
 
-        this.events[event].push(listener);
+        this.topics[topic].push(listener);
 
-        // If there are active RPC connections, subscribe the event to the RPC
+        // If there are active RPC connections, subscribe the topic to the RPC
         // channel as well.
         for (let connection of values(app.rpc.connections)) {
-            connection.subscribe(event, <any>listener);
-        }
-
-        // If the current process is not an RPC server, bind the event to the 
-        // cluster channel instead.
-        if (!app.rpc.server) {
-            clusterChannel.on(event, this.bindClusterChannel(listener));
+            connection.subscribe(topic, <any>listener);
         }
 
         return this;
     }
 
-    /** Unsubscribes a `listener` or all listeners of the `event`. */
-    unsubscribe(event: string, listener?: Function) {
-        event = this.name + "#" + event;
+    /** Unsubscribes a `listener` or all listeners of the `topic`. */
+    unsubscribe(topic: string, listener?: (data: any) => void) {
+        topic = this.name + "#" + topic;
 
-        let clusterListener: Function;
-        let listeners = this.events[event] || [];
+        let listeners = this.topics[topic] || [];
 
-        // Unsubscribe event listeners in the RPC channel.
+        // Unsubscribe topic listeners in the RPC channel.
         for (let connection of values(app.rpc.connections)) {
-            connection.unsubscribe(event, <any>listener);
-        }
-
-        // Remove event listeners in the cluster channel.
-        if (listener) {
-            clusterChannel.removeAllListeners(event);
-        } else if (clusterListener = this.clusterListenerMap.get(listener)) {
-            clusterChannel.removeListener(event, <any>clusterListener);
+            connection.unsubscribe(topic, <any>listener);
         }
 
 
-        // Remove event listeners in the message channel.
+        // Remove topic listeners in the message channel.
         if (!listeners.length) {
             return false;
         } else if (listener) {
-            return listeners.splice(listeners.indexOf(listener), 1).length > 0;
+            let i = listeners.indexOf(listener);
+            return i === -1 ? false : listeners.splice(i, 1).length > 0;
         } else {
-            return delete this.events[event];
+            return delete this.topics[topic];
         }
     }
 
     /** @inner */
     linkRpcChannel(connection: RpcClient) {
-        for (let event in this.events) {
-            for (let listener of this.events[event]) {
-                connection.subscribe(event, <any>listener);
+        for (let topic in this.topics) {
+            for (let listener of this.topics[topic]) {
+                connection.subscribe(topic, <any>listener);
             }
         }
-    }
-
-    private bindClusterChannel(listener: Function) {
-        let fn = (_: number, data: any) => listener(data);
-        this.clusterListenerMap.set(listener, fn);
-        return fn;
     }
 }
 
@@ -114,8 +89,8 @@ export abstract class Message {
     constructor(protected data: any = {}) { }
 
     /** Sends the message via a front end server. */
-    via(serverId: string): InstanceType<new (...args: any[]) => this> {
-        return new (<any>this.constructor)({ ...this.data, serverId });
+    via(appId: string): InstanceType<new (...args: any[]) => this> {
+        return new (<any>this.constructor)({ ...this.data, appId });
     }
 
     /** Sends the message to a specified target. */
@@ -123,20 +98,20 @@ export abstract class Message {
         return new (<any>this.constructor)({ ...this.data, target });
     }
 
-    protected getServerId() {
-        let serverId: string;
+    protected getAppId() {
+        let appId: string;
 
-        if (this.data.serverId) {
-            serverId = this.data.serverId;
-            delete this.data.serverId;
+        if (this.data.appId) {
+            appId = this.data.appId;
+            delete this.data.appId;
         } else if (app.rpc.server) {
-            // If serverId isn't provided, use the default web server.
-            serverId = "web-server-1";
+            // If appId isn't provided, use the default web server.
+            appId = "web-server-1";
         } else {
-            serverId = app.serverId;
+            appId = app.id;
         }
 
-        return serverId;
+        return appId;
     }
 }
 
@@ -164,7 +139,7 @@ export class WebSocketMessage extends Message {
             ...this.data,
             event,
             data
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 }
 
@@ -175,14 +150,14 @@ export class SSEMessage extends Message {
         return app.message.publish(this.name, {
             ...this.data,
             close: true
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 
     send(data: any) {
         return app.message.publish(this.name, {
             ...this.data,
             data,
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 
     emit(event: string, data?: any) {
@@ -190,6 +165,6 @@ export class SSEMessage extends Message {
             ...this.data,
             event,
             data,
-        }, [this.getServerId()]);
+        }, [this.getAppId()]);
     }
 }

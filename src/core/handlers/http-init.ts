@@ -1,9 +1,9 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { SSE } from "sfn-sse";
 import { router } from "../bootstrap/index";
 import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
-import { grey, red } from "../tools/internal/color";
+import { grey, red, green, yellow } from "../tools/internal/color";
 import truncate = require("lodash/truncate");
 
 const reqLogged = Symbol("reqLogged");
@@ -25,15 +25,21 @@ router.use(async (req: Request, res: Response, next) => {
         if (res.sse.isClosed)
             return;
 
-        app.sse[res.sse.id] = res.sse;
-    } else {
-        res.charset = "UTF-8";
+        app.sse.set(res.sse.id, res.sse);
+    }
+
+    if (req.lang) {
+        let names = req.lang.split("-");
+
+        if (names.length > 1) {
+            req.lang = names[0] + "-" + names[1].toUpperCase();
+        }
     }
 
     let logger = getDevLogger(req, res);
     let clearSSE = () => {
-        res.sse && (delete app.sse[res.sse.id]);
-    }
+        res.sse && app.sse.delete(res.sse.id);
+    };
 
     res.on("finish", logger)
         .on("finish", clearSSE)
@@ -44,7 +50,7 @@ router.use(async (req: Request, res: Response, next) => {
 });
 
 export function logRequest(reqTime: number, type: string, code: number, url: string): void {
-    if (isDevMode || code >= 500) {
+    if (isDevMode || code >= 500 || app.argv["log-request"] === true) {
         // dev mode log out request info.
         var cost: number | string = Date.now() - reqTime,
             codeStr = code.toString(),
@@ -58,8 +64,10 @@ export function logRequest(reqTime: number, type: string, code: number, url: str
             codeStr = chalk.blue(codeStr);
         } else if (code >= 200 && code < 300) {
             codeStr = chalk.green(codeStr);
+            color = green;
         } else if (code >= 300 && code < 400) {
             codeStr = chalk.yellow(codeStr);
+            color = yellow;
         } else {
             codeStr = chalk.red(codeStr);
             level = "error";

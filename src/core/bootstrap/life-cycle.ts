@@ -1,16 +1,16 @@
-import { DB } from 'modelar';
 import { SSE } from 'sfn-sse';
-import { Plugin } from '../tools/Plugin';
-import { sleep } from '../tools/functions';
+import { Hook } from '../tools/Hook';
 import { tryLogError } from '../tools/internal/error';
+import { Controller } from '../controllers/Controller';
+import { Service } from '../tools/Service';
 import get = require('lodash/get');
 
 declare global {
     namespace app {
-        namespace plugins {
+        namespace hooks {
             namespace lifeCycle {
-                const startup: Plugin;
-                const shutdown: Plugin;
+                const startup: Hook;
+                const shutdown: Hook;
             }
         }
     }
@@ -19,7 +19,7 @@ declare global {
 // gracefully shutdown
 process.on("SIGINT", async () => {
     try {
-        await app.plugins.lifeCycle.shutdown.invoke();
+        await app.hooks.lifeCycle.shutdown.invoke();
         process.exit();
     } catch (err) {
         process.exit(1);
@@ -30,54 +30,53 @@ process.on("SIGINT", async () => {
     }
 });
 
-// Try to close all database connections.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    DB.close();
-    await sleep(500);
-});
+// Try to close HTTP/WebSocket servers, RPC server and clients.
+app.hooks.lifeCycle.shutdown.bind(async () => {
+    let closures: Promise<any>[] = [];
 
-// Try to recover cached schedules from the previous shutdown.
-app.plugins.lifeCycle.startup.bind(async () => {
-    await app.services.schedule.instance(app.services.local).resume();
-});
-
-// Try to stop the internal schedule service.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    await app.services.schedule.instance(app.services.local).stop();
-});
-
-// Try to close http server.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    if (app.http) {
-        await new Promise(resolve => {
-            let timer = setTimeout(resolve, 500);
-
+    if (app.http) { // close HTTP server
+        closures.push(new Promise(resolve => {
+            let timeout = setTimeout(resolve, 2000);
             app.http.close(() => {
-                clearTimeout(timer);
+                clearTimeout(timeout);
                 resolve();
             });
+        }));
+
+        // close SSE connections.
+        app.sse.forEach(sse => {
+            closures.push(new Promise(resolve => sse.close(resolve)));
         });
     }
-});
 
-// Try to close ws server.
-app.plugins.lifeCycle.shutdown.bind(async () => {
-    if (app.ws) {
-        await new Promise(resolve => {
-            let timer = setTimeout(resolve, 500);
-
+    if (app.ws) { // close WebSocket server
+        closures.push(new Promise(resolve => {
+            let timeout = setTimeout(resolve, 2000);
             app.ws.close(() => {
-                clearTimeout(timer);
+                clearTimeout(timeout);
                 resolve();
             });
-        });
+        }));
     }
+
+    // The RPC clients should be closed before the closing the server, since
+    // a client will try to reconnect if lost connection from the server.
+    for (let id in app.rpc.connections) { // close RPC clients
+        let client = app.rpc.connections[id];
+        closures.push(client.close());
+    }
+
+    if (app.rpc.server) { // close RPC server
+        closures.push(app.rpc.server.close());
+    }
+
+    await Promise.all(closures);
 });
 
-// Subscribe an event listener so that when receives WebSocket message sent from
+// Subscribe an topic listener so that when receives WebSocket message sent from
 // an RPC server, the message can be delivered to the web client via the web
 // server.
-app.plugins.lifeCycle.startup.bind(() => {
+app.hooks.lifeCycle.startup.bind(() => {
     if (!app.ws) return;
 
     app.message.subscribe(app.message.ws.name, (context: {
@@ -90,21 +89,18 @@ app.plugins.lifeCycle.startup.bind(() => {
     }) => {
         let { target, volatile, local, event, data } = context;
         let ws = volatile ? app.ws.volatile : app.ws;
-
         ws = local ? ws.local : ws;
-
         let nsp = context.nsp ? ws.of(context.nsp) : ws;
 
         target && (nsp = nsp.to(target));
-
         nsp.emit(event, ...data);
     });
 });
 
-// Subscribes an event listener so that when receives SSE message sent from an 
+// Subscribes an topic listener so that when receives SSE message sent from an 
 // RPC server, the message can be delivered to the web client via the web
 // server.
-app.plugins.lifeCycle.startup.bind(() => {
+app.hooks.lifeCycle.startup.bind(() => {
     if (!app.sse) return;
 
     app.message.subscribe(app.message.sse.name, (context: {
@@ -114,33 +110,28 @@ app.plugins.lifeCycle.startup.bind(() => {
         data?: any
     }) => {
         let { close, target, event, data } = context;
-        let targets: { [x: string]: SSE };
+        let dispatch = (sse: SSE) => {
+            if (close) {
+                sse.close();
+            } else if (event) {
+                sse.emit(event, data);
+            } else {
+                sse.send(data);
+            }
+        };
 
         if (target) {
-            targets = { [target]: app.sse[target] };
+            let sse = app.sse.get(target);
+            sse && dispatch(sse);
         } else {
-            targets = app.sse;
-        }
-
-        for (let id in targets) {
-            let sse = app.sse[id];
-
-            if (sse) {
-                if (close) {
-                    sse.close();
-                } else if (event) {
-                    sse.emit(event, data);
-                } else {
-                    sse.send(data);
-                }
-            }
+            app.sse.forEach(dispatch);
         }
     });
 });
 
-// Subscribe an event listener so that when receives schedule task sent from an
+// Subscribe an topic listener so that when receives schedule task sent from an
 // RPC server, the task can be invoked in the current server.
-app.plugins.lifeCycle.startup.bind(() => {
+app.hooks.lifeCycle.startup.bind(() => {
     type Context = [string, string, any[]];
 
     app.message.subscribe(app.schedule.name, async (context: Context) => {
@@ -149,10 +140,25 @@ app.plugins.lifeCycle.startup.bind(() => {
 
         if (module) {
             try {
-                await module.instance(app.local)[method](...(data || []));
+                let ins = module();
+
+                if (typeof ins[method] === "function") {
+                    await ins[method](...(data || []));
+                }
             } catch (err) {
                 tryLogError(err);
             }
         }
     });
+});
+
+// Initiate the static property Controller.flow.
+app.hooks.lifeCycle.startup.bind(async () => {
+    Controller.flow = new Service();
+    Controller.flow.init && (await Controller.flow.init());
+});
+
+// GC static property Controller.flow.
+app.hooks.lifeCycle.startup.bind(async () => {
+    Controller.flow.destroy && (await Controller.flow.destroy());
 });

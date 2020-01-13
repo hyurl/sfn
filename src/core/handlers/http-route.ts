@@ -1,20 +1,19 @@
 import * as zlib from "zlib";
 import * as cors from "sfn-cors";
 import values = require("lodash/values");
-import { Model } from 'modelar';
 import { RouteHandler } from "webium";
 import { router } from "../bootstrap/index";
 import { HttpController } from "../controllers/HttpController";
 import { StatusException } from "../tools/StatusException";
 import { randStr } from "../tools/functions";
-import { isOwnMethod, isSubClassOf } from "../tools/internal";
+import { isOwnMethod } from "../tools/internal";
 import { tryLogError } from "../tools/internal/error";
 import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
-// import isIteratorLike = require("is-iterator-like");
+import { Controller } from '../controllers/Controller';
 
 const EFFECT_METHODS: string[] = [
     "DELETE",
@@ -44,7 +43,7 @@ router.onerror = function onerror(err: any, req: Request, res: Response) {
 
 export function getRouteHandler(key: string): RouteHandler {
     return async (req: Request, res: Response) => {
-        let mod = routeMap.resolve(key),
+        let Controller = routeMap.resolve(key),
             methods = routeMap.methods(key),
             ctrl: HttpController = null,
             initiated = false;
@@ -54,7 +53,7 @@ export function getRouteHandler(key: string): RouteHandler {
         });
 
         try {
-            ctrl = mod.create(req, res);
+            ctrl = new Controller(req, res);
 
             for (let method of methods) {
                 if (!isOwnMethod(ctrl, method)) {
@@ -62,17 +61,14 @@ export function getRouteHandler(key: string): RouteHandler {
                     continue;
                 } else if (!initiated) {
                     // Handle CORS.
-                    if (!cors(<any>ctrl.cors, req, res)) {
+                    if (ctrl.ctor["cors"] && !cors(ctrl.ctor["cors"], req, res)) {
                         throw new StatusException(410);
-                    } else if (req.method === "OPTIONS") {
-                        // cors will set proper headers for OPTIONS
-                        res.end();
                     }
 
                     // Handle CSRF token.
                     handleCsrfToken(ctrl);
 
-                    if (false === (await ctrl.before())) return;
+                    await applyInit(ctrl);
 
                     initiated = true;
 
@@ -85,7 +81,7 @@ export function getRouteHandler(key: string): RouteHandler {
                     }
                 }
 
-                let result = await ctrl[method](...await getArguments(ctrl, method));
+                let result = await ctrl[method](...getArguments(ctrl, method));
 
                 if (isIterableIterator(result) || isAsyncIterableIterator(result)) {
                     await handleIteratorResponse(ctrl, result);
@@ -95,11 +91,12 @@ export function getRouteHandler(key: string): RouteHandler {
             }
 
             if (initiated) {
-                if (!req.isEventSource && !res.finished) {
+                if (!req.isEventSource && !res.sent) {
                     res.end();
                 }
 
-                await ctrl.after();
+                await applyDestroy(ctrl);
+
                 finish(ctrl);
             }
         } catch (err) {
@@ -107,6 +104,22 @@ export function getRouteHandler(key: string): RouteHandler {
 
             handleError(err, ctrl);
         }
+    }
+}
+
+export async function applyInit(ctrl: Controller) {
+    if (typeof ctrl.init === "function") {
+        await ctrl.init();
+    } else if (typeof ctrl.before === "function") {
+        await ctrl.before();
+    }
+}
+
+export async function applyDestroy(ctrl: Controller) {
+    if (typeof ctrl.destroy === "function") {
+        await ctrl.destroy();
+    } else if (typeof ctrl.after === "function") {
+        await ctrl.after();
     }
 }
 
@@ -146,16 +159,16 @@ async function handleError(err: any, ctrl: HttpController, stack?: string) {
 
             res.type = "text/html";
             res.send(content);
-        } catch (err) {
+        } catch (e) {
             res.type = "text/plain";
-            res.send(err.message);
+            res.send(_err.message);
         }
     }
 
     handleFinish(err, ctrl, stack);
 }
 
-async function getArguments(ctrl: HttpController, method: string) {
+function getArguments(ctrl: HttpController, method: string) {
     let { req, res } = ctrl,
         data: string[] = values(req.params),
         args: any[] = [];
@@ -177,28 +190,6 @@ async function getArguments(ctrl: HttpController, method: string) {
             args.push(res);
         } else if (type === Session) { // inject Session
             args.push(req.session);
-        } else if (isSubClassOf(type, Model)) { // inject user-defined Model
-            if (req.method == "POST" && req.params.id === undefined) {
-                // POST request means creating a new model.
-                // If a POST request with an ID, which means the 
-                // request isn't a RESTful request, DO NOT 
-                // create new model.
-                args.push((new (<typeof Model>type)).use(req.db));
-            } else {
-                // Other type of requests, such as GET, DELETE, 
-                // PATCH, PUT, all need to retrieve an existing 
-                // model.
-                try {
-                    let id = <number>number.parse(req.params.id);
-
-                    if (!id || isNaN(id))
-                        throw new StatusException(400);
-
-                    args.push(await (<typeof Model>type).use(req.db).get(id));
-                } catch (e) {
-                    args.push(null);
-                }
-            }
         } else {
             args.push(data.shift());
         }

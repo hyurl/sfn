@@ -23,6 +23,10 @@ export default class LoggerService extends Logger {
         this.dateFormat = "YYYY-MM-DD HH:mm:ss";
     }
 
+    async destroy() {
+        await this.close();
+    }
+
     async debug(...msg: any[]) {
         return super.debug(...msg);
     }

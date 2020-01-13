@@ -17,12 +17,12 @@ declare global {
 export default class DocumentationService extends Service {
     async getSideMenu(version: string, lang: string) {
         let path = `app.docs.sideMenu.${version.replace(/\./g, "")}.${lang}`;
-        let sideMenu: string = await app.services.cache.instance().get(path);
+        let sideMenu: string = await app.services.cache().get(path);
 
         if (!sideMenu) {
             let categoryTree = await this.getCategoryTree(version, lang);
             sideMenu = renderHtml(categoryTree, "categories", "    ");
-            await app.services.cache.instance().set(path, sideMenu);
+            await app.services.cache().set(path, sideMenu);
         }
 
         return sideMenu;
@@ -33,9 +33,9 @@ export default class DocumentationService extends Service {
         let filename = resolvePath(dir, name + ".md");
 
         try {
-            return (<ModuleProxy<View>>get(global, app.docs.resolve(filename)))
-                .instance(filename)
-                .render();
+            let name = app.docs.resolve(filename);
+            let view = <ModuleProxy<View>>get(global, name);
+            return view().render();
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
             throw new StatusException(code, isDevMode ? e.message : null);
@@ -59,7 +59,7 @@ export default class DocumentationService extends Service {
                 metaData = meta(content)[0] || {};
 
             categoryTree.push({
-                order: parseInt(metaData.order) || 0,
+                order: parseFloat(metaData.order) || 0,
                 id: _name,
                 level: 0,
                 title: `<a href="/docs/${version}/${_name}" title="${metaData.title}">${metaData.title}</a><i class="fa fa-angle-right"></i>`,

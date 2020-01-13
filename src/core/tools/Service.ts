@@ -1,41 +1,8 @@
 import * as util from "util";
-import * as path from "path";
 import { EventEmitter } from "events";
-import { Storage, StoreOptions } from "cluster-storage";
-import * as Logger from "sfn-logger";
-import { DB } from "modelar";
 import HideProtectedProperties = require("hide-protected-properties");
-import { ROOT_PATH } from "../../init";
 import get = require('lodash/get');
-import { Locale } from './interfaces';
-import { realDB } from './symbols';
-
-/** @deprecated */
-export const LogOptions: Logger.Options = Object.assign({}, Logger.Options, {
-    ttl: 1000,
-    filename: ROOT_PATH + "/logs/sfn.log",
-    fileSize: 1024 * 1024 * 2,
-    trace: false
-});
-
-/** @deprecated */
-export interface CacheOptions extends StoreOptions {
-    name: string
-}
-
-/** @deprecated */
-export const CacheOptions: CacheOptions = {
-    name: "sfn",
-    path: ROOT_PATH + "/cache",
-    gcInterval: 120000
-};
-
-export interface ResultMessage {
-    success: boolean;
-    code: number;
-    data?: any;
-    error?: string;
-}
+import { Queue } from "dynamic-queue";
 
 /**
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
@@ -43,17 +10,43 @@ export interface ResultMessage {
  * EventEmitter, you can bind customized events if needed.
  */
 @HideProtectedProperties
-export class Service extends EventEmitter {
+export class Service extends EventEmitter implements Service {
     /** The language of the current service. */
     lang: string = app.config.lang;
 
-    /** @deprecated Configurations for the logger in this instance. */
-    logOptions: Logger.Options = Object.assign({}, LogOptions);
-    /** @deprecated Configurations for the logger in this instance. */
-    cacheOptions: CacheOptions = Object.assign({}, CacheOptions);
+    private throttles: { [key: string]: number } = {};
+    private queues: { [key: string]: Queue } = {};
+    private gcTimer: NodeJS.Timer = null;
 
-    static readonly Loggers: { [filename: string]: Logger } = {};
-    static readonly Caches: { [filename: string]: Storage } = {};
+    protected gc(): void | Promise<void> {
+        let now = Date.now();
+
+        for (let key in this.throttles) {
+            if (this.throttles[key] < now) {
+                delete this.throttles[key];
+            }
+        }
+
+        for (let key in this.queues) {
+            if (this.queues[key].length === 0) {
+                this.queues[key].stop();
+                delete this.queues[key];
+            }
+        }
+    }
+
+    /** This method will be called to initiate the service. */
+    init(): void | Promise<void> {
+        this.gcTimer = setInterval(() => this.gc(), 1000 * 30);
+    }
+
+    /**
+     * This method will be called when the service is about to be destroyed.
+     */
+    destroy(): void | Promise<void> {
+        this.gcTimer && clearInterval(this.gcTimer);
+        this.gc();
+    }
 
     /**
      * Gets a locale text according to i18n. 
@@ -67,77 +60,53 @@ export class Service extends EventEmitter {
      * @param replacements Values that replaces %s, %i, etc. in the `text`.
      */
     i18n(text: string, ...replacements: string[]): string {
-        let mod = get(app.locales, this.lang);
-        let defMod = get(app.locales, app.config.lang);
-        let locale: Locale = null;
-        let stmt: string;
-
-        if (mod && mod.proto) {
-            locale = mod.instance();
-            locale[text] && (stmt = locale[text]);
-        }
-
-        if (stmt === undefined && defMod && defMod.proto) {
-            locale = defMod.instance();
-            locale[text] && (stmt = locale[text]);
-        }
-
-        (stmt === undefined) && (stmt = text);
+        let trans = get(app.locales.translations, this.lang) ||
+            get(app.locales.translations, app.config.lang);
+        let stmt = trans[text] || text;
 
         return util.format(stmt, ...replacements);
     }
 
-    /** Returns a result indicates the operation is succeeded. */
-    success(data: any, code: number = 200): ResultMessage {
-        return {
-            success: true,
-            code,
-            data,
-        };
+    /**
+     * Throttles the operation in the body associated to a unique key.
+     * @param interval default `0`.
+     */
+    async throttle<T>(
+        key: string,
+        body: () => T | Promise<T>,
+        interval = 0,
+        error: any = new Error("To many operations")
+    ) {
+        let result = await new Promise<T>((resolve, reject) => {
+            let now = Date.now();
+
+            if (this.throttles[key] && this.throttles[key] >= now) {
+                return reject(error);
+            } else {
+                this.throttles[key] = now + interval;
+                resolve(body.call(this));
+            }
+        });
+
+        return result;
     }
 
-    /** Returns a result indicates the operation is failed. */
-    error(msg: string | Error, code: number = 500): ResultMessage {
-        msg = msg instanceof Error ? msg.message : msg;
-        return {
-            success: false,
-            code,
-            error: msg
-        };
-    }
+    /**
+     * Queues the operation in the body associated to a unique key.
+     */
+    async queue<T>(key: string, body: () => T | Promise<T>) {
+        return new Promise<T>((resolve, reject) => {
+            if (!this.queues[key]) {
+                this.queues[key] = new Queue();
+            }
 
-    /** @deprecated Gets a logger instance. */
-    get logger(): Logger {
-        let filename = this.logOptions.filename || LogOptions.filename;
-
-        if (!Service.Loggers[filename]) {
-            let options = Object.assign({}, LogOptions, this.logOptions);
-            Service.Loggers[filename] = new Logger(options);
-        }
-
-        return Service.Loggers[filename];
-    }
-
-    /** @deprecated Gets a cache instance. */
-    get cache(): Storage {
-        let { path: dirname, name } = this.cacheOptions;
-        let filename = path.resolve(dirname, name + ".db");
-
-        if (!Service.Caches[filename]) {
-            Service.Caches[filename] = new Storage(name, this.cacheOptions);
-        }
-
-        return Service.Caches[filename];
-    }
-
-    /** Gets/Sets a DB instance. */
-    get db() {
-        return this[realDB] || (this[realDB] = new DB(app.config.database));
-    }
-
-    set db(v: DB) {
-        this[realDB] = v;
+            this.queues[key].push(async () => {
+                try {
+                    resolve(await body.call(this));
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
     }
 }
-
-export default Service;

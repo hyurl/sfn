@@ -18,7 +18,6 @@ try {
         `${init_1.SRC_PATH}/services`
     ];
     let copyingFiles = new Map([
-        [`${tplDir}/.env`, `${init_1.ROOT_PATH}/.env`],
         [`${tplDir}/tsconfig.json`, `${init_1.ROOT_PATH}/tsconfig.json`],
         [`${tplDir}/config.ts`, `${init_1.SRC_PATH}/config.ts`],
         [`${tplDir}/index.ts`, `${init_1.SRC_PATH}/index.ts`],
@@ -67,6 +66,6 @@ try {
     console.log(color_1.green `Initiation succeed!`);
 }
 catch (err) {
-    console.log(color_1.red `Initiation failed!`, String(err));
+    console.error(color_1.red `Initiation failed!`, String(err));
 }
 //# sourceMappingURL=init.js.map

@@ -1,13 +1,15 @@
 import * as fs from "fs-extra";
 import * as marked from "marked";
-import hljs = require("highlightjs");
+import hljs = require("highlight.js");
 import trim = require("lodash/trim");
 import meta from "comment-meta";
+import { FSWatcher } from 'alar';
 
 declare global {
     namespace app {
         namespace utils {
-            const markdown: ModuleProxy<MarkdownUtil>
+            const markdown: ModuleProxy<MarkdownUtil>;
+            function watch(): FSWatcher;
         }
     }
 }

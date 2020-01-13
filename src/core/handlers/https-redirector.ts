@@ -16,7 +16,7 @@ if (server.type == "https" || server.type == "http2") {
         res.end(res.statusMessage);
     }).on("error", (err) => {
         if (err.message.match(/EADDRINUSE/)) {
-            console.log(red`Failed to redirect HTTP: ${err.message}`);
+            console.error(red`Failed to redirect HTTP: ${err.message}`);
         }
     }).listen(80);
 }

@@ -1,11 +1,11 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import * as FRON from "fron";
-import * as modelar from "modelar";
 import { isTsNode } from "../../../init";
 import { tryLogError, resolveErrorStack } from './error';
+import merge = require('lodash/merge');
+import { Locale } from "../interfaces";
 import get = require('lodash/get');
-import { isSubClassOf } from '.';
 
 const tryImport = createImport(require);
 
@@ -53,25 +53,9 @@ export function traceModulePath(baseDir: string) {
     return filename;
 }
 
-export function importUser() {
-    let ctor: typeof modelar.User;
-
-    try {
-        ctor = get(app, "models.user").ctor;
-
-        if (!ctor || !(isSubClassOf(ctor, modelar.User))) {
-            ctor = modelar.User;
-        }
-    } catch (err) {
-        ctor = modelar.User;
-    }
-
-    return ctor;
-}
-
 export async function importDirectory(dir: string) {
-    var ext = isTsNode ? ".ts" : ".js";
-    var files = await fs.readdir(dir);
+    let ext = isTsNode ? ".ts" : ".js";
+    let files = await fs.readdir(dir);
 
     for (let file of files) {
         let filename = path.resolve(dir, file);
@@ -83,5 +67,61 @@ export async function importDirectory(dir: string) {
             // load files recursively.
             await importDirectory(filename);
         }
+    }
+}
+
+export function loadLanguagePack(filename: string) {
+    let name = app.locales.resolve(filename);
+    let ins = name ? (<ModuleProxy<Locale>>get(global, name))() : null;
+
+    if (ins) {
+        let lang = path.basename(filename, path.extname(filename));
+        app.locales.translations[lang] = ins;
+
+        if (ins.$alias) {
+            let aliases = ins.$alias.split(/\s*,\s*/);
+
+            for (let alias of aliases) {
+                app.locales.translations[alias] = ins;
+            }
+        }
+    }
+}
+
+/**
+ * NOTE: This function is called in the following files:
+ * - ../../../index.ts
+ * - ../../../../index.js
+ */
+export function bootstrap() {
+    let configFile = app.APP_PATH + "/config";
+    let tryImport = createImport(require);
+    let config = require("../../../config");
+
+    if (!app.isCli) {
+        // Load user-defined bootstrap procedures.
+        let bootstrap = app.APP_PATH + "/bootstrap/index";
+
+        moduleExists(bootstrap) && tryImport(bootstrap);
+
+        // load hooks
+        fs.pathExists(app.hooks.path).then(async (exists) => {
+            exists && (await importDirectory(app.hooks.path));
+        });
+    }
+
+    if (moduleExists(configFile)) {
+        // Load user-defined configurations.
+        let mod = tryImport(configFile);
+
+        if (!Object.is(mod, config) && typeof mod.default == "object") {
+            merge(config.default, mod.default);
+        }
+    }
+
+    if (fs.existsSync(app.locales.path)) {
+        fs.readdirSync(app.locales.path).forEach(filename => {
+            loadLanguagePack(app.locales.path + "/" + filename);
+        });
     }
 }

@@ -3,7 +3,7 @@
         "module": "commonjs",
         "target": "es2017",
         "preserveConstEnums": true,
-        "rootDir": "src",
+        "rootDir": "./src/",
         "outDir": "dist",
         "newLine": "LF",
         "experimentalDecorators": true,
@@ -14,6 +14,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "emitDecoratorMetadata": true,
+        // "strictBindCallApply": true,
         // "diagnostics": true,
         "baseUrl": ".",
         "paths": {
@@ -26,17 +27,13 @@
         "src/*.ts",
         "src/controllers/*.ts",
         "src/bootstrap/*.ts",
-        "src/schedules/*.ts",
         "src/services/*.ts",
         "src/locales/*.ts",
-        "src/plugins/*.ts",
+        "src/hooks/*.ts",
         "src/models/*.ts",
         "src/utils/*.ts",
         "src/core/*/*.ts",
         "src/core/*/*/*.ts",
         "src/cli/*.ts"
-    ],
-    "exclude": [
-        "./node_modules/*"
     ]
 }
