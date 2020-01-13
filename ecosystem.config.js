@@ -40,7 +40,7 @@ module.exports = {
             name: "web-server",
             script: "dist/index.js",
             exec_mode: "cluster",
-            instances: -1,
+            instances: "max",
             wait_ready: true,
             timeout: 5000,
             out_file: __dirname + "/logs/web-server-stdout.log",
