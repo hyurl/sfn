@@ -36,15 +36,17 @@ declare global {
             /**
              * Connects to an RPC server according to the given `id`, 
              * which is set in `config.server.rpc`. If `defer` is `true`, when 
-             * the server is not online, the function will hang until it becomes
-             * available and finishes the connection.
+             * the server is not online, the function will hang in the
+             * background until it becomes available and finishes the connection.
              */
             function connect(id: string, defer?: boolean): Promise<void>;
             /** Connects to all RPC servers. */
             function connectAll(defer?: boolean): Promise<void>;
             /**
              * Connects to all dependency services, by default, `id` is
-             * the `app.id`, and don't have to pass it.
+             * the `app.id`, and don't have to pass it. But if the `app.id`
+             * is not set in `config.server.rpc`, it needs to be provided
+             * explicitly.
              */
             function connectDependencies(id?: string): Promise<void>;
             /** Checks if the target server is connected. */
@@ -99,7 +101,7 @@ async function tryConnect(
 
         pendingConnections.delete(serverId);
 
-        if (isMainThread) {
+        if (isMainThread && serverId !== app.id) {
             console.log(green`RPC server [${serverId}] connected.`);
         }
 
@@ -127,27 +129,19 @@ app.rpc = {
             ...options,
             id,
             host: "0.0.0.0"
-        });
+        }, false);
 
         services.forEach(mod => service.register(mod));
         app.rpc.server = service;
         app.id = id;
 
-        // invoke all start-up hooks.
-        await app.hooks.lifeCycle.startup.invoke();
+        await app.rpc.connectDependencies(id); // connect to dependency services.
+        await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
 
+        await service.open(); // open channel and initiate bound services.
         console.log(serveTip("RPC", id, service.dsn));
-
-        // self-connect after serving.
-        await app.rpc.connect(id);
-        // connect to dependency services.
-        await app.rpc.connectDependencies(id);
-
-        // try to serve the REPL server.
-        await serveRepl(app.id);
-
-        // initiating registered services.
-        await service.init();
+        await app.rpc.connect(id); // self-connect after serving.
+        await serveRepl(app.id); // serve the REPL server.
 
         if (!app.isDevMode) { // notify PM2 that the service is available.
             process.send("ready");
@@ -155,10 +149,16 @@ app.rpc = {
     },
     async connect(id: string, defer = false) {
         let servers = app.config.server.rpc;
-        let { services, ...options } = servers[id];
-        let service = new RpcClient({ ...options, id: app.id });
+        let { services, fallbackToLocal = true, ...options } = servers[id];
+        let service = await app.services.connect({
+            ...options,
+            id: app.id
+        }, false);
 
-        services.forEach(mod => service.register(mod));
+        services.forEach(mod => {
+            service.register(mod);
+            mod.fallbackToLocal(fallbackToLocal);
+        });
 
         if (!(await tryConnect(service, id, defer)) && defer) {
             tasks[id] = setInterval(tryConnect, 1000, service, id, defer);

@@ -70,6 +70,13 @@ app.serve = async function serve(id?: string) {
         return app.rpc.serve(id);
     }
 
+    // set the server ID
+    if (process.env.NODE_APP_INSTANCE) {
+        app.id = "web-server-" + process.env.NODE_APP_INSTANCE;
+    } else {
+        app.id = "web-server";
+    }
+
     let { type, port, timeout, options } = app.config.server.http;
     let WS = app.config.server.websocket;
 
@@ -118,12 +125,15 @@ app.serve = async function serve(id?: string) {
         moduleExists(wsBootstrap) && tryImport(wsBootstrap);
     }
 
-    // Start HTTP server.
     if (typeof http["setTimeout"] == "function") {
         http["setTimeout"](timeout);
     }
 
-    return new Promise((resolve, reject) => {
+    await app.rpc.connectAll(true); // connect to RPC services.
+    await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
+
+    // serve HTTP server
+    await new Promise((resolve, reject) => {
         http.on("error", (err: Error) => {
             console.error(red`${err.toString()}`);
 
@@ -132,40 +142,18 @@ app.serve = async function serve(id?: string) {
             } else {
                 reject(err);
             }
-        }).listen(port, async () => {
-            try {
-                // load controllers
-                if (await pathExists(app.controllers.path)) {
-                    await importDirectory(app.controllers.path);
-                }
-
-                // set the server ID
-                if (process.env.NODE_APP_INSTANCE) {
-                    app.id = "web-server-" + process.env.NODE_APP_INSTANCE;
-                } else {
-                    app.id = "web-server";
-                }
-
-                // invoke all start-up hooks.
-                await app.hooks.lifeCycle.startup.invoke();
-
-                console.log(serveTip("Web", app.id, baseUrl()));
-
-                // try to connect all RPC services.
-                await app.rpc.connectAll(true);
-
-                // try to serve the REPL server.
-                await serveRepl(app.id);
-
-                if (!app.isDevMode) {
-                    // notify PM2 that the service is available.
-                    process.send("ready");
-                }
-
-                resolve();
-            } catch (err) {
-                reject(err);
-            }
-        });
+        }).listen(port, resolve);
     });
+
+    await serveRepl(app.id); // serve the REPL server
+    console.log(serveTip("Web", app.id, baseUrl()));
+
+    // load controllers
+    if (await pathExists(app.controllers.path)) {
+        await importDirectory(app.controllers.path);
+    }
+
+    if (!app.isDevMode) { // notify PM2 that the service is available.
+        process.send("ready");
+    }
 }

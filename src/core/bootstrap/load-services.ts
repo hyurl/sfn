@@ -6,8 +6,11 @@ declare global {
         namespace services {
             const name: string;
             const path: string;
-            function serve(config: string | alar.RpcOptions): Promise<alar.RpcServer>;
-            function connect(config: string | alar.ClientOptions): Promise<alar.RpcClient>;
+            /** @inner This function is for internal use. */
+            function serve(config: alar.RpcOptions, immediate?: boolean): Promise<alar.RpcServer>;
+            /** @inner This function is for internal use. */
+            function connect(config: alar.ClientOptions, immediate?: boolean): Promise<alar.RpcClient>;
+            /** @inner This function is for internal use. */
             function watch(): alar.FSWatcher;
         }
     }

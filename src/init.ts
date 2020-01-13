@@ -29,7 +29,7 @@ declare global {
          * `process.env.NODE_APP_INSTANCE`; in an RPC server, the app ID is the
          * ID passed to `app.serve()`.
          * 
-         * NOTE: the ID will only be available until the server started.
+         * NOTE: the ID will only be available until the server has started.
          * 
          * @see http://pm2.keymetrics.io/docs/usage/environment/#node-app-instance-pm2-25-minimum
          */
@@ -53,7 +53,7 @@ declare global {
         /**
          * Pass this symbol to `ModuleProxy<any>.instance()` method so that it
          * can always resolve the local instance of the module.
-         * @deprecated Alar v6.0 by default uses the local singleton.
+         * @deprecated Alar v6.0 by default uses the local singleton already.
          */
         const local: symbol;
     }

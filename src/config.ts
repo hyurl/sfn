@@ -88,6 +88,12 @@ declare global {
                          * ones excluded.)
                          */
                         dependencies?: "all" | ModuleProxy<any>[];
+                        /**
+                         * Whether to allow services fallback to their local
+                         * instances when the remote instance is not available.
+                         * @default true
+                         */
+                        fallbackToLocal?: boolean;
                     }
                 };
             };
