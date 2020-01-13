@@ -1,7 +1,7 @@
 {
     "name": "sfn",
     "version": "0.6.1",
-    "description": "An easy and elegant web based service framework for Node.js",
+    "description": "An easy and elegant web-based service framework for Node.js",
     "main": "dist/index.js",
     "types": "src/index.ts",
     "bin": "dist/cli/sfn.js",
