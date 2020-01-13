@@ -1,10 +1,9 @@
 import { SSE } from 'sfn-sse';
 import { Hook } from '../tools/Hook';
 import { tryLogError } from '../tools/internal/error';
-import get = require('lodash/get');
-import { sleep } from '../tools/functions';
 import { Controller } from '../controllers/Controller';
 import { Service } from '../tools/Service';
+import get = require('lodash/get');
 
 declare global {
     namespace app {
@@ -31,57 +30,50 @@ process.on("SIGINT", async () => {
     }
 });
 
-// Try to close http server.
+// Try to close HTTP/WebSocket servers, RPC server and clients.
 app.hooks.lifeCycle.shutdown.bind(async () => {
-    if (app.http) {
-        await new Promise(resolve => {
-            let timer = setTimeout(resolve, 500);
+    let closures: Promise<any>[] = [];
 
+    if (app.http) { // close HTTP server
+        closures.push(new Promise(resolve => {
+            let timeout = setTimeout(resolve, 2000);
             app.http.close(() => {
-                clearTimeout(timer);
+                clearTimeout(timeout);
                 resolve();
             });
-        });
+        }));
 
         // close SSE connections.
-        for (let id in app.sse) {
-            app.sse[id].close();
-        }
-
-        await sleep(500);
-    }
-});
-
-// Try to close ws server.
-app.hooks.lifeCycle.shutdown.bind(async () => {
-    if (app.ws) {
-        await new Promise(resolve => {
-            let timer = setTimeout(resolve, 500);
-
-            app.ws.close(() => {
-                clearTimeout(timer);
-                resolve();
-            });
+        app.sse.forEach(sse => {
+            closures.push(new Promise(resolve => sse.close(resolve)));
         });
     }
-});
 
-// Try to disconnect all RPC clients.
-app.hooks.lifeCycle.shutdown.bind(async () => {
-    for (let id in app.rpc.connections) {
+    if (app.ws) { // close WebSocket server
+        closures.push(new Promise(resolve => {
+            let timeout = setTimeout(resolve, 2000);
+            app.ws.close(() => {
+                clearTimeout(timeout);
+                resolve();
+            });
+        }));
+    }
+
+    // The RPC clients should be closed before the closing the server, since
+    // a client will try to reconnect if lost connection from the server.
+    for (let id in app.rpc.connections) { // close RPC clients
         let client = app.rpc.connections[id];
-        await client.close();
+        closures.push(client.close());
     }
+
+    if (app.rpc.server) { // close RPC server
+        closures.push(app.rpc.server.close());
+    }
+
+    await Promise.all(closures);
 });
 
-// Try to close rpc server.
-app.hooks.lifeCycle.shutdown.bind(async () => {
-    if (app.rpc.server) {
-        await app.rpc.server.close();
-    }
-});
-
-// Subscribe an event listener so that when receives WebSocket message sent from
+// Subscribe an topic listener so that when receives WebSocket message sent from
 // an RPC server, the message can be delivered to the web client via the web
 // server.
 app.hooks.lifeCycle.startup.bind(() => {
@@ -97,18 +89,15 @@ app.hooks.lifeCycle.startup.bind(() => {
     }) => {
         let { target, volatile, local, event, data } = context;
         let ws = volatile ? app.ws.volatile : app.ws;
-
         ws = local ? ws.local : ws;
-
         let nsp = context.nsp ? ws.of(context.nsp) : ws;
 
         target && (nsp = nsp.to(target));
-
         nsp.emit(event, ...data);
     });
 });
 
-// Subscribes an event listener so that when receives SSE message sent from an 
+// Subscribes an topic listener so that when receives SSE message sent from an 
 // RPC server, the message can be delivered to the web client via the web
 // server.
 app.hooks.lifeCycle.startup.bind(() => {
@@ -121,31 +110,26 @@ app.hooks.lifeCycle.startup.bind(() => {
         data?: any
     }) => {
         let { close, target, event, data } = context;
-        let targets: { [x: string]: SSE };
+        let dispatch = (sse: SSE) => {
+            if (close) {
+                sse.close();
+            } else if (event) {
+                sse.emit(event, data);
+            } else {
+                sse.send(data);
+            }
+        };
 
         if (target) {
-            targets = { [target]: app.sse[target] };
+            let sse = app.sse.get(target);
+            sse && dispatch(sse);
         } else {
-            targets = app.sse;
-        }
-
-        for (let id in targets) {
-            let sse = app.sse[id];
-
-            if (sse) {
-                if (close) {
-                    sse.close();
-                } else if (event) {
-                    sse.emit(event, data);
-                } else {
-                    sse.send(data);
-                }
-            }
+            app.sse.forEach(dispatch);
         }
     });
 });
 
-// Subscribe an event listener so that when receives schedule task sent from an
+// Subscribe an topic listener so that when receives schedule task sent from an
 // RPC server, the task can be invoked in the current server.
 app.hooks.lifeCycle.startup.bind(() => {
     type Context = [string, string, any[]];
@@ -157,7 +141,7 @@ app.hooks.lifeCycle.startup.bind(() => {
         if (module) {
             try {
                 let ins = module();
-                
+
                 if (typeof ins[method] === "function") {
                     await ins[method](...(data || []));
                 }

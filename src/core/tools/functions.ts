@@ -244,7 +244,7 @@ export function queue(key: string): MethodDecorator {
  */
 export function timestamp(time?: number | string | Date) {
     if (time === undefined) {
-        return moment().unix();
+        return Math.round(Date.now() / 1000);
     } else if (typeof time === "number") {
         // Compatible fix with milliseconds
         if (String(time).length === 13) {

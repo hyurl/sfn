@@ -1,9 +1,8 @@
 require("../env-fix");
 
-let isTsNode = process.execArgv.join(" ").includes("ts-node");
-let isMain = process.mainModule.filename === __filename;
-
-!isTsNode && require("source-map-support/register");
+if (process.execArgv.join(" ").includes("ts-node")) {
+    require("source-map-support/register");
+}
 
 import "reflect-metadata";
 export * from "sfn-xss";
@@ -36,10 +35,10 @@ export { StaticOptions };
 
 global.app.config = config;
 
-if (isMain) {
+if (require.main.filename === __filename) {
     require("./core/tools/internal/module").bootstrap();
 
-    let appId = app.argv["app-id"] || app.argv._[2];
+    let appId: string = app.argv["app-id"] || app.argv._[2];
 
     if (appId) {
         app.serve(appId);

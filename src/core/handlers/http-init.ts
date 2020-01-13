@@ -25,7 +25,7 @@ router.use(async (req: Request, res: Response, next) => {
         if (res.sse.isClosed)
             return;
 
-        app.sse[res.sse.id] = res.sse;
+        app.sse.set(res.sse.id, res.sse);
     }
 
     if (req.lang) {
@@ -38,8 +38,8 @@ router.use(async (req: Request, res: Response, next) => {
 
     let logger = getDevLogger(req, res);
     let clearSSE = () => {
-        res.sse && (delete app.sse[res.sse.id]);
-    }
+        res.sse && app.sse.delete(res.sse.id);
+    };
 
     res.on("finish", logger)
         .on("finish", clearSSE)

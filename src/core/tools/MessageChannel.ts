@@ -2,25 +2,25 @@ import { RpcClient } from 'alar';
 import values = require("lodash/values")
 
 export class MessageChannel {
-    private events: { [name: string]: Function[] } = {};
+    private topics: { [name: string]: ((data: any) => void)[] } = {};
 
     constructor(readonly name: string) { }
 
     /**
-     * Publishes `data` to the given `event` in the channel, if `servers` are
-     * provided, the event will only be emitted to them.
+     * Publishes `data` to the given `topic` in the channel, if `servers` are
+     * provided, the topic will only be emitted to them.
      */
-    publish(event: string, data?: any, servers?: string[]): boolean {
-        event = this.name + "#" + event;
+    publish(topic: string, data?: any, servers?: string[]): boolean {
+        topic = this.name + "#" + topic;
 
         if (app.rpc.server) {
-            // If the current server is an RPC server, publish the event via the
+            // If the current server is an RPC server, publish the topic via the
             // RPC channel.
-            return app.rpc.server.publish(event, data, servers);
-        } else if (this.events[event] && this.events[event].length > 0) {
+            return app.rpc.server.publish(topic, data, servers);
+        } else if (this.topics[topic] && this.topics[topic].length > 0) {
             // Invoke the listeners asynchronously.
             (async () => {
-                for (let listener of this.events[event]) {
+                for (let listener of this.topics[topic]) {
                     listener.call(void 0, data);
                 }
             })().catch(() => null);
@@ -31,53 +31,53 @@ export class MessageChannel {
         }
     }
 
-    /** Subscribes a `listener` to the given `event` of the channel. */
-    subscribe(event: string, listener: Function) {
-        event = this.name + "#" + event;
+    /** Subscribes a `listener` to the given `topic` of the channel. */
+    subscribe(topic: string, listener: (data: any) => void) {
+        topic = this.name + "#" + topic;
 
-        if (!this.events[event]) {
-            this.events[event] = [];
+        if (!this.topics[topic]) {
+            this.topics[topic] = [];
         }
 
-        this.events[event].push(listener);
+        this.topics[topic].push(listener);
 
-        // If there are active RPC connections, subscribe the event to the RPC
+        // If there are active RPC connections, subscribe the topic to the RPC
         // channel as well.
         for (let connection of values(app.rpc.connections)) {
-            connection.subscribe(event, <any>listener);
+            connection.subscribe(topic, <any>listener);
         }
 
         return this;
     }
 
-    /** Unsubscribes a `listener` or all listeners of the `event`. */
-    unsubscribe(event: string, listener?: Function) {
-        event = this.name + "#" + event;
+    /** Unsubscribes a `listener` or all listeners of the `topic`. */
+    unsubscribe(topic: string, listener?: (data: any) => void) {
+        topic = this.name + "#" + topic;
 
-        let listeners = this.events[event] || [];
+        let listeners = this.topics[topic] || [];
 
-        // Unsubscribe event listeners in the RPC channel.
+        // Unsubscribe topic listeners in the RPC channel.
         for (let connection of values(app.rpc.connections)) {
-            connection.unsubscribe(event, <any>listener);
+            connection.unsubscribe(topic, <any>listener);
         }
 
 
-        // Remove event listeners in the message channel.
+        // Remove topic listeners in the message channel.
         if (!listeners.length) {
             return false;
         } else if (listener) {
             let i = listeners.indexOf(listener);
             return i === -1 ? false : listeners.splice(i, 1).length > 0;
         } else {
-            return delete this.events[event];
+            return delete this.topics[topic];
         }
     }
 
     /** @inner */
     linkRpcChannel(connection: RpcClient) {
-        for (let event in this.events) {
-            for (let listener of this.events[event]) {
-                connection.subscribe(event, <any>listener);
+        for (let topic in this.topics) {
+            for (let listener of this.topics[topic]) {
+                connection.subscribe(topic, <any>listener);
             }
         }
     }

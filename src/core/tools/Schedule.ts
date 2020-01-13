@@ -65,7 +65,6 @@ export interface ScheduleTask {
     end?: number;
     repeat?: number;
     timetable?: number[];
-    expired?: boolean;
     module?: string;
     handler?: string;
     onEnd?: string;
@@ -229,7 +228,7 @@ export class ScheduleService {
     /** @inner Use `app.schedule.create()` instead. */
     async add(task: ScheduleTask) {
         this.state === "uninitiated" && await this.init();
-        this.tasks.set(task.taskId, { ...task, expired: false });
+        this.tasks.set(task.taskId, task);
         return true;
     }
 
@@ -238,10 +237,7 @@ export class ScheduleService {
         let task = this.tasks.get(taskId);
 
         if (task) {
-            // Mark the task expired and emit onEnd event.
-            task.expired = true;
             this.dispatch(task, "onEnd");
-
             return true;
         } else {
             return false;
@@ -290,47 +286,48 @@ export class ScheduleService {
     async init() {
         this.state = "running";
         this.timer = setInterval(() => {
-            let now = moment().unix();
+            let now = timestamp();
 
             for (let [, task] of this.tasks) {
                 let { start, end, repeat, timetable } = task;
+                let expired = !(!end || now < end);
 
-                if (!task.expired) {
-                    if (!end || now < end) {
-                        if (timetable) {
-                            if (timetable.length === 0) {
-                                task.expired = true;
-                            } else {
-                                for (let i = timetable.length; i--;) {
-                                    if (now >= timetable[i]) {
-                                        this.dispatch(task);
+                if (!expired) {
+                    if (timetable) {
+                        if (timetable.length === 0) {
+                            expired = true;
+                        } else {
+                            for (let i = timetable.length; --i;) {
+                                if (now >= timetable[i]) {
+                                    this.dispatch(task);
 
-                                        if (repeat) {
-                                            timetable[i] += repeat;
-                                        } else {
-                                            timetable.splice(i, 1);
+                                    if (repeat) {
+                                        timetable[i] += repeat;
+                                    } else {
+                                        timetable.splice(i, 1);
+
+                                        if (timetable.length === 0) {
+                                            expired = true;
                                         }
-
-                                        break;
                                     }
+
+                                    break;
                                 }
                             }
-                        } else if (now >= start) {
-                            this.dispatch(task);
-
-                            if (repeat) {
-                                task.start = now + repeat;
-                            } else {
-                                task.expired = true;
-                            }
                         }
-                    } else {
-                        task.expired = true;
-                    }
+                    } else if (now >= start) {
+                        this.dispatch(task);
 
-                    if (task.expired) {
-                        this.dispatch(task, "onEnd");
+                        if (repeat) {
+                            task.start = now + repeat;
+                        } else {
+                            expired = true;
+                        }
                     }
+                }
+
+                if (expired) {
+                    this.dispatch(task, "onEnd");
                 }
             }
         }, 1000);

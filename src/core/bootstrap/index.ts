@@ -40,7 +40,7 @@ declare global {
          * instead.
          * @inner
          */
-        const sse: { [id: string]: SSE };
+        const sse: Map<string, SSE>;
 
         /**
          * Starts the web server (both `http` and `ws`) or an RPC server if
@@ -58,12 +58,12 @@ export var http: HttpServer | HttpsServer | Http2SecureServer = null;
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
-let sseContainer = null;
+let sse: Map<string, SSE> = null;
 
 define(app, "router", () => router);
 define(app, "http", () => http);
 define(app, "ws", () => ws);
-define(app, "sse", () => sseContainer);
+define(app, "sse", () => sse);
 
 app.serve = async function serve(id?: string) {
     if (id && !id.startsWith("web-server")) {
@@ -81,7 +81,7 @@ app.serve = async function serve(id?: string) {
     let WS = app.config.server.websocket;
 
     global.app.isWebServer = true;
-    sseContainer = {};
+    sse = new Map();
     router = new App({
         cookieSecret: <string>app.config.session.secret,
         domain: app.config.server.hostname

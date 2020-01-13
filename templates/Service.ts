@@ -9,5 +9,23 @@ declare global {
 }
 
 export default class __Service__ extends Service {
+    async gc() {
+        await super.gc();
+
+        // TODO
+    }
+
+    async init() {
+        await super.init();
+
+        // TODO
+    }
+
+    async destroy() {
+        await super.destroy();
+
+        // TODO
+    }
+
     // ...
 }

@@ -17,7 +17,7 @@ export interface View {
 }
 
 export interface Session extends Express.Session {
-    uid: number;
+    csrfTokens?: object;
 }
 
 export abstract class Session {
@@ -27,7 +27,7 @@ export abstract class Session {
 }
 
 export interface Request extends webium.Request {
-    /** Whether the request comes from an EventSource.  */
+    /** Whether the request comes from an EventSource client.  */
     isEventSource: boolean;
     /** Gets the CSRF token if available. */
     csrfToken?: string;
@@ -35,7 +35,7 @@ export interface Request extends webium.Request {
     session: Session;
     /** 
      * A short-version url, when the url contains more than 64 characters,
-     * the rest part will be cut off and changed to `...`.
+     * the rest part will be cut off and replaced with `...`.
      */
     shortUrl: string;
     /**

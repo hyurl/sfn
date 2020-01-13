@@ -3,8 +3,6 @@ import "source-map-support/register";
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as program from "commander";
-import pluralize = require("pluralize");
-import kebabCase = require("lodash/kebabCase");
 import camelCase = require("lodash/camelCase");
 import upperFirst = require("lodash/upperFirst");
 import get = require('lodash/get');
@@ -18,10 +16,9 @@ var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
 var replSessionOpen = false;
 
-program.description("create new controllers, models. etc.")
+program.description("create new controllers, services. etc.")
     .version(version, "-v, --version")
     .option("-c, --controller <name>", "create a new controller with a specified name")
-    .option("-m, --model <name>", "create a new model with a specified name")
     .option("-s, --service <name>", "create a new service with a specified name")
     .option("-l, --language <name>", "create a new language pack with a specified name")
     .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
@@ -29,10 +26,9 @@ program.description("create new controllers, models. etc.")
         console.log("\nExamples:");
         console.log("  sfn -c article                   create an http controller of article");
         console.log("  sfn -c article -t websocket      create a websocket controller of article");
-        console.log("  sfn -m article                   create an article model");
         console.log("  sfn -s article                   create an article service");
         console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
-        console.log("  sfn repl web-server-1            open REPL session to web-server-1");
+        console.log("  sfn repl web-server              open REPL session to web-server");
         console.log("");
     });
 
@@ -123,22 +119,6 @@ try {
             .replace(/__Controller__/g, ControllerName);
 
         outputFile(output, contents, "controller");
-    } else if (program.model) { // create model.
-        let ModelName = upperFirst(path.basename(program.model)),
-            table = pluralize(kebabCase(ModelName)),
-            mod = camelCase(ModelName),
-            filename = path.dirname(program.model) + "/" + mod,
-            input = `${tplDir}/Model.ts`,
-            output = `${SRC_PATH}/models/${filename}.ts`;
-
-        checkSource(input);
-
-        let contents = fs.readFileSync(input, "utf8")
-            .replace(/__Model__/g, ModelName)
-            .replace(/__table__/g, table)
-            .replace(/__mod__/g, mod);
-
-        outputFile(output, contents, "Model");
     } else if (program.service) { // create service
         let ServiceName = upperFirst(path.basename(program.service)),
             mod = camelCase(ServiceName),
