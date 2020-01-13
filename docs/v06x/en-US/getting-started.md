@@ -1,4 +1,4 @@
-<!-- title: Getting Start; order: 1 -->
+<!-- title: Getting Started; order: 1 -->
 
 >This documentation is for SFN 0.6.x, for old version SFN documentation, please 
 > [click here](/docs/v0.5.x/getting-started).

@@ -17,7 +17,7 @@ the given data sent by the client.
 In HttpController, this feature supports the interfaces `Request`, `Response`
 and `Session`.
 
-At the mean time, you can directly set the URL parameters as the parameters 
+In the meantime, you can directly set the URL parameters as the parameters 
 of the method, and they will be injected as well.
 
 ```typescript

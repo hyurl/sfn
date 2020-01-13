@@ -4,17 +4,17 @@
 Both `HttpController` and `WebSocketController` provide a simple approach to 
 control user authorization.
 
-In a controller, there is a property `authorized`, if it's `true`, that 
-means the operation is permitted, `false` the otherwise. Since v0.6, the
-framework no longer checks and sets this property, it's `false` by default, you
-have to customize your checking condition to suit your needs.
+In a controller, there is a property `authorized`, if it's `true`, that means
+the operation is permitted, `false` the otherwise. Since v0.6, the framework
+no longer checks and sets this property, it's `false` by default, you have to
+customize your checking condition to suit your needs.
 
-If an operation is unauthorized, the framework will throws a StatusException
+If an operation is unauthorized, the framework will throw a StatusException
 `401 Unauthorized` to the client.
 
 ## Usage Example
 
-To wake up authentication check, you just need to use the decorator
+To wake up the authentication check, you just need to use the decorator
 `@requireAuth` to decorate the controller method, when this method is invoked
 via URL (or WebSocket event), the checking process will be automatically
 executed.
@@ -56,8 +56,8 @@ export default class extends HttpController {
 
 # CSRF Protection
 
-CSRF security issue is a very old topic actually, in my experience, modern 
-browsers have done a lot of work to protect it for you. But just in case, you 
+CSRF security issue is a very old topic actually, in my experience, modern
+browsers have done a lot of work to protect it for you. But just in case, you
 may need to do your own protection as well.  
 
 CSRF protection in an **SFN** application is very easy, you just need to turn 
@@ -111,14 +111,14 @@ export default class extends HttpController {
 
 ### Sending the CSRF Token Back To Server
 
-On client side, you just need to send a field `x-csrf-token` that carries the 
-token along with your data via one of these approaches:
+On the client-side, you just need to send a field `x-csrf-token` that carries
+the token along with your data via one of these approaches:
 
 - `HTTP request header` for Ajax.
 - `URL search string` e.g. `?x-csrf-token={token}`
 - `request body` a.k.a. HTML form-data.
 
-When you're request with these HTTP methods, you must send the token, otherwise
+When you request with these HTTP methods, you must send the token, otherwise
 a `403 Forbidden` will be thrown.
 
 - `DELETE`
@@ -129,14 +129,14 @@ a `403 Forbidden` will be thrown.
 ## CORS Control
 
 Allowing requests from untrusted origins will cause some troubles, although 
-modern browsers more intend to block response from cross origin requests, but 
-on the server side, the operation will be performed as usual, even the remote 
-client will never notice.
+modern browsers more intend to block response from cross-origin requests, but 
+on the server-side, the operation will be performed, as usual, even the client
+will never notice.
 
-However in the **SFN** framework, CORS check is very severe, if not pass, then
-the target function will never be called. Whist the framework give you full 
-control of CORS, and it is, as usual, very easy to be configured, you just need
-to turn on it in the controller.
+However, in the **SFN** framework, the CORS check is very severe, if not pass,
+then the target function will never be called. Whist the framework gives you
+full control of CORS, and it is, as usual, very easy to be configured, you just
+need to turn on it in the controller.
 
 (**NOTE:** Since v0.6, the property `cors` has been changed to `static cors`,
 and the framework will set the OPTIONS route automatically.)
@@ -174,15 +174,15 @@ bound to the controller.
 For more details, see 
 [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
-The framework uses [sfn-cors](https://github.com/Hyurl/sfn-cors) module to 
+The framework uses [sfn-cors](https://github.com/Hyurl/sfn-cors) module to
 perform CORS control, it enhances the legacy CORS Access Control Checking, 
 allows you checking multiple origins in multiple forms. Possible host
 specifications are:
 
-- `https://github.com` allow only https scheme for this host.
-- `http://github.com` allow only http scheme for this host.
-- `github.com` allow any scheme for this host.
-- `*.github.com` allow any sub-domain including second-level domain itself.
+- `https://github.com` allows only https scheme for this host.
+- `http://github.com` allows only http scheme for this host.
+- `github.com` allows any scheme for this host.
+- `*.github.com` allows any sub-domain including second-level domain itself.
 - `https://*.github.com` same as above but restrict for https only.
 - `github.com:*` allow any port for this host.
 - `*.github.com:*` allow any port for this host and any sub-domain.
@@ -198,10 +198,10 @@ terminated and no more operations will be run after that.
 
 ## XSS Protection
 
-XSS attacks are way more danger than CSRF and CORS. There is a golden rule that 
-works at any time: **Never trust user input**. If without any escaping, the 
-hacker may inject dangerous code in your website, and do harm when other users
-visit the dangerous page.
+XSS attacks are way more dangerous than CSRF and CORS. There is a golden rule
+that works at any time: **Never trust user input**. If without any escaping,
+the hacker may inject dangerous code in your website, and do harm when other
+users visit the dangerous page.
 
 To protect your website being hacked from an XSS attack, **SFN** provides some
 useful functions that help you escaping unsafe code in the user input.
@@ -233,7 +233,7 @@ console.log(escaped);
 // => &lt;script&gt;document.write('You are being hacked.')&lt;/script&gt;
 ```
 
-The tags will be changed to safe entities, so that the code will not be run and
+The tags will be changed to safe entities so that the code will not be run and
 the input contents can be displayed properly.
 
 ### Escape Script Links
@@ -256,7 +256,7 @@ never be run.
 
 ### Escape Event Attributes
 
-The function `escapeEventAttributes()` is sued to escape event attributes, 
+The function `escapeEventAttributes()` is used to escape event attributes, 
 e.g. `onclick`, `onmouseover`, they will be prefixed with a `data-` as well.
 
 ```typescript

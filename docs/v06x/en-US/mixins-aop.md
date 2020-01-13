@@ -1,14 +1,14 @@
-<!-- title: Mixins and AOP; order: 18 -->
+<!-- title: Mixins & AOP; order: 18 -->
 # Concept
 
 The design of **Mixins** and **AOP** is meant to write highly re-useful code 
-that suits for many scenarios and you don't have to expand your class.
+that suits many scenarios and you don't have to expand your class.
 
 ## Horizontal Inheritance (Mixins)
 
-**Mixins** allows you inherit methods and properties from multiple classes 
-instead of only the supper class. To use mixins, you will need to install 
-another package [class-mixins](https://github.com/hyurl/class-mixins), you 
+**Mixins** allows you inherit methods and properties from multiple classes
+instead of only the supper class. To use mixins, you will need to install
+another package [class-mixins](https://github.com/hyurl/class-mixins), you
 should check out its documentation to be more understood of its features.
 
 ```typescript
@@ -44,9 +44,9 @@ export default class extends Mixed(HttpController, CheckUserState) {
 }
 ```
 
-## Aspect Oriented Programming
+## Aspect-Oriented Programming
 
-**AOP** is an important part in an SFN application, an it is very easy to 
+**AOP** is an important part of an SFN application, and it is very easy to
 achieve. To use this feature, you just need to install another package named 
 [function-intercepter](https://github.com/hyurl/function-intercepter).
 
@@ -74,8 +74,8 @@ export default class MyController extends HttpController {
 }
 ```
 
-The above example only shows you how to directly set intercepter functions upon 
-the method via the decorator. But most times you would want to defined the 
+The above example only shows you how to directly set intercepter functions upon
+the method via the decorator. But most times you would want to define the
 function that can be reused in many scenarios.
 
 ```typescript
@@ -105,7 +105,7 @@ export class AnotherController extends HttpController {
 ```
 
 Other than directly calling `before` and `after`, you can define any functions 
-to be used as decorators as you want by wrapping it in side of
+to be used as decorators as you want by wrapping it inside of
 `interceptAsync().before()`. Actually, `@requireAuth` also uses this technique
 under the hood.
 
@@ -136,14 +136,14 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(
 
 ## Hooks
 
-Hook is another way to implement AOP in a software. By using hooks, one can 
+The hook is another way to implement AOP in software. By using hooks, one can 
 easily write pluggable and extendable components to manipulate objects without 
 having to modify any source code.
 
-Since version 0.5.x, SFN introduces new internal hook support, and implemented
-hot-reloading and auto-loading. Hooks do not need to create instance, and all
-hooks will be loaded into the system when start up. All hooks should be located
-in path `src/hooks/`.
+Since version 0.5.x, SFN introduced new internal hook support and implemented
+hot-reloading and auto-loading. Hooks do not need to create the instance, and
+all hooks will be loaded into the system when startup. All hooks should be
+located in path `src/hooks/`.
 
 > Hook was once called `Plugin` in history versions of SFN, but since v0.6, for
 > clarity, it has been renamed to `Hook`, if you have ~~plugins~~ before, it's 
@@ -219,7 +219,7 @@ export default class extends HttpController {
 ### Internal Hook Interface
 
 SFN reserved a hook interface `lifeCycle`, used to control all activities
-related to server startup and shutdown, also you can add your own logic to this 
+related to server startup and shutdown, also you can add your own logic to this
 interface, to open or close some resources during startup and shutdown. The
 following example comes from the SFN website itself.
 
@@ -231,7 +231,7 @@ app.hooks.lifeCycle.shutdown.bind(async () => {
 });
 ```
 
-Hooks are hot pluggable components, if you want to add a new function inside 
+Hooks are hot-pluggable components. If you want to add a new function inside 
 some procedure, you just need to bind a new handler on the hook interface, and
 if you want to remove some function, you just need to remove that corresponding 
 handler from the hook interface, and take advantage of the hot-reloading 

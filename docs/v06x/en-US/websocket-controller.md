@@ -33,8 +33,8 @@ export default class extends WebSocketController {
 ## Relations Between Event and Method
 
 When a method is decorated with `@event`, this method is bound to a certain 
-socket.io event. When a client emits data to this event, the method will be 
-automatically called, and the returning value will be sent back to the client 
+socket.io event. When a client emits data to this event, the method will be
+automatically called, and the returning value will be sent back to the client
 with proper forms.
 
 ### Set Up Namespace
@@ -134,12 +134,12 @@ specification of the controller method [error()](./http-controller#Common-API-Re
 
 ## Bind Multiple Methods and Returns Many Values.
 
-In a WebSocketController, if several methods are bound to the same event, these 
+In a WebSocketController, if several methods are bound to the same event, these
 methods will be called accordingly, and all returning values will be sent to the
 client. Even multiple methods are bound, a controller will only be instantiated
 once, `init()` and `destroy()` methods will also be called only once. However,
-if an event is bound to multiple controllers, they will all be instantiated 
-accordingly, and their `init()` and `destroy()` methods will be called as 
+if an event is bound to multiple controllers, they will all be instantiated
+accordingly, and their `init()` and `destroy()` methods will be called as
 expected. And, if the method is a generator, any values `yield`ed by it will be
 sent as well. that means you can use a generator to send data continuously.
 
@@ -169,7 +169,7 @@ SocketIO supports, the default WebSocket session data stored in memory, which
 has some disadvantages, e.g. online user session are not shared between 
 processes, and when rebooting the process the user states will get lost. So it's
 recommended to use extra adapters, e.g. 
-[socket.io-redis](https://www.npmjs.com/package/socket.io-redis), The benefits 
+[socket.io-redis](https://www.npmjs.com/package/socket.io-redis), the benefits 
 of using Redis I won't cover here, you can check it out yourself.
 
 ```typescript

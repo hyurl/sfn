@@ -1,9 +1,9 @@
 <!-- title: Logging; order: 11 -->
 # Concept
 
-> Warning: since SFN 0.5.x, the built-in logger function has be deprecated, and
-> fully removed since v0.6, it is recommended that a user should implement his 
-> own logger service and runs it distributed as a micro-service.
+> Warning: since SFN 0.5.x, the built-in logger function has been deprecated,
+> and fully removed since v0.6, it is recommended that a user should implement
+> his own logger service and runs it distributed as a micro-service.
 
 ## Example: implement a simple logger service
 

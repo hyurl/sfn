@@ -1,7 +1,7 @@
 <!-- title: Session; order: 8 -->
 # Concept
 
-Session is enabled by default in **SFN** framework, and shared between HTTP 
+The session is enabled by default in **SFN** framework and shared between HTTP 
 and WebSocket. the framework uses 
 [express-session](https://www.npmjs.com/package/express-session) to back 
 session support.
@@ -36,7 +36,7 @@ export default <app.Config>{
 }
 ```
 
-Also, you can change to other available storage engine if you want to.
+Also, you can change to other available storage engines if you want to.
 
 ## Share State Between HTTP and WebSocket
 
@@ -53,9 +53,9 @@ and [socket.io](https://socket.io)), it's very the same that
 [express-session](https://www.npmjs.com/package/express-session) had told you, 
 you must have a look at this module if you're not familiar with it.
 
-In the HTTP end, the session will be automatically saved when the response 
-channel is closed, but in the WebSocket end, for efficiency concerns, the 
-framework won't save the the session automatically, you must do it yourself, 
+In the HTTP end, the session will be automatically saved when the
+response channel is closed, but in the WebSocket end, for efficiency concerns,
+the framework won't save the session automatically, you must do it yourself, 
 just like this:
 
 ```typescript

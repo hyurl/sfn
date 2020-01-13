@@ -4,15 +4,15 @@
 `HttpController` manages requests come from an HTTP client. Essentially, it is a
 class inherited from [Service](./service), but unlike the singleton model of the
 service, Controllers are one-time products. An instance will be created when a
-request come, and will be destroyed after the request has gone. Therefore, the
+request comes and will be destroyed after the request has gone. Therefore, the
 Controller overrides some methods from the base class to allow it fitting this
-special running model, at the mean time to keep the same development experience
+special running model, in the meantime to keep the same development experience
 as ordinary services. 
 
 # Usage Example
 
-You just create a file in `src/controllers`, this file should export a default
-class that extends `HttpController`, and it will be auto-loaded when the 
+You just create a file in `src/controllers`, this file should export a
+default class that extends `HttpController`, and it will be auto-loaded when the 
 server starts.
 
 ## Example
@@ -31,8 +31,8 @@ export default class extends HttpController {
 ## Relations Between the Route and Method
 
 When a method is decorated with `@route`, this method is bound to a certain 
-URL route. When visiting a URL that matches the route, the method will be 
-automatically called, and the returning value will be sent back to the client 
+URL route. When visiting a URL that matches the route, the method will be
+automatically called, and the returning value will be sent back to the client
 with proper forms.
 
 The decorator `route`, is a function, and an namespace. When calling as a 
@@ -42,7 +42,7 @@ function, it accepts these forms:
 - `route(httpMethod: string, path: string)` e.g. `route("GET", "/demo")`
 
 When using as a namespace, it contains these methods, each one is a short-hand 
-for corresponding HTTP request method.
+for the corresponding HTTP request method.
 
 - `route.delete(path: string)`
 - `route.get(path: string)`
@@ -135,7 +135,7 @@ export default class extends HttpController {
 
 ## Signature of Methods
 
-In the above example you see I passed a `uid: number` to the methods that 
+In the above example, you see I passed a `uid: number` to the methods that
 bound to routes. Actually, you can do more, please have a look at
 [Dependency Injection](./di#Auto-Injection-in-Controllers).
 
@@ -196,13 +196,13 @@ For more advanced usage, please see
 
 ### Using Async Syntactical
 
-In network oriented programming, it is always recommended to use async methods,
-even there isn't any async operation inside the method, because these methods
-are invoked through network (async IO), thus using `async` will make them more
-syntactical (Of course this is a recommendation, it's not required).
+In network-oriented programming, it is always recommended to use async methods,
+even there isn't any async operation inside the method, because of these methods
+are invoked through the network (async IO), thus using `async` will make them
+more syntactical (Of course this is a recommendation, it's not required).
 
-But if your code uses some asynchronous functions or third-party packages that 
-doesn't support `Promise`, then you can use `util.promisify()` to wrap them as
+But if your code uses some asynchronous functions or third-party packages that
+don't support `Promise`, then you can use `util.promisify()` to wrap them as
 promises. Please check the following example.
 
 ```typescript
@@ -228,7 +228,7 @@ export default class extends HttpController {
 
 `StatusException` is a customized error class that safe to use when you're going
 to 
-response an HTTP error to the client. when an StatusException is thrown, the
+response an HTTP error to the client. when a StatusException is thrown, the
 framework will handle it properly, and sending error response automatically.
 
 ```typescript
@@ -253,10 +253,11 @@ export default class extends HttpController {
 ```
 
 The framework will check what response type the client accepts, and send the 
-error properly. More often, a common HTTP error will be responded. But if an 
+error properly. More often, a common HTTP error will be responded to. But if an 
 `Accept: application/json` is present in the request headers, a `200` status 
 will be responded with a JSON that contains `{success: false, code, error}`, 
-according to the specification of the controller method [error()](#Common-API-Response).
+according to the specification of the controller method
+[error()](#Common-API-Response).
 
 If this header isn't present, then the framework will check if there is a 
 template in the `src/views/` named just the same as the error code 
@@ -319,16 +320,16 @@ export default class extends HttpController {
 
 ## Bind Multiple Methods and Returns Many Values.
 
-In an HttpController, if several methods are bound to the same route, these 
-methods will be called accordingly. Except SSE, with other request modes, only 
-the first valid (non-`undefined`) value will be sent to the client. Even 
+In an HttpController, if several methods are bound to the same route, these
+methods will be called accordingly. Except for SSE, with other request modes,
+only the first valid (non-undefined) value will be sent to the client. Even
 multiple methods are bound, a controller will only be instantiated once, 
 `init()` and `destroy()` methods will also be called only once. However, if a 
-route is bound to multiple controllers, they will all be instantiated 
-accordingly, and their `init()` and `destroy()` methods will be called as 
+route is bound to multiple controllers, they will all be instantiated
+accordingly, and their `init()` and `destroy()` methods will be called as
 expected.
 
-However, if it's an SSE route, then all the returning values of all bound 
+However, if it's an SSE route, then all the returning values of all bound
 methods will be sent to the client accordingly, and, if the method is a 
 generator, any values `yield`ed by it will be sent as well. that means you can
 use a generator to send data continuously.

@@ -6,14 +6,14 @@ concept. With the RPC ability that [Alar](https://github.com/hyurl/alar)
 framework gives, SFN provides the simplest however efficient development scheme 
 of distributed service. During the development process, you will scarcely notice 
 that you're working on a distributed system, every development task could be 
-done on a single machine, and when deploy, it is very easy to separate services,
-to run them across networks.
+done on a single machine, and when deployed, it is very easy to separate
+services, to run them across networks.
 
 
 ## Create a New Service
 
 Write a new service file, store it under `src/services/` directory, ensure the 
-filename consists with the variable name under the namespace. Let's look at this
+filename consists of the variable name under the namespace. Let's look at this
 simple cache service example bellow.
 
 (NOTE: `ModuleProxy` is a global interface from Alar framework, no need to 
@@ -69,7 +69,8 @@ export default class CacheService {
 }
 ```
 
-And then wherever you need, use namespace to access the instance of this service.
+And then wherever you need, use the namespace to access the instance of this
+service.
 
 ```typescript
 (async () => {
@@ -84,10 +85,10 @@ website.
 
 ## Distributed Services
 
-The [Alar](https://github.com/hyurl/alar) framework allows 
-services being separated and called as RPC procedures, so that to reduce the 
-pressure of the web server, and improve the stability. This mechanism is also 
-used to easily build a distributed service system.
+The [Alar](https://github.com/hyurl/alar) framework allows services being
+separated and called as RPC procedures so that to reduce the pressure of
+the web server and improve the stability. This mechanism is also used to
+easily build a distributed service system.
 
 To separate the services, you just need to do some simple configurations.
 
@@ -114,12 +115,13 @@ node dist cache-server
 
 ## Service Dependencies
 
-After start the cache service via the above command, the web server (including 
-HTTP and WebSocket) will be able to redirect all traffics to this service to
-the new server, basically you don't have to alter any code (BUT remember not all
-properties are supported, and the methods will all become asynchronous).
+After starting the cache service via the above command, the web server
+(including HTTP and WebSocket) will be able to redirect all traffics to this
+service to the new server, basically you don't have to alter any code (BUT
+remember not all properties are supported, and the methods will all become
+asynchronous).
 
-However if you want another service running in another RPC server to be able to
+However, if you want another service running in another RPC server to be able to
 access this service, then you need to config service dependencies for that RPC
 server, just like this:
 
@@ -139,16 +141,16 @@ export default <app.Config>{
 }
 ```
 
-Then all programs runs in doc-server, when calling `app.services.cache`, will be
+Then all programs run in doc-server, when calling `app.services.cache`, will be
 able to redirect all their traffics to the server that ships this service (no
-matter how many servers are configured to ship the cache service).
+matter how many servers are configured to ship this service).
 
 The different designs between web server and RPC server, are because, usually,
 the web server requires more back-end services (especially for web applications).
-And an RPC service will less likely rely on another RPC service, usually only
-few functions are required. Of course, if you do not know which service might be
-needed or not, you can directly set `dependencies` option to `all`, in order 
-to connect all RPC services.
+And an RPC service will less likely rely on another RPC service, usually, only
+a few functions are required. Of course, if you do not know which service might
+be needed or not, you can directly set the `dependencies` option to `all`, in
+order to connect all RPC services.
 
 ## Basic Service
 
@@ -175,8 +177,8 @@ export default class MyService extends Service {
 }
 ```
 
-In fact, HTTP controller and WebSocket controller are also base on this basic 
-service, which will be mentioned afterwards.
+In fact, HTTP controller and WebSocket controller are also based on this basic 
+service, which will be mentioned afterward.
 
 ## Service Initiation and Destruction
 
@@ -184,7 +186,7 @@ SFN v0.6 ships with Alar v6, which provides the ability to support life cycle
 controls of the service. When running distributed, if a service has an `init()`
 method, then it will be invoked on the start-up, in order to perform initiation
 for the service， for example, connecting to a database. BUT it should be aware
-that this feature only works with the services that was served as RPC services.
+that this feature only works with the services that were served as RPC services.
 
 Just like the initiation, if a service has a `destroy()` method, it will be
 called when the system shuts down, in order to release resources, do garbage
