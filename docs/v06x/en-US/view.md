@@ -30,8 +30,8 @@ export default class extends HttpController {
 In modern web development, template engines are less important, so since 
 0.5.x, SFN only provides two template engines based on Alar framework.
 
-- [alar-ejs-loader](https://github.com/Hyurl/alar-ejs-loader)
-- [alar-pug-loader](https://github.com/Hyurl/alar-ejs-loader)
+- [alar-ejs-loader](https://github.com/hyurl/alar-ejs-loader)
+- [alar-pug-loader](https://github.com/hyurl/alar-pug-loader)
 
 These loaders all return a module that includes a method 
 `render(data: { [name: string]: any }): string`, when calling `view()` method, 

@@ -174,7 +174,7 @@ bound to the controller.
 For more details, see 
 [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
-The framework uses [sfn-cors](https://github.com/Hyurl/sfn-cors) module to
+The framework uses [sfn-cors](https://github.com/hyurl/sfn-cors) module to
 perform CORS control, it enhances the legacy CORS Access Control Checking, 
 allows you checking multiple origins in multiple forms. Possible host
 specifications are:
@@ -206,7 +206,7 @@ users visit the dangerous page.
 To protect your website being hacked from an XSS attack, **SFN** provides some
 useful functions that help you escaping unsafe code in the user input.
 
-The framework uses [sfn-xss](https://github.com/Hyurl/sfn-xss) module to back 
+The framework uses [sfn-xss](https://github.com/hyurl/sfn-xss) module to back 
 these escapes.
 
 ### Escape HTML Tags
@@ -275,7 +275,7 @@ XSS escaping functions sometimes don't work as well as you'd expect, so there
 is another option you can choose, using a form validator to check user input.
 
 The framework recommended using 
-[sfn-validator](https://github.com/Hyurl/sfn-validator) to check use input, you 
+[sfn-validator](https://github.com/hyurl/sfn-validator) to check use input, you 
 can learn more information about it on GitHub.
 
 ### Example

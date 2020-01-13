@@ -163,7 +163,7 @@ export default class extends HttpController {
 更多细节请查看 
 [HTTP 访问控制 (CORS)](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS)。
 
-框架使用 [sfn-cors](https://github.com/Hyurl/sfn-cors) 模块来处理 CORS 控制，它
+框架使用 [sfn-cors](https://github.com/hyurl/sfn-cors) 模块来处理 CORS 控制，它
 增强了传统的 CORS 访问控制检测，允许你同时检查多个来源并支持多种形式。可能的主机地址
 形式为：
 
@@ -189,7 +189,7 @@ XSS 攻击远比 CRSF 和 CORS 要危险得多。在任何时候，这条黄金�
 为了防止你的网站被来自 XSS 的攻击所入侵，**SFN** 提供了一些非常实用的函数，允许你过滤
 用户输入内容中不安全的代码。
 
-框架使用 [sfn-xss](https://github.com/Hyurl/sfn-xss) 模块来提供过滤支持。
+框架使用 [sfn-xss](https://github.com/hyurl/sfn-xss) 模块来提供过滤支持。
 
 ### 过滤 HTML 标签
 
@@ -252,7 +252,7 @@ console.log(escaped3);
 XSS 过滤函数在某些时候可能会不尽人意，因此你还有另外的选择，使用表单验证器来检查用户
 的输入。
 
-框架建议使用 [sfn-validator](https://github.com/Hyurl/sfn-validator) 模块来检查
+框架建议使用 [sfn-validator](https://github.com/hyurl/sfn-validator) 模块来检查
 用户输入，你可以在 GitHub 上学习更多关于它的信息。
 
 ### 示例

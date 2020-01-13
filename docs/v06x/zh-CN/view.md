@@ -26,8 +26,8 @@ export default class extends HttpController {
 现代化 Web 开发中模板引擎已经不再重要，因此自 0.5.x 版本起，SFN 仅提供了两个
 基于 Alar 框架的模板引擎加载器。
 
-- [alar-ejs-loader](https://github.com/Hyurl/alar-ejs-loader)
-- [alar-pug-loader](https://github.com/Hyurl/alar-pug-loader)
+- [alar-ejs-loader](https://github.com/hyurl/alar-ejs-loader)
+- [alar-pug-loader](https://github.com/hyurl/alar-pug-loader)
 
 这些加载器所返回的模块包含了一个 `render(data: { [name: string]: any }): string`
 方法，当调用 `view()` 方法时，SFN 会自动调用 `render()` 方法来渲染模板。
