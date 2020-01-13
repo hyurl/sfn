@@ -3,8 +3,8 @@ module.exports = {
         {
             name: "sfn-server",
             script: "dist/index.js",
-            exec_mode: "cluster",
-            instances: "max",
+            // exec_mode: "cluster",
+            // instances: "max",
             wait_ready: true,
             timeout: 5000,
             out_file: __dirname + "/logs/web-server-stdout.log",
