@@ -1,6 +1,6 @@
 require("../env-fix");
 
-if (process.execArgv.join(" ").includes("ts-node")) {
+if (!process.execArgv.join(" ").includes("ts-node")) {
     require("source-map-support/register");
 }
 
@@ -31,6 +31,7 @@ export * from "./core/controllers/WebSocketController";
 export * from "./core/bootstrap/index";
 
 import config, { StaticOptions } from "./config";
+import { tryLogError } from './core/tools/functions';
 export { StaticOptions };
 
 global.app.config = config;
@@ -38,11 +39,15 @@ global.app.config = config;
 if (require.main.filename === __filename) {
     require("./core/tools/internal/module").bootstrap();
 
-    let appId: string = app.argv["app-id"] || app.argv._[2];
+    (async () => {
+        let appId: string = app.argv["app-id"] || app.argv._[2];
 
-    if (appId) {
-        app.serve(appId);
-    } else {
-        app.serve();
-    }
+        if (appId) {
+            await app.serve(appId);
+        } else {
+            await app.serve();
+        }
+    })().catch(err => {
+        return tryLogError(err);
+    });
 }

@@ -1,11 +1,15 @@
-import "sfn";
+import { tryLogError } from "sfn";
 
 if (require.main.filename === __filename) {
-    let appId: string = app.argv["app-id"] || app.argv._[2];
+    (async () => {
+        let appId: string = app.argv["app-id"] || app.argv._[2];
 
-    if (appId) {
-        app.serve(appId);
-    } else {
-        app.serve();
-    }
+        if (appId) {
+            await app.serve(appId);
+        } else {
+            await app.serve();
+        }
+    })().catch(err => {
+        return tryLogError(err);
+    });
 }
