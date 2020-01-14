@@ -287,10 +287,10 @@ alar-ejs-loader@^1.1.3:
     "@types/ejs" "^2.6.3"
     ejs "^2.6.2"
 
-alar@^6.4.0:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/alar/-/alar-6.4.0.tgz#4949d61e1a9bcf3ee261c8bf4274c67d41b72c90"
-  integrity sha512-JCtCYrqU+wY+gjc5r165uNj/SGj2StUcExVy2smTdoAmRTgF6oNgwVOiKD/V8KHu/N5nU52Dz+mFZE2mBVFqiw==
+alar@^6.5.0:
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/alar/-/alar-6.5.0.tgz#e9ee443b4fd4a06381dea62292f94d0d352655b7"
+  integrity sha512-csO0FiFHECQACRAi5Ecz4FN3fOK15GYKAiU80huOBhgngRBdRGvHBydlbfbVxWDc/8UANpJAlf1z83I+Wi128w==
   dependencies:
     "@hyurl/structured-clone" "^0.1.4"
     "@types/backoff" "^2.5.1"

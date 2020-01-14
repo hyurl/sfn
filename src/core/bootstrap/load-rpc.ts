@@ -64,10 +64,28 @@ function ensureAppId(id: string): void {
     }
 }
 
+async function getConnect(id: string) {
+    let servers = app.config.server.rpc;
+    let { services, fallbackToLocal = true, ...options } = servers[id];
+    let service = await app.services.connect({
+        ...options,
+        id: app.id,
+        serverId: id
+    }, false);
+
+    app.rpc.connections[id] = service;
+    services.forEach(mod => {
+        service.register(mod);
+        mod.fallbackToLocal(fallbackToLocal);
+    });
+
+    return service;
+}
+
 async function tryConnect(
     service: RpcClient,
     serverId: string,
-    suppressError = false
+    defer = false
 ) {
     ensureAppId(serverId);
 
@@ -82,7 +100,6 @@ async function tryConnect(
         let { services } = app.config.server.rpc[serverId];
 
         await service.open();
-        app.rpc.connections[serverId] = service;
 
         // If detects the schedule service is served by other processes and
         // being connected, stop the local schedule service.
@@ -95,10 +112,6 @@ async function tryConnect(
             delete tasks[serverId];
         }
 
-        // Link all the subscriber listeners from the message channel to
-        // the RPC channel.
-        app.message.linkRpcChannel(service);
-
         pendingConnections.delete(serverId);
 
         if (isMainThread && serverId !== app.id) {
@@ -109,7 +122,7 @@ async function tryConnect(
     } catch (err) {
         pendingConnections.delete(serverId);
 
-        if (!suppressError) {
+        if (!defer) {
             throw err;
         } else {
             return false;
@@ -123,42 +136,34 @@ app.rpc = {
     async serve(id: string) {
         ensureAppId(id);
 
+        app.id = id;
         let servers = app.config.server.rpc;
-        let { services = [], ...options } = servers[id];
+        let { services = [], ...options } = servers[app.id];
         let service = await app.services.serve({
             ...options,
-            id,
+            id: app.id,
             host: "0.0.0.0"
         }, false);
+        let client = await getConnect(app.id);
 
         services.forEach(mod => service.register(mod));
         app.rpc.server = service;
-        app.id = id;
 
         await app.rpc.connectDependencies(id); // connect to dependency services.
         await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
 
         await service.open(); // open channel and initiate bound services.
-        console.log(serveTip("RPC", id, service.dsn));
-        await app.rpc.connect(id); // self-connect after serving.
+        await tryConnect(client, app.id); // self-connect after serving.
         await serveRepl(app.id); // serve the REPL server.
+
+        console.log(serveTip("RPC", app.id, service.dsn));
 
         if (!app.isDevMode) { // notify PM2 that the service is available.
             process.send("ready");
         }
     },
     async connect(id: string, defer = false) {
-        let servers = app.config.server.rpc;
-        let { services, fallbackToLocal = true, ...options } = servers[id];
-        let service = await app.services.connect({
-            ...options,
-            id: app.id
-        }, false);
-
-        services.forEach(mod => {
-            service.register(mod);
-            mod.fallbackToLocal(fallbackToLocal);
-        });
+        let service = await getConnect(id);
 
         if (!(await tryConnect(service, id, defer)) && defer) {
             tasks[id] = setInterval(tryConnect, 1000, service, id, defer);

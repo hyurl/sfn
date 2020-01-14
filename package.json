@@ -57,7 +57,7 @@
         "@types/pluralize": "0.0.29",
         "@types/socket.io": "^2.1.4",
         "@types/xml2js": "^0.4.5",
-        "alar": "^6.4.0",
+        "alar": "^6.5.0",
         "body-parser": "^1.19.0",
         "callsite-record": "^4.1.3",
         "chalk": "^3.0.0",

@@ -1,4 +1,3 @@
-import { RpcClient } from 'alar';
 import values = require("lodash/values")
 
 export class MessageChannel {
@@ -61,7 +60,6 @@ export class MessageChannel {
             connection.unsubscribe(topic, <any>listener);
         }
 
-
         // Remove topic listeners in the message channel.
         if (!listeners.length) {
             return false;
@@ -70,15 +68,6 @@ export class MessageChannel {
             return i === -1 ? false : listeners.splice(i, 1).length > 0;
         } else {
             return delete this.topics[topic];
-        }
-    }
-
-    /** @inner */
-    linkRpcChannel(connection: RpcClient) {
-        for (let topic in this.topics) {
-            for (let listener of this.topics[topic]) {
-                connection.subscribe(topic, <any>listener);
-            }
         }
     }
 }
