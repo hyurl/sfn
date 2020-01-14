@@ -55,7 +55,7 @@ declare global {
          * can always resolve the local instance of the module.
          * @deprecated Alar v6.0 by default uses the local singleton already.
          */
-        const local: symbol;
+        const local: typeof alar.local;
     }
 }
 
