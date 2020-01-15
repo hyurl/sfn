@@ -40,20 +40,19 @@
 
 ### `sfn -c <name> [-t <type>]`
 
-根据给定的名称创建控制器文件。在 **SFN** 应用程序中，我建议你使用 **驼峰法** 来为类
-文件命名，并且首字母使用大写。
+根据给定的名称创建控制器文件。
 
 ```sh
-sfn -c Article
+sfn -c article
 ```
 
-这个命令将会创建一个名为 `Article.ts` 的文件并存储在 `src/controllers/` 目录下。
+这个命令将会创建一个名为 `article.ts` 的文件并存储在 `src/controllers/` 目录下。
 
 默认地，这个命令会创建一个 HttpController，你可以指定 `-t <type>` 选项来生成不同
 类型的地控制器，例如：
 
 ```sh
-sfn -c ArticleSocket -t websocket
+sfn -c articleSocket -t websocket
 ```
 
 这个命令将创建一个 WebSocketController。
@@ -63,10 +62,10 @@ sfn -c ArticleSocket -t websocket
 根据给定的名称创建一个新的服务。
 
 ```sh
-sfn -s Tool
+sfn -s tool
 ```
 
-这个命令将会创建一个名为 `Tool.ts` 的文件并存储在 `src/services/` 目录下。
+这个命令将会创建一个名为 `tool.ts` 的文件并存储在 `src/services/` 目录下。
 
 ### `sfn -l <name>`
 
@@ -88,7 +87,8 @@ sfn -l zh-CN
 
 要打开这个 REPL 窗口，只需要在终端输入命令 `sfn repl <appId>` 即可，`<appId>` 则
 表示你希望连接的服务器，例如 `sfn repl web-server` 将会把 REPL 会话连接到
-web-server。一旦 REPL 准备完成，你就可以做任何你在内置 REPL 中所熟悉的事情。
+web-server。一旦 REPL 准备完成，你就可以做几乎任何你在内置 REPL 中所熟悉的事情（Tab 快捷
+提示除外）。
 
 另外，如果你不希望标准输入输出被传送到 REPL 中，则可以使用 `--no-stdout` 参数来规避，
 通常情况下这很有用，因为在项目运行时，可能会有很多内容被输出到 stdout 中，例如 `console.log`。

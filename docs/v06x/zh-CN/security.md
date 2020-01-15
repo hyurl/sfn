@@ -84,7 +84,7 @@ export default class extends HttpController {
 ### 自动插入 CSRF Token
 
 你可以使用函数 `injectCsrfToken()` 来帮助你将 CSRF Token 插入到 HTML 表单中，但是
-你需要保证你的试图文件地书写是格式化的，并且仅支持 HTML 文件（或 **ejs** 模板）。
+你需要保证你的视图文件的书写是格式化的，并且仅支持 HTML 文件（或 **ejs** 模板）。
 
 ```typescript
 import { HttpController, route, injectCsrfToken } from "sfn";
@@ -104,7 +104,7 @@ export default class extends HttpController {
 
 ### 将 CSRF Token 返回给服务器
 
-在客户端，，你只需要将字段 `x-csrf-token`，其携带着 token，一同与你的数据发送给
+在客户端，你只需要将字段 `x-csrf-token`，其携带着 token，一同与你的数据发送给
 服务端即可，你可以通过下面任何一种方式来发送这个字段：
 
 - `HTTP request header` for Ajax.
@@ -122,7 +122,7 @@ export default class extends HttpController {
 ## CORS 控制
 
 允许来自不受信任的访问源进行请求会产生一些问题，虽然现代浏览器更倾向于屏蔽来自跨域的
-响应，但是在大多数服务端，其操作已经被正常地执行，即使远程客户端永远不会意识到。
+响应，但是在大多数服务端，其操作已经被正常地执行，即使客户端永远不会意识到。
 
 然而在 **SFN** 框架中，CORS 检查是非常严格的，如果检查不通过，那么调用的方法永远
 不会执行。同时框架赋予你完全控制 CORS 地能力，并且它很容易配置。如平时一样，你

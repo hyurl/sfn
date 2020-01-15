@@ -88,7 +88,7 @@ app.schedule.cancel(taskId);
 恢复运行。
 
 ```typescript
-// services/someService.ts
+// services/myService.ts
 declare global {
     namespace app {
         namespace services {
@@ -98,17 +98,20 @@ declare global {
 }
 
 export default class MyService {
+    async init() {
+        // Should create schedule in the init() method.
+        var taskId = app.schedule.create({
+            start: moment().unix(),
+            repeat: 3600 * 24,
+            module: app.services.myService,
+            handler: "syncDataEveryDay"
+        });
+    }
+
     async syncDataEveryDay() {
         // ...
     }
 }
-
-var taskId = app.schedule.create({
-    start: moment().unix(),
-    repeat: 3600 * 24,
-    module: app.services.myService,
-    handler: "syncDataEveryDay"
-});
 ```
 
 ## 传递数据到定时任务的处理器函数中
@@ -119,16 +122,18 @@ var taskId = app.schedule.create({
 
 ```typescript
 export default class MyService {
+    async init() {
+        var taskId = app.schedule.create({
+            start: moment().unix(),
+            repeat: 3600 * 24,
+            module: app.services.myService,
+            handler: "syncDataEveryDay",
+            data: [{ foo: "Hello, World!" }]
+        });
+    }
+
     async syncDataEveryDay(data: { foo: any }) {
         // ...
     }
 }
-
-var taskId = app.schedule.create({
-    start: moment().unix(),
-    repeat: 3600 * 24,
-    module: app.services.myService,
-    handler: "syncDataEveryDay",
-    data: [{ foo: "Hello, World!" }]
-});
 ```

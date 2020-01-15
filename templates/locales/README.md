@@ -1,4 +1,4 @@
-This folder stores language packages, each package is named in RFC1766 standard,
+This folder stores language packs, each package is named in RFC1766 standard,
 support JSON and JSONC (JSON with Comments) files.
 
 ```jsonc

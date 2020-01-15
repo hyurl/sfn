@@ -161,12 +161,12 @@ export default class extends HttpController {
     txtData: string;
 
     async init() {
-        super.init();
+        await super.init();
         this.txtData = await readFile("example.txt", "utf8");
     }
 
-    destroy() {
-        super.destroy();
+    async destroy() {
+        await super.destroy();
         // This method is just for example, it's not necessary here, but 
         // sometimes you should define it and say, close database connections in 
         // it.
@@ -197,11 +197,11 @@ import { HttpController, Request, Response, route } from "sfn";
 import * as fs from "fs";
 import * as util from "util";
 
-var fileExists = util.promisify(fs.exists),
+const fileExists = util.promisify(fs.exists),
 
 export default class extends HttpController {
     @route.get("/check-file")
-    async checkFilePromisify() {
+    async checkFile() {
         if (await fileExists("somefile")) {
             return this.success("File exists!");
         } else {
@@ -238,7 +238,7 @@ export default class extends HttpController {
 }
 ```
 
-框架会检查客户端所接受地响应类型，并用合适的方式发送错误信息。通常地，一个普通的
+框架会检查客户端所接受的响应类型，并用合适的方式发送错误信息。通常地，一个普通的
 HTTP 错误页面会被返回。但如果在请求头中出现了 `Accept: application/json`，一个
 状态码为 `200` 并携带 JSON 信息 `{success: false, code, error}` 的响应将会被返回，
 这个响应形式来自于控制器方法 [error()](./http-controller#通用-API-响应).。
@@ -249,7 +249,7 @@ HTTP 错误页面会被返回。但如果在请求头中出现了 `Accept: appli
 
 ## 自定义错误页面
 
-默认地，框架会根据错误代码发送一个对应的视图文件，并且仅传递 `err: HttpError` 
+默认地，框架会根据错误代码发送一个对应的视图文件，并且仅传递 `err: StatusException` 
 对象到模板中，它可能并不满足一些复杂的需求。因此，框架允许你自定义错误处理器，
 通过重写静态方法 `HttpController.httpErrorView` 来实现。下面的示例将向你展示如何做。
 
@@ -308,7 +308,7 @@ export default class extends HttpController {
 
 如果所绑定的是一个 SSE 路由，那么所有被绑定方法的返回值都会被依次发送给客户端。
 并且，如果方法是一个生成器，那么该方法所 `yield` 的值也会被依次发送。因此，你也
-可以使用生成器来向客户端持续的向客户端返回数据。
+可以使用生成器来持续地向客户端返回数据。
 
 ```typescript
 import { HttpController, Request, Response, route } from "sfn";
