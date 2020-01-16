@@ -19,7 +19,7 @@ just recommended.
         - `websocket.ts` User-defined bootstrap file related to WebSocket controllers.
         - Other files must be loaded by `index.ts`.
     - `controllers/`* The directory that stores controller files.
-    - `locales/`* The directory that stores language packages.
+    - `locales/`* The directory that stores language packs.
     - `models/`* The directory that stores model files.
     - `hooks`* The directory that stores hook files. 
     - `services/`* The directory that stores service files.

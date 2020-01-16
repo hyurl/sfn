@@ -174,10 +174,12 @@ export default class extends HttpController {
     txtData: string;
 
     async init() {
+        await super.init();
         this.txtData = await readFile("example.txt", "utf8");
     }
 
-    destroy() {
+    async destroy() {
+        await super.destroy();
         // This method is just for example, it's not necessary here, but 
         // sometimes you should define it and say, close database connections in 
         // it.
@@ -210,11 +212,11 @@ import { HttpController, Request, Response, route } from "sfn";
 import * as fs from "fs";
 import * as util from "util";
 
-var fileExists = util.promisify(fs.exists),
+const fileExists = util.promisify(fs.exists),
 
 export default class extends HttpController {
     @route.get("/check-file")
-    async checkFilePromisify() {
+    async checkFile() {
         if (await fileExists("somefile")) {
             return this.success("File exists!");
         } else {
@@ -267,9 +269,9 @@ Otherwise, a simple error response will be sent.
 ### Customize Error Page
 
 By default, the framework will send a view file according to the error code, 
-and only pass the `err: HttpError` object to the template, it may not suitable
-for complicated needs. For this reason, the framework allows you to customize 
-the error view handler by rewriting the static method 
+and only pass the `err: StatusException` object to the template, it may not
+suitable for complicated needs. For this reason, the framework allows you to
+customize the error view handler by rewriting the static method 
 `HttpController.httpErrorView`, the following example will show you how.
 
 ```typescript

@@ -1,9 +1,11 @@
 <!-- title: Dependency Injection; order: 18 -->
 # Concept
 
-Since SFN 0.5.x introduced Alar framework to auto-load and hot-reload modules, 
-traditional Dependency Injection support is no longer suggested, so here I only
-list out the DI specifications of controllers.
+Since SFN 0.5.x introduced Alar framework to auto-load and hot-reload modules,
+and during practice I found Dependency Injection is less practical and will
+cause some semantic deficiencies, the traditional Dependency Injection support
+is no longer suggested, so here I only list out the DI specifications of
+controllers.
 
 ## Auto-Injection in Controllers
 

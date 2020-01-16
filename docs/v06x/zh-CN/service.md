@@ -77,7 +77,7 @@ export default class CacheService {
 
 ## 分布式服务
 
-Alar](https://github.com/hyurl/alar) 框架允许将服务分离出来并作为
+[Alar](https://github.com/hyurl/alar) 框架允许将服务分离出来并作为
 RPC 调用，这样并可以将 Web 服务器所承载的压力尽可能减小，从而提高稳定性。这个特性
 也是 SFN 分布式系统的核心。
 

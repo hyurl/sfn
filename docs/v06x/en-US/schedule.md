@@ -95,7 +95,7 @@ schedule as the handler function, and take extra benefits like after the service
 rebooted, the schedule can resume running.
 
 ```typescript
-// services/someService.ts
+// services/myService.ts
 declare global {
     namespace app {
         namespace services {
@@ -105,17 +105,20 @@ declare global {
 }
 
 export default class MyService {
+    async init() {
+        // Should create schedule in the init() method.
+        var taskId = app.schedule.create({
+            start: moment().unix(),
+            repeat: 3600 * 24,
+            module: app.services.myService,
+            handler: "syncDataEveryDay"
+        });
+    }
+
     async syncDataEveryDay() {
         // ...
     }
 }
-
-var taskId = app.schedule.create({
-    start: moment().unix(),
-    repeat: 3600 * 24,
-    module: app.services.myService,
-    handler: "syncDataEveryDay"
-});
 ```
 
 ### Pass Data To The Handler
@@ -127,16 +130,18 @@ serialized will be lost, and once set, the data cannot be modified.
 
 ```typescript
 export default class MyService {
+    async init() {
+        var taskId = app.schedule.create({
+            start: moment().unix(),
+            repeat: 3600 * 24,
+            module: app.services.myService,
+            handler: "syncDataEveryDay",
+            data: [{ foo: "Hello, World!" }]
+        });
+    }
+
     async syncDataEveryDay(data: { foo: any }) {
         // ...
     }
 }
-
-var taskId = app.schedule.create({
-    start: moment().unix(),
-    repeat: 3600 * 24,
-    module: app.services.myService,
-    handler: "syncDataEveryDay",
-    data: [{ foo: "Hello, World!" }]
-});
 ```

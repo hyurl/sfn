@@ -47,22 +47,20 @@ must-be-present files when any missing.
 
 ### `sfn -c <name> [-t <type>]`
 
-Creates a controller file according to the specified name. In an SFN application,
-I recommend you name your class file as **CamelCase** style with a leading
-upper-cased character.
+Creates a controller file according to the specified name.
 
 ```sh
-sfn -c Article
+sfn -c article
 ```
 
-This command should create a file named `Article.ts` in `src/controllers/` 
+This command should create a file named `article.ts` in `src/controllers/` 
 directory.
 
 By default, this command will generate a HttpController, you can specify the 
 `-t <type>` option to generate different type of controllers, e.g.
 
 ```sh
-sfn -c ArticleSocket -t websocket
+sfn -c articleSocket -t websocket
 ```
 
 This command will create a WebSocketController.
@@ -71,10 +69,10 @@ This command will create a WebSocketController.
 
 Creates a new service according to the specified name.
 ```sh
-sfn -s Tool
+sfn -s tool
 ```
 
-This command should create a file named `Tool.ts` in `src/services/` directory.
+This command should create a file named `tool.ts` in `src/services/` directory.
 
 ### `sfn -l <name>`
 
@@ -101,7 +99,7 @@ To open the REPL window, simply type the command `sfn repl <appId>` in the
 terminal, where the `<appId>` is the server you wish to attach, e.g. 
 `sfn repl web-server` will attach the REPL session to the web-server. Once
 the REPL is ready, you can do almost everything you familiar with the built-in
-REPL.
+REPL (Except for `Tab`-key fast hint).
 
 Another tip, if you don't want any standard output content being transmitted to
 the REPL, you can use the option `--no-stdout` to prevent it, this is very
