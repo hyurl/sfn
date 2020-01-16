@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.6.5",
+    "version": "0.6.6",
     "description": "An easy and elegant web-based service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",

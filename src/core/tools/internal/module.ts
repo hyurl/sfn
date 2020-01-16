@@ -88,16 +88,26 @@ export function loadLanguagePack(filename: string) {
     }
 }
 
+export function loadConfig() {
+    let configFile = app.APP_PATH + "/config";
+    let config = require("../../../config");
+
+    if (moduleExists(configFile)) {
+        // Load user-defined configurations.
+        let mod = tryImport(configFile);
+
+        if (!Object.is(mod, config) && typeof mod.default == "object") {
+            merge(config.default, mod.default);
+        }
+    }
+}
+
 /**
  * NOTE: This function is called in the following files:
  * - ../../../index.ts
  * - ../../../../index.js
  */
 export function bootstrap() {
-    let configFile = app.APP_PATH + "/config";
-    let tryImport = createImport(require);
-    let config = require("../../../config");
-
     if (!app.isCli) {
         // Load user-defined bootstrap procedures.
         let bootstrap = app.APP_PATH + "/bootstrap/index";
@@ -108,15 +118,8 @@ export function bootstrap() {
         fs.pathExists(app.hooks.path).then(async (exists) => {
             exists && (await importDirectory(app.hooks.path));
         });
-    }
 
-    if (moduleExists(configFile)) {
-        // Load user-defined configurations.
-        let mod = tryImport(configFile);
-
-        if (!Object.is(mod, config) && typeof mod.default == "object") {
-            merge(config.default, mod.default);
-        }
+        loadConfig(); // load configs
     }
 
     if (fs.existsSync(app.locales.path)) {

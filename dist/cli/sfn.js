@@ -12,6 +12,7 @@ const init_1 = require("../init");
 const color_1 = require("../core/tools/internal/color");
 const repl_1 = require("../core/tools/internal/repl");
 const module_1 = require("../core/tools/internal/module");
+module_1.loadConfig();
 const tryImport = module_1.createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;

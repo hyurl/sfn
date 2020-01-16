@@ -9,7 +9,9 @@ import get = require('lodash/get');
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
-import { moduleExists, createImport } from "../core/tools/internal/module";
+import { moduleExists, createImport, loadConfig } from "../core/tools/internal/module";
+
+loadConfig();
 
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
