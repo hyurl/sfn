@@ -30,7 +30,7 @@ program.description("create new controllers, services. etc.")
         console.log("  sfn -c article -t websocket      create a websocket controller of article");
         console.log("  sfn -s article                   create an article service");
         console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
-        console.log("  sfn repl web-server              open REPL session to web-server");
+        console.log("  sfn [repl] web-server            open REPL session to web-server");
         console.log("");
     });
 
