@@ -288,7 +288,7 @@ export class ScheduleService {
         this.timer = setInterval(() => {
             let now = timestamp();
 
-            for (let [, task] of this.tasks) {
+            this.tasks.forEach(task => {
                 let { start, end, repeat, timetable } = task;
                 let expired = !(!end || now < end);
 
@@ -297,6 +297,9 @@ export class ScheduleService {
                         if (timetable.length === 0) {
                             expired = true;
                         } else {
+                            // A reverse-ordered iteration is needed here since
+                            // we want to check the timetable from the newest
+                            // time to the oldest one.
                             for (let i = timetable.length; --i;) {
                                 if (now >= timetable[i]) {
                                     this.dispatch(task);
@@ -329,19 +332,19 @@ export class ScheduleService {
                 if (expired) {
                     this.dispatch(task, "onEnd");
                 }
-            }
+            });
         }, 1000);
 
         if (app.config.saveSchedules) {
             try {
                 let tasks: ScheduleTask[] = await fs.readJSON(this.filename);
 
-                for (let task of tasks) {
+                tasks.forEach(task => {
                     // compatible with old version
                     Array.isArray(task) && (task = task[1]);
 
                     this.tasks.set(task.taskId, task);
-                }
+                });
             } catch (e) { }
 
             if (this.isScheduleServer()) {
@@ -370,12 +373,12 @@ export class ScheduleService {
         let isScheduleServer = this.isScheduleServer();
         let jobs: Promise<any>[] = [];
 
-        for (let [taskId, task] of this.tasks) {
+        this.tasks.forEach((task, taskId) => {
             if (transferTasks && !isScheduleServer) {
                 this.tasks.delete(taskId);
                 jobs.push(app.services.schedule(taskId).add(task));
             }
-        }
+        });
 
         await Promise.all(jobs);
 

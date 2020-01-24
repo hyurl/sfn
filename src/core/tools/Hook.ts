@@ -18,17 +18,12 @@ export class Hook<I = void, O = void> {
     /** Binds a handler to the hook. */
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
         let path = traceModulePath(this.path) || "<internal>";
+        let container = Hook.Container.get(path);
+        container || Hook.Container.set(path, container = new Map());
+        let handlers = container.get(this.path);
+        handlers || container.set(this.name, handlers = new Set());
 
-        if (!Hook.Container[path]) {
-            Hook.Container[path] = {};
-        }
-
-        if (!Hook.Container[path][this.name]) {
-            Hook.Container[path][this.name] = [];
-        }
-
-        Hook.Container[path][this.name].push(handler);
-
+        handlers.add(handler);
         return this;
     }
 
@@ -61,13 +56,13 @@ export class Hook<I = void, O = void> {
     getHandlers() {
         let handlers: Function[] = [];
 
-        for (let container of Object.values(Hook.Container)) {
-            let _handlers = container[this.name];
+        Hook.Container.forEach(container => {
+            let _handlers = container.get(this.name);
 
-            if (_handlers && _handlers.length > 0) {
+            if (_handlers && _handlers.size > 0) {
                 handlers.push(..._handlers);
             }
-        }
+        });
 
         return handlers;
     }
@@ -91,11 +86,7 @@ export class Hook<I = void, O = void> {
 }
 
 export namespace Hook {
-    export const Container: {
-        [path: string]: {
-            [name: string]: Function[];
-        }
-    } = {};
+    export const Container = new Map<string, Map<string, Set<Function>>>();
 }
 
 export class HookProxy extends Hook {
@@ -103,19 +94,18 @@ export class HookProxy extends Hook {
         return watch(this.path, {
             followSymlinks: false,
             awaitWriteFinish: true,
-            ignored: /\.(js\.map|d\.ts|md)$/,
+            ignored: (file: string) => !/\.(ts|js)$/.test(extname(file))
         }).on("add", filename => {
             tryImport(filename);
         }).on("change", filename => {
-            // remove previous hooks from the internal container
-            this.clearCache(filename);
-            tryImport(filename);
+            this.clearCache(filename); // remove previous hooks from the cache
+            tryImport(filename); // import the modified module
         }).on("unlink", this.clearCache.bind(this));
     }
 
     private clearCache(filename: string) {
         let path = filename.slice(0, -extname(filename).length);
-        path && (Hook.Container[path] = {});
-        delete require.cache[filename];
+        path && (Hook.Container.delete(path));
+        delete require.cache[filename]; // delete module cache
     }
 }

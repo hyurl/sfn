@@ -97,7 +97,7 @@ export function ensureType(value: any) {
                 let obj = {};
 
                 for (let key in value) {
-                    if (value.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(value, key)) {
                         obj[key] = ensureType(value[key]);
                     }
                 }
