@@ -1,7 +1,7 @@
 import values = require("lodash/values")
 
 export class MessageChannel {
-    private topics: { [name: string]: ((data: any) => void)[] } = {};
+    private topics = new Map<string, Set<(data: any) => void>>();
 
     constructor(readonly name: string) { }
 
@@ -11,18 +11,16 @@ export class MessageChannel {
      */
     publish(topic: string, data?: any, servers?: string[]): boolean {
         topic = this.name + "#" + topic;
+        let listeners: Set<(data: any) => void>;
 
         if (app.rpc.server) {
             // If the current server is an RPC server, publish the topic via the
             // RPC channel.
             return app.rpc.server.publish(topic, data, servers);
-        } else if (this.topics[topic] && this.topics[topic].length > 0) {
-            // Invoke the listeners asynchronously.
-            (async () => {
-                for (let listener of this.topics[topic]) {
-                    listener.call(void 0, data);
-                }
-            })().catch(() => null);
+        } else if ((listeners = this.topics.get(topic)) && listeners.size > 0) {
+            listeners.forEach(handle => {
+                try { handle(data) } catch (e) { }
+            });
 
             return true;
         } else {
@@ -33,12 +31,10 @@ export class MessageChannel {
     /** Subscribes a `listener` to the given `topic` of the channel. */
     subscribe(topic: string, listener: (data: any) => void) {
         topic = this.name + "#" + topic;
+        let listeners = this.topics.get(topic);
 
-        if (!this.topics[topic]) {
-            this.topics[topic] = [];
-        }
-
-        this.topics[topic].push(listener);
+        listeners || this.topics.set(topic, listeners = new Set());
+        listeners.add(listener);
 
         // If there are active RPC connections, subscribe the topic to the RPC
         // channel as well.
@@ -52,8 +48,7 @@ export class MessageChannel {
     /** Unsubscribes a `listener` or all listeners of the `topic`. */
     unsubscribe(topic: string, listener?: (data: any) => void) {
         topic = this.name + "#" + topic;
-
-        let listeners = this.topics[topic] || [];
+        let listeners = this.topics.get(topic);
 
         // Unsubscribe topic listeners in the RPC channel.
         for (let connection of values(app.rpc.connections)) {
@@ -61,13 +56,12 @@ export class MessageChannel {
         }
 
         // Remove topic listeners in the message channel.
-        if (!listeners.length) {
+        if (!listeners || listeners.size === 0) {
             return false;
         } else if (listener) {
-            let i = listeners.indexOf(listener);
-            return i === -1 ? false : listeners.splice(i, 1).length > 0;
+            return listeners.delete(listener);
         } else {
-            return delete this.topics[topic];
+            return this.topics.delete(topic);
         }
     }
 }
