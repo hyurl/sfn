@@ -14,7 +14,7 @@ import { ThenableAsyncGenerator } from "thenable-generator";
 import last = require("lodash/last");
 import { applyInit, applyDestroy } from './http-route';
 
-let importedNamesapces: string[] = [];
+let importedNamespaces: string[] = [];
 type SocketEventInfo = {
     time: number;
     event: string;
@@ -22,9 +22,9 @@ type SocketEventInfo = {
 };
 
 export function tryImport(nsp: string) {
-    if (importedNamesapces.includes(nsp)) return;
+    if (importedNamespaces.includes(nsp)) return;
 
-    importedNamesapces.push(nsp);
+    importedNamespaces.push(nsp);
     ws.of(nsp)
         .use(initHandler)
         .use(cookieHandler)
