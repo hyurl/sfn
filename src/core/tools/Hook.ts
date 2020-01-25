@@ -20,7 +20,7 @@ export class Hook<I = void, O = void> {
         let path = traceModulePath(this.path) || "<internal>";
         let container = Hook.Container.get(path);
         container || Hook.Container.set(path, container = new Map());
-        let handlers = container.get(this.path);
+        let handlers = container.get(this.name);
         handlers || container.set(this.name, handlers = new Set());
 
         handlers.add(handler);

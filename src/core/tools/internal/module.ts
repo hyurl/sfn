@@ -7,6 +7,7 @@ import merge = require('lodash/merge');
 import { Locale } from "../interfaces";
 import get = require('lodash/get');
 
+const Module: typeof NodeJS.Module = <any>module.constructor;
 const tryImport = createImport(require);
 
 export function moduleExists(name: string): boolean {
@@ -23,7 +24,24 @@ export function createImport(require: NodeRequire): (id: string) => {
 
             // Support JSONC (JSON with comment) files.
             if ([".json", ".jsonc"].includes(path.extname(filename))) {
-                return FRON.parse(fs.readFileSync(filename, "utf8"));
+                let _module: NodeJS.Module = require.cache[filename];
+
+                if (!_module) {
+                    _module = Object.create(Module.prototype);
+                    require.cache[filename] = _module;
+                    Object.assign<NodeJS.Module, NodeJS.Module>(_module, {
+                        require,
+                        filename,
+                        id: filename,
+                        exports: FRON.parse(fs.readFileSync(filename, "utf8")),
+                        loaded: true,
+                        parent: module,
+                        paths: module.paths,
+                        children: []
+                    });
+                }
+
+                return _module.exports;
             } else {
                 return require(id);
             }
