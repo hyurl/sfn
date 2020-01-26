@@ -27,17 +27,14 @@ export function createImport(require: NodeRequire): (id: string) => {
                 let _module: NodeJS.Module = require.cache[filename];
 
                 if (!_module) {
-                    _module = Object.create(Module.prototype);
+                    _module = new Module(filename, module);
                     require.cache[filename] = _module;
-                    Object.assign<NodeJS.Module, NodeJS.Module>(_module, {
+                    Object.assign<NodeJS.Module, Partial<NodeJS.Module>>(_module, {
                         require,
                         filename,
-                        id: filename,
                         exports: FRON.parse(fs.readFileSync(filename, "utf8")),
                         loaded: true,
-                        parent: module,
-                        paths: module.paths,
-                        children: []
+                        paths: module.paths
                     });
                 }
 
