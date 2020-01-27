@@ -22,6 +22,17 @@
   resolved "https://registry.yarnpkg.com/@hyurl/structured-clone/-/structured-clone-0.1.4.tgz#dd081fbb071d1f05b5d06251a283df9966b49f96"
   integrity sha512-dQndcIz+ncfZTrq0XQfWUIzc4LJckhfs+58N3uC6AN+2Q/7MjDfOSEJwRrUJGueDSANrZ/3IhVkSUW4mYrGxYg==
 
+"@hyurl/utils@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@hyurl/utils/-/utils-0.1.0.tgz#d6c07beee4804ad5951b2c21c48a1a2730e4bf20"
+  integrity sha512-gDj3pnvRPvotvCLlRaDlik/V3IgXoGZtCd19w7P5eAahoMdQttQQye0Z08DdDgPt+VuV/HpEVWokzpocXjNNTA==
+  dependencies:
+    is-like "^0.1.3"
+    moment "^2.24.0"
+    split-any "^1.0.1"
+    tslib "^1.10.0"
+    utf8-length "0.0.1"
+
 "@types/backoff@^2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@types/backoff/-/backoff-2.5.1.tgz#343d0f5c75c2c65d1f90f954f469506a3b4a41ed"
@@ -1118,6 +1129,11 @@ is-like@^0.1.2:
   resolved "https://registry.yarnpkg.com/is-like/-/is-like-0.1.2.tgz#fa120083af087b857acfa181241eb92ec0c5ae44"
   integrity sha512-ZSPZqF/LV/fVkl0jOYVJvLlEuGY8x/WBI6n3oayrGxSeMaY11vPdl4IsdzTCy90n+9KIlw8riQyAcsztFcwRUA==
 
+is-like@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/is-like/-/is-like-0.1.3.tgz#f46a6dc9439520b2ac8b962e7792d27d33182a2d"
+  integrity sha512-Sc68QTXZNHnQXwcD67jDBzcry2V5zQwDz7mB4kQSmoiTyITgMj8JqYmLnXdxDcGuaBILczQGR+lzSLnsh4AhAA==
+
 is-number@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/is-number/-/is-number-7.0.0.tgz#7535345b896734d5f80c4d06c50955527a14f12b"
@@ -1788,6 +1804,13 @@ source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
+split-any@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/split-any/-/split-any-1.0.1.tgz#13aefaa2610bebd76c594c67bfd0ed8fb8c272c4"
+  integrity sha512-7OQJqG6W8aGx/75b0AWMf7ZNydXKbXWaAr0VFQ4Yzv5b3vclvRo6VZ+EeE4esqTIb7811+nFLqXuUoQjGFB+mw==
+  dependencies:
+    is-like "^0.1.2"
+
 sprintf-js@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.1.2.tgz#da1765262bf8c0f571749f2ad6c26300207ae673"
@@ -1930,6 +1953,11 @@ url6@^6.1.0:
   dependencies:
     "@types/qs" "^6.5.1"
     qs "^6.5.1"
+
+utf8-length@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/utf8-length/-/utf8-length-0.0.1.tgz#d315c4bed529c977f18dd35c73d72628327d9ada"
+  integrity sha1-0xXEvtUpyXfxjdNcc9cmKDJ9mto=
 
 util-deprecate@~1.0.1:
   version "1.0.2"

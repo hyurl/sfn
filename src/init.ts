@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as FRON from "fron";
 import * as alar from "alar";
 import parseArgv = require("minimist");
-import { ensureType } from './core/tools/internal';
+import ensureType from "@hyurl/utils/ensureType";
 import trimEnd = require("lodash/trimEnd");
 
 declare global {

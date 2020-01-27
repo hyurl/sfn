@@ -1,15 +1,6 @@
 import * as util from "util";
 import { green } from './color';
 
-const truePattern = /^\s*(true|yes|on)\s*$/i;
-const falsePattern = /^\s*(false|no|off)\s*$/i;
-const nullPattern = /^\s*(null|nil|none|void)\s*$/i;
-
-export function isOwnMethod(obj: any, method: string): boolean {
-    return typeof obj[method] === "function" &&
-        (<Object>obj.constructor.prototype).hasOwnProperty(method);
-}
-
 export function serveTip(type: string, id: string, url: string) {
     return green`${type} server [${id}](${url}) started.`;
 }
@@ -25,10 +16,6 @@ export function baseUrl(): string {
 export function inspectAs<T>(target: T, data: any): T {
     target[util.inspect.custom] = () => data;
     return target;
-}
-
-export function isSubClassOf(target: Function, base: Function) {
-    return target.prototype instanceof base;
 }
 
 /**
@@ -57,56 +44,4 @@ export function copyFuncProps(source: Function, target: Function) {
     define(target, "length", source.length);
     define(target, "toString", source.toString.bind(source));
     return target;
-}
-
-/** Casts the value or its properties to the closest types. */
-export function ensureType(value: any) {
-    switch (typeof value) {
-        case "string": {
-            if (value.trim().length === 0) {
-                return value;
-            } else if (truePattern.test(value)) {
-                return true;
-            } else if (falsePattern.test(value)) {
-                return false;
-            } else if (nullPattern.test(value)) {
-                return null;
-            } else {
-                let num = Number(value);
-
-                if (!isNaN(num) && num <= Math.pow(2, 31) - 1) {
-                    return num;
-                } else {
-                    return value;
-                }
-            }
-        }
-
-        case "object": {
-            if (value === null) {
-                return null;
-            } else if (Array.isArray(value)) {
-                let arr = [];
-
-                for (let item of value) {
-                    arr.push(ensureType(item));
-                }
-
-                return arr;
-            } else {
-                let obj = {};
-
-                for (let key in value) {
-                    if (Object.prototype.hasOwnProperty.call(value, key)) {
-                        obj[key] = ensureType(value[key]);
-                    }
-                }
-
-                return obj;
-            }
-        }
-
-        default:
-            return value;
-    }
 }

@@ -6,7 +6,7 @@ import { router } from "../bootstrap/index";
 import { HttpController } from "../controllers/HttpController";
 import { StatusException } from "../tools/StatusException";
 import { randStr } from "../tools/functions";
-import { isOwnMethod } from "../tools/internal";
+import isOwnMethod from "@hyurl/utils/isOwnMethod";
 import { tryLogError } from "../tools/internal/error";
 import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";

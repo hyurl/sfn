@@ -1,4 +1,5 @@
-import { WebSocketController, event, sleep, queue, requireAuth } from "sfn";
+import { WebSocketController, event, queue, requireAuth } from "sfn";
+import sleep from "@hyurl/utils/sleep";
 
 export default class iWebSocketController extends WebSocketController {
     authorized = true;

@@ -4,7 +4,7 @@ import md5 = require("md5");
 import moment = require('moment');
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
-import { timestamp } from "./functions";
+import timestamp from "@hyurl/utils/timestamp";
 import sift from "sift";
 
 export interface TaskOptions<T = any, D extends any[] = any[]> {
@@ -144,14 +144,14 @@ export class Schedule {
                 } else {
                     start = moment().unix();
                 }
-            } else {
+            } else if (typeof start !== "number") {
                 start = timestamp(start);
             }
         } else {
             let now = moment().unix();
 
             timetable = timetable
-                .map(timestamp)
+                .map(time => typeof time === "number" ? time : timestamp(time))
                 .sort()
                 .filter((time, i, table) => {
                     if (time < now) {
@@ -171,7 +171,7 @@ export class Schedule {
             if (endIn) {
                 end = moment().unix() + endIn;
             }
-        } else {
+        } else if (typeof end !== "number") {
             end = timestamp(end);
         }
 

@@ -7,7 +7,7 @@ import { logRequest } from "./http-init";
 import initHandler from "./websocket-init";
 import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
-import { isOwnMethod } from "../tools/internal";
+import isOwnMethod from "@hyurl/utils/isOwnMethod";
 import { tryLogError } from "../tools/internal/error";
 import { eventMap } from '../tools/RouteMap';
 import { ThenableAsyncGenerator } from "thenable-generator";
