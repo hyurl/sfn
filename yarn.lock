@@ -310,9 +310,9 @@ alar-ejs-loader@^1.1.3:
     ejs "^2.6.2"
 
 alar@^6.5.0:
-  version "6.6.0"
-  resolved "https://registry.yarnpkg.com/alar/-/alar-6.6.0.tgz#8f3297f2b2221607b7d46c94dc7f12ee1776f073"
-  integrity sha512-ZDiDh74NIp9mZJdoM46i7S/xjk2PLalNiDyGejX4EUuwOz/8TCe+Avu1WIv9EDeHOo378JYmH7vorWRK2mW1vA==
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/alar/-/alar-6.6.1.tgz#e0bc7f8ddb1ccb8cf4a4018fb396f8def229227f"
+  integrity sha512-mGzZBfUqs6Vc8Zlj/onnUpoYx4cEVZ87Eqn+QynqhTKhUAlMvLuwO0fnzTGTVmWktQpfM05l3K7JAmyYGmfv1Q==
   dependencies:
     "@hyurl/structured-clone" "^0.1.4"
     "@hyurl/utils" "^0.1.2"
