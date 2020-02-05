@@ -287,15 +287,22 @@ export class ScheduleService {
         return true;
     }
 
-    /** @inner Use `app.schedule.cancel()` instead. */
-    async delete(taskId: string) {
-        let task = this.tasks.get(taskId);
+    delete(taskId: string): Promise<boolean>;
+    delete(condition: object): Promise<boolean>;
+    async delete(condition: string | object) {
+        if (typeof condition === "string") {
+            let task = this.tasks.get(condition);
 
-        if (task) {
-            this.dispatch(task, "onEnd");
-            return true;
+            if (task) {
+                this.dispatch(task, "onEnd");
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            let tasks = await this.query(condition);
+            await Promise.all(tasks.map(task => this.delete(task.taskId)));
+            return tasks.length > 0;
         }
     }
 
