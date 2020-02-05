@@ -7,7 +7,12 @@ import { traceModulePath } from './internal/module';
 import timestamp from "@hyurl/utils/timestamp";
 import sift from "sift";
 
-export interface TaskOptions<T = any, D extends any[] = any[]> {
+
+/** @deprecated */
+export type TaskOptions = FunctionTaskOptions<any> | ModuleTaskOptions<any, string>;
+export type TaskHandler = (...data: any[]) => void | Promise<void>;
+
+export interface BaseTaskOptions<F extends TaskHandler> {
     /**
      * A UNIX timestamp, date-time string or Date instance of when should the
      * task starts running.
@@ -40,22 +45,22 @@ export interface TaskOptions<T = any, D extends any[] = any[]> {
      */
     salt?: string;
     /**
-     * If provided, the schedule will be bound to a specified `module` and must
-     * provide the `handler` a method of the module instance.
-     */
-    module?: ModuleProxy<T>;
-    /**
-     * A callback function or a method name of the `module` instance (if 
-     * provided). 
-     */
-    handler?: ((...data: D) => void) | keyof FunctionProperties<T>;
-    onEnd?: ((...data: D) => void) | keyof FunctionProperties<T>
-    /**
      * The data passed to the handler as arguments, note that the data will be
      * jsonified for transmission, anything that cannot be jsonified will be
      * lost during transmission.
      */
-    data?: D
+    data?: Parameters<F>;
+}
+
+export interface FunctionTaskOptions<F extends TaskHandler> extends BaseTaskOptions<F> {
+    handler?: F;
+    onEnd?: (...data: Parameters<F>) => void | Promise<void>;
+}
+
+export interface ModuleTaskOptions<T, M extends keyof FunctionProperties<T>> extends BaseTaskOptions<T[M]> {
+    module?: ModuleProxy<T>;
+    handler?: M;
+    onEnd?: keyof FunctionProperties<T>;
 }
 
 export interface ScheduleTask {
@@ -68,7 +73,7 @@ export interface ScheduleTask {
     module?: string;
     handler?: string;
     onEnd?: string;
-    data?: any[]
+    data?: any[];
 }
 
 export class Schedule {
@@ -78,10 +83,34 @@ export class Schedule {
      * Creates a new schedule task according to the options and returns the task
      * ID. NOTE: the minimum tick interval of the schedule service is `1000`ms. 
      */
-    create<D extends any[]>(
-        options: TaskOptions, handler: (...data: D) => void): string;
-    create<T, D extends any[]>(options: TaskOptions<T, D>): string;
-    create(options: TaskOptions, handler: Function | string = null): string {
+    create<F extends TaskHandler>(
+        options: BaseTaskOptions<F>,
+        handler: F,
+    ): string;
+    create<F extends TaskHandler>(
+        options: BaseTaskOptions<F>,
+        handler: F,
+        ensure: true
+    ): Promise<string>;
+    create<F extends TaskHandler>(
+        options: FunctionTaskOptions<F>
+    ): string;
+    create<F extends TaskHandler>(
+        options: FunctionTaskOptions<F>,
+        ensure: true
+    ): Promise<string>;
+    create<T, M extends keyof FunctionProperties<T>>(
+        options: ModuleTaskOptions<T, M>
+    ): string;
+    create<T, M extends keyof FunctionProperties<T>>(
+        options: ModuleTaskOptions<T, M>,
+        ensure: true
+    ): Promise<string>;
+    create(
+        options: FunctionTaskOptions<TaskHandler> & ModuleTaskOptions<any, string>,
+        handler: Function | string | boolean = null,
+        ensure = false
+    ): string | Promise<string> {
         let {
             salt,
             start,
@@ -95,6 +124,11 @@ export class Schedule {
             onEnd
         } = options;
         let params: string[] = [app.id, traceModulePath(ROOT_PATH)];
+
+        if (typeof handler === "boolean") {
+            ensure = handler;
+            handler = null;
+        }
 
         salt && params.push(salt);
         module && params.push(module.name);
@@ -110,8 +144,8 @@ export class Schedule {
                         "when 'handler' is provided a string"
                     );
                 }
-            } else if (handler.name) {
-                params.push(handler.name);
+            } else if ((<Function>handler).name) {
+                params.push((<Function>handler).name);
             } else {
                 let hash = md5(String(handler));
 
@@ -195,27 +229,48 @@ export class Schedule {
             });
         }
 
-        // Redirect the task to one of the schedule server.
-        app.services.schedule(taskId).add({
-            taskId,
-            appId: app.id,
-            start: <number>start,
-            end: <number>end,
-            timetable: <number[]>timetable,
-            repeat,
-            module: module && module.name,
-            handler: typeof handler === "string" ? handler : void 0,
-            onEnd: typeof onEnd === "string" ? onEnd : void 0,
-            data
-        });
+        if (ensure) {
+            return app.services.schedule(taskId).add({
+                taskId,
+                appId: app.id,
+                start: <number>start,
+                end: <number>end,
+                timetable: <number[]>timetable,
+                repeat,
+                module: module && module.name,
+                handler: typeof handler === "string" ? handler : void 0,
+                onEnd: typeof onEnd === "string" ? onEnd : void 0,
+                data
+            }).then(() => taskId);
+        } else {
+            app.services.schedule(taskId).add({
+                taskId,
+                appId: app.id,
+                start: <number>start,
+                end: <number>end,
+                timetable: <number[]>timetable,
+                repeat,
+                module: module && module.name,
+                handler: typeof handler === "string" ? handler : void 0,
+                onEnd: typeof onEnd === "string" ? onEnd : void 0,
+                data
+            });
 
-        return taskId;
+            return taskId;
+        }
     }
 
     /** Cancels a task according to the given task ID. */
-    cancel(taskId: string) {
+    cancel(taskId: string): void;
+    cancel(taskId: string, ensure: true): Promise<boolean>;
+    cancel(taskId: string, ensure = false) {
         app.message.unsubscribe(taskId);
-        app.services.schedule(taskId).delete(taskId);
+
+        if (ensure) {
+            return app.services.schedule(taskId).delete(taskId);
+        } else {
+            app.services.schedule(taskId).delete(taskId);
+        }
     }
 }
 
