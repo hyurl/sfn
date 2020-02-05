@@ -328,7 +328,7 @@ export class ScheduleService {
         if (!condition) {
             return this.tasks.size;
         } else {
-            return this.query(condition).then(tasks => tasks.length);
+            return (await this.query(condition)).length;
         }
     }
 
