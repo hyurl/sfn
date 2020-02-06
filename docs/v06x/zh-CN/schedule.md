@@ -137,3 +137,40 @@ export default class MyService {
     }
 }
 ```
+
+## 关于 ScheduleService
+
+当调用 `app.schedule.create()` 或 `app.schedule.cancel()` 时，实际上是在调用
+ScheduleService 的相关方法。然而，这两个函数内部存在一些逻辑，特别是
+`app.schedule.create()`，因此是不能通过调用 ScheduleService 的相关方法来直接创建任务的。
+虽说如此，ScheduleService 依旧提供了一些有用的方法，来供你进行查询或删除任务。
+
+```ts
+declare class ScheduleService {
+    /** Retrieves a specific task according to the taskId. */
+    find(taskId: string): Promise<ScheduleTask>;
+    /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
+    find<T>(query?: ScheduleQuery<T>): Promise<ScheduleTask[]>;
+
+    /** Deletes the specified task. */
+    delete(taskId: string): Promise<boolean>;
+    /** Deletes tasks that matched the queries (using mongodb syntax).  */
+    delete<T>(query?: ScheduleQuery<T>): Promise<boolean>;
+
+    /**
+     * Counts the size of the task pool, or specific tasks matched the queries
+     * (using mongodb syntax).
+     */
+    count<T>(query?: ScheduleQuery<T>): Promise<number>;
+}
+```
+
+除了上面的方法，其它方法都是系统内部使用的，开发者不要调用它们。要调用这些方法，使用
+`app.services.schedule()` 来访问服务，例如：
+
+```ts
+(async () => {
+    // Get all tasks that created for the app.services.docs module.
+    let tasks = await app.services.schedule("route").find({ module: app.services.docs });
+})();
+```

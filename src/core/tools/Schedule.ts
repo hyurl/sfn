@@ -5,12 +5,19 @@ import moment = require('moment');
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
 import timestamp from "@hyurl/utils/timestamp";
-import sift, { Query } from "sift";
+import sift, { Query as SiftQuery } from "sift";
 
+type Methods<T> = FunctionPropertyNames<T>;
 
 /** @deprecated */
 export type TaskOptions = FunctionTaskOptions<any> | ModuleTaskOptions<any, string>;
 export type TaskHandler = (...data: any[]) => void | Promise<void>;
+export type ScheduleQuery<T> = Partial<SiftQuery>
+    & Partial<Omit<ScheduleTask, "module" | "handler" | "onEnd"> & {
+        module: ModuleProxy<T> | string;
+        handler: Methods<T>;
+        onEnd: Methods<T>;
+    }>;
 
 export interface BaseTaskOptions<F extends TaskHandler> {
     /**
@@ -57,10 +64,10 @@ export interface FunctionTaskOptions<F extends TaskHandler> extends BaseTaskOpti
     onEnd?: (...data: Parameters<F>) => void | Promise<void>;
 }
 
-export interface ModuleTaskOptions<T, M extends keyof FunctionProperties<T>> extends BaseTaskOptions<T[M]> {
+export interface ModuleTaskOptions<T, M extends Methods<T>> extends BaseTaskOptions<T[M]> {
     module?: ModuleProxy<T>;
     handler?: M;
-    onEnd?: keyof FunctionProperties<T>;
+    onEnd?: Methods<T>;
 }
 
 export interface ScheduleTask {
@@ -92,17 +99,13 @@ export class Schedule {
         handler: F,
         ensure: true
     ): Promise<string>;
-    create<F extends TaskHandler>(
-        options: FunctionTaskOptions<F>
-    ): string;
+    create<F extends TaskHandler>(options: FunctionTaskOptions<F>): string;
     create<F extends TaskHandler>(
         options: FunctionTaskOptions<F>,
         ensure: true
     ): Promise<string>;
-    create<T, M extends keyof FunctionProperties<T>>(
-        options: ModuleTaskOptions<T, M>
-    ): string;
-    create<T, M extends keyof FunctionProperties<T>>(
+    create<T, M extends Methods<T>>(options: ModuleTaskOptions<T, M>): string;
+    create<T, M extends Methods<T>>(
         options: ModuleTaskOptions<T, M>,
         ensure: true
     ): Promise<string>;
@@ -288,23 +291,29 @@ export class ScheduleService {
     }
 
     /** Retrieves a specific task according to the taskId. */
-    async find(taskId: string): Promise<ScheduleTask>;
+    find(taskId: string): Promise<ScheduleTask>;
     /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
-    async find(query?: Partial<Query>): Promise<ScheduleTask[]>;
-    async find(query: string | any = {}) {
+    find<T>(query?: ScheduleQuery<T>): Promise<ScheduleTask[]>;
+    async find(query: string | ScheduleQuery<any> = {}) {
         if (typeof query === "string") {
             return this.tasks.get(query);
         } else {
+            query = { ...query };
+
+            if (typeof query.module !== "string")
+                query.module = JSON.parse(JSON.stringify(query.module));
+
+            console.log(query);
             return ([...this.tasks])
                 .map(([, task]) => task)
-                .filter(sift(query));
+                .filter(sift(<any>query));
         }
     }
 
     /** Deletes the specified task. */
     delete(taskId: string): Promise<boolean>;
     /** Deletes tasks that matched the queries (using mongodb syntax).  */
-    delete(query: Partial<Query>): Promise<boolean>;
+    delete<T>(query: ScheduleQuery<T>): Promise<boolean>;
     async delete(query: string | object) {
         if (typeof query === "string") {
             let task = this.tasks.get(query);
@@ -323,10 +332,10 @@ export class ScheduleService {
     }
 
     /**
-     * Counts the size of the task queue, or specific tasks matched the queries
+     * Counts the size of the task pool, or specific tasks matched the queries
      * (using mongodb syntax).
      */
-    async count(query: Partial<Query> = void 0) {
+    async count<T>(query: ScheduleQuery<T> = void 0): Promise<number> {
         if (!query) {
             return this.tasks.size;
         } else {
@@ -335,10 +344,10 @@ export class ScheduleService {
     }
 
     /** @deprecated use `find()` instead. */
-    async query(taskId: string): Promise<ScheduleTask>;
-    async query(query?: Partial<Query>): Promise<ScheduleTask[]>;
-    async query(query: string | Partial<Query>): Promise<any> {
-        return this.find(<any>query);
+    query(taskId: string): Promise<ScheduleTask>;
+    query<T>(query?: ScheduleQuery<T>): Promise<ScheduleTask[]>;
+    async query(query: any): Promise<any> {
+        return this.find(query);
     }
 
     private isScheduleServer() {
@@ -354,6 +363,7 @@ export class ScheduleService {
         return false;
     }
 
+    /** @inner */
     async init() {
         this.state = "running";
         this.timer = setInterval(() => {
@@ -432,6 +442,7 @@ export class ScheduleService {
         }
     }
 
+    /** @inner */
     async destroy(transferTasks = false) {
         if (this.state !== "running") {
             return;
@@ -458,6 +469,7 @@ export class ScheduleService {
         }
     }
 
+    /** @inner */
     async flush() {
         let tasks = [...this.tasks.values()].filter(task => {
             return task.taskId !== "d41d8cd98f00b204e9800998ecf8427e";

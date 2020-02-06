@@ -145,3 +145,42 @@ export default class MyService {
     }
 }
 ```
+
+## About ScheduleService
+
+When calling `app.schedule.create()` or `app.schedule.cancel()`, it actually
+calls the corresponding methods of ScheduleService. However, these two methods
+have some internal logics, especially for `app.schedule.create()`, that means
+you cannot directly use ScheduleService to create tasks. That being said,
+ScheduleService provided some useful methods, to help you find or delete tasks.
+
+```ts
+declare class ScheduleService {
+    /** Retrieves a specific task according to the taskId. */
+    find(taskId: string): Promise<ScheduleTask>;
+    /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
+    find<T>(query?: ScheduleQuery<T>): Promise<ScheduleTask[]>;
+
+    /** Deletes the specified task. */
+    delete(taskId: string): Promise<boolean>;
+    /** Deletes tasks that matched the queries (using mongodb syntax).  */
+    delete<T>(query?: ScheduleQuery<T>): Promise<boolean>;
+
+    /**
+     * Counts the size of the task pool, or specific tasks matched the queries
+     * (using mongodb syntax).
+     */
+    count<T>(query?: ScheduleQuery<T>): Promise<number>;
+}
+```
+
+Other than the above methods, all other ones are reserved by the framework,
+developers should never use them. To call these methods, use 
+`app.services.schedule()` to access the service, for example:
+
+```ts
+(async () => {
+    // Get all tasks that created for the app.services.docs module.
+    let tasks = await app.services.schedule("route").find({ module: app.services.docs });
+})();
+```
