@@ -303,7 +303,6 @@ export class ScheduleService {
             if (typeof query.module !== "string")
                 query.module = JSON.parse(JSON.stringify(query.module));
 
-            console.log(query);
             return ([...this.tasks])
                 .map(([, task]) => task)
                 .filter(sift(<any>query));
