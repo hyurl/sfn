@@ -12,12 +12,16 @@ type Methods<T> = FunctionPropertyNames<T>;
 /** @deprecated */
 export type TaskOptions = FunctionTaskOptions<any> | ModuleTaskOptions<any, string>;
 export type TaskHandler = (...data: any[]) => void | Promise<void>;
-export type ScheduleQuery<T> = Partial<SiftQuery>
-    & Partial<Omit<ScheduleTask, "module" | "handler" | "onEnd"> & {
-        module: ModuleProxy<T> | string;
-        handler: Methods<T>;
-        onEnd: Methods<T>;
-    }>;
+export type ScheduleQuery<T> = Partial<SiftQuery> & {
+    appId?: string | RegExp;
+    taskId?: string | RegExp;
+    start?: number;
+    end?: number;
+    repeat?: number;
+    module?: ModuleProxy<T> | string | RegExp;
+    handler?: Methods<T> | RegExp;
+    onEnd?: Methods<T> | RegExp;
+};
 
 export interface BaseTaskOptions<F extends TaskHandler> {
     /**
