@@ -7,7 +7,7 @@ import merge = require('lodash/merge');
 import { Locale } from "../interfaces";
 import get = require('lodash/get');
 
-const Module: typeof NodeJS.Module = <any>module.constructor;
+const Module: new (...args: any[]) => NodeJS.Module = <any>module.constructor;
 const tryImport = createImport(require);
 
 export function moduleExists(name: string): boolean {

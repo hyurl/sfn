@@ -5,7 +5,7 @@ import moment = require('moment');
 import { ROOT_PATH } from '../../init';
 import { traceModulePath } from './internal/module';
 import timestamp from "@hyurl/utils/timestamp";
-import sift from "sift";
+import sift, { Query } from "sift";
 
 
 /** @deprecated */
@@ -287,11 +287,27 @@ export class ScheduleService {
         return true;
     }
 
+    /** Retrieves a specific task according to the taskId. */
+    async find(taskId: string): Promise<ScheduleTask>;
+    /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
+    async find(query?: Partial<Query>): Promise<ScheduleTask[]>;
+    async find(query: string | any = {}) {
+        if (typeof query === "string") {
+            return this.tasks.get(query);
+        } else {
+            return ([...this.tasks])
+                .map(([, task]) => task)
+                .filter(sift(query));
+        }
+    }
+
+    /** Deletes the specified task. */
     delete(taskId: string): Promise<boolean>;
-    delete(condition: object): Promise<boolean>;
-    async delete(condition: string | object) {
-        if (typeof condition === "string") {
-            let task = this.tasks.get(condition);
+    /** Deletes tasks that matched the queries (using mongodb syntax).  */
+    delete(query: Partial<Query>): Promise<boolean>;
+    async delete(query: string | object) {
+        if (typeof query === "string") {
+            let task = this.tasks.get(query);
 
             if (task) {
                 this.dispatch(task, "onEnd");
@@ -300,23 +316,9 @@ export class ScheduleService {
                 return false;
             }
         } else {
-            let tasks = await this.query(condition);
+            let tasks = await this.find(query);
             await Promise.all(tasks.map(task => this.delete(task.taskId)));
             return tasks.length > 0;
-        }
-    }
-
-    /** Retrieves a specific task according to the taskId. */
-    async query(taskId: string): Promise<ScheduleTask>;
-    /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
-    async query(condition?: object): Promise<ScheduleTask[]>;
-    async query(condition: string | object = {}) {
-        if (typeof condition === "string") {
-            return this.tasks.get(condition);
-        } else {
-            return ([...this.tasks])
-                .map(([, task]) => task)
-                .filter(sift(condition));
         }
     }
 
@@ -324,12 +326,19 @@ export class ScheduleService {
      * Counts the size of the task queue, or specific tasks matched the queries
      * (using mongodb syntax).
      */
-    async count(condition: object = null) {
-        if (!condition) {
+    async count(query: Partial<Query> = void 0) {
+        if (!query) {
             return this.tasks.size;
         } else {
-            return (await this.query(condition)).length;
+            return (await this.find(query)).length;
         }
+    }
+
+    /** @deprecated use `find()` instead. */
+    async query(taskId: string): Promise<ScheduleTask>;
+    async query(query?: Partial<Query>): Promise<ScheduleTask[]>;
+    async query(query: string | Partial<Query>): Promise<any> {
+        return this.find(<any>query);
     }
 
     private isScheduleServer() {
