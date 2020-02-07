@@ -164,7 +164,7 @@ declare class ScheduleService {
     /** Deletes the specified task. */
     delete(taskId: string): Promise<boolean>;
     /** Deletes tasks that matched the queries (using mongodb syntax).  */
-    delete<T>(query?: ScheduleQuery<T>): Promise<boolean>;
+    delete<T>(query?: ScheduleQuery<T>): Promise<number>;
 
     /**
      * Counts the size of the task pool, or specific tasks matched the queries
