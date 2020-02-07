@@ -316,21 +316,24 @@ export class ScheduleService {
     /** Deletes the specified task. */
     delete(taskId: string): Promise<boolean>;
     /** Deletes tasks that matched the queries (using mongodb syntax).  */
-    delete<T>(query: ScheduleQuery<T>): Promise<boolean>;
+    delete<T>(query: ScheduleQuery<T>): Promise<number>;
     async delete(query: string | object) {
         if (typeof query === "string") {
             let task = this.tasks.get(query);
 
             if (task) {
-                this.dispatch(task, "onEnd");
+                this.dispatch(task, "end");
                 return true;
             } else {
                 return false;
             }
         } else {
             let tasks = await this.find(query);
-            await Promise.all(tasks.map(task => this.delete(task.taskId)));
-            return tasks.length > 0;
+            let result = await Promise.all(
+                tasks.map(task => this.delete(task.taskId))
+            );
+
+            return result.filter(Boolean).length;
         }
     }
 
@@ -414,7 +417,7 @@ export class ScheduleService {
                 }
 
                 if (expired) {
-                    this.dispatch(task, "onEnd");
+                    this.dispatch(task, "end");
                 }
             });
         }, 1000);
@@ -481,12 +484,12 @@ export class ScheduleService {
         await fs.writeJSON(this.filename, tasks);
     }
 
-    private dispatch(task: ScheduleTask, fn: "handler" | "onEnd" = "handler") {
+    private dispatch(task: ScheduleTask, type: "handle" | "end" = "handle") {
         let { taskId, appId, module, data } = task;
-        let handler = task[fn];
+        let handle = type === "end" ? task.onEnd : task.handler;
 
-        if (!handler) {
-            if (fn === "onEnd") {
+        if (!handle) {
+            if (type === "end") {
                 app.message.publish(taskId + ".onEnd", data, [appId]);
             } else {
                 app.message.publish(taskId, data, [appId]);
@@ -494,13 +497,13 @@ export class ScheduleService {
         } else {
             app.message.publish(app.schedule.name, [
                 module,
-                handler,
+                handle,
                 data
             ], [appId]);
         }
 
-        // If an task is expired or canceled, remove it from the queue.
-        if (fn === "onEnd") {
+        // If an task is expired or canceled, remove it from the pool.
+        if (type === "end") {
             this.tasks.delete(taskId);
         }
     }
