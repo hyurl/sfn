@@ -26,16 +26,16 @@ export abstract class Controller extends Service {
     };
 
     /** @override */
-    protected gc() { }
+    protected async gc() { }
 
     /** @override */
-    init(): void | Promise<void> { }
+    async init(): Promise<void> { }
 
     /** @deprecated Use `init()` instead. */
-    before?(): void | Promise<void>;
+    async before?(): Promise<void>;
 
     /** @deprecated Use `destroy()` instead. */
-    after?(): void | Promise<void>;
+    async after?(): Promise<void>;
 
     async throttle<T>(key: string, body: () => T | Promise<T>, interval = 0) {
         key = this.session.id + ":" + key;

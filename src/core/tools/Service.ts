@@ -14,38 +14,38 @@ export class Service extends EventEmitter implements Service {
     /** The language of the current service. */
     lang: string = app.config.lang;
 
-    private throttles: { [key: string]: number } = {};
-    private queues: { [key: string]: Queue } = {};
+    private throttles = new Map<string, number>();
+    private queues = new Map<string, Queue>();
     private gcTimer: NodeJS.Timer = null;
 
-    protected gc(): void | Promise<void> {
+    protected async gc(): Promise<void> {
         let now = Date.now();
 
-        for (let key in this.throttles) {
-            if (this.throttles[key] < now) {
-                delete this.throttles[key];
+        this.throttles.forEach((time, key) => {
+            if (time < now) {
+                this.throttles.delete(key);
             }
-        }
+        });
 
-        for (let key in this.queues) {
-            if (this.queues[key].length === 0) {
-                this.queues[key].stop();
-                delete this.queues[key];
+        this.queues.forEach((queue, key) => {
+            if (queue.length === 0) {
+                queue.stop();
+                this.queues.delete(key);
             }
-        }
+        });
     }
 
     /** This method will be called to initiate the service. */
-    init(): void | Promise<void> {
+    async init(): Promise<void> {
         this.gcTimer = setInterval(() => this.gc(), 1000 * 30);
     }
 
     /**
      * This method will be called when the service is about to be destroyed.
      */
-    destroy(): void | Promise<void> {
+    async destroy(): Promise<void> {
         this.gcTimer && clearInterval(this.gcTimer);
-        this.gc();
+        await this.gc();
     }
 
     /**
@@ -77,18 +77,16 @@ export class Service extends EventEmitter implements Service {
         interval = 0,
         error: any = new Error("To many operations")
     ) {
-        let result = await new Promise<T>((resolve, reject) => {
+        return new Promise<T>((resolve, reject) => {
             let now = Date.now();
 
-            if (this.throttles[key] && this.throttles[key] >= now) {
+            if ((this.throttles.get(key) || 0) >= now) {
                 return reject(error);
             } else {
-                this.throttles[key] = now + interval;
+                this.throttles.set(key, now + interval);
                 resolve(body.call(this));
             }
         });
-
-        return result;
     }
 
     /**
@@ -96,11 +94,13 @@ export class Service extends EventEmitter implements Service {
      */
     async queue<T>(key: string, body: () => T | Promise<T>) {
         return new Promise<T>((resolve, reject) => {
-            if (!this.queues[key]) {
-                this.queues[key] = new Queue();
+            let queue = this.queues.get(key);
+
+            if (!queue) {
+                this.queues.set(key, queue = new Queue());
             }
 
-            this.queues[key].push(async () => {
+            queue.push(async () => {
                 try {
                     resolve(await body.call(this));
                 } catch (err) {
