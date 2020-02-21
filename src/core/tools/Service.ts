@@ -3,6 +3,7 @@ import { EventEmitter } from "events";
 import HideProtectedProperties = require("hide-protected-properties");
 import get = require('lodash/get');
 import { Queue } from "dynamic-queue";
+import useThrottle from "@hyurl/utils/useThrottle";
 
 /**
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
@@ -14,19 +15,10 @@ export class Service extends EventEmitter implements Service {
     /** The language of the current service. */
     lang: string = app.config.lang;
 
-    private throttles = new Map<string, number>();
     private queues = new Map<string, Queue>();
     private gcTimer: NodeJS.Timer = null;
 
     protected async gc(): Promise<void> {
-        let now = Date.now();
-
-        this.throttles.forEach((time, key) => {
-            if (time < now) {
-                this.throttles.delete(key);
-            }
-        });
-
         this.queues.forEach((queue, key) => {
             if (queue.length === 0) {
                 queue.stop();
@@ -69,24 +61,10 @@ export class Service extends EventEmitter implements Service {
 
     /**
      * Throttles the operation in the body associated to a unique key.
-     * @param interval default `0`.
+     * @param interval default `1000`.
      */
-    async throttle<T>(
-        key: string,
-        body: () => T | Promise<T>,
-        interval = 0,
-        error: any = new Error("To many operations")
-    ) {
-        return new Promise<T>((resolve, reject) => {
-            let now = Date.now();
-
-            if ((this.throttles.get(key) || 0) >= now) {
-                return reject(error);
-            } else {
-                this.throttles.set(key, now + interval);
-                resolve(body.call(this));
-            }
-        });
+    async throttle<T>(key: string, body: () => T | Promise<T>, interval = 1000) {
+        return useThrottle(key, interval)(body);
     }
 
     /**

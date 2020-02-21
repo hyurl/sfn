@@ -32,6 +32,6 @@ export default class extends HttpController {
             let content = await app.services.docs(version).getContent(version, this.lang, name);
 
             return req.xhr ? content : this.view("docs", { sideMenu, content });
-        }, 1000);
+        }, 10000);
     }
 }

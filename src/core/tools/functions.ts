@@ -211,8 +211,7 @@ export function throttle(
                 return this.throttle<any>(
                     key,
                     original.bind(this, ...arguments),
-                    interval,
-                    error
+                    interval
                 );
             }
         );
