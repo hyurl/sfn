@@ -19,7 +19,7 @@ export default class extends HttpController {
     @route.get("/docs/:version/:name")
     @app.hooks.web.onView.decorate()
     async showContents(req: Request, version: string, name: string) {
-        return this.throttle(req.url, async () => {
+        return this.throttle(req.url + ":xhr:" + req.xhr, async () => {
             if (["zh", "zh-hans"].includes(this.lang)) {
                 this.lang = "zh-CN";
             }
@@ -32,6 +32,6 @@ export default class extends HttpController {
             let content = await app.services.docs(version).getContent(version, this.lang, name);
 
             return req.xhr ? content : this.view("docs", { sideMenu, content });
-        }, 10000);
+        }, 1000);
     }
 }

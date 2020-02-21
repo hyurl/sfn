@@ -37,14 +37,14 @@ export abstract class Controller extends Service {
     /** @deprecated Use `destroy()` instead. */
     async after?(): Promise<void>;
 
-    async throttle<T>(key: string, body: () => T | Promise<T>, interval = 0) {
-        key = this.session.id + ":" + key;
-        return Controller.flow.throttle(key, body, interval);
+    /** @override */
+    async throttle<T>(key: string, handle: () => T | Promise<T>, interval = 1000) {
+        return Controller.flow.throttle(key, handle, interval);
     }
 
-    async queue<T>(key: string, body: () => T | Promise<T>) {
-        key = this.session.id + ":" + key;
-        return Controller.flow.queue(key, body);
+    /** @override */
+    async queue<T>(key: string, handle: () => T | Promise<T>) {
+        return Controller.flow.queue(key, handle);
     }
 
     /** Returns a result indicates the operation is succeeded. */

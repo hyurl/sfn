@@ -15,7 +15,7 @@ export class Service extends EventEmitter implements Service {
     /** The language of the current service. */
     lang: string = app.config.lang;
 
-    private queues = new Map<string, Queue>();
+    private queues = new Map<any, Queue>();
     private gcTimer: NodeJS.Timer = null;
 
     protected async gc(): Promise<void> {
@@ -60,27 +60,33 @@ export class Service extends EventEmitter implements Service {
     }
 
     /**
-     * Throttles the operation in the body associated to a unique key.
+     * Uses throttle strategy on the given resource, if a subsequent call
+     * happens within the `interval` time, the previous result will be returned
+     * and the current `handle` function will not be invoked.
+     * 
+     * NOTE: this function only uses `internal` once for creating the internal
+     * throttle function.
      * @param interval default `1000`.
      */
-    async throttle<T>(key: string, body: () => T | Promise<T>, interval = 1000) {
-        return useThrottle(key, interval)(body);
+    async throttle<T>(resource: any, handle: () => T | Promise<T>, interval = 1000) {
+        return useThrottle(resource, interval)(handle);
     }
 
     /**
-     * Queues the operation in the body associated to a unique key.
+     * Uses queue strategy on the given resource, any subsequent call will be
+     * queued and needs to wait the previous call finishes.
      */
-    async queue<T>(key: string, body: () => T | Promise<T>) {
+    async queue<T>(resource: any, handle: () => T | Promise<T>) {
         return new Promise<T>((resolve, reject) => {
-            let queue = this.queues.get(key);
+            let queue = this.queues.get(resource);
 
             if (!queue) {
-                this.queues.set(key, queue = new Queue());
+                this.queues.set(resource, queue = new Queue());
             }
 
             queue.push(async () => {
                 try {
-                    resolve(await body.call(this));
+                    resolve(await handle.call(this));
                 } catch (err) {
                     reject(err);
                 }
