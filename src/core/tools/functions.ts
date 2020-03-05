@@ -15,6 +15,7 @@ import {
 } from './interfaces';
 import { Controller } from '../controllers/Controller';
 import * as cors from "sfn-cors";
+import isOwnKey from "@hyurl/utils/isOwnKey";
 
 // Expose some internal functions as utilities to the public API.
 export { green, grey, red, yellow } from "./internal/color";
@@ -91,7 +92,7 @@ export function event(name: string): WebSocketDecorator {
 
         let nsp: string = "";
 
-        if (proto.ctor.hasOwnProperty("nsp")) {
+        if (isOwnKey(proto.ctor, "nsp")) {
             nsp = proto.ctor["nsp"];
         }
 
@@ -122,7 +123,7 @@ export function route(method: string, path?: string): HttpDecorator {
         let modPath = traceModulePath(app.controllers.path);
         let baseURI: string = "";
 
-        if (proto.ctor.hasOwnProperty("baseURI")) {
+        if (isOwnKey(proto.ctor, "baseURI")) {
             baseURI = proto.ctor["baseURI"];
         }
 
@@ -157,7 +158,7 @@ export function route(method: string, path?: string): HttpDecorator {
             routeMap.lock(key);
             router.method(<HttpMethods>method, path, handle(key));
 
-            if (method === "POST" && proto.ctor.hasOwnProperty("cors") &&
+            if (method === "POST" && isOwnKey(proto.ctor, "cors") &&
                 !router.contains("OPTIONS", path)) {
                 router.method("OPTIONS", path, (req, res) => {
                     cors(proto.ctor["cors"], req, res);
