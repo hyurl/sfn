@@ -2,8 +2,6 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import md5 = require("md5");
 import moment = require('moment');
-import { ROOT_PATH } from '../../init';
-import { traceModulePath } from './internal/module';
 import timestamp from "@hyurl/utils/timestamp";
 import sift, { Query as SiftQuery } from "sift";
 
@@ -130,7 +128,7 @@ export class Schedule {
             data,
             onEnd
         } = options;
-        let params: string[] = [app.id, traceModulePath(ROOT_PATH)];
+        let params: string[] = [app.id];
 
         if (typeof handler === "boolean") {
             ensure = handler;
