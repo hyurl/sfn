@@ -304,7 +304,7 @@ export class ScheduleService {
         } else {
             query = { ...query };
 
-            if (typeof query.module !== "string")
+            if (query.module && typeof query.module !== "string")
                 query.module = JSON.parse(JSON.stringify(query.module));
 
             return ([...this.tasks])
