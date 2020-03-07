@@ -89,3 +89,17 @@ e.g. `console.log`.
 SFN REPL provides full support of top-level `await` operator, so you're free
 to use this keyword to resolve any async operation and prints the final result
 just like you would do in the Chrome Console.
+
+## Run Script
+
+Since v0.6.40, SFN now supports running a external script while the server is
+serving, unlink executing the script directly by `node` command, using the
+following command will allow it to connect to any alive RPC services before
+actually running the script.
+
+```sh
+npx sfn src/script/test.ts
+```
+
+*NOTE: you can pass the source TypeScript filename directly, but it must be*
+*compiled to JavaScript first in order to be able to run.*

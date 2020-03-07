@@ -3,9 +3,11 @@ import "source-map-support/register";
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as program from "commander";
+import get = require('lodash/get');
 import camelCase = require("lodash/camelCase");
 import upperFirst = require("lodash/upperFirst");
-import get = require('lodash/get');
+import startsWith = require('lodash/startsWith');
+import isEmpty from "@hyurl/utils/isEmpty";
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
@@ -31,6 +33,7 @@ program.description("create new controllers, services. etc.")
         console.log("  sfn -s article                   create an article service");
         console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
         console.log("  sfn [repl] web-server            open REPL session to web-server");
+        console.log("  sfn [run] src/scripts/test.ts    run the script 'src/scripts/test.ts'");
         console.log("");
     });
 
@@ -48,11 +51,13 @@ program.command("repl <appId>")
     .description("open REPL session to the given server")
     .action(openREPLSession);
 
+program.command("run <filename>")
+    .description("run a script under the service context")
+    .action(runScript);
+
 // Load user-defined bootstrap procedures.
 let cliBootstrap = APP_PATH + "/bootstrap/cli";
 moduleExists(cliBootstrap) && tryImport(cliBootstrap);
-
-program.parse(process.argv);
 
 function outputFile(filename: string, data: any, type: string): void {
     filename = path.normalize(filename);
@@ -103,61 +108,114 @@ function openREPLSession(appId: string, options: { stdout: boolean }) {
     });
 }
 
-try {
-    if (program.controller) { // create controller.
-        let filename = lastChar(program.controller) == "/"
-            ? program.controller + "index"
-            : (<string>program.controller).toLowerCase();
-        let type = program.type == "websocket" ? "WebSocket" : "Http",
-            ControllerName = upperFirst(path.basename(program.controller)),
-            input = `${tplDir}/${type}Controller.ts`,
-            output = `${SRC_PATH}/controllers/${filename}.ts`;
+async function runScript(filename: string) {
+    try {
+        if (!path.isAbsolute(filename))
+            filename = path.normalize(app.ROOT_PATH + "/" + filename);
 
-        checkSource(input);
+        // Before importing the script, try to resolve the file first, if the
+        // script doesn't exist, then raise an error so that the program will
+        // not try to connect RPC services afterward.
+        if (startsWith(filename, SRC_PATH)) {
+            let ext = path.extname(filename);
 
-        let route = (<string>program.controller).toLowerCase();
-        let contents = fs.readFileSync(input, "utf8")
-            .replace(/\{name\}/g, route)
-            .replace(/__Controller__/g, ControllerName);
-
-        outputFile(output, contents, "controller");
-    } else if (program.service) { // create service
-        let ServiceName = upperFirst(path.basename(program.service)),
-            mod = camelCase(ServiceName),
-            filename = path.dirname(program.service) + "/" + mod,
-            input = `${tplDir}/Service.ts`,
-            output = `${SRC_PATH}/services/${filename}.ts`;
-
-        checkSource(input);
-
-        let contents = fs.readFileSync(input, "utf8")
-            .replace(/__Service__/g, ServiceName + "Service")
-            .replace(/__mod__/g, mod);
-
-        outputFile(output, contents, "Service");
-    } else if (program.language) { // create language pack.
-        let names = program.language.split("-");
-
-        if (names.length > 1) {
-            program.language = names[0] + "-" + names[1].toUpperCase();
+            if (ext === ".js") {
+                filename = require.resolve(filename);
+            } else if (ext === ".ts") {
+                filename = require.resolve(
+                    filename.replace(SRC_PATH, APP_PATH).slice(0, -3) + ".js"
+                );
+            } else if (fs.existsSync(filename + ".ts")) {
+                filename = require.resolve(
+                    filename.replace(SRC_PATH, APP_PATH) + ".js"
+                );
+            } else if (!fs.existsSync(filename + ".js")) {
+                filename = require.resolve(filename + ".js");
+            }
+        } else {
+            filename = require.resolve(filename);
         }
 
-        let output: string = `${SRC_PATH}/locales/${program.language}.json`;
-        let lang = get(app.locales.translations, app.config.lang, {});
-        let contents: string;
-
-        contents = JSON.stringify(lang, null, "    ");
-        outputFile(output, contents, "Language pack");
-    } else if (process.argv.length >= 3) {
-        // open REPL session, internal usage
-        openREPLSession(process.argv[2], {
-            stdout: process.argv[3] !== "--no-stdout"
-        });
-    } else if (process.argv.length <= 3) {
-        program.help();
-        process.exit();
+        app.id = filename;
+        await app.rpc.connectAll(true);
+        require(filename);
+    } catch (err) {
+        console.error(err);
+        process.exit(1);
     }
-} catch (err) {
-    console.error(red`${err.toString()}`);
-    process.exit(1);
 }
+
+program.parseAsync(process.argv).then(() => {
+    let command: string;
+
+    if (!isEmpty(program.args)) {
+        let index = process.argv.indexOf(program.args[0]) - 1;
+        command = process.argv[index];
+    } else {
+        command = process.argv[2];
+    }
+
+    if (command && ["init", "repl", "run"].includes(command))
+        return;
+
+    try {
+        if (program.controller) { // create controller.
+            let filename = lastChar(program.controller) == "/"
+                ? program.controller + "index"
+                : (<string>program.controller).toLowerCase();
+            let type = program.type == "websocket" ? "WebSocket" : "Http",
+                ControllerName = upperFirst(path.basename(program.controller)),
+                input = `${tplDir}/${type}Controller.ts`,
+                output = `${SRC_PATH}/controllers/${filename}.ts`;
+
+            checkSource(input);
+
+            let route = (<string>program.controller).toLowerCase();
+            let contents = fs.readFileSync(input, "utf8")
+                .replace(/\{name\}/g, route)
+                .replace(/__Controller__/g, ControllerName);
+
+            outputFile(output, contents, "controller");
+        } else if (program.service) { // create service
+            let ServiceName = upperFirst(path.basename(program.service)),
+                mod = camelCase(ServiceName),
+                filename = path.dirname(program.service) + "/" + mod,
+                input = `${tplDir}/Service.ts`,
+                output = `${SRC_PATH}/services/${filename}.ts`;
+
+            checkSource(input);
+
+            let contents = fs.readFileSync(input, "utf8")
+                .replace(/__Service__/g, ServiceName + "Service")
+                .replace(/__mod__/g, mod);
+
+            outputFile(output, contents, "Service");
+        } else if (program.language) { // create language pack.
+            let names = program.language.split("-");
+
+            if (names.length > 1) {
+                program.language = names[0] + "-" + names[1].toUpperCase();
+            }
+
+            let output: string = `${SRC_PATH}/locales/${program.language}.json`;
+            let lang = get(app.locales.translations, app.config.lang, {});
+            let contents: string;
+
+            contents = JSON.stringify(lang, null, "    ");
+            outputFile(output, contents, "Language pack");
+        } else if (process.argv.length >= 3) {
+            if (app.config.server.rpc[process.argv[2]]) {
+                openREPLSession(process.argv[2], {
+                    stdout: process.argv[3] !== "--no-stdout"
+                });
+            } else {
+                runScript(process.argv[2]);
+            }
+        } else if (process.argv.length < 3) {
+            program.help();
+        }
+    } catch (err) {
+        console.error(red`${err.toString()}`);
+        process.exit(1);
+    }
+});

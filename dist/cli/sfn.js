@@ -5,9 +5,11 @@ require("source-map-support/register");
 const fs = require("fs-extra");
 const path = require("path");
 const program = require("commander");
+const get = require("lodash/get");
 const camelCase = require("lodash/camelCase");
 const upperFirst = require("lodash/upperFirst");
-const get = require("lodash/get");
+const startsWith = require("lodash/startsWith");
+const isEmpty_1 = require("@hyurl/utils/isEmpty");
 const init_1 = require("../init");
 const color_1 = require("../core/tools/internal/color");
 const repl_1 = require("../core/tools/internal/repl");
@@ -30,6 +32,7 @@ program.description("create new controllers, services. etc.")
     console.log("  sfn -s article                   create an article service");
     console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
     console.log("  sfn [repl] web-server            open REPL session to web-server");
+    console.log("  sfn [run] src/scripts/test.ts    run the script 'src/scripts/test.ts'");
     console.log("");
 });
 program.command("init")
@@ -42,9 +45,11 @@ program.command("repl <appId>")
     .option("--no-stdout", "do not display any data output to process.stdout")
     .description("open REPL session to the given server")
     .action(openREPLSession);
+program.command("run <filename>")
+    .description("run a script under the service context")
+    .action(runScript);
 let cliBootstrap = init_1.APP_PATH + "/bootstrap/cli";
 module_1.moduleExists(cliBootstrap) && tryImport(cliBootstrap);
-program.parse(process.argv);
 function outputFile(filename, data, type) {
     filename = path.normalize(filename);
     var dir = path.dirname(filename);
@@ -87,50 +92,97 @@ function openREPLSession(appId, options) {
         process.exit(1);
     });
 }
-try {
-    if (program.controller) {
-        let filename = lastChar(program.controller) == "/"
-            ? program.controller + "index"
-            : program.controller.toLowerCase();
-        let type = program.type == "websocket" ? "WebSocket" : "Http", ControllerName = upperFirst(path.basename(program.controller)), input = `${tplDir}/${type}Controller.ts`, output = `${init_1.SRC_PATH}/controllers/${filename}.ts`;
-        checkSource(input);
-        let route = program.controller.toLowerCase();
-        let contents = fs.readFileSync(input, "utf8")
-            .replace(/\{name\}/g, route)
-            .replace(/__Controller__/g, ControllerName);
-        outputFile(output, contents, "controller");
-    }
-    else if (program.service) {
-        let ServiceName = upperFirst(path.basename(program.service)), mod = camelCase(ServiceName), filename = path.dirname(program.service) + "/" + mod, input = `${tplDir}/Service.ts`, output = `${init_1.SRC_PATH}/services/${filename}.ts`;
-        checkSource(input);
-        let contents = fs.readFileSync(input, "utf8")
-            .replace(/__Service__/g, ServiceName + "Service")
-            .replace(/__mod__/g, mod);
-        outputFile(output, contents, "Service");
-    }
-    else if (program.language) {
-        let names = program.language.split("-");
-        if (names.length > 1) {
-            program.language = names[0] + "-" + names[1].toUpperCase();
+async function runScript(filename) {
+    try {
+        if (!path.isAbsolute(filename))
+            filename = path.normalize(app.ROOT_PATH + "/" + filename);
+        if (startsWith(filename, init_1.SRC_PATH)) {
+            let ext = path.extname(filename);
+            if (ext === ".js") {
+                filename = require.resolve(filename);
+            }
+            else if (ext === ".ts") {
+                filename = require.resolve(filename.replace(init_1.SRC_PATH, init_1.APP_PATH).slice(0, -3) + ".js");
+            }
+            else if (fs.existsSync(filename + ".ts")) {
+                filename = require.resolve(filename.replace(init_1.SRC_PATH, init_1.APP_PATH) + ".js");
+            }
+            else if (!fs.existsSync(filename + ".js")) {
+                filename = require.resolve(filename + ".js");
+            }
         }
-        let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
-        let lang = get(app.locales.translations, app.config.lang, {});
-        let contents;
-        contents = JSON.stringify(lang, null, "    ");
-        outputFile(output, contents, "Language pack");
+        else {
+            filename = require.resolve(filename);
+        }
+        app.id = filename;
+        await app.rpc.connectAll(true);
+        require(filename);
     }
-    else if (process.argv.length >= 3) {
-        openREPLSession(process.argv[2], {
-            stdout: process.argv[3] !== "--no-stdout"
-        });
-    }
-    else if (process.argv.length <= 3) {
-        program.help();
-        process.exit();
+    catch (err) {
+        console.error(err);
+        process.exit(1);
     }
 }
-catch (err) {
-    console.error(color_1.red `${err.toString()}`);
-    process.exit(1);
-}
+program.parseAsync(process.argv).then(() => {
+    let command;
+    if (!isEmpty_1.default(program.args)) {
+        let index = process.argv.indexOf(program.args[0]) - 1;
+        command = process.argv[index];
+    }
+    else {
+        command = process.argv[2];
+    }
+    if (command && ["init", "repl", "run"].includes(command))
+        return;
+    try {
+        if (program.controller) {
+            let filename = lastChar(program.controller) == "/"
+                ? program.controller + "index"
+                : program.controller.toLowerCase();
+            let type = program.type == "websocket" ? "WebSocket" : "Http", ControllerName = upperFirst(path.basename(program.controller)), input = `${tplDir}/${type}Controller.ts`, output = `${init_1.SRC_PATH}/controllers/${filename}.ts`;
+            checkSource(input);
+            let route = program.controller.toLowerCase();
+            let contents = fs.readFileSync(input, "utf8")
+                .replace(/\{name\}/g, route)
+                .replace(/__Controller__/g, ControllerName);
+            outputFile(output, contents, "controller");
+        }
+        else if (program.service) {
+            let ServiceName = upperFirst(path.basename(program.service)), mod = camelCase(ServiceName), filename = path.dirname(program.service) + "/" + mod, input = `${tplDir}/Service.ts`, output = `${init_1.SRC_PATH}/services/${filename}.ts`;
+            checkSource(input);
+            let contents = fs.readFileSync(input, "utf8")
+                .replace(/__Service__/g, ServiceName + "Service")
+                .replace(/__mod__/g, mod);
+            outputFile(output, contents, "Service");
+        }
+        else if (program.language) {
+            let names = program.language.split("-");
+            if (names.length > 1) {
+                program.language = names[0] + "-" + names[1].toUpperCase();
+            }
+            let output = `${init_1.SRC_PATH}/locales/${program.language}.json`;
+            let lang = get(app.locales.translations, app.config.lang, {});
+            let contents;
+            contents = JSON.stringify(lang, null, "    ");
+            outputFile(output, contents, "Language pack");
+        }
+        else if (process.argv.length >= 3) {
+            if (app.config.server.rpc[process.argv[2]]) {
+                openREPLSession(process.argv[2], {
+                    stdout: process.argv[3] !== "--no-stdout"
+                });
+            }
+            else {
+                runScript(process.argv[2]);
+            }
+        }
+        else if (process.argv.length < 3) {
+            program.help();
+        }
+    }
+    catch (err) {
+        console.error(color_1.red `${err.toString()}`);
+        process.exit(1);
+    }
+});
 //# sourceMappingURL=sfn.js.map
