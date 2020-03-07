@@ -133,7 +133,10 @@ async function runScript(filename: string) {
         }
 
         app.id = filename;
-        await app.rpc.connectAll(true);
+
+        await app.rpc.connectAll(true); // connect to RPC services.
+        await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
+
         require(filename);
     } catch (err) {
         console.error(err);
