@@ -115,6 +115,8 @@ export function loadConfig() {
             merge(config.default, mod.default);
         }
     }
+
+    return config.default as app.Config;
 }
 
 /**

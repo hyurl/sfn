@@ -14,7 +14,7 @@ const init_1 = require("../init");
 const color_1 = require("../core/tools/internal/color");
 const repl_1 = require("../core/tools/internal/repl");
 const module_1 = require("../core/tools/internal/module");
-module_1.loadConfig();
+global.app.config = module_1.loadConfig();
 const tryImport = module_1.createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
 var tplDir = `${sfnd}/templates`;
@@ -80,8 +80,6 @@ function openREPLSession(appId, options) {
     else {
         replSessionOpen = true;
     }
-    let bootstrap = init_1.APP_PATH + "/bootstrap/index";
-    module_1.moduleExists(bootstrap) && tryImport(bootstrap);
     repl_1.connect(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
             console.error(color_1.red `(code: ${err["code"]}) failed to connect [${appId}]`);
@@ -167,13 +165,21 @@ program.parseAsync(process.argv).then(() => {
             outputFile(output, contents, "Language pack");
         }
         else if (process.argv.length >= 3) {
-            if (app.config.server.rpc[process.argv[2]]) {
-                openREPLSession(process.argv[2], {
+            let bootstrap = init_1.APP_PATH + "/bootstrap/index";
+            let id = process.argv[2];
+            if (app.ROOT_PATH === sfnd) {
+                module_1.moduleExists(bootstrap) && tryImport(bootstrap);
+            }
+            if (app.config.server.rpc[id] || startsWith(id, "web-server")) {
+                openREPLSession(id, {
                     stdout: process.argv[3] !== "--no-stdout"
                 });
             }
             else {
-                runScript(process.argv[2]);
+                if (app.ROOT_PATH !== sfnd) {
+                    module_1.moduleExists(bootstrap) && tryImport(bootstrap);
+                }
+                runScript(id);
             }
         }
         else if (process.argv.length < 3) {

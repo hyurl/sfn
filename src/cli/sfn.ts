@@ -13,7 +13,7 @@ import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
 import { moduleExists, createImport, loadConfig } from "../core/tools/internal/module";
 
-loadConfig();
+global.app.config = loadConfig();
 
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");
@@ -92,10 +92,6 @@ function openREPLSession(appId: string, options: { stdout: boolean }) {
     } else {
         replSessionOpen = true;
     }
-
-    // Load user-defined bootstrap procedures.
-    let bootstrap = APP_PATH + "/bootstrap/index";
-    moduleExists(bootstrap) && tryImport(bootstrap);
 
     connectRepl(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
@@ -204,12 +200,25 @@ program.parseAsync(process.argv).then(() => {
             contents = JSON.stringify(lang, null, "    ");
             outputFile(output, contents, "Language pack");
         } else if (process.argv.length >= 3) {
-            if (app.config.server.rpc[process.argv[2]]) {
-                openREPLSession(process.argv[2], {
+            let bootstrap = APP_PATH + "/bootstrap/index";
+            let id = process.argv[2];
+
+            if (app.ROOT_PATH === sfnd) {
+                // Load user-defined bootstrap procedures.
+                moduleExists(bootstrap) && tryImport(bootstrap);
+            }
+
+            if (app.config.server.rpc[id] || startsWith(id, "web-server")) {
+                openREPLSession(id, {
                     stdout: process.argv[3] !== "--no-stdout"
                 });
             } else {
-                runScript(process.argv[2]);
+                if (app.ROOT_PATH !== sfnd) {
+                    // Load user-defined bootstrap procedures.
+                    moduleExists(bootstrap) && tryImport(bootstrap);
+                }
+
+                runScript(id);
             }
         } else if (process.argv.length < 3) {
             program.help();
