@@ -24,7 +24,7 @@
   dependencies:
     "@hyurl/utils" "^0.1.24"
 
-"@hyurl/utils@^0.1.24":
+"@hyurl/utils@^0.1.24", "@hyurl/utils@^0.1.25":
   version "0.1.25"
   resolved "https://registry.yarnpkg.com/@hyurl/utils/-/utils-0.1.25.tgz#72ba16f83fc7640a9e354698f483b7a4ebc29aa3"
   integrity sha512-P7ZgaWZRoFylOa7fLvIB3VydRd4Ldeclc+Z9mI+/lwPDnzaADzPi0MwKCUjU0Z/Ii8u0KlQvhbS9fJoyY3WQWg==

@@ -33,6 +33,8 @@ export interface Request extends webium.Request {
     csrfToken?: string;
     /** In an sfn app, the session is shared between HTTP and WebSocket. */
     session: Session;
+    /** An MD5 string representing the identical signature of the request. */
+    readonly sign: string;
     /** 
      * A short-version url, when the url contains more than 64 characters,
      * the rest part will be cut off and replaced with `...`.

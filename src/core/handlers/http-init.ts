@@ -5,8 +5,12 @@ import { version, isDevMode } from "../../init";
 import { Request, Response } from "../tools/interfaces";
 import { grey, red, green, yellow } from "../tools/internal/color";
 import truncate = require("lodash/truncate");
+import sort from "@hyurl/utils/sort";
+import * as qs from "qs";
+import md5 = require('md5');
 
 const reqLogged = Symbol("reqLogged");
+const sign = Symbol("sign");
 
 router.use(async (req: Request, res: Response, next) => {
     req["originalUrl"] = req.url; // compatible with Express framework.
@@ -35,6 +39,20 @@ router.use(async (req: Request, res: Response, next) => {
             req.lang = names[0] + "-" + names[1].toUpperCase();
         }
     }
+
+    Object.defineProperty(req, "sign", {
+        get() {
+            if (!req[sign]) {
+                let url = req.method + " "
+                    + req.pathname
+                    + qs.stringify(sort(req.query), { addQueryPrefix: true });
+
+                req[sign] = md5(url);
+            }
+
+            return req[sign] as string;
+        }
+    });
 
     let logger = getDevLogger(req, res);
     let clearSSE = () => {
