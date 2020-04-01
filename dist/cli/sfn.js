@@ -21,19 +21,17 @@ var tplDir = `${sfnd}/templates`;
 var replSessionOpen = false;
 program.description("create new controllers, services. etc.")
     .version(init_1.version, "-v, --version")
-    .option("-c, --controller <name>", "create a new controller with a specified name")
-    .option("-s, --service <name>", "create a new service with a specified name")
-    .option("-l, --language <name>", "create a new language pack with a specified name")
-    .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
-    .on("--help", () => {
-    console.log("\nExamples:");
-    console.log("  sfn -c article                   create an http controller of article");
-    console.log("  sfn -c article -t websocket      create a websocket controller of article");
-    console.log("  sfn -s article                   create an article service");
-    console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
-    console.log("  sfn [repl] web-server            open REPL session to web-server");
-    console.log("  sfn [run] src/scripts/test.ts    run the script 'src/scripts/test.ts'");
-    console.log("");
+    .option("-c, --controller <name>", "create a new controller with a specified name").option("-s, --service <name>", "create a new service with a specified name").option("-l, --language <name>", "create a new language pack with a specified name").option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating the controller").on("--help", () => {
+    let msg = `
+Examples:
+  sfn -c article                   create an http controller of article
+  sfn -c article -t websocket      create a websocket controller of article
+  sfn -s article                   create an article service
+  sfn -l zh-CN                     create a language pack of zh-CN
+  sfn [repl] web-server            open REPL session to web-server
+  sfn [run] src/scripts/test.ts    run the script 'src/scripts/test.ts'
+`;
+    console.log(msg);
 });
 program.command("init")
     .description("initiate a new project")
@@ -90,7 +88,7 @@ function openREPLSession(appId, options) {
         process.exit(1);
     });
 }
-async function runScript(filename) {
+async function runScript(filename, bootstrapLoaded = false) {
     try {
         if (!path.isAbsolute(filename))
             filename = path.normalize(app.ROOT_PATH + "/" + filename);
@@ -127,7 +125,14 @@ async function runScript(filename) {
     }
 }
 program.parseAsync(process.argv).then(() => {
-    let command = !isEmpty_1.default(program.args) ? program.args[0] : process.argv[2];
+    let command;
+    if (!isEmpty_1.default(program.args)) {
+        let index = process.argv.indexOf(program.args[0]) - 1;
+        command = process.argv[index];
+    }
+    else {
+        command = process.argv[2];
+    }
     if (command && ["init", "repl", "run"].includes(command))
         return;
     try {

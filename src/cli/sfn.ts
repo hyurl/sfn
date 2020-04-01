@@ -11,7 +11,11 @@ import isEmpty from "@hyurl/utils/isEmpty";
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
-import { moduleExists, createImport, loadConfig } from "../core/tools/internal/module";
+import {
+    moduleExists,
+    createImport,
+    loadConfig
+} from "../core/tools/internal/module";
 
 global.app.config = loadConfig();
 
@@ -22,19 +26,29 @@ var replSessionOpen = false;
 
 program.description("create new controllers, services. etc.")
     .version(version, "-v, --version")
-    .option("-c, --controller <name>", "create a new controller with a specified name")
-    .option("-s, --service <name>", "create a new service with a specified name")
-    .option("-l, --language <name>", "create a new language pack with a specified name")
-    .option("-t, --type <type>", "set the type 'http' (default) or 'websocket' when creating a controller")
-    .on("--help", () => {
-        console.log("\nExamples:");
-        console.log("  sfn -c article                   create an http controller of article");
-        console.log("  sfn -c article -t websocket      create a websocket controller of article");
-        console.log("  sfn -s article                   create an article service");
-        console.log("  sfn -l zh-CN                     create a language pack of zh-CN");
-        console.log("  sfn [repl] web-server            open REPL session to web-server");
-        console.log("  sfn [run] src/scripts/test.ts    run the script 'src/scripts/test.ts'");
-        console.log("");
+    .option(
+        "-c, --controller <name>",
+        "create a new controller with a specified name"
+    ).option(
+        "-s, --service <name>",
+        "create a new service with a specified name"
+    ).option(
+        "-l, --language <name>",
+        "create a new language pack with a specified name"
+    ).option(
+        "-t, --type <type>",
+        "set the type 'http' (default) or 'websocket' when creating the controller"
+    ).on("--help", () => {
+        let msg = `
+Examples:
+  sfn -c article                   create an http controller of article
+  sfn -c article -t websocket      create a websocket controller of article
+  sfn -s article                   create an article service
+  sfn -l zh-CN                     create a language pack of zh-CN
+  sfn [repl] web-server            open REPL session to web-server
+  sfn [run] src/scripts/test.ts    run the script 'src/scripts/test.ts'
+`;
+        console.log(msg);
     });
 
 // Command `sfn init` is used to initiate the project.
@@ -95,7 +109,9 @@ function openREPLSession(appId: string, options: { stdout: boolean }) {
 
     connectRepl(appId, !options.stdout).catch((err) => {
         if (/^Error: connect/.test(err.toString())) {
-            console.error(red`(code: ${err["code"]}) failed to connect [${appId}]`);
+            console.error(
+                red`(code: ${err["code"]}) failed to connect [${appId}]`
+            );
         } else {
             console.error(red`${err.toString()}`);
         }
@@ -104,7 +120,7 @@ function openREPLSession(appId: string, options: { stdout: boolean }) {
     });
 }
 
-async function runScript(filename: string) {
+async function runScript(filename: string, bootstrapLoaded = false) {
     try {
         if (!path.isAbsolute(filename))
             filename = path.normalize(app.ROOT_PATH + "/" + filename);
@@ -151,7 +167,16 @@ async function runScript(filename: string) {
 }
 
 program.parseAsync(process.argv).then(() => {
-    let command = !isEmpty(program.args) ? program.args[0] : process.argv[2];
+    // let command = !isEmpty(program.args) ? program.args[0] : process.argv[2];
+
+    let command: string;
+
+    if (!isEmpty(program.args)) {
+        let index = process.argv.indexOf(program.args[0]) - 1;
+        command = process.argv[index];
+    } else {
+        command = process.argv[2];
+    }
 
     if (command && ["init", "repl", "run"].includes(command))
         return;
