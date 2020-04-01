@@ -15,7 +15,8 @@ import {
 } from './interfaces';
 import { Controller } from '../controllers/Controller';
 import * as cors from "sfn-cors";
-import isOwnKey from "@hyurl/utils/isOwnKey";
+import trimEnd = require('lodash/trimEnd');
+import isEmpty from '@hyurl/utils/isEmpty';
 
 // Expose some internal functions as utilities to the public API.
 export { green, grey, red, yellow } from "./internal/color";
@@ -90,11 +91,11 @@ export function event(name: string): WebSocketDecorator {
         if (!modPath)
             return;
 
-        let nsp: string = "";
+        let nsp: string = trimEnd(proto.ctor["nsp"] || "", "/");
 
-        if (isOwnKey(proto.ctor, "nsp")) {
-            nsp = proto.ctor["nsp"];
-        }
+        // if (isOwnKey(proto.ctor, "nsp")) {
+        //     nsp = proto.ctor["nsp"];
+        // }
 
         let data = {
             prefix: nsp,
@@ -121,11 +122,11 @@ export function route(method: HttpMethods | "SSE", path: string): HttpDecorator;
 export function route(method: string, path?: string): HttpDecorator {
     return (proto: HttpController, prop: string) => {
         let modPath = traceModulePath(app.controllers.path);
-        let baseURI: string = "";
+        let baseURI: string = trimEnd(proto.ctor["baseURI"] || "", "/");
 
-        if (isOwnKey(proto.ctor, "baseURI")) {
-            baseURI = proto.ctor["baseURI"];
-        }
+        // if (isOwnKey(proto.ctor, "baseURI")) {
+        //     baseURI = proto.ctor["baseURI"];
+        // }
 
         if (!modPath)
             return;
@@ -158,8 +159,10 @@ export function route(method: string, path?: string): HttpDecorator {
             routeMap.lock(key);
             router.method(<HttpMethods>method, path, handle(key));
 
-            if (method === "POST" && isOwnKey(proto.ctor, "cors") &&
-                !router.contains("OPTIONS", path)) {
+            if (method === "POST" &&
+                !isEmpty(proto.ctor["cors"]) &&
+                !router.contains("OPTIONS", path)
+            ) {
                 router.method("OPTIONS", path, (req, res) => {
                     cors(proto.ctor["cors"], req, res);
                     res.end();

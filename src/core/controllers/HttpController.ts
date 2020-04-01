@@ -34,7 +34,7 @@ export { CorsOptions };
  */
 export class HttpController extends Controller {
     /** Sets a specified base URI for route paths. */
-    static baseURI: string;
+    static baseURI: string = "/";
 
     /**
      * Enables Cross-Origin Resource Sharing, set an array to accept multiple 
