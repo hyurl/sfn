@@ -113,6 +113,10 @@ async function runScript(filename) {
             filename = require.resolve(filename);
         }
         app.id = filename;
+        let bootstrap = init_1.APP_PATH + "/bootstrap/index";
+        if (app.ROOT_PATH !== sfnd) {
+            module_1.moduleExists(bootstrap) && tryImport(bootstrap);
+        }
         await app.rpc.connectAll(true);
         await app.hooks.lifeCycle.startup.invoke();
         require(filename);
@@ -123,14 +127,7 @@ async function runScript(filename) {
     }
 }
 program.parseAsync(process.argv).then(() => {
-    let command;
-    if (!isEmpty_1.default(program.args)) {
-        let index = process.argv.indexOf(program.args[0]) - 1;
-        command = process.argv[index];
-    }
-    else {
-        command = process.argv[2];
-    }
+    let command = !isEmpty_1.default(program.args) ? program.args[0] : process.argv[2];
     if (command && ["init", "repl", "run"].includes(command))
         return;
     try {
@@ -138,7 +135,10 @@ program.parseAsync(process.argv).then(() => {
             let filename = lastChar(program.controller) == "/"
                 ? program.controller + "index"
                 : program.controller.toLowerCase();
-            let type = program.type == "websocket" ? "WebSocket" : "Http", ControllerName = upperFirst(path.basename(program.controller)), input = `${tplDir}/${type}Controller.ts`, output = `${init_1.SRC_PATH}/controllers/${filename}.ts`;
+            let type = program.type == "websocket" ? "WebSocket" : "Http";
+            let ControllerName = upperFirst(path.basename(program.controller));
+            let input = `${tplDir}/${type}Controller.ts`;
+            let output = `${init_1.SRC_PATH}/controllers/${filename}.ts`;
             checkSource(input);
             let route = program.controller.toLowerCase();
             let contents = fs.readFileSync(input, "utf8")
@@ -147,7 +147,11 @@ program.parseAsync(process.argv).then(() => {
             outputFile(output, contents, "controller");
         }
         else if (program.service) {
-            let ServiceName = upperFirst(path.basename(program.service)), mod = camelCase(ServiceName), filename = path.dirname(program.service) + "/" + mod, input = `${tplDir}/Service.ts`, output = `${init_1.SRC_PATH}/services/${filename}.ts`;
+            let ServiceName = upperFirst(path.basename(program.service));
+            let mod = camelCase(ServiceName);
+            let filename = path.dirname(program.service) + "/" + mod;
+            let input = `${tplDir}/Service.ts`;
+            let output = `${init_1.SRC_PATH}/services/${filename}.ts`;
             checkSource(input);
             let contents = fs.readFileSync(input, "utf8")
                 .replace(/__Service__/g, ServiceName + "Service")
@@ -177,9 +181,6 @@ program.parseAsync(process.argv).then(() => {
                 });
             }
             else {
-                if (app.ROOT_PATH !== sfnd) {
-                    module_1.moduleExists(bootstrap) && tryImport(bootstrap);
-                }
                 runScript(id);
             }
         }

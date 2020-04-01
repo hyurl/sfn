@@ -133,6 +133,12 @@ async function runScript(filename: string) {
         }
 
         app.id = filename;
+        let bootstrap = APP_PATH + "/bootstrap/index";
+
+        if (app.ROOT_PATH !== sfnd) {
+            // Load user-defined bootstrap procedures.
+            moduleExists(bootstrap) && tryImport(bootstrap);
+        }
 
         await app.rpc.connectAll(true); // connect to RPC services.
         await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
@@ -145,14 +151,7 @@ async function runScript(filename: string) {
 }
 
 program.parseAsync(process.argv).then(() => {
-    let command: string;
-
-    if (!isEmpty(program.args)) {
-        let index = process.argv.indexOf(program.args[0]) - 1;
-        command = process.argv[index];
-    } else {
-        command = process.argv[2];
-    }
+    let command = !isEmpty(program.args) ? program.args[0] : process.argv[2];
 
     if (command && ["init", "repl", "run"].includes(command))
         return;
@@ -162,10 +161,10 @@ program.parseAsync(process.argv).then(() => {
             let filename = lastChar(program.controller) == "/"
                 ? program.controller + "index"
                 : (<string>program.controller).toLowerCase();
-            let type = program.type == "websocket" ? "WebSocket" : "Http",
-                ControllerName = upperFirst(path.basename(program.controller)),
-                input = `${tplDir}/${type}Controller.ts`,
-                output = `${SRC_PATH}/controllers/${filename}.ts`;
+            let type = program.type == "websocket" ? "WebSocket" : "Http";
+            let ControllerName = upperFirst(path.basename(program.controller));
+            let input = `${tplDir}/${type}Controller.ts`;
+            let output = `${SRC_PATH}/controllers/${filename}.ts`;
 
             checkSource(input);
 
@@ -176,11 +175,11 @@ program.parseAsync(process.argv).then(() => {
 
             outputFile(output, contents, "controller");
         } else if (program.service) { // create service
-            let ServiceName = upperFirst(path.basename(program.service)),
-                mod = camelCase(ServiceName),
-                filename = path.dirname(program.service) + "/" + mod,
-                input = `${tplDir}/Service.ts`,
-                output = `${SRC_PATH}/services/${filename}.ts`;
+            let ServiceName = upperFirst(path.basename(program.service));
+            let mod = camelCase(ServiceName);
+            let filename = path.dirname(program.service) + "/" + mod;
+            let input = `${tplDir}/Service.ts`;
+            let output = `${SRC_PATH}/services/${filename}.ts`;
 
             checkSource(input);
 
@@ -216,11 +215,6 @@ program.parseAsync(process.argv).then(() => {
                     stdout: process.argv[3] !== "--no-stdout"
                 });
             } else {
-                if (app.ROOT_PATH !== sfnd) {
-                    // Load user-defined bootstrap procedures.
-                    moduleExists(bootstrap) && tryImport(bootstrap);
-                }
-
                 runScript(id);
             }
         } else if (process.argv.length < 3) {
