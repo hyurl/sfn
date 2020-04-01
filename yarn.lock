@@ -34,6 +34,16 @@
     tslib "^1.11.1"
     utf8-length "0.0.1"
 
+"@hyurl/utils@^0.1.25":
+  version "0.1.26"
+  resolved "https://registry.yarnpkg.com/@hyurl/utils/-/utils-0.1.26.tgz#edf8bdc14a9305b760cfe39be0b14de348916fcd"
+  integrity sha512-hTPLcf3iNogOtQ8p2sa+w2IbNw80FLdppeG8GoV+WSq0OHDmK6gw6vjc4ffvTUCuwb3x3We6sNy+dsCGSP6QFg==
+  dependencies:
+    is-like "^0.1.4"
+    split-any "^1.0.1"
+    tslib "^1.11.1"
+    utf8-length "0.0.1"
+
 "@types/backoff@^2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@types/backoff/-/backoff-2.5.1.tgz#343d0f5c75c2c65d1f90f954f469506a3b4a41ed"
@@ -1274,10 +1284,17 @@ minimist@0.0.8:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
   integrity sha1-hX/Kv8M5fSYluCKCYuhqp6ARsF0=
 
+<<<<<<< HEAD
 minimist@^1.2.0, minimist@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
+=======
+minimist@^1.2.0:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.2.tgz#b00a00230a1108c48c169e69a291aafda3aacd63"
+  integrity sha512-rIqbOrKb8GJmx/5bc2M0QchhUouMXSpd1RTclXsB41JdL+VtnojfaJR+h7F9k18/4kHUsBFgk80Uk+q569vjPA==
+>>>>>>> 7a4cec242775761b839991b84aa51122f2500574
 
 mkdirp@0.5.1:
   version "0.5.1"
