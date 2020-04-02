@@ -1660,10 +1660,10 @@ sfn-cookie@^1.0.6:
   resolved "https://registry.yarnpkg.com/sfn-cookie/-/sfn-cookie-1.0.7.tgz#4d58e989d3cc459ab545638fca4ab269becaeab1"
   integrity sha512-Ktd8Zqe+IkjAZm9OQKOzx0x7pZ6QMPXvsZ7ud2bI67n+W3iWjZ+I/f/3EN+wpasDtPh819bt8jH51GLjS6HcCw==
 
-sfn-cors@^0.1.5:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/sfn-cors/-/sfn-cors-0.1.5.tgz#2f6963e0e5382a8f5ad95a5900ea59bfadf79a7d"
-  integrity sha512-cS8S7Wn7Bck0QaEBIrk4u500WRbT/d2ltCq4Aw0VwoT7JyXQHrzaQaWQe0PoeqOYQowkd/gl7yXQOA5OEeDXHw==
+sfn-cors@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/sfn-cors/-/sfn-cors-0.1.6.tgz#0d8d58e13b679c2afab7c089911f3dc9c64a6787"
+  integrity sha512-yyVvHUypookqirnzCFqObte+4hg1DFQVIGCH5E5N0rW2SiVo1WPmHLvZKfm3i2e9U+MDsXozx55auvSLpcaoLA==
 
 sfn-logger@^0.5.3:
   version "0.5.3"
