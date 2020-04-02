@@ -25,6 +25,13 @@ export { define } from "./internal/index";
 export { moduleExists, createImport } from "./internal/module";
 export { serve as serveRepl, connect as connectRepl } from "./internal/repl";
 
+export const EFFECT_METHODS: string[] = [
+    "DELETE",
+    "PATCH",
+    "POST",
+    "PUT"
+];
+
 /** 
  * Generates a random string.
  * @param length The string length.
@@ -159,7 +166,7 @@ export function route(method: string, path?: string): HttpDecorator {
             routeMap.lock(key);
             router.method(<HttpMethods>method, path, handle(key));
 
-            if (method === "POST" &&
+            if (EFFECT_METHODS.includes(method) &&
                 !isEmpty(proto.ctor["cors"]) &&
                 !router.contains("OPTIONS", path)
             ) {
