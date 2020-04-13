@@ -4,6 +4,7 @@ import { Http2SecureServer } from "http2";
 import { pathExists } from 'fs-extra';
 import { App } from "webium";
 import * as SocketIO from "socket.io";
+import define from "@hyurl/utils/define";
 import { SSE } from "sfn-sse";
 import { APP_PATH } from "../../init";
 import {
@@ -11,7 +12,7 @@ import {
     createImport,
     importDirectory,
 } from "../tools/internal/module";
-import { serveTip, inspectAs, baseUrl, define } from "../tools/internal";
+import { serveTip, inspectAs, baseUrl } from "../tools/internal";
 import { red } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
 import "./load-message";

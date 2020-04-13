@@ -24,11 +24,23 @@
   dependencies:
     "@hyurl/utils" "^0.1.24"
 
-"@hyurl/utils@^0.1.24", "@hyurl/utils@^0.1.28":
+"@hyurl/utils@^0.1.24":
   version "0.1.28"
   resolved "https://registry.yarnpkg.com/@hyurl/utils/-/utils-0.1.28.tgz#05b10427599ec43b1d696bfdca0de6dcb2b3a570"
   integrity sha512-PdUMH2hEFzOumKMNofS/zsj6o+RcbFrsa7wKBU0MiVm8agu28KLfyPXoOo+vLcC+H1Zp/QdrzaEMvMR8LpQMng==
   dependencies:
+    is-like "^0.1.4"
+    split-any "^1.0.1"
+    tslib "^1.11.1"
+    utf8-length "0.0.1"
+
+"@hyurl/utils@^0.1.30":
+  version "0.1.32"
+  resolved "https://registry.yarnpkg.com/@hyurl/utils/-/utils-0.1.32.tgz#585634001c1434f8d151d84c6d172c5df52a898e"
+  integrity sha512-e9lf7xPaEuKTYl4CVcrg/6yibVUyZ14F8BOFD+1h8c8lPHOnWnc72QFbKusvP2KwcnWWJGbhLpBwhXNzIuvLzw==
+  dependencies:
+    check-iterable "^1.0.2"
+    could-be-class "^0.2.0"
     is-like "^0.1.4"
     split-any "^1.0.1"
     tslib "^1.11.1"
@@ -682,6 +694,11 @@ could-be-class@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/could-be-class/-/could-be-class-0.1.4.tgz#112e0d3c0d21ba952734bfc1581dbca78029f858"
   integrity sha512-JlE20s9XuAR6kgRMwEQ1hy17Eucpv7ZXWYoxfK7Mo42Il1i+oqsG1nLj17GdJZfbeKD0wDO4Iggn9BvK6ZGk/w==
+
+could-be-class@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/could-be-class/-/could-be-class-0.2.0.tgz#081ed80548893207d8438b53e8dc60227662cb04"
+  integrity sha512-z5VzMR+uofHUocp6aiZtPpy5SWw948JaCRP6BfYqY98yqWefEjL5Mq5Io/IviMhbMI8uqwZx3kFEbku/Ckqztg==
 
 crypt@~0.0.1:
   version "0.0.2"

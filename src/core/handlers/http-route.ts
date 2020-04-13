@@ -5,7 +5,7 @@ import { RouteHandler } from "webium";
 import { router } from "../bootstrap/index";
 import { HttpController } from "../controllers/HttpController";
 import { StatusException } from "../tools/StatusException";
-import { randStr, EFFECT_METHODS } from "../tools/functions";
+import { EFFECT_METHODS } from "../tools/functions";
 import isOwnMethod from "@hyurl/utils/isOwnMethod";
 import { tryLogError } from "../tools/internal/error";
 import { Request, Response, Session } from "../tools/interfaces";
@@ -14,6 +14,7 @@ import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
 import { Controller } from '../controllers/Controller';
+import randStr from "@hyurl/utils/randStr";
 
 const XMLType = /(text|application)\/xml\b/;
 

@@ -19,6 +19,7 @@ import "./core/bootstrap/load-hooks";
 
 export * from "./core/tools/interfaces";
 export * from "./core/tools/StatusException";
+export * from "./core/tools/decorators";
 export * from "./core/tools/functions";
 export * from "./core/tools/upload";
 export * from "./core/tools/Hook";
