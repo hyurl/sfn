@@ -5,7 +5,7 @@ import { router } from "../bootstrap/index";
 import { Request, Response } from "../tools/interfaces";
 import * as FRON from "fron";
 
-const parseStringAsync = promisify<any, OptionsV2, any>(<any>parseString);
+const parseXML = promisify<any, OptionsV2, any>(<any>parseString);
 const plainType = /text\/plain\b/;
 const xmlType = /(text|application)\/xml\b/;
 const fronType = /(text|application)\/(javascript|jsonc|fron)\b/;
@@ -31,7 +31,7 @@ router.use(<any>BodyParser.text({
         switch (type) {
             case "xml":
                 try {
-                    req.body = await parseStringAsync(req.body, {
+                    req.body = await parseXML(req.body, {
                         async: true,
                         explicitArray: false,
                         explicitRoot: false
