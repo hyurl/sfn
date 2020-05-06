@@ -8,6 +8,7 @@ import initHandler from "./websocket-init";
 import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
 import sessionHandler, { handler2 as sessionHandler2 } from "./websocket-session";
 import isOwnMethod from "@hyurl/utils/isOwnMethod";
+import typeAs from "@hyurl/utils/typeAs";
 import { tryLogError } from "../tools/internal/error";
 import { eventMap } from '../tools/RouteMap';
 import { ThenableAsyncGenerator } from "thenable-generator";
@@ -56,9 +57,7 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
     let ctrl: WebSocketController = null;
     let initiated = false;
     let info: SocketEventInfo = { time: Date.now(), event, code: 200 };
-    let callback: (result: any) => void = typeof last(data) === "function"
-        ? last(data)
-        : void 0;
+    let callback: Callable = typeAs(last(data), Function);
 
     try {
         socket[activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
@@ -80,23 +79,21 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 initiated = true;
             }
 
-            if (callback && ctrl[method].length === data.length - 1) {
-                data = data.slice(0, -1); // strip the callback
-            }
-
-            let generator = new ThenableAsyncGenerator(ctrl[method](
-                ...getArguments(ctrl, method, data)
-            ));
+            let options = { passCallback: false };
+            let args = getArguments(ctrl, method, data, options);
+            let generator = new ThenableAsyncGenerator(ctrl[method](...args));
             let value: any, done: boolean;
 
             // Fetch any data produced by the method, whether they are returned 
             // or yielded.
             while ({ value, done } = await generator.next()) {
                 // Send data to the client.
-                if (callback) {
-                    callback(value);
-                } else {
-                    (value === undefined) || socket.emit(event, value);
+                if (!options.passCallback) {
+                    if (callback) {
+                        callback(value);
+                    } else {
+                        (value === undefined) || socket.emit(event, value);
+                    }
                 }
 
                 if (done) {
@@ -116,7 +113,12 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
     }
 }
 
-function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
+function getArguments(
+    ctrl: WebSocketController,
+    method: string,
+    data: any[],
+    options: { passCallback: boolean; }
+) {
     let args: any[] = [];
 
     // Dependency Injection
@@ -131,6 +133,10 @@ function getArguments(ctrl: WebSocketController, method: string, data: any[]) {
             args.push(ctrl.socket.session);
         } else {
             args.push(data.shift());
+
+            if (type === Function) {
+                options.passCallback = true;
+            }
         }
     }
 

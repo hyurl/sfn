@@ -38,10 +38,10 @@ router.onerror = function onerror(err: any, req: Request, res: Response) {
 
 export function getRouteHandler(key: string): RouteHandler {
     return async (req: Request, res: Response) => {
-        let Controller = routeMap.resolve(key),
-            methods = routeMap.methods(key),
-            ctrl: HttpController = null,
-            initiated = false;
+        let Controller = routeMap.resolve(key);
+        let methods = routeMap.methods(key);
+        let ctrl: HttpController = null;
+        let initiated = false;
 
         res.on("error", (err) => {
             tryLogError(err, req.method + " " + req.shortUrl);
