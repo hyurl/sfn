@@ -50,12 +50,15 @@ export function tryImport(nsp: string) {
 }
 
 async function handleEvent(key: string, socket: WebSocket, data: any[]) {
-    let Controller = eventMap.resolve(key),
-        methods = eventMap.methods(key),
-        { prefix: nsp, route: event } = eventMap.get(key),
-        ctrl: WebSocketController = null,
-        initiated = false,
-        info: SocketEventInfo = { time: Date.now(), event, code: 200 };
+    let Controller = eventMap.resolve(key);
+    let methods = eventMap.methods(key);
+    let { prefix: nsp, route: event } = eventMap.get(key);
+    let ctrl: WebSocketController = null;
+    let initiated = false;
+    let info: SocketEventInfo = { time: Date.now(), event, code: 200 };
+    let callback: (result: any) => void = typeof last(data) === "function"
+        ? last(data)
+        : void 0;
 
     try {
         socket[activeEvent] = nsp + (last(nsp) == "/" ? "" : "/") + event;
@@ -77,6 +80,10 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 initiated = true;
             }
 
+            if (callback && ctrl[method].length === data.length - 1) {
+                data = data.slice(0, -1); // strip the callback
+            }
+
             let generator = new ThenableAsyncGenerator(ctrl[method](
                 ...getArguments(ctrl, method, data)
             ));
@@ -86,7 +93,11 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
             // or yielded.
             while ({ value, done } = await generator.next()) {
                 // Send data to the client.
-                (value === undefined) || socket.emit(event, value);
+                if (callback) {
+                    callback(value);
+                } else {
+                    (value === undefined) || socket.emit(event, value);
+                }
 
                 if (done) {
                     break;

@@ -267,9 +267,7 @@ $(function () {
 
 
     var socket = window.socket = io.connect(location.host);
-    socket.on("greeting", function (data) {
-        console.log("Socket:", data);
-    }).on("repeat-what-I-said", function (data) {
+    socket.on("repeat-what-I-said", function (data) {
         console.log("You just said:", data);
     }).on("renew-doc-contents", function (pathname, _lang, data) {
         if (pathname === location.pathname && _lang === lang) {
@@ -278,5 +276,7 @@ $(function () {
             replaceLink(content);
         }
     });
-    socket.emit("greeting");
+    socket.emit("greeting", (data) => {
+        console.log(data);
+    });
 });
