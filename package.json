@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.6.62",
+    "version": "0.6.63",
     "description": "An easy and elegant web-based service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",
@@ -77,7 +77,7 @@
         "lodash": "^4.17.15",
         "md5": "^2.2.1",
         "minimist": "^1.2.5",
-        "moment": "^2.24.0",
+        "moment": "^2.25.3",
         "multer": "^1.4.2",
         "power-repl": "^0.1.11",
         "reflect-metadata": "^0.1.13",
@@ -89,8 +89,8 @@
         "socket.io": "^2.3.0",
         "source-map-support": "^0.5.19",
         "thenable-generator": "^0.4.0",
-        "tslib": "^1.11.1",
-        "webium": "^0.6.1",
+        "tslib": "^1.11.2",
+        "webium": "^0.6.2",
         "xml2js": "^0.4.23"
     },
     "devDependencies": {
@@ -100,7 +100,7 @@
         "@types/marked": "^0.7.4",
         "@types/md5": "^2.2.0",
         "@types/minimist": "^1.2.0",
-        "@types/node": "^13.13.4",
+        "@types/node": "^13.13.5",
         "@types/serve-static": "^1.13.3",
         "@types/session-file-store": "^1.2.1",
         "alar-ejs-loader": "^1.2.0",
