@@ -15,7 +15,7 @@ export class RouteMap<T> {
 
     keyFor(data: RouteMapData) {
         let { prefix, route, name } = data;
-        let key = prefix + " " + route + " " + name;
+        let key = (prefix ? prefix + " " : "") + route + " " + name;
 
         if (!this.dataMap.get(key)) {
             this.dataMap.set(key, data);
