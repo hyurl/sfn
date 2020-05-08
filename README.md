@@ -42,7 +42,7 @@ git clone https://github.com/hyurl/sfn
 mkdir ./node_modules
 ln -s ./sfn ./node_modules/sfn # some modules require sfn in node_modules
 cd sfn
-yarn install
+npm install
 tsc
 node dist
 ```
