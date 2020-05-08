@@ -52,7 +52,7 @@ export abstract class Controller extends Service {
         return {
             success: true,
             code,
-            data,
+            data: data ?? null,
         };
     }
 
