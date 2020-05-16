@@ -5,10 +5,10 @@ if (!process.stdout.isTTY) {
 
 const path = require("path");
 
-// When run the program in REPL, there is no mainModule defined by default, 
-// to keep the framework running expectedly, assign a default mainModule to the
+// When running the program in REPL, there is no main module defined by default, 
+// to keep the framework running expectedly, assign a default main module to the
 // process object.
-process.mainModule || (process.mainModule = require.main = {
+require.main || (require.main = process.mainModule = {
     id: "<repl>",
     require,
     exports: {},
