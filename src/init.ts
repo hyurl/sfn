@@ -59,7 +59,7 @@ declare global {
     }
 }
 
-var appPath = path.dirname(process.mainModule.filename);
+var appPath = path.dirname(require.main.filename);
 var argv = process.execArgv.join(" ");
 
 appPath === path.resolve(__dirname, "..") && (appPath = __dirname);
