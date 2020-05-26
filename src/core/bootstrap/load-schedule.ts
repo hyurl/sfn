@@ -1,5 +1,6 @@
 import * as alar from "alar";
 import { Schedule, default as ScheduleService } from "../tools/Schedule";
+import define from '@hyurl/utils/define';
 
 declare global {
     namespace app {
@@ -21,11 +22,14 @@ declare global {
 }
 
 
-global.app.schedule = new Schedule("app.schedule");
-global.app.services.schedule = alar.createModuleProxy(
+define(app, "schedule", new Schedule("app.schedule"));
+
+const proxy = alar.createModuleProxy(
     "app.services.schedule",
     __dirname + "/../tools/Schedule",
     void 0,
     void 0,
     <any>app.services
 );
+
+define(app.services, "schedule", proxy);

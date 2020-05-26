@@ -2,6 +2,7 @@ import * as alar from "alar";
 import { APP_PATH } from "../../init";
 import { Controller } from '../controllers/Controller';
 import { createImport } from '../tools/internal/module';
+import define from '@hyurl/utils/define';
 
 declare global {
     namespace app {
@@ -11,10 +12,9 @@ declare global {
     }
 }
 
-global.app.controllers = new alar.ModuleProxy(
-    "app.controllers",
-    APP_PATH + "/controllers"
-);
+define(app,
+    "controllers",
+    new alar.ModuleProxy("app.controllers", APP_PATH + "/controllers"));
 
 // Rewrite watch method for more advanced functions.
 const tryImport = createImport(require);

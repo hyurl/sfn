@@ -1,5 +1,6 @@
 import * as alar from "alar";
 import { APP_PATH } from "../../init";
+import define from '@hyurl/utils/define';
 
 declare global {
     namespace app {
@@ -10,4 +11,4 @@ declare global {
     }
 }
 
-global.app.utils = new alar.ModuleProxy("app.utils", APP_PATH + "/utils");
+define(app, "utils", new alar.ModuleProxy("app.utils", APP_PATH + "/utils"));

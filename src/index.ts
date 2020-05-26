@@ -33,9 +33,11 @@ export * from "./core/bootstrap/index";
 
 import config, { StaticOptions } from "./config";
 import { tryLogError } from './core/tools/functions';
+import define from '@hyurl/utils/define';
+
 export { StaticOptions };
 
-global.app.config = config;
+define(app, "config", config);
 
 if (require.main.filename === __filename) {
     require("./core/tools/internal/module").bootstrap();

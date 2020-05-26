@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as alar from "alar";
 import { SRC_PATH } from '../../init';
 import { View } from '../tools/interfaces';
+import define from '@hyurl/utils/define';
 
 declare global {
     namespace app {
@@ -9,10 +10,12 @@ declare global {
     }
 }
 
-export const ViewEntry = global.app.views = new alar.ModuleProxy(
+export const ViewEntry = new alar.ModuleProxy(
     "app.views",
     SRC_PATH + "/views"
 );
+
+define(app, "views", ViewEntry);
 
 app.views.setLoader({
     cache: {},

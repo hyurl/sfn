@@ -8,6 +8,7 @@ import camelCase = require("lodash/camelCase");
 import upperFirst = require("lodash/upperFirst");
 import startsWith = require('lodash/startsWith');
 import isEmpty from "@hyurl/utils/isEmpty";
+import define from '@hyurl/utils/define';
 import { version, APP_PATH, SRC_PATH } from "../init";
 import { green, red } from "../core/tools/internal/color";
 import { connect as connectRepl } from "../core/tools/internal/repl";
@@ -17,7 +18,7 @@ import {
     loadConfig
 } from "../core/tools/internal/module";
 
-global.app.config = loadConfig();
+define(app, "config", loadConfig());
 
 const tryImport = createImport(require);
 var sfnd = path.normalize(__dirname + "/../..");

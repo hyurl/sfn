@@ -61,10 +61,10 @@ export var ws: SocketIO.Server = null;
 const tryImport = createImport(require);
 let sse: Map<string, SSE> = null;
 
-define(app, "router", () => router);
-define(app, "http", () => http);
-define(app, "ws", () => ws);
-define(app, "sse", () => sse);
+define(app, "router", { get: () => router });
+define(app, "http", { get: () => http });
+define(app, "ws", { get: () => ws });
+define(app, "sse", { get: () => sse });
 
 app.serve = async function serve(id?: string) {
     if (id && !id.startsWith("web-server")) {

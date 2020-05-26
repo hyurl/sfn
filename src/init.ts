@@ -5,6 +5,7 @@ import * as alar from "alar";
 import parseArgv = require("minimist");
 import ensureType from "@hyurl/utils/ensureType";
 import trimEnd = require("lodash/trimEnd");
+import define from '@hyurl/utils/define';
 
 declare global {
     namespace NodeJS {
@@ -108,7 +109,7 @@ export const APP_PATH: string = isTsNode ? SRC_PATH : appPath;
 export const isDevMode = isDebugMode ||
     !(process.send && process.env.NODE_APP_INSTANCE); // PM2 special
 
-global.app = {
+define(global, "app", {
     ROOT_PATH,
     SRC_PATH,
     APP_PATH,
@@ -119,9 +120,9 @@ global.app = {
     argv: ensureType(parseArgv(process.argv)),
     local: alar.local,
     isWebServer: false
-};
+});
 
-Object.defineProperty(app, "serverId", {
+define(app, "serverId", {
     get: () => app.id,
-    set: (id) => { app.id = id }
+    set: (id: string) => void (app.id = id)
 });

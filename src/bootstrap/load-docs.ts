@@ -3,6 +3,7 @@ import * as fs from "fs";
 import { View } from "sfn";
 import startsWith = require('lodash/startsWith');
 import get = require('lodash/get');
+import define from '@hyurl/utils/define';
 
 declare global {
     namespace app {
@@ -11,7 +12,7 @@ declare global {
 }
 
 // add new module proxy to auto-load and hot-reload markdown documentations
-global.app.docs = new alar.ModuleProxy("app.docs", app.ROOT_PATH + "/docs");
+define(app, "docs", new alar.ModuleProxy("app.docs", app.ROOT_PATH + "/docs"));
 
 app.docs.setLoader({
     cache: {},
