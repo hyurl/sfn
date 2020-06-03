@@ -117,7 +117,7 @@ export function upload(...args): HttpDecorator {
                 }
             }).fields(fields);
 
-            handle(<any>req, <any>res, (err: Error) => {
+            handle(<any>req, <any>res, (err: any) => {
                 err ? reject(err) : resolve(void 0);
             });
         });
