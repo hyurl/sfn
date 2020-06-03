@@ -385,7 +385,7 @@ export class ScheduleService {
                             // A reverse-ordered iteration is needed here since
                             // we want to check the timetable from the newest
                             // time to the oldest one.
-                            for (let i = timetable.length; --i;) {
+                            for (let i = timetable.length; i--;) {
                                 if (now >= timetable[i]) {
                                     this.dispatch(task);
 
