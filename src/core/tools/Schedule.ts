@@ -288,7 +288,16 @@ export class ScheduleService {
     /** @inner Use `app.schedule.create()` instead. */
     async add(task: ScheduleTask) {
         this.state === "uninitiated" && await this.init();
-        this.tasks.set(task.taskId, task);
+        let _task = this.tasks.get(task.taskId);
+
+        if (_task) {
+            task.repeat ?? (_task.repeat = task.repeat);
+            task.end ?? (_task.end = task.end);
+            task.data ?? (_task.data = task.data);
+        } else {
+            this.tasks.set(task.taskId, task);
+        }
+
         return true;
     }
 
@@ -303,7 +312,7 @@ export class ScheduleService {
             query = { ...query };
 
             if (query.module && typeof query.module !== "string")
-                query.module = JSON.parse(JSON.stringify(query.module));
+                query.module = String(query.module);
 
             return ([...this.tasks])
                 .map(([, task]) => task)
