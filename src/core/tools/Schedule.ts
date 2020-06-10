@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import md5 = require("md5");
-import moment = require('moment');
+import omit = require("lodash/omit");
 import timestamp from "@hyurl/utils/timestamp";
 import sift, { Query as SiftQuery } from "sift";
 
@@ -13,15 +13,15 @@ export type TaskHandler = (...data: any[]) => void | Promise<void>;
 export type ScheduleQuery<T> = Partial<SiftQuery> & {
     appId?: string | RegExp;
     taskId?: string | RegExp;
-    start?: number;
-    end?: number;
+    start?: string | number | Date;
+    end?: string | number | Date;
     repeat?: number;
     module?: ModuleProxy<T> | string | RegExp;
     handler?: Methods<T> | RegExp;
     onEnd?: Methods<T> | RegExp;
 };
 
-export interface BaseTaskOptions<F extends TaskHandler> {
+export interface ScheduleOptions {
     /**
      * A UNIX timestamp, date-time string or Date instance of when should the
      * task starts running.
@@ -47,6 +47,18 @@ export interface BaseTaskOptions<F extends TaskHandler> {
      * A number of seconds of how often should the task be running repeatedly.
      */
     repeat?: number;
+}
+
+export interface ScheduleTask extends ScheduleOptions {
+    appId: string;
+    taskId: string;
+    module?: string;
+    handler?: string;
+    onEnd?: string;
+    data?: any[];
+}
+
+export interface BaseTaskOptions<F extends TaskHandler> extends ScheduleOptions {
     /** 
      * The salt must be unique and predictable for each task, so that when the
      * module is reloaded, the new task can override the ole one, to keep there 
@@ -70,19 +82,6 @@ export interface ModuleTaskOptions<T, M extends Methods<T>> extends BaseTaskOpti
     module?: ModuleProxy<T>;
     handler?: M;
     onEnd?: Methods<T>;
-}
-
-export interface ScheduleTask {
-    appId: string;
-    taskId: string;
-    start: number;
-    end?: number;
-    repeat?: number;
-    timetable?: number[];
-    module?: string;
-    handler?: string;
-    onEnd?: string;
-    data?: any[];
 }
 
 export class Schedule {
@@ -176,45 +175,21 @@ export class Schedule {
             repeat = Math.ceil(repeat / 1000);
         }
 
-        if (!timetable) {
-            if (!start) {
-                if (startIn) {
-                    start = moment().unix() + startIn;
-                } else {
-                    start = moment().unix();
-                }
-            } else if (typeof start !== "number") {
-                start = timestamp(start);
-            }
-        } else {
-            let now = moment().unix();
-
-            timetable = timetable
-                .map(time => typeof time === "number" ? time : timestamp(time))
-                .sort()
-                .filter((time, i, table) => {
-                    if (time < now) {
-                        if (repeat) {
-                            table[i] += repeat;
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return true;
-                    }
-                });
-        }
-
-        if (!end) {
-            if (endIn) {
-                end = moment().unix() + endIn;
-            }
-        } else if (typeof end !== "number") {
-            end = timestamp(end);
-        }
-
         let taskId = md5(params.join("#"));
+        let task: ScheduleTask = {
+            taskId,
+            appId: app.id,
+            start,
+            startIn,
+            end,
+            endIn,
+            timetable,
+            repeat,
+            module: module && module.name,
+            handler: typeof handler === "string" ? handler : void 0,
+            onEnd: typeof onEnd === "string" ? onEnd : void 0,
+            data
+        };
 
         // If the handler is provided a callable function, directly subscribe 
         // the event using the handler.
@@ -235,32 +210,9 @@ export class Schedule {
         }
 
         if (ensure) {
-            return app.services.schedule(taskId).add({
-                taskId,
-                appId: app.id,
-                start: <number>start,
-                end: <number>end,
-                timetable: <number[]>timetable,
-                repeat,
-                module: module && module.name,
-                handler: typeof handler === "string" ? handler : void 0,
-                onEnd: typeof onEnd === "string" ? onEnd : void 0,
-                data
-            }).then(() => taskId);
+            return app.services.schedule(taskId).add(task).then(() => taskId);
         } else {
-            app.services.schedule(taskId).add({
-                taskId,
-                appId: app.id,
-                start: <number>start,
-                end: <number>end,
-                timetable: <number[]>timetable,
-                repeat,
-                module: module && module.name,
-                handler: typeof handler === "string" ? handler : void 0,
-                onEnd: typeof onEnd === "string" ? onEnd : void 0,
-                data
-            });
-
+            app.services.schedule(taskId).add(task);
             return taskId;
         }
     }
@@ -290,12 +242,67 @@ export class ScheduleService {
         this.state === "uninitiated" && await this.init();
         let _task = this.tasks.get(task.taskId);
 
+        if (task.timetable) {
+            let now = timestamp();
+
+            // Record initial value for comparison.
+            task["_timetable"] = task.timetable.map(
+                time => time instanceof Date ? time.toISOString() : String(time)
+            );
+
+            task.timetable = task.timetable
+                .map(time => typeof time === "number" ? time : timestamp(time))
+                .sort()
+                .filter((time, i, table) => {
+                    if (time < now) {
+                        if (task.repeat) {
+                            table[i] += task.repeat;
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return true;
+                    }
+                });
+        } else {
+            if (task.start) {
+                // Record initial value for comparison.
+                task["_start"] = task.start instanceof Date
+                    ? task.start.toISOString()
+                    : String(task.start);
+
+                if (typeof task.start !== "number")
+                    task.start = timestamp(task.start);
+            } else if (task.startIn) {
+                task.start = timestamp() + task.startIn;
+            } else {
+                task.start = timestamp();
+            }
+        }
+
+        if (task.end && typeof task.end !== "number") {
+            task.end = timestamp(task.end);
+        } else if (task.endIn) {
+            task.end = timestamp() + task.endIn;
+        }
+
         if (_task) {
             task.repeat ?? (_task.repeat = task.repeat);
             task.end ?? (_task.end = task.end);
             task.data ?? (_task.data = task.data);
+
+            // The modification of `start` and `timetable` will immediately
+            // affect the task's schedule, so they need to be compared with the
+            // original settings and only modify them when the settings are
+            // mutated.
+            if (String(_task["_timetable"]) !== String(task["_timetable"])) {
+                _task.timetable = task.timetable;
+            } else if (_task["_start"] !== task["_start"]) {
+                _task.start = task.start;
+            }
         } else {
-            this.tasks.set(task.taskId, task);
+            this.tasks.set(task.taskId, omit(task, ["startIn", "endIn"]));
         }
 
         return true;
@@ -310,6 +317,12 @@ export class ScheduleService {
             return this.tasks.get(query);
         } else {
             query = { ...query };
+
+            if (query.start && typeof query.start !== "number")
+                query.start = timestamp(query.start);
+
+            if (query.end && typeof query.end !== "number")
+                query.end = timestamp(query.end);
 
             if (query.module && typeof query.module !== "string")
                 query.module = String(query.module);
@@ -399,7 +412,7 @@ export class ScheduleService {
                                     this.dispatch(task);
 
                                     if (repeat) {
-                                        timetable[i] += repeat;
+                                        timetable[i] = Number(timetable[i]) + repeat;
                                     } else {
                                         timetable.splice(i, 1);
 
@@ -446,7 +459,7 @@ export class ScheduleService {
                 this.add({
                     taskId: "d41d8cd98f00b204e9800998ecf8427e", // empty string
                     appId: app.id,
-                    start: moment().unix() + 900, // in 15 minutes
+                    start: timestamp() + 900, // in 15 minutes
                     repeat: 900, // every 15 minutes
                     module: app.services.schedule.name,
                     handler: "flush"
