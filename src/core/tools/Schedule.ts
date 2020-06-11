@@ -297,8 +297,10 @@ export class ScheduleService {
             // original settings and only modify them when the settings are
             // mutated.
             if (String(_task["_timetable"]) !== String(task["_timetable"])) {
+                _task["_timetable"] = task["_timetable"];
                 _task.timetable = task.timetable;
             } else if (_task["_start"] !== task["_start"]) {
+                _task["_start"] = task["_start"];
                 _task.start = task.start;
             }
         } else {
