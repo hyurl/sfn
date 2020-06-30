@@ -121,7 +121,7 @@ function openREPLSession(appId: string, options: { stdout: boolean }) {
     });
 }
 
-async function runScript(filename: string, bootstrapLoaded = false) {
+async function runScript(filename: string) {
     try {
         if (!path.isAbsolute(filename))
             filename = path.normalize(app.ROOT_PATH + "/" + filename);
@@ -160,7 +160,15 @@ async function runScript(filename: string, bootstrapLoaded = false) {
         await app.rpc.connectAll(true); // connect to RPC services.
         await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
 
-        require(filename);
+        let _module = require(filename);
+
+        if (typeof _module.default === "function") {
+            await _module.default();
+            process.emit("SIGINT", "SIGINT");
+        } else if (typeof _module.main === "function") {
+            await _module.main();
+            process.emit("SIGINT", "SIGINT");
+        }
     } catch (err) {
         console.error(err);
         process.exit(1);
