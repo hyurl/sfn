@@ -6,6 +6,7 @@ import parseArgv = require("minimist");
 import ensureType from "@hyurl/utils/ensureType";
 import trimEnd = require("lodash/trimEnd");
 import define from '@hyurl/utils/define';
+import isVoid from "@hyurl/utils/isVoid";
 
 declare global {
     namespace NodeJS {
@@ -69,7 +70,15 @@ appPath === path.resolve(__dirname, "..") && (appPath = __dirname);
 export const version: string = require("../package.json").version;
 
 /** Whether the current process is running in debug/inspect mode. */
-export const isDebugMode = argv.includes("inspect") || argv.includes("debug");
+export const isDebugMode = argv.includes("inspect")
+    || argv.includes("debug")
+    || (() => {
+        try {
+            return !isVoid(require("inspector").url());
+        } catch (e) {
+            return false;
+        }
+    })();
 
 /** Whether the current process is running in ts-node. */
 export const isTsNode = argv.includes("ts-node");
