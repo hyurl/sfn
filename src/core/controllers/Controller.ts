@@ -1,10 +1,10 @@
 import { Service } from "../tools/Service";
 import { Session } from "../tools/interfaces";
 
-export interface ResultMessage {
+export interface ResultMessage<T = any> {
     success: boolean;
     code: number;
-    data?: any;
+    data?: T;
     error?: string;
 }
 
@@ -48,7 +48,7 @@ export abstract class Controller extends Service {
     }
 
     /** Returns a result indicates the operation is succeeded. */
-    success(data: any, code: number = 200): ResultMessage {
+    success<T = any>(data: T, code: number = 200): ResultMessage<T> {
         return {
             success: true,
             code,
@@ -57,7 +57,7 @@ export abstract class Controller extends Service {
     }
 
     /** Returns a result indicates the operation is failed. */
-    error(msg: string | Error, code: number = 500): ResultMessage {
+    error(msg: string | Error, code: number = 500): ResultMessage<void> {
         msg = msg instanceof Error ? msg.message : msg;
         return {
             success: false,
