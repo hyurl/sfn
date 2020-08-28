@@ -32,7 +32,7 @@ export interface Request extends webium.Request {
     /** Gets the CSRF token if available. */
     csrfToken?: string;
     /** In an sfn app, the session is shared between HTTP and WebSocket. */
-    session: Session;
+    session?: Session;
     /** An MD5 string representing the identical signature of the request. */
     readonly sign: string;
     /** 
@@ -86,7 +86,7 @@ export interface WebSocket extends SocketIO.Socket {
     /** The subdomain name of the handshake. */
     subdomain?: string;
     /** In an sfn app, the session is shared between HTTP and WebSocket. */
-    session: Session;
+    session?: Session;
     /** * The cookies of handshake. */
     cookies: { [name: string]: any };
     /** The proxy information of handshake. */

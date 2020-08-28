@@ -57,6 +57,8 @@ CSRF 安全问题其实是一个非常老的话题，根据我的经验，现代
 
 在 **SFN** 框架中使用 CSRF 保护是很简单的，你只要在 HttpController 中打开它即可。
 
+*注意：会话必须启用才可以开启 CSRF 防护功能。*
+
 ```typescript
 import { HttpController, route } from "sfn";
 

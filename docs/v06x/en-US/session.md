@@ -1,14 +1,15 @@
 <!-- title: Session; order: 8 -->
 # Concept
 
-The session is enabled by default in **SFN** framework and shared between HTTP 
-and WebSocket. the framework uses 
+The session in **SFN** framework and shared between HTTP and WebSocket. the
+framework uses 
 [express-session](https://www.npmjs.com/package/express-session) to back 
 session support.
 
 ## Configuration
 
-You can modify `config.ts` to set proper configurations for your own session
+Since v0.6.100, SFN disables session by default, to enable it, you can modify
+`config.ts` to set proper configurations for your own session
 needs, the following example shows how to configure 
 [session-file-store](https://www.npmjs.com/package/session-file-store) as the 
 storage engine.
@@ -23,7 +24,7 @@ export default <app.Config>{
     // ... 
     session: {
         secret: "sfn",
-        name: "sfn-sid",
+        name: "sid",
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
@@ -70,3 +71,5 @@ export default class extends WebSocketController {
     }
 }
 ```
+
+*NOTE: when session is disabled, the `session` property will disappear.*

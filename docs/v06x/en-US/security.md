@@ -63,6 +63,8 @@ may need to do your own protection as well.
 CSRF protection in an **SFN** application is very easy, you just need to turn 
 it on in the HttpController.
 
+*NOTE: session must be enabled in order to turn on CSRF protection.*
+
 ```typescript
 import { HttpController, route } from "sfn";
 

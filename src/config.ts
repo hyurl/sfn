@@ -101,7 +101,7 @@ declare global {
              * Configurations for Express-Session.
              * @see https://www.npmjs.com/package/express-session
              */
-            session?: Session.SessionOptions;
+            session?: Session.SessionOptions | false;
         }
     }
 }
@@ -147,14 +147,5 @@ export default <app.Config>{
         },
         rpc: {}
     },
-    session: {
-        secret: "sfn",
-        name: "sid",
-        resave: true,
-        saveUninitialized: true,
-        unset: "destroy",
-        cookie: {
-            maxAge: 3600 * 24 * 1000 // 24 hours (in milliseconds)
-        }
-    }
+    session: false
 };

@@ -1,13 +1,14 @@
 <!-- title: 会话; order: 8 -->
 ## 基本概念
 
-在 **SFN** 框架中，会话是默认开启的，并且在 HTTP 和 WebSocket 中共享。框架使用 
+在 **SFN** 框架中，会话在 HTTP 和 WebSocket 中共享。框架使用 
 [express-session](https://www.npmjs.com/package/express-session) 来实现会话支持。
 
 ## 配置
 
-你可以修改 `config.ts` 来设置合适的配置以满足自己的会话需要，下面的示例展示了如何配置
-使用 [session-file-store](https://www.npmjs.com/package/session-file-store)
+自 0.6.100 版本起，SFN 默认禁用了会话，你可以修改 `config.ts` 来设置合适的配置以满足自己的
+会话需要，下面的示例展示了如何配置使用 
+[session-file-store](https://www.npmjs.com/package/session-file-store)
 作为会话存储引擎。
 
 ```typescript
@@ -20,7 +21,7 @@ export default <app.Config>{
     // ... 
     session: {
         secret: "sfn",
-        name: "sfn-sid",
+        name: "sid",
         resave: true,
         saveUninitialized: true,
         unset: "destroy",
@@ -63,3 +64,5 @@ export default class extends WebSocketController {
     }
 }
 ```
+
+*注意，在会话被禁用时，`session` 属性会不存在。*
