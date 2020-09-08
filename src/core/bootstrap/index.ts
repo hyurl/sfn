@@ -104,7 +104,7 @@ app.serve = async function serve(id?: string) {
 
     if (WS.enabled) {
         if (!WS.port)
-            ws = SocketIO(http, WS.options);
+            ws = SocketIO(<any>http, WS.options);
         else
             ws = SocketIO(WS.port, WS.options);
 
