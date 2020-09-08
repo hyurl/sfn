@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.6.103",
+    "version": "0.6.104",
     "description": "An easy and elegant web-based service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",
@@ -89,7 +89,7 @@
         "socket.io": "^2.3.0",
         "source-map-support": "^0.5.19",
         "thenable-generator": "^0.4.0",
-        "tslib": "^1.13.0",
+        "tslib": "^2.0.1",
         "webium": "^0.6.2",
         "xml2js": "^0.4.23"
     },

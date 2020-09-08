@@ -1,3 +1,4 @@
+import define from "@hyurl/utils/define";
 import * as alar from "alar";
 import { APP_PATH } from "../../init";
 
@@ -11,4 +12,4 @@ declare global {
     }
 }
 
-global.app.models = new alar.ModuleProxy("app.models", APP_PATH + "/models");
+define(app, "models", new alar.ModuleProxy("app.models", APP_PATH + "/models"));
