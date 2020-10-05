@@ -502,7 +502,7 @@ export class ScheduleService {
         let tasks = [...this.tasks.values()].filter(task => {
             return task.taskId !== "d41d8cd98f00b204e9800998ecf8427e";
         });
-        await fs.emptyDir(path.dirname(this.filename));
+        await fs.ensureDir(path.dirname(this.filename));
         await fs.writeJSON(this.filename, tasks);
     }
 
