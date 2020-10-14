@@ -1,6 +1,6 @@
 # Service Framework for NodeJS
 
-**An easy and elegant web-based service framework for Node.js**
+**An easy and elegant distributed service framework for Node.js**
 
 * [Node.js v10.0+](http://nodejs.org/)
 * [ES 2018](https://babeljs.io/learn-es2015/)
