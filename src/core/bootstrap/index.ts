@@ -84,9 +84,7 @@ app.serve = async function serve(id?: string) {
     global.app.isWebServer = true;
     sse = new Map();
     router = new App({
-        cookieSecret: app.config.session
-            ? <string>app.config.session.secret
-            : void 0,
+        cookieSecret: String(app.config.session?.secret) || void 0,
         domain: app.config.server.hostname
     });
 
@@ -159,4 +157,4 @@ app.serve = async function serve(id?: string) {
     if (!app.isDevMode) { // notify PM2 that the service is available.
         process.send("ready");
     }
-}
+};

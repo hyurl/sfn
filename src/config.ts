@@ -101,7 +101,7 @@ declare global {
              * Configurations for Express-Session.
              * @see https://www.npmjs.com/package/express-session
              */
-            session?: Session.SessionOptions | false;
+            session?: Session.SessionOptions;
         }
     }
 }
@@ -147,5 +147,5 @@ export default <app.Config>{
         },
         rpc: {}
     },
-    session: false
+    session: null
 };

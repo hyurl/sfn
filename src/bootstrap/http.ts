@@ -9,7 +9,7 @@ const maxAge: number = get(app.config, "session.cookie.maxAge");
 
 app.views.setLoader(new EjsLoader());
 
-if (typeof app.config.session === "object") {
+if (app.config.session) {
     app.config.session.store = new FileStore({
         path: app.ROOT_PATH + "/sessions",
         ttl: maxAge ? Math.round(maxAge / 1000) : (24 * 3600)

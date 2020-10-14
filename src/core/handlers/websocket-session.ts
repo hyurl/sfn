@@ -1,7 +1,7 @@
 import { WebSocket } from "../tools/interfaces";
 import { session } from "./http-session";
 
-export default async function (socket: WebSocket, next: (err?: Error) => void) {
+export default function (socket: WebSocket, next: (err?: Error) => void) {
     if (!app.config.session)
         return next();
 
@@ -9,7 +9,7 @@ export default async function (socket: WebSocket, next: (err?: Error) => void) {
     session?.(socket.handshake, {}, next);
 }
 
-export async function handler2(socket: WebSocket, next: (err?: Error) => void) {
+export function handler2(socket: WebSocket, next: (err?: Error) => void) {
     if (!app.config.session)
         return next();
 

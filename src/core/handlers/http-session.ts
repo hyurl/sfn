@@ -7,7 +7,7 @@ type SessionHandler = (req: any, res: any, next: Function) => void;
 
 export var session: SessionHandler = null;
 
-if (typeof app.config.session === "object") {
+if (app.config.session) {
     session = ExpressSession(app.config.session);
 
     router.use(session)
