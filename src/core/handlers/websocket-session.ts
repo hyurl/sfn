@@ -3,7 +3,7 @@ import { session } from "./http-session";
 
 export default async function (socket: WebSocket, next: (err?: Error) => void) {
     if (!app.config.session)
-        return;
+        return next();
 
     // Parse session.
     session?.(socket.handshake, {}, next);
@@ -11,7 +11,7 @@ export default async function (socket: WebSocket, next: (err?: Error) => void) {
 
 export async function handler2(socket: WebSocket, next: (err?: Error) => void) {
     if (!app.config.session)
-        return;
+        return next();
 
     // Handle session in socket.
     socket.session = new Proxy(socket.handshake["session"], {
