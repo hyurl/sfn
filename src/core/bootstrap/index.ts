@@ -72,16 +72,16 @@ app.serve = async function serve(id?: string) {
     }
 
     // set the server ID
-    if (process.env.NODE_APP_INSTANCE) {
-        app.id = "web-server-" + process.env.NODE_APP_INSTANCE;
+    if (process.env.NODE_APP_INSTANCE && require("cluster").isWorker) {
+        define(app, "id", "web-server-" + process.env.NODE_APP_INSTANCE, true);
     } else {
-        app.id = "web-server";
+        define(app, "id", "web-server", true);
     }
 
     let { type, port, timeout, options } = app.config.server.http;
     let WS = app.config.server.websocket;
 
-    global.app.isWebServer = true;
+    define(app, "isWebServer", true, true);
     sse = new Map();
     router = new App({
         cookieSecret: String(app.config.session?.secret) || void 0,

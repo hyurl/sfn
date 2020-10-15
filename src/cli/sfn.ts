@@ -149,7 +149,9 @@ async function runScript(filename: string) {
             filename = require.resolve(filename);
         }
 
-        app.id = filename;
+        define(app, "id", filename, true);
+        define(app, "isScript", true, true);
+
         let bootstrap = APP_PATH + "/bootstrap/index";
 
         if (app.ROOT_PATH !== sfnd) {

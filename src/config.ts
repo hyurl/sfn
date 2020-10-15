@@ -5,7 +5,7 @@ import serveStatic = require("serve-static");
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { RpcOptions, ClientOptions } from 'alar';
+import { ChannelOptions, ClientOptions } from 'alar';
 import { FSWatcher } from "chokidar";
 
 declare global {
@@ -79,7 +79,7 @@ declare global {
                  * @see https://github.com/hyurl/alar
                  */
                 rpc?: {
-                    [id: string]: RpcOptions & ClientOptions & {
+                    [id: string]: ChannelOptions & ClientOptions & {
                         [x: string]: any;
                         /** The services that should be hosted by this server. */
                         services: ModuleProxy<any>[];

@@ -11,7 +11,7 @@ import isVoid from "@hyurl/utils/isVoid";
 declare global {
     namespace NodeJS {
         interface Global {
-            app: { [name: string]: any };
+            app: { [name: string]: any; };
         }
     }
 
@@ -25,6 +25,12 @@ declare global {
         const isCli: boolean;
         const argv: parseArgv.ParsedArgs;
 
+        /** The version number set in the project's package.json. */
+        const version: string;
+
+        /** @alias `app.APP_PATH` */
+        const path: string;
+
         /**
          * In the web server, the app ID would be either `web-server`, or 
          * `web-server-<n>` when started with PM2, where `<n>` is the 
@@ -35,7 +41,7 @@ declare global {
          * 
          * @see http://pm2.keymetrics.io/docs/usage/environment/#node-app-instance-pm2-25-minimum
          */
-        var id: string;
+        const id: string;
 
         /**
          * @deprecated
@@ -43,14 +49,20 @@ declare global {
          * Since v0.6, this variable is a getter/setter of `app.id`, should use
          * the later instead for more convenience.
          */
-        var serverId: string;
+        const serverId: string;
 
         /**
          * Whether the current process runs as a web server, it's `false` by
          * default, and become `true` once `app.serve()` is called to ship the
          * web server.
          */
-        var isWebServer: boolean;
+        const isWebServer: boolean;
+
+        /**
+         * Whether the current process runs as a script, scripts is run via the
+         * command `npx sfn <filename>`.
+         */
+        const isScript: boolean;
 
         /**
          * Pass this symbol to `ModuleProxy<any>.instance()` method so that it
@@ -128,10 +140,10 @@ define(global, "app", {
     isCli,
     argv: ensureType(parseArgv(process.argv)),
     local: alar.local,
-    isWebServer: false
+    isWebServer: false,
+    isScript: false,
+    version: require(ROOT_PATH + "/package.json").version,
+    path: APP_PATH
 });
 
-define(app, "serverId", {
-    get: () => app.id,
-    set: (id: string) => void (app.id = id)
-});
+define(app, "serverId", { get: () => app.id });

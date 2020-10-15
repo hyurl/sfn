@@ -19,6 +19,7 @@ define(app,
 // Rewrite watch method for more advanced functions.
 const tryImport = createImport(require);
 const _watch: () => alar.FSWatcher = app.controllers.watch.bind(app.controllers);
+
 app.controllers.watch = () => {
     if (app.isWebServer) {
         return _watch().on("add", autoLoad).on("change", autoLoad);

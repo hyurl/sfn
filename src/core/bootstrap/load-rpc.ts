@@ -2,6 +2,7 @@ import { RpcServer, RpcClient } from "alar";
 import { serveTip, inspectAs } from "../tools/internal";
 import { green } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
+import define from "@hyurl/utils/define";
 
 let isMainThread: boolean;
 
@@ -136,7 +137,7 @@ app.rpc = {
     async serve(id: string) {
         ensureAppId(id);
 
-        app.id = id;
+        define(app, "id", id, true);
         let servers = app.config.server.rpc;
         let { services = [], ...options } = servers[app.id];
         let service = await app.services.serve({
