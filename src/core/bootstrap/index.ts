@@ -72,7 +72,7 @@ app.serve = async function serve(id?: string) {
     }
 
     // set the server ID
-    if (process.env.NODE_APP_INSTANCE) {
+    if (process.env.NODE_APP_INSTANCE && require("cluster").isWorker) {
         app.id = "web-server-" + process.env.NODE_APP_INSTANCE;
     } else {
         app.id = "web-server";
