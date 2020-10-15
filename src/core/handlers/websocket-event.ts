@@ -1,5 +1,5 @@
 import { ws } from "../bootstrap/index";
-import { StatusException } from "../tools/StatusException";
+import { HttpException } from "../tools/HttpException";
 import { WebSocket, Session } from "../tools/interfaces";
 import { activeEvent } from "../tools/symbols";
 import { WebSocketController } from "../controllers/WebSocketController";
@@ -156,7 +156,7 @@ async function handleError(
     ctrl: WebSocketController,
     stack?: string
 ) {
-    let _err = StatusException.from(err);
+    let _err = HttpException.from(err);
 
     info.code = _err.code;
 

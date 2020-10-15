@@ -4,7 +4,7 @@ import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
 import { Controller, ResultMessage } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
-import { StatusException } from "../tools/StatusException";
+import { HttpException } from "../tools/HttpException";
 import { UploadOptions } from "../tools/upload";
 
 export { CorsOptions };
@@ -107,7 +107,7 @@ export class HttpController extends Controller {
             return view().render(vars);
         } catch (err) {
             if (err instanceof TypeError)
-                throw new StatusException(404);
+                throw new HttpException(404);
             else
                 throw err;
         }
@@ -154,7 +154,7 @@ export class HttpController extends Controller {
      * framework allows you to customize the error view handler by rewriting 
      * this method.
      */
-    static httpErrorView(err: StatusException, instance: HttpController) {
+    static httpErrorView(err: HttpException, instance: HttpController) {
         return instance.view(String(err.code), { err });
     }
 }

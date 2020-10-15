@@ -2,7 +2,7 @@ import { App, RouteHandler, HttpMethods } from "webium";
 import { interceptAsync, intercept } from 'function-intercepter';
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { StatusException } from './StatusException';
+import { HttpException } from './HttpException';
 import { routeMap, eventMap } from './RouteMap';
 import { traceModulePath } from './internal/module';
 import { Service } from './Service';
@@ -150,12 +150,12 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(
                 } else if (this.fallbackTo) {
                     this.res.send(this.fallbackTo);
                 } else {
-                    throw new StatusException(401);
+                    throw new HttpException(401);
                 }
 
                 return intercept.BREAK;
             } else {
-                throw new StatusException(401);
+                throw new HttpException(401);
             }
         }
     }
