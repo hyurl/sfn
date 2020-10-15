@@ -13,7 +13,6 @@
     "Elegant Description": "SFN 提供了一套简洁和优雅的 API，你可以使用它们来快速搭建富有表现力的应用。只需要专注于你的逻辑和设计，然后框架就能帮你处理剩下的所有事务。",
     "Distributed Description": "SFN 支持自动扩容与服务发现，它允许你在单机上开发，然后随时随地将服务分离出去，系统会自动重定向网络流量，无需进行任何修改即可实现分布式部署。",
     "Hot Reloading Description": "SFN 所提供的模块加载方案，能够使你在修改程序文件之后，无需重启进程即可立即热重载模块和功能。在分布式部署时，重启远程服务也不会影响应用的运行。",
-    "version": "0.6.x",
     "The page you are requested doesn't exist, please check the URL and try again.": "你所访问的页面不存在，请检查 URL 地址并再次尝试。",
     "The page you are requested is not available currently, please try again later.": "你所访问的页面暂时不可用，请稍后再次尝试。"
 }
