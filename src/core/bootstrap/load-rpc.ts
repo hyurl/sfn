@@ -1,4 +1,4 @@
-import { RpcServer, RpcClient } from "alar";
+import { RpcServer, RpcClient } from "microse";
 import { serveTip, inspectAs } from "../tools/internal";
 import { green } from "../tools/internal/color";
 import { serve as serveRepl } from "../tools/internal/repl";
@@ -27,7 +27,7 @@ declare global {
             var server: RpcServer;
 
             /** @inner reserved portal used by the framework */
-            var connections: { [id: string]: RpcClient };
+            var connections: { [id: string]: RpcClient; };
 
             /**
              * Starts an RPC server according to the given `id`, which is 
@@ -56,7 +56,7 @@ declare global {
     }
 }
 
-const tasks: { [id: string]: NodeJS.Timer } = {};
+const tasks: { [id: string]: NodeJS.Timer; } = {};
 const pendingConnections = new Set<string>();
 
 function ensureAppId(id: string): void {
@@ -65,26 +65,7 @@ function ensureAppId(id: string): void {
     }
 }
 
-async function getConnect(id: string) {
-    let servers = app.config.server.rpc;
-    let { services, fallbackToLocal = true, ...options } = servers[id];
-    let service = await app.services.connect({
-        ...options,
-        id: app.id,
-        serverId: id
-    }, false);
-
-    app.rpc.connections[id] = service;
-    services.forEach(mod => {
-        service.register(mod);
-        mod.fallbackToLocal(fallbackToLocal);
-    });
-
-    return service;
-}
-
 async function tryConnect(
-    service: RpcClient,
     serverId: string,
     defer = false
 ) {
@@ -98,14 +79,24 @@ async function tryConnect(
     }
 
     try {
-        let { services } = app.config.server.rpc[serverId];
+        let servers = app.config.server.rpc;
+        let { services, ...options } = servers[serverId];
+        let service = await app.services.connect({
+            ...options,
+            id: app.id,
+            serverId
+        });
 
-        await service.open();
+        app.rpc.connections[serverId] = service;
+
+        for (let mod of services) {
+            await service.register(mod);
+        }
 
         // If detects the schedule service is served by other processes and
         // being connected, stop the local schedule service.
         if (serverId !== app.id && services.includes(app.services.schedule)) {
-            await app.services.schedule().destroy(true);
+            await app.services.schedule.destroy(true);
         }
 
         if (tasks[serverId]) {
@@ -138,23 +129,22 @@ app.rpc = {
         ensureAppId(id);
 
         define(app, "id", id, true);
-        let servers = app.config.server.rpc;
-        let { services = [], ...options } = servers[app.id];
-        let service = await app.services.serve({
-            ...options,
-            id: app.id,
-            host: "0.0.0.0"
-        }, false);
-        let client = await getConnect(app.id);
-
-        services.forEach(mod => service.register(mod));
-        app.rpc.server = service;
-
         await app.rpc.connectDependencies(id); // connect to dependency services.
         await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
 
-        await service.open(); // open channel and initiate bound services.
-        await tryConnect(client, app.id); // self-connect after serving.
+        let servers = app.config.server.rpc;
+        let { services = [], ...options } = servers[app.id];
+        let service = app.rpc.server = await app.services.serve({
+            ...options,
+            id: app.id,
+            hostname: "0.0.0.0"
+        });
+
+        for (let mod of services) {
+            await service.register(mod);
+        }
+
+        await tryConnect(app.id); // self-connect after serving.
         await serveRepl(app.id); // serve the REPL server.
 
         console.log(serveTip("RPC", app.id, service.dsn));
@@ -164,10 +154,8 @@ app.rpc = {
         }
     },
     async connect(id: string, defer = false) {
-        let service = await getConnect(id);
-
-        if (!(await tryConnect(service, id, defer)) && defer) {
-            tasks[id] = setInterval(tryConnect, 1000, service, id, defer);
+        if (!(await tryConnect(id, defer)) && defer) {
+            tasks[id] = setInterval(tryConnect, 1000, id, defer);
         }
     },
     async connectAll(defer = false) {
@@ -208,4 +196,4 @@ app.rpc = {
     hasConnect(id: string) {
         return !!app.rpc.connections[id];
     }
-}
+};

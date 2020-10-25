@@ -1,5 +1,5 @@
-import * as alar from "alar";
-import { Schedule, default as ScheduleService } from "../tools/Schedule";
+import { ModuleProxy, createModuleProxy } from "microse";
+import ScheduleService, { Schedule } from "../tools/Schedule";
 import define from '@hyurl/utils/define';
 
 declare global {
@@ -24,11 +24,9 @@ declare global {
 
 define(app, "schedule", new Schedule("app.schedule"));
 
-const proxy = alar.createModuleProxy(
+const proxy = createModuleProxy(
     "app.services.schedule",
     __dirname + "/../tools/Schedule",
-    void 0,
-    void 0,
     <any>app.services
 );
 

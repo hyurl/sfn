@@ -1,4 +1,5 @@
 import { SSE } from 'sfn-sse';
+import { ModuleProxy } from "microse";
 import { Hook } from '../tools/Hook';
 import { tryLogError } from '../tools/internal/error';
 import { Controller } from '../controllers/Controller';
@@ -85,7 +86,7 @@ app.hooks.lifeCycle.startup.bind(() => {
         volatile?: boolean,
         local?: boolean,
         event: string,
-        data?: any[]
+        data?: any[];
     }) => {
         let { target, volatile, local, event, data } = context;
         let ws = volatile ? app.ws.volatile : app.ws;
@@ -107,7 +108,7 @@ app.hooks.lifeCycle.startup.bind(() => {
         close?: boolean,
         target?: string,
         event?: string,
-        data?: any
+        data?: any;
     }) => {
         let { close, target, event, data } = context;
         let dispatch = (sse: SSE) => {
@@ -135,15 +136,13 @@ app.hooks.lifeCycle.startup.bind(() => {
     type Context = [string, string, any[]];
 
     app.message.subscribe(app.schedule.name, async (context: Context) => {
-        let [modname, method, data] = context;
-        let module: ModuleProxy<any> = get(global, modname, null);
+        let [modName, method, data] = context;
+        let mod: ModuleProxy<any> = get(global, modName, null);
 
-        if (module) {
+        if (mod) {
             try {
-                let ins = module();
-
-                if (typeof ins[method] === "function") {
-                    await ins[method](...(data || []));
+                if (typeof mod.proto?.[method] === "function") {
+                    await mod[method](...(data || []));
                 }
             } catch (err) {
                 tryLogError(err);

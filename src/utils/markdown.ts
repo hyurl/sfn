@@ -3,7 +3,7 @@ import * as marked from "marked";
 import hljs = require("highlight.js");
 import trim = require("lodash/trim");
 import meta from "comment-meta";
-import { FSWatcher } from 'alar';
+import { ModuleProxy, FSWatcher } from "microse";
 
 declare global {
     namespace app {
@@ -49,7 +49,7 @@ export default class MarkdownUtil {
 
     /** Parses markdown contents to HTML. */
     parse(contents: string): string {
-        return marked(contents, { renderer: this.renderer })
+        return marked(contents, { renderer: this.renderer });
     }
 
     /** Parses a markdown file to HTML. */

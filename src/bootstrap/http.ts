@@ -1,4 +1,4 @@
-import { EjsLoader } from "alar-ejs-loader";
+const { EjsLoader } = require("alar-ejs-loader");
 import * as Session from "express-session";
 import fileStore = require("session-file-store");
 import get = require("lodash/get");

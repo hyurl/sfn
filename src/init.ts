@@ -1,7 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as FRON from "fron";
-import * as alar from "alar";
 import parseArgv = require("minimist");
 import ensureType from "@hyurl/utils/ensureType";
 import trimEnd = require("lodash/trimEnd");
@@ -63,13 +62,6 @@ declare global {
          * command `npx sfn <filename>`.
          */
         const isScript: boolean;
-
-        /**
-         * Pass this symbol to `ModuleProxy<any>.instance()` method so that it
-         * can always resolve the local instance of the module.
-         * @deprecated Alar v6.0 by default uses the local singleton already.
-         */
-        const local: typeof alar.local;
     }
 }
 
@@ -139,7 +131,6 @@ define(global, "app", {
     isTsNode,
     isCli,
     argv: ensureType(parseArgv(process.argv)),
-    local: alar.local,
     isWebServer: false,
     isScript: false,
     version: require(ROOT_PATH + "/package.json").version,

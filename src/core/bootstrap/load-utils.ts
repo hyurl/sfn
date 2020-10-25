@@ -1,4 +1,4 @@
-import * as alar from "alar";
+import { FSWatcher, ModuleProxyApp } from "microse";
 import { APP_PATH } from "../../init";
 import define from '@hyurl/utils/define';
 
@@ -6,9 +6,9 @@ declare global {
     namespace app {
         namespace utils {
             const name: string;
-            function watch(): alar.FSWatcher;
+            function watch(): FSWatcher;
         }
     }
 }
 
-define(app, "utils", new alar.ModuleProxy("app.utils", APP_PATH + "/utils"));
+define(app, "utils", new ModuleProxyApp("app.utils", APP_PATH + "/utils"));

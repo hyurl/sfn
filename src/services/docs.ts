@@ -5,11 +5,12 @@ import { Section, constructMarkdown, renderHtml } from "outlining";
 import trim = require("lodash/trim");
 import get = require("lodash/get");
 import meta from "comment-meta";
+import { ModuleProxy } from "microse";
 
 declare global {
     namespace app {
         namespace services {
-            const docs: ModuleProxy<DocumentationService>
+            const docs: ModuleProxy<DocumentationService>;
         }
     }
 }
@@ -17,12 +18,12 @@ declare global {
 export default class DocumentationService extends Service {
     async getSideMenu(version: string, lang: string) {
         let path = `app.docs.sideMenu.${version.replace(/\./g, "")}.${lang}`;
-        let sideMenu: string = await app.services.cache().get(path);
+        let sideMenu: string = await app.services.cache.get(path);
 
         if (!sideMenu) {
             let categoryTree = await this.getCategoryTree(version, lang);
             sideMenu = renderHtml(categoryTree, "categories", "    ");
-            await app.services.cache().set(path, sideMenu);
+            await app.services.cache.set(path, sideMenu);
         }
 
         return sideMenu;
@@ -35,7 +36,7 @@ export default class DocumentationService extends Service {
         try {
             let name = app.docs.resolve(filename);
             let view = <ModuleProxy<View>>get(global, name);
-            return view().render();
+            return view.render();
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
             throw new HttpException(code, isDevMode ? e.message : null);
@@ -50,7 +51,7 @@ export default class DocumentationService extends Service {
             id: string;
             level: number;
             title: string;
-            children: Section[]
+            children: Section[];
         }> = [];
 
         for (let file of files) {

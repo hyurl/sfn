@@ -1,5 +1,6 @@
 import * as path from "path";
 import get = require('lodash/get');
+import { ModuleProxy } from "microse";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
 import { Controller, ResultMessage } from "./Controller";
@@ -91,7 +92,7 @@ export class HttpController extends Controller {
      * @param path The template path (without extension) related to `src/views`.
      * @param vars Local variables passed to the template.
      */
-    view(path: string, vars: { [name: string]: any } = {}) {
+    view(path: string, vars: { [name: string]: any; } = {}) {
         path = this.getAbsFilename(path);
 
         // i18n support for the template.
@@ -104,7 +105,7 @@ export class HttpController extends Controller {
         try {
             this.res.type = "text/html";
             let view: ModuleProxy<View> = get(global, app.views.resolve(path));
-            return view().render(vars);
+            return view?.render(vars);
         } catch (err) {
             if (err instanceof TypeError)
                 throw new HttpException(404);

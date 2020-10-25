@@ -28,8 +28,8 @@ export default class extends HttpController {
                 this.lang = "en-US";
             }
 
-            let sideMenu = await app.services.docs(version).getSideMenu(version, this.lang);
-            let content = await app.services.docs(version).getContent(version, this.lang, name);
+            let sideMenu = await app.services.docs.getSideMenu(version, this.lang);
+            let content = await app.services.docs.getContent(version, this.lang, name);
 
             return req.xhr ? content : this.view("docs", { sideMenu, content });
         }, 1000);

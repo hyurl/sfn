@@ -5,7 +5,7 @@ import serveStatic = require("serve-static");
 import { ServerOptions } from "socket.io";
 import * as https from "https";
 import * as http2 from "http2";
-import { ChannelOptions, ClientOptions } from 'alar';
+import { ChannelOptions, ClientOptions, ModuleProxy } from "microse";
 import { FSWatcher } from "chokidar";
 
 declare global {
@@ -31,7 +31,7 @@ declare global {
              * NOTE: **DO NOT** import the module statically in anywhere,
              * otherwise it may not be reloaded as expected.
              * 
-             * @see https://github.com/hyurl/alar
+             * @see https://github.com/microse-rpc/microse-node
              */
             watch?: { watch: (...args: any[]) => FSWatcher }[];
             server: {
@@ -76,7 +76,7 @@ declare global {
                 };
                 /**
                  * Configurations for RPC services.
-                 * @see https://github.com/hyurl/alar
+                 * @see https://github.com/microse-rpc/microse-node
                  */
                 rpc?: {
                     [id: string]: ChannelOptions & ClientOptions & {

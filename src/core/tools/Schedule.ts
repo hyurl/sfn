@@ -4,6 +4,7 @@ import md5 = require("md5");
 import omit = require("lodash/omit");
 import timestamp from "@hyurl/utils/timestamp";
 import sift, { Query as SiftQuery } from "sift";
+import { ModuleProxy } from "microse";
 
 type Methods<T> = FunctionPropertyNames<T>;
 
@@ -210,9 +211,9 @@ export class Schedule {
         }
 
         if (ensure) {
-            return app.services.schedule(taskId).add(task).then(() => taskId);
+            return app.services.schedule.add(task).then(() => taskId);
         } else {
-            app.services.schedule(taskId).add(task);
+            app.services.schedule.add(task);
             return taskId;
         }
     }
@@ -224,9 +225,9 @@ export class Schedule {
         app.message.unsubscribe(taskId);
 
         if (ensure) {
-            return app.services.schedule(taskId).delete(taskId);
+            return app.services.schedule.delete(taskId);
         } else {
-            app.services.schedule(taskId).delete(taskId);
+            app.services.schedule.delete(taskId);
         }
     }
 }
@@ -486,7 +487,7 @@ export class ScheduleService {
         this.tasks.forEach((task, taskId) => {
             if (transferTasks && !isScheduleServer) {
                 this.tasks.delete(taskId);
-                jobs.push(app.services.schedule(taskId).add(task));
+                jobs.push(app.services.schedule.add(task));
             }
         });
 

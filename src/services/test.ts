@@ -1,7 +1,9 @@
+import { ModuleProxy } from "microse";
+
 declare global {
     namespace app {
         namespace services {
-            const test: ModuleProxy<TestService>
+            const test: ModuleProxy<TestService>;
         }
     }
 }

@@ -3,6 +3,7 @@ import get = require("lodash/get");
 import has = require("lodash/has");
 import set = require("lodash/set");
 import unset = require("lodash/unset");
+import { ModuleProxy } from "microse";
 
 declare global {
     namespace app {
@@ -13,7 +14,7 @@ declare global {
 }
 
 export default class CacheService {
-    protected cache: { [path: string]: any } = {};
+    protected cache: { [path: string]: any; } = {};
     protected filename = app.ROOT_PATH + "/cache/cache-service.json";
 
     async init() {
