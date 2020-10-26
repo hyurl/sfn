@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "0.7.0",
+    "version": "1.0.0-alpha.0",
     "description": "An easy and elegant distributed service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",
@@ -9,7 +9,7 @@
         "compile": "tsc --incremental",
         "start": "node dist",
         "postinstall": "tsc --build tsconfig-postinstall.json",
-        "test": "echo No Test"
+        "test": "echo No test available"
     },
     "keywords": [
         "http",
