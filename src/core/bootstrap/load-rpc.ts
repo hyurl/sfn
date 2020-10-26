@@ -81,22 +81,22 @@ async function tryConnect(
     try {
         let servers = app.config.server.rpc;
         let { services, ...options } = servers[serverId];
-        let service = await app.services.connect({
+        let client = await app.services.connect({
             ...options,
             id: app.id,
             serverId
         });
 
-        app.rpc.connections[serverId] = service;
-
-        for (let mod of services) {
-            await service.register(mod);
-        }
+        app.rpc.connections[serverId] = client;
 
         // If detects the schedule service is served by other processes and
         // being connected, stop the local schedule service.
         if (serverId !== app.id && services.includes(app.services.schedule)) {
             await app.services.schedule.destroy(true);
+        }
+
+        for (let mod of services) {
+            await client.register(mod);
         }
 
         if (tasks[serverId]) {
@@ -134,20 +134,20 @@ app.rpc = {
 
         let servers = app.config.server.rpc;
         let { services = [], ...options } = servers[app.id];
-        let service = app.rpc.server = await app.services.serve({
+        let server = app.rpc.server = await app.services.serve({
             ...options,
             id: app.id,
             hostname: "0.0.0.0"
         });
 
         for (let mod of services) {
-            await service.register(mod);
+            await server.register(mod);
         }
 
         await tryConnect(app.id); // self-connect after serving.
         await serveRepl(app.id); // serve the REPL server.
 
-        console.log(serveTip("RPC", app.id, service.dsn));
+        console.log(serveTip("RPC", app.id, server.dsn));
 
         if (!app.isDevMode) { // notify PM2 that the service is available.
             process.send("ready");
