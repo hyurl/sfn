@@ -81,29 +81,27 @@ export abstract class Message {
         return new (<any>this.constructor)({ ...this.data, target });
     }
 
-    protected getAppId() {
-        let appId: string;
-
+    protected getWebServers(): string[] {
         if (this.data.appId) {
-            appId = this.data.appId;
+            let appId = this.data.appId;
             delete this.data.appId;
+            return [appId];
+        } else if (app.isWebServer) {
+            return [app.id];
         } else if (app.rpc.server) {
-            // If is an RPC server, use the web server to forward message.
-            let webServerId: string;
+            let webServer: string[] = [];
 
             for (let id of app.rpc.server.getClients()) {
                 if (id.startsWith("web-server")) {
-                    webServerId = id;
+                    webServer.push(id);
                     break;
                 }
             }
 
-            appId = webServerId || "web-server";
-        } else {
-            appId = app.id;
+            return webServer.length > 0 ? webServer : ["web-server"];
         }
 
-        return appId;
+        return [];
     }
 }
 
@@ -131,7 +129,7 @@ export class WebSocketMessage extends Message {
             ...this.data,
             event,
             data
-        }, [this.getAppId()]);
+        }, this.getWebServers());
     }
 }
 
@@ -142,14 +140,14 @@ export class SSEMessage extends Message {
         return app.message.publish(this.name, {
             ...this.data,
             close: true
-        }, [this.getAppId()]);
+        }, this.getWebServers());
     }
 
     send(data: any) {
         return app.message.publish(this.name, {
             ...this.data,
             data,
-        }, [this.getAppId()]);
+        }, this.getWebServers());
     }
 
     emit(event: string, data?: any) {
@@ -157,6 +155,6 @@ export class SSEMessage extends Message {
             ...this.data,
             event,
             data,
-        }, [this.getAppId()]);
+        }, this.getWebServers());
     }
 }

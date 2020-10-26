@@ -64,8 +64,8 @@ app.message.ws.via("web-server-1")
 ```
 
 Other than the above examples, other features like `of(nsp: string)`,
-`volatile`, `local`, `binary()` are also available. For consistency, if it's
-not in a controller, please always push messages via `app.message.ws`.
+`volatile`, `local`, `binary()` are also available. For consistency, unless in a
+WebSocketController, please always push messages via `app.message.ws`.
 
 # Push SSE (Server-Sent Events) Messages
 
@@ -92,5 +92,5 @@ app.message.sse.via("web-server-1")
     .close();
 ```
 
-Same rule as `app.message.ws`, except in a controller, please always use 
+Like `app.message.ws`, except in an HttpController, please always use 
 `app.message.sse` to push SSE messages.

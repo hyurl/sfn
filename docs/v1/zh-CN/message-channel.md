@@ -58,7 +58,8 @@ app.message.ws.via("web-server-1")
 ```
 
 除了上述例子，诸如 `of(nsp: string)`, `volatile`, `local`, `binary()` 等特性也都是
-支持的。为了统一，如果不是在控制器中，请始终通过 `app.message.ws` 来推送消息。
+支持的。为了统一，除了在 WebSocket 控制器中，其他地方请始终通过 `app.message.ws` 来推送
+消息。
 
 ## 推送 SSE (Server-Sent Events) 消息
 
@@ -84,5 +85,5 @@ app.message.sse.via("web-server-1")
     .close();
 ```
 
-和 `app.message.ws` 一样，除了在控制器中，也请使用通过 `app.message.sse` 来推送 SSE 
-消息。
+和 `app.message.ws` 类似，除了在 Http 控制器中，其他请始终通过 `app.message.sse` 来推送
+SSE 消息。
