@@ -49,7 +49,7 @@
 // src/config.ts
 export default <app.Config>{
     // ...
-    watch: [ // configure modules will be hot-reloadable
+    watch: [ // configured modules will be hot-reloadable
         app.controllers,
         app.views,
         app.locales,
