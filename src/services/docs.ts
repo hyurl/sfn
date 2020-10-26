@@ -17,7 +17,7 @@ declare global {
 
 export default class DocumentationService extends Service {
     async getSideMenu(version: string, lang: string) {
-        let path = `app.docs.sideMenu.${version.replace(/\./g, "")}.${lang}`;
+        let path = `app.docs.sideMenu.${version}.${lang}`;
         let sideMenu: string = await app.services.cache.get(path);
 
         if (!sideMenu) {
@@ -30,7 +30,7 @@ export default class DocumentationService extends Service {
     }
 
     async getContent(version: string, lang: string, name: string) {
-        let dir = `${ROOT_PATH}/docs/${version.replace(/\./g, "")}/${lang}`;
+        let dir = `${ROOT_PATH}/docs/${version}/${lang}`;
         let filename = resolvePath(dir, name + ".md");
 
         try {
@@ -44,7 +44,7 @@ export default class DocumentationService extends Service {
     }
 
     async getCategoryTree(version: string, lang: string) {
-        let dir = `${ROOT_PATH}/docs/${version.replace(/\./g, "")}/${lang}`;
+        let dir = `${ROOT_PATH}/docs/${version}/${lang}`;
         let files = await readdir(dir);
         let categoryTree: Array<{
             order: number;
