@@ -53,9 +53,9 @@ declare global {
                     timeout?: number;
                     /**
                      * These options are mainly for type `http` and type `http2`.
-                     * @see https://nodejs.org/dist/latest-v10.x/docs/api/https.html#https_https_createserver_options_requestlistener
-                     * @see https://nodejs.org/dist/latest-v10.x/docs/api/http2.html#http2_http2_createserver_options_onrequesthandler
-                     * @see https://nodejs.org/dist/latest-v10.x/docs/api/tls.html#tls_tls_createsecurecontext_options
+                     * @see https://nodejs.org/dist/latest-v14.x/docs/api/https.html#https_https_createserver_options_requestlistener
+                     * @see https://nodejs.org/dist/latest-v14.x/docs/api/http2.html#http2_http2_createserver_options_onrequesthandler
+                     * @see https://nodejs.org/dist/latest-v14.x/docs/api/tls.html#tls_tls_createsecurecontext_options
                      */
                     options?: https.ServerOptions & http2.ServerOptions;
                 };
@@ -88,12 +88,6 @@ declare global {
                          * ones excluded.)
                          */
                         dependencies?: "all" | ModuleProxy<any>[];
-                        /**
-                         * Whether to allow services fallback to their local
-                         * instances when the remote instance is not available.
-                         * @default true
-                         */
-                        fallbackToLocal?: boolean;
                     }
                 };
             };
