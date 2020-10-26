@@ -180,7 +180,7 @@ export default class extends HttpController {
 }
 ```
 
-更高级的方案，请查看 [面向切面编程](./aop-mixins#面向切面编程)。
+更高级的方案，请查看 [面向切面编程](./mixins-aop#面向切面编程)。
 
 ## 使用异步语义
 
