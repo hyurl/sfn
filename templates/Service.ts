@@ -1,4 +1,5 @@
 import { Service } from "sfn";
+import { ModuleProxy } from "microse";
 
 declare global {
     namespace app {
