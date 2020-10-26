@@ -1,3 +1,4 @@
+import * as path from "path";
 import * as fs from "fs-extra";
 import get = require("lodash/get");
 import has = require("lodash/has");
@@ -22,10 +23,23 @@ export default class CacheService {
             let data = await fs.readFile(this.filename, "utf8");
             this.cache = JSON.parse(data);
         } catch (e) { }
+
+        await app.schedule.create({
+            module: app.services.cache,
+            handler: "syncToFile",
+            startIn: 30,
+            repeat: 30,
+        }, true);
     }
 
     async destroy() {
+        await this.syncToFile();
+        this.cache = {};
+    }
+
+    async syncToFile() {
         let data = JSON.stringify(this.cache);
+        await fs.ensureDir(path.dirname(this.filename));
         await fs.writeFile(this.filename, data, "utf8");
     }
 

@@ -1,4 +1,4 @@
-import values = require("lodash/values")
+import values = require("lodash/values");
 
 export class MessageChannel {
     private topics = new Map<string, Set<(data: any) => void>>();
@@ -19,7 +19,7 @@ export class MessageChannel {
             return app.rpc.server.publish(topic, data, servers);
         } else if ((listeners = this.topics.get(topic)) && listeners.size > 0) {
             listeners.forEach(handle => {
-                try { handle(data) } catch (e) { }
+                try { handle(data); } catch (e) { }
             });
 
             return true;
@@ -88,8 +88,17 @@ export abstract class Message {
             appId = this.data.appId;
             delete this.data.appId;
         } else if (app.rpc.server) {
-            // If appId isn't provided, use the default web server.
-            appId = "web-server-1";
+            // If is an RPC server, use the web server to forward message.
+            let webServerId: string;
+
+            for (let id of app.rpc.server.getClients()) {
+                if (id.startsWith("web-server")) {
+                    webServerId = id;
+                    break;
+                }
+            }
+
+            appId = webServerId || "web-server";
         } else {
             appId = app.id;
         }

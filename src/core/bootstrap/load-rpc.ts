@@ -95,6 +95,11 @@ async function tryConnect(
             await app.services.schedule.destroy(true);
         }
 
+        // Once connected, bind all existing topics and handlers from
+        // MessageChannel to the RpcClient so that the RpcServer can publish
+        // message to them.
+        client["topics"] = app.message["topics"];
+
         for (let mod of services) {
             await client.register(mod);
         }
