@@ -23,7 +23,7 @@
     - `services/`* 存储独立服务文件的目录。
     - `utils/`* 存储功能模块文件的目录。
     - `views/`* 存储视图文件的目录。
-    - `config.ts` 项目配置文件。
+    - `config.ts` 项目配置文件，可以从这个文件中加载其他的配置文件并合并到默认导出。
     - `index.ts` 服务器入口文件。
 - `package.json` 项目的说明文件。
 - `package-lock.json`
@@ -40,3 +40,23 @@
 你必须要改变你的开发习惯，并将你的程序设计成无状态的，或者实现一中方式来在服务暂停时保存状态（
 在 `destroy()` 方法中），并在服务重载后恢复状态（在 `init()` 方法中）。如果这对你来说比较
 困难，只需要关闭热重载特性，就没问题了。
+
+### 配置热重载
+
+热重载配置可在配置文件的 `watch` 选项汇中设置，示例如下：
+
+```ts
+// src/config.ts
+export default <app.Config>{
+    // ...
+    watch: [ // configure modules will be hot-reloadable
+        app.controllers,
+        app.views,
+        app.locales,
+        app.hooks,
+        app.services,
+        app.utils
+    ],
+    // ...
+}
+```

@@ -25,7 +25,8 @@ just recommended.
     - `services/`* The directory that stores service files.
     - `utils/`* The directory that stores utility module files.
     - `views/`* The directory that stores view files.
-    - `config.ts` The file of configurations.
+    - `config.ts` The file of configurations, you can load other configuration
+        files from this file and merge them to the default export.
     - `index.ts` The entry file of the server.
 - `package.json` The specification file of the project.
 - `package-lock.json`
@@ -46,3 +47,24 @@ have to change your development habit and design your program to be stateless,
 or implement a way to save the state during service pause (in `destroy()` method)
 and resume them after reload (in `init()` method). If doing so is hard for you,
 just turn off hot-reloading, and it's fine.
+
+### Configure Hot-reloading
+
+Hot-reloading features can be enabled in the config file by setting the
+`watch` option, for example:
+
+```ts
+// src/config.ts
+export default <app.Config>{
+    // ...
+    watch: [ // configure modules will be hot-reloadable
+        app.controllers,
+        app.views,
+        app.locales,
+        app.hooks,
+        app.services,
+        app.utils
+    ],
+    // ...
+}
+```
