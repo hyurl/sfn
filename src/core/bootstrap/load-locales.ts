@@ -8,14 +8,12 @@ declare global {
     namespace app {
         const locales: ModuleProxyApp & {
             [x: string]: ModuleProxy<Locale> | object;
-            translations: { [lang: string]: Locale };
+            translations: { [lang: string]: Locale; };
         };
     }
 }
 
-define(app,
-    "locales",
-    new ModuleProxyApp("app.locales", SRC_PATH + "/locales"));
+define(app, "locales", new ModuleProxyApp("app.locales", SRC_PATH + "/locales"));
 define(app.locales, "translations", {});
 
 const tryImport = createImport(require);
@@ -34,4 +32,4 @@ app.locales.setLoader({
 
 app.locales.watch = () => {
     return _watch().on("add", loadLanguagePack).on("change", loadLanguagePack);
-}
+};

@@ -15,13 +15,9 @@ declare global {
             const name: string;
             const path: string;
             /** @inner This function is for internal use. */
-            function serve(
-                config: ServerOptions
-            ): Promise<RpcServer>;
+            function serve(config: ServerOptions): Promise<RpcServer>;
             /** @inner This function is for internal use. */
-            function connect(
-                config: ClientOptions
-            ): Promise<RpcClient>;
+            function connect(config: ClientOptions): Promise<RpcClient>;
             /** @inner This function is for internal use. */
             function watch(): FSWatcher;
         }

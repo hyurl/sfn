@@ -10,11 +10,7 @@ declare global {
     }
 }
 
-export const ViewEntry = new ModuleProxyApp(
-    "app.views",
-    SRC_PATH + "/views"
-);
-
+export const ViewEntry = new ModuleProxyApp("app.views", SRC_PATH + "/views");
 define(app, "views", ViewEntry);
 
 app.views.setLoader({

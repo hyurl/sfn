@@ -6,6 +6,7 @@ declare global {
     namespace app {
         namespace utils {
             const name: string;
+            const path: string;
             function watch(): FSWatcher;
         }
     }
