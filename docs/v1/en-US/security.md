@@ -9,7 +9,7 @@ the operation is permitted, `false` the otherwise. Since v0.6, the framework
 no longer checks and sets this property, it's `false` by default, you have to
 customize your checking condition to suit your needs.
 
-If an operation is unauthorized, the framework will throw a StatusException
+If an operation is unauthorized, the framework will throw a HttpException
 `401 Unauthorized` to the client.
 
 ## Usage Example

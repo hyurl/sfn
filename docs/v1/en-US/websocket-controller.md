@@ -106,11 +106,11 @@ export default class extends WebSocketController {
 
 ### Throw Status Exception In the Controller
 
-Like in an HttpController, you can throw a `StatusException`, the framework will
+Like in an HttpController, you can throw a `HttpException`, the framework will
 handle it properly, and sending error response automatically.
 
 ```typescript
-import { WebSocketController, StatusException, event } from "sfn";
+import { WebSocketController, HttpException, event } from "sfn";
 
 export default class extends WebSocketController {
     @event("/example")
@@ -120,15 +120,15 @@ export default class extends WebSocketController {
         // ...
         if (!well) {
             if (!msg)
-                throw new StatusException(400); // => 400 bad request
+                throw new HttpException(400); // => 400 bad request
             else
-                throw new StatusException(400, msg); // => 400 with customized message
+                throw new HttpException(400, msg); // => 400 with customized message
         }
     }
 }
 ```
 
-When a StatusException is thrown, the framework will always send a message that 
+When a HttpException is thrown, the framework will always send a message that 
 contains `{success: false, code, error}` to the client according to the 
 specification of the controller method [error()](./http-controller#Common-API-Response).
 

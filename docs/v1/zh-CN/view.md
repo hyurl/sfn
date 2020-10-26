@@ -35,7 +35,7 @@ export default class extends HttpController {
 
 ### 使用 Ejs 引擎的示例
 
-注意：自 1.0 版本起，SFN 重 Alar 切换到了 Microse，虽然旧的加载器依旧能够在新系统中工作，
+注意：自 1.0 版本起，SFN 从 Alar 切换到了 Microse，虽然旧的加载器依旧能够在新系统中工作，
 因为两个引擎的加载器是兼容的，但它们需要通过 CommonJS 的 `require()` 函数进行导入，从而避免
 在编译程序时报错，因为新系统将不会携带任何 Alar 的头文件。
 
@@ -50,8 +50,8 @@ app.views.setLoader(new EjsLoader());
 
 ## 适配你自己的引擎
 
-如果你自己编写了一套模板引擎，或者想要使用其他的模板引擎，你可以自己实现一个
-加载器，这非常简，例如一个 Ejs 加载器可以这么实现：
+如果你自己编写了一套模板引擎，或者想要使用其他的模板引擎，你可以自己实现一个加载器，这非常简单，
+例如一个 Ejs 加载器可以这么实现：
 
 ```typescript
 import * as fs from "fs";

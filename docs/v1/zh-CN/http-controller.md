@@ -213,12 +213,12 @@ export default class extends HttpController {
 
 ## 抛出状态异常
 
-`StatusException` 是一个由框架定义的异常类，你可以在想要响应一个 HTTP 错误到客户端
-时使用它。当一个 StatusException 被抛出时，框架将会对其进行合适的处理并自动地发送
+`HttpException` 是一个由框架定义的异常类，你可以在想要响应一个 HTTP 错误到客户端
+时使用它。当一个 HttpException 被抛出时，框架将会对其进行合适的处理并自动地发送
 错误响应内容。
 
 ```typescript
-import { HttpController, StatusException, route } from "sfn";
+import { HttpController, HttpException, route } from "sfn";
 
 export default class extends HttpController {
     @route.get("/example")
@@ -228,10 +228,10 @@ export default class extends HttpController {
         // ...
         if (!well) {
             if (!msg) {
-                throw new StatusException(400); // => 400 bad request
+                throw new HttpException(400); // => 400 bad request
             } else {
                 // => 400 with customized message
-                throw new StatusException(400, msg);
+                throw new HttpException(400, msg);
             }
         }
     }
@@ -249,7 +249,7 @@ HTTP 错误页面会被返回。但如果在请求头中出现了 `Accept: appli
 
 ## 自定义错误页面
 
-默认地，框架会根据错误代码发送一个对应的视图文件，并且仅传递 `err: StatusException` 
+默认地，框架会根据错误代码发送一个对应的视图文件，并且仅传递 `err: HttpException` 
 对象到模板中，它可能并不满足一些复杂的需求。因此，框架允许你自定义错误处理器，
 通过重写静态方法 `HttpController.httpErrorView` 来实现。下面的示例将向你展示如何做。
 

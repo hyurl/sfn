@@ -103,11 +103,11 @@ export default class extends WebSocketController {
 
 ## 抛出状态异常
 
-和在 HttpController 中一样，你可以使用 `StatusException` 来抛出状态异常，框架将
+和在 HttpController 中一样，你可以使用 `HttpException` 来抛出状态异常，框架将
 会对其进行合适的处理，并自动地发送错误响应内容。
 
 ```typescript
-import { WebSocketController, StatusException, event } from "sfn";
+import { WebSocketController, HttpException, event } from "sfn";
 
 export default class extends WebSocketController {
     @event("/example")
@@ -117,15 +117,15 @@ export default class extends WebSocketController {
         // ...
         if (!well) {
             if (!msg)
-                throw new StatusException(400); // => 400 bad request
+                throw new HttpException(400); // => 400 bad request
             else
-                throw new StatusException(400, msg); // => 400 with customized message
+                throw new HttpException(400, msg); // => 400 with customized message
         }
     }
 }
 ```
 
-当一个 StatusException 被抛出时，框架总是会发送一个包含着 
+当一个 HttpException 被抛出时，框架总是会发送一个包含着 
 `{success: false, code, error}` 的消息到客户端，这个响应形式来自于控制器方法
 [error()](./http-controller#通用-API-响应)。
 

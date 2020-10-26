@@ -5,7 +5,7 @@ To make programming fast, **SFN** provides some commands, you can use them in
 the shell or CMD, to generate needed files, to interact with the servers, etc.
 They're few and easy to learn.
 
-**SFN v0.6 recommends using `npx` to run commands.**
+**Since v0.6, it's recommended using `npx` to run commands.**
 
 **NOTE: In the following commands, `[]` indicates the argument is optional, and**
 **`<>` indicates the argument is required.**

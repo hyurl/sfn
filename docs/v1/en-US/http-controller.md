@@ -228,13 +228,13 @@ export default class extends HttpController {
 
 ## Throw Status Exception In the Controller
 
-`StatusException` is a customized error class that safe to use when you're going
+`HttpException` is a customized error class that safe to use when you're going
 to 
-response an HTTP error to the client. when a StatusException is thrown, the
+response an HTTP error to the client. when a HttpException is thrown, the
 framework will handle it properly, and sending error response automatically.
 
 ```typescript
-import { HttpController, StatusException, route } from "sfn";
+import { HttpController, HttpException, route } from "sfn";
 
 export default class extends HttpController {
     @route.get("/example")
@@ -244,10 +244,10 @@ export default class extends HttpController {
         // ...
         if (!well) {
             if (!msg) {
-                throw new StatusException(400); // => 400 bad request
+                throw new HttpException(400); // => 400 bad request
             } else {
                 // => 400 with customized message
-                throw new StatusException(400, msg);
+                throw new HttpException(400, msg);
             }
         }
     }
@@ -269,7 +269,7 @@ Otherwise, a simple error response will be sent.
 ### Customize Error Page
 
 By default, the framework will send a view file according to the error code, 
-and only pass the `err: StatusException` object to the template, it may not
+and only pass the `err: HttpException` object to the template, it may not
 suitable for complicated needs. For this reason, the framework allows you to
 customize the error view handler by rewriting the static method 
 `HttpController.httpErrorView`, the following example will show you how.

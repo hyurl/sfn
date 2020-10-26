@@ -122,12 +122,12 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(
                 } else if (this.fallbackTo) {
                     this.res.send(this.fallbackTo);
                 } else {
-                    throw new StatusException(401);
+                    throw new HttpException(401);
                 }
 
                 return intercept.BREAK;
             } else {
-                throw new StatusException(401);
+                throw new HttpException(401);
             }
         }
     }
