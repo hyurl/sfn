@@ -12,6 +12,11 @@ They're few and easy to learn.
 
 ## Commands
 
+### `node dist [server-id]`
+
+Used to start a server, the `server-id` is `web-server` (by default) or the ID
+set in `app.config.server.rpc`.
+
 ### `sfn init`
 
 Initiates the project and create needed files. This command should be run right

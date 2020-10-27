@@ -10,6 +10,11 @@
 
 ## 命令
 
+### `node dist [server-id]`
+
+用来启动服务器，`server-id` 为 `web-server`（默认）或者设置在 `app.config.server.rpc`
+中的 ID。
+
 ### `sfn init`
 
 初始化项目并自动创建需要的文件。这个命令应该在安装框架之后就立即运行，但是也可以用来恢复
