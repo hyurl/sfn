@@ -1,4 +1,4 @@
-<!-- title: Schedule; order: 17 -->
+<!-- title: Schedule; order: 6 -->
 # Concept
 
 Since version 0.5.x, SFN introduced a new distributed schedule system, and run

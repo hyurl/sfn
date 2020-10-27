@@ -1,4 +1,4 @@
-<!-- title: Mixins & AOP; order: 18 -->
+<!-- title: Mixins & AOP; order: 14 -->
 # Concept
 
 The design of **Mixins** and **AOP** is meant to write highly re-useful code 

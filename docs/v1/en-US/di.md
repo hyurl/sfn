@@ -1,4 +1,4 @@
-<!-- title: Dependency Injection; order: 18 -->
+<!-- title: Dependency Injection; order: 13 -->
 ## Auto-Injection in Controllers
 
 When dealing with controllers, both HttpController and WebSocketController 

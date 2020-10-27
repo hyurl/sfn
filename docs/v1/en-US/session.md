@@ -1,4 +1,4 @@
-<!-- title: Session; order: 8 -->
+<!-- title: Session; order: 9 -->
 # Concept
 
 The session in **SFN** framework and shared between HTTP and WebSocket. the

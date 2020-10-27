@@ -1,4 +1,4 @@
-<!-- title: 会话; order: 8 -->
+<!-- title: 会话; order: 9 -->
 ## 基本概念
 
 在 **SFN** 框架中，会话在 HTTP 和 WebSocket 中共享。框架使用 

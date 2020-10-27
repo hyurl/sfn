@@ -1,4 +1,4 @@
-<!-- title: View; order: 6 -->
+<!-- title: View; order: 8 -->
 # Concept
 
 Since version 0.5.x, SFN introduces a new view system to resolve templates as

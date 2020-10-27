@@ -1,4 +1,4 @@
-<!-- title: 依赖注入; order: 18 -->
+<!-- title: 依赖注入; order: 13 -->
 ## 在控制器中自动注入
 
 当处理控制器时，HttpController 和 WebSocketController 都支持自动注入特性，也就是，当

@@ -1,4 +1,4 @@
-<!-- title: Message Channel; order: 10.1 -->
+<!-- title: Message Channel; order: 7 -->
 
 # Inner-Service Communication
 

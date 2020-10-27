@@ -1,4 +1,4 @@
-<!-- title: Service; order: 2.1 -->
+<!-- title: Service; order: 3 -->
 # Concept
 
 In a distributed system, **Service** is the most basic and most important 

@@ -1,4 +1,4 @@
-<!-- title: Mixins 和 AOP; order: 18 -->
+<!-- title: Mixins 和 AOP; order: 14 -->
 ## 基本概念
 
 **Mixins**（混入）和 **AOP** (面向切面编程)的意义是编写高复用性的代码，以适合不用的应用

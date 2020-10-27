@@ -1,4 +1,4 @@
-<!-- title: CLI & REPL; order: 7 -->
+<!-- title: CLI & REPL; order: 16 -->
 ## Purpose
 
 To make programming fast, **SFN** provides some commands, you can use them in

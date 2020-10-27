@@ -1,4 +1,4 @@
-<!-- title: IDE 调试; order: 7.1 -->
+<!-- title: IDE 调试; order: 15 -->
 
 ## 基本概念
 
