@@ -159,6 +159,6 @@ app.hooks.lifeCycle.startup.bind(async () => {
 });
 
 // GC static property Controller.flow.
-app.hooks.lifeCycle.startup.bind(async () => {
+app.hooks.lifeCycle.shutdown.bind(async () => {
     Controller.flow.destroy && (await Controller.flow.destroy());
 });
