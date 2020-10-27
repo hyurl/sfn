@@ -1,6 +1,5 @@
 import { route, HttpController, ROOT_PATH, Request, Response } from "sfn";
 import { readdir } from 'fs-extra';
-import trimEnd = require("lodash/trimEnd");
 
 export default class extends HttpController {
     @route.get("/docs")
@@ -23,8 +22,6 @@ export default class extends HttpController {
     @app.hooks.web.onView.decorate()
     async showContents(req: Request, version: string, name: string) {
         return this.throttle(req.url + ":xhr:" + req.xhr, async () => {
-            version = trimEnd(version, ".x").replace(/v0\.(\d)/, "v0_$1");
-
             if (["zh", "zh-hans"].includes(this.lang)) {
                 this.lang = "zh-CN";
             }

@@ -4,6 +4,7 @@ import { resolve as resolvePath } from "path";
 import { Section, constructMarkdown, renderHtml } from "outlining";
 import trim = require("lodash/trim");
 import get = require("lodash/get");
+import trimEnd = require("lodash/trimEnd");
 import meta from "comment-meta";
 import { ModuleProxy } from "microse";
 
@@ -17,7 +18,8 @@ declare global {
 
 export default class DocumentationService extends Service {
     async getSideMenu(version: string, lang: string) {
-        let path = `app.docs.sideMenu.${version}.${lang}`;
+        let _version = trimEnd(version, ".x").replace(/v0\.(\d)/, "v0_$1");
+        let path = `app.docs.sideMenu.${_version}.${lang}`;
         let sideMenu: string = await app.services.cache.get(path);
 
         if (!sideMenu) {
@@ -30,7 +32,8 @@ export default class DocumentationService extends Service {
     }
 
     async getContent(version: string, lang: string, name: string) {
-        let dir = `${ROOT_PATH}/docs/${version}/${lang}`;
+        let _version = trimEnd(version, ".x").replace(/v0\.(\d)/, "v0_$1");
+        let dir = `${ROOT_PATH}/docs/${_version}/${lang}`;
         let filename = resolvePath(dir, name + ".md");
 
         try {
@@ -44,7 +47,8 @@ export default class DocumentationService extends Service {
     }
 
     async getCategoryTree(version: string, lang: string) {
-        let dir = `${ROOT_PATH}/docs/${version}/${lang}`;
+        let _version = trimEnd(version, ".x").replace(/v0\.(\d)/, "v0_$1");
+        let dir = `${ROOT_PATH}/docs/${_version}/${lang}`;
         let files = await readdir(dir);
         let categoryTree: Array<{
             order: number;
