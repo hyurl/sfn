@@ -59,16 +59,23 @@ export default class DocumentationService extends Service {
         }> = [];
 
         for (let file of files) {
-            let _name = file.slice(0, -3),
-                content = await readFile(dir + "/" + file, "utf8"),
-                metaData = meta(content)[0] || {};
+            let _name = file.slice(0, -3);
+            let content = await readFile(dir + "/" + file, "utf8");
+            let metaData = meta(content)[0] || {};
+            let type = lang === "api" ? "api" : "docs";
 
             categoryTree.push({
                 order: parseFloat(metaData.order) || 0,
                 id: _name,
                 level: 0,
-                title: `<a href="/docs/${version}/${_name}" title="${metaData.title}">${metaData.title}</a><i class="fa fa-angle-right"></i>`,
+                title: `<a href="/${type}/${version}/${_name}" title="${metaData.title}">${metaData.title}</a><i class="fa fa-angle-right"></i>`,
                 children: constructMarkdown(content, section => {
+                    if (section.title === _name) {
+                        return {
+                            title: `<span style="display:none">${section.title}</span>`
+                        };
+                    }
+
                     let depth = section.id.split(".").length,
                         padding = depth <= 2 ? depth * 15 + 10 : 40,
                         title = section.title.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, ""),
@@ -86,7 +93,7 @@ export default class DocumentationService extends Service {
 
                     id = trim(id, "_");
 
-                    title = `<a href="/docs/${version}/${_name}#${id}" title="${title}"`
+                    title = `<a href="/${type}/${version}/${_name}#${id}" title="${title}"`
                         + ` style="padding-left: ${padding}px">${title}</a>`
                         + (section.children ? '<i class="fa fa-angle-right"></i>' : '');
 

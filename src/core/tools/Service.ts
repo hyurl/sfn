@@ -11,7 +11,7 @@ import useThrottle from "@hyurl/utils/useThrottle";
  * EventEmitter, you can bind customized events if needed.
  */
 @HideProtectedProperties
-export class Service extends EventEmitter implements Service {
+export class Service extends EventEmitter {
     /**
      * The language of the current service, the default value is
      * `app.config.lang`, but for controllers, this property is set

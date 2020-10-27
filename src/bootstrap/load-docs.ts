@@ -7,7 +7,7 @@ import define from '@hyurl/utils/define';
 
 declare global {
     namespace app {
-        const docs: ModuleProxyApp & { [name: string]: ModuleProxy<View> };
+        const docs: ModuleProxyApp & { [name: string]: ModuleProxy<View>; };
     }
 }
 
@@ -26,7 +26,7 @@ app.docs.setLoader({
                 render: () => {
                     return contents;
                 }
-            }
+            };
         }
 
         return this.cache[file];
@@ -61,7 +61,11 @@ async function reload(file: string) {
         let name = app.docs.resolve(file);
         let view: ModuleProxy<View> = get(global, name);
         let data = await view?.render();
-        let pathname = `/docs/${parts[0]}/${parts.slice(2).join("/").slice(0, -3)}`;
+        let type = lang === "api" ? "api" : "docs";
+        let pathname = `/${type}/${parts[0]}/${parts.slice(2).join("/").slice(0, -3)}`;
+
+        if (type === "api")
+            lang = "";
 
         app.message.ws.local.emit("renew-doc-contents", pathname, lang, data);
     }

@@ -270,7 +270,7 @@ $(function () {
     socket.on("repeat-what-I-said", function (data) {
         console.log("You just said:", data);
     }).on("renew-doc-contents", function (pathname, _lang, data) {
-        if (pathname === location.pathname && _lang === lang) {
+        if (pathname === location.pathname && (!_lang || _lang === lang)) {
             content.removeClass("fadeOut").addClass("fadeIn");
             SoftLoader.replaceWith(data, document.title, location.href);
             replaceLink(content);
