@@ -2,14 +2,6 @@
 export { green, grey, red, yellow } from "./internal/color";
 export { tryLogError } from "./internal/error";
 export { moduleExists, createImport } from "./internal/module";
-export { serve as serveRepl, connect as connectRepl } from "./internal/repl";
-
-export const EFFECT_METHODS: string[] = [
-    "DELETE",
-    "PATCH",
-    "POST",
-    "PUT"
-];
 
 /** Injects CSRF Token into forms. */
 export function injectCsrfToken(html: string, token: string): string {

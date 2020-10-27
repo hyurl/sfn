@@ -10,7 +10,7 @@ This class is not intended to be used directly, to use its functions, a new
 class must be defined and inherited from this one.
 
 ```ts
-class Service extends EventEmitter { }
+abstract class Service extends EventEmitter { }
 ```
 
 ## 属性

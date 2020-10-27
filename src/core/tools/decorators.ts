@@ -5,6 +5,7 @@ import { WebSocketController } from "../controllers/WebSocketController";
 import { HttpException } from './HttpException';
 import { routeMap, eventMap } from './RouteMap';
 import { traceModulePath } from './internal/module';
+import { EFFECT_METHODS } from './internal';
 import { Service } from './Service';
 import {
     ControllerDecorator,
@@ -16,7 +17,6 @@ import * as cors from "sfn-cors";
 import trimEnd = require('lodash/trimEnd');
 import isEmpty from '@hyurl/utils/isEmpty';
 import wrap from "@hyurl/utils/wrap";
-import { EFFECT_METHODS } from './functions';
 
 
 let router: App;

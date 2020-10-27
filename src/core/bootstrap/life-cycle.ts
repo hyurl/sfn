@@ -153,11 +153,11 @@ app.hooks.lifeCycle.startup.bind(() => {
 
 // Initiate the static property Controller.flow.
 app.hooks.lifeCycle.startup.bind(async () => {
-    Controller.flow = new Service();
-    Controller.flow.init && (await Controller.flow.init());
+    Controller.flow = new class extends Service { };
+    await Controller.flow.init?.();
 });
 
 // GC static property Controller.flow.
-app.hooks.lifeCycle.startup.bind(async () => {
-    Controller.flow.destroy && (await Controller.flow.destroy());
+app.hooks.lifeCycle.shutdown.bind(async () => {
+    Controller.flow?.destroy?.();
 });

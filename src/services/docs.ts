@@ -1,4 +1,4 @@
-import { Service, ROOT_PATH, View, HttpException, isDevMode } from "sfn";
+import { Service, ROOT_PATH, View, HttpException } from "sfn";
 import { readdir, readFile } from 'fs-extra';
 import { resolve as resolvePath } from "path";
 import { Section, constructMarkdown, renderHtml } from "outlining";
@@ -42,7 +42,7 @@ export default class DocumentationService extends Service {
             return view.render();
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
-            throw new HttpException(code, isDevMode ? e.message : null);
+            throw new HttpException(code, app.isDevMode ? e.message : null);
         }
     }
 

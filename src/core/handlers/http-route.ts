@@ -5,14 +5,14 @@ import { RouteHandler } from "webium";
 import { router } from "../bootstrap/index";
 import { HttpController } from "../controllers/HttpController";
 import { HttpException } from "../tools/HttpException";
-import { EFFECT_METHODS } from "../tools/functions";
-import isOwnMethod from "@hyurl/utils/isOwnMethod";
+import { EFFECT_METHODS } from "../tools/internal";
 import { tryLogError } from "../tools/internal/error";
 import { Request, Response, Session } from "../tools/interfaces";
 import { realCsrfToken } from "../tools/symbols";
 import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
+import isOwnMethod from "@hyurl/utils/isOwnMethod";
 import randStr from "@hyurl/utils/randStr";
 import isVoid from "@hyurl/utils/isVoid";
 

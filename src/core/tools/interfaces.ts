@@ -6,6 +6,21 @@ import { Controller } from "../controllers/Controller";
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { UploadedFile } from "./upload";
+import { FSWatcher } from "fs-extra";
+
+/**
+ * Indicates a watchable object that can be set in `app.config.watch`, and if
+ * set, when the server starts, the `watch()` method will be automatically
+ * called to watch file changes, and close the watcher automatically when the
+ * server shuts down.
+ */
+export interface Watchable {
+    /**
+     * @inner Called automatically when adding the instance to `app,config.watch`,
+     *  the implementation shall include some strategy to reload modules.
+     */
+    watch(): FSWatcher;
+}
 
 export interface Locale {
     $alias: string;

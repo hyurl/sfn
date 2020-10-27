@@ -4,12 +4,11 @@
 
 The base class used to create hook instance when accessing hook chains.
 
-This class is considered abstract and the user shall not try to manually
-create new hook instance via this class, instead, use it as an interface to
-annotate variables and accessing the `app.hooks` module to get instance instead.
+This class is not intended to be used directly, instead, use it as an interface
+to annotate variables and use the `app.hooks` module to get instance instead.
 
 ```ts
-class Hook<I = void, O = void> { }
+abstract class Hook<I = void, O = void> { }
 ```
 
 ## 属性

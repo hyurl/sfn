@@ -14,7 +14,7 @@ import useThrottle from "@hyurl/utils/useThrottle";
  * class must be defined and inherited from this one.
  */
 @HideProtectedProperties
-export class Service extends EventEmitter {
+export abstract class Service extends EventEmitter {
     /**
      * The language of the current service, the default value is
      * `app.config.lang`, but for controllers, this property is set

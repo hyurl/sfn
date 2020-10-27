@@ -3,32 +3,22 @@ import { watch } from "chokidar";
 import { applyMagic } from 'js-magic';
 import { interceptAsync } from 'function-intercepter';
 import { createImport, traceModulePath } from './internal/module';
+import { Watchable } from "./interfaces";
 
 const tryImport = createImport(require);
 
 /**
  * The base class used to create hook instance when accessing hook chains.
- * 
- * This class is considered abstract and the user shall not try to manually
- * create new hook instance via this class, instead, use it as an interface to
- * annotate variables and accessing the `app.hooks` module to get instance
- * instead.
  */
 @applyMagic
-export class Hook<I = void, O = void> {
-    protected path: string;
-    protected children: { [name: string]: Hook } = {};
-
-    constructor(
-        /**
-         * The name of the hook, when accessing a hook via `app.hooks`, this
-         * property will be set automatically.
-         */
-        readonly name: string,
-        path: string
-    ) {
-        this.path = normalize(path);
-    }
+export abstract class Hook<I = void, O = void> {
+    /**
+     * The name of the hook, when accessing a hook via `app.hooks`, this
+     * property will be set automatically.
+     */
+    abstract readonly name: string;
+    protected abstract path: string;
+    protected abstract children: { [name: string]: Hook; };
 
     /** Binds a handler function to the current hook. */
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
@@ -89,10 +79,14 @@ export class Hook<I = void, O = void> {
         } else if (prop in this.children) {
             return this.children[prop];
         } else if (typeof prop != "symbol") {
-            return this.children[prop] = new Hook(
-                this.name + "." + String(prop),
-                this.path
-            );
+            // Create the Hook instance from prototype and patch properties
+            // since this is an abstract class.
+            return this.children[prop] = applyMagic(Object.assign(
+                Object.create(Hook.prototype), {
+                name: this.name + "." + String(prop),
+                path: this.path,
+                children: {}
+            }), true);
         }
     }
 
@@ -105,7 +99,17 @@ export namespace Hook {
     export const Container = new Map<string, Map<string, Set<Function>>>();
 }
 
-export class HookProxy extends Hook {
+export class HookProxy extends Hook implements Watchable {
+    readonly name: string;
+    protected path: string;
+    protected children = {};
+
+    constructor(name: string, path: string) {
+        super();
+        this.name = name;
+        this.path = normalize(path);
+    }
+
     watch() {
         return watch(this.path, {
             followSymlinks: false,
