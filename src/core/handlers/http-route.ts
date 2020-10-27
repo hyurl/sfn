@@ -15,12 +15,13 @@ import { number } from 'literal-toolkit';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
 import { Controller } from '../controllers/Controller';
 import randStr from "@hyurl/utils/randStr";
+import isVoid from "@hyurl/utils/isVoid";
 
 const XMLType = /(text|application)\/xml\b/;
 
 router.onerror = function onerror(err: any, req: Request, res: Response) {
     res.keepAlive = false;
-    let ctrl = new HttpController(req, res)
+    let ctrl = new HttpController(req, res);
 
     if (res.statusCode === 404)
         err = new StatusException(404);
@@ -34,7 +35,7 @@ router.onerror = function onerror(err: any, req: Request, res: Response) {
         err = new StatusException(500);
 
     handleError(err, ctrl, req.method + " " + req.shortUrl);
-}
+};
 
 export function getRouteHandler(key: string): RouteHandler {
     return async (req: Request, res: Response) => {
@@ -86,8 +87,12 @@ export function getRouteHandler(key: string): RouteHandler {
             }
 
             if (initiated) {
-                if (!req.isEventSource && !res.sent) {
-                    res.end();
+                if (!res.sent) {
+                    if (req.isEventSource) {
+                        res.sse.close();
+                    } else {
+                        res.end();
+                    }
                 }
 
                 await applyDestroy(ctrl);
@@ -99,7 +104,7 @@ export function getRouteHandler(key: string): RouteHandler {
 
             handleError(err, ctrl);
         }
-    }
+    };
 }
 
 export async function applyInit(ctrl: Controller) {
@@ -129,6 +134,10 @@ async function handleError(err: any, ctrl: HttpController, stack?: string) {
     // If the response is has already been sent, handle finish immediately.
     if (res.sent)
         return handleFinish(err, ctrl, stack);
+    else if (res.headersSent) {
+        res.end();
+        return handleFinish(err, ctrl, stack);
+    }
 
     // If the response hasn't been sent, try to response the error in a proper 
     // form to the client.
@@ -225,15 +234,11 @@ async function handleIteratorResponse(
 ) {
     let { req, res, sse } = ctrl;
     let reqType = req.type;
-    let value: any, done: boolean;
 
-    while ({ value, done } = await iter.next()) {
-        if (value === undefined) {
-            if (done)
-                break;
-            else
-                continue;
-        } else if (!res.headersSent && !req.isEventSource) {
+    while (true) {
+        let { value, done } = await iter.next();
+
+        if (!res.headersSent && !req.isEventSource) {
             if (!res.type && reqType && reqType !== "*/*") {
                 res.type = reqType;
             } else if (Buffer.isBuffer(value)) {
@@ -245,7 +250,11 @@ async function handleIteratorResponse(
             res.writeHead(200);
         }
 
-        if (req.isEventSource) {
+        if (done) {
+            break;
+        } else if (!isVoid(value)) {
+            continue;
+        } else if (req.isEventSource) {
             sse.send(value);
         } else if (Buffer.isBuffer(value)) {
             res.write(value);
