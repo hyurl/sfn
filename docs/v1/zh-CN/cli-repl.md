@@ -20,6 +20,17 @@
 初始化项目并自动创建需要的文件。这个命令应该在安装框架之后就立即运行，但是也可以用来恢复
 应用必需的文件，如果它们丢失了。
 
+### `sfn -s <name>`
+
+根据给定的名称创建一个新的服务。
+
+```sh
+npx sfn -s tool
+```
+
+这个命令将会创建一个名为 `tool.ts` 的文件并存储在 `src/services/` 目录下。
+
+
 ### `sfn -c <name> [-t <type>]`
 
 根据给定的名称创建控制器文件。
@@ -38,16 +49,6 @@ npx sfn -c articleSocket -t websocket
 ```
 
 这个命令将创建一个 WebSocketController。
-
-### `sfn -s <name>`
-
-根据给定的名称创建一个新的服务。
-
-```sh
-npx sfn -s tool
-```
-
-这个命令将会创建一个名为 `tool.ts` 的文件并存储在 `src/services/` 目录下。
 
 ### `sfn -l <name>`
 

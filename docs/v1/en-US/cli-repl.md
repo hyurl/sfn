@@ -23,6 +23,15 @@ Initiates the project and create needed files. This command should be run right
 after you install the framework. But you can also run it to recover
 must-be-present files when any missing.
 
+### `sfn -s <name>`
+
+Creates a new service according to the specified name.
+```sh
+npx sfn -s tool
+```
+
+This command should create a file named `tool.ts` in `src/services/` directory.
+
 ### `sfn -c <name> [-t <type>]`
 
 Creates a controller file according to the specified name.
@@ -42,15 +51,6 @@ npx sfn -c articleSocket -t websocket
 ```
 
 This command will create a WebSocketController.
-
-### `sfn -s <name>`
-
-Creates a new service according to the specified name.
-```sh
-npx sfn -s tool
-```
-
-This command should create a file named `tool.ts` in `src/services/` directory.
 
 ### `sfn -l <name>`
 
