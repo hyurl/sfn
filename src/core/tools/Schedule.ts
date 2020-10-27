@@ -7,10 +7,8 @@ import sift, { Query as SiftQuery } from "sift";
 import { ModuleProxy } from "microse";
 
 type Methods<T> = FunctionPropertyNames<T>;
+type TaskHandler = (...data: any[]) => void | Promise<void>;
 
-/** @deprecated */
-export type TaskOptions = FunctionTaskOptions<any> | ModuleTaskOptions<any, string>;
-export type TaskHandler = (...data: any[]) => void | Promise<void>;
 export type ScheduleQuery<T> = Partial<SiftQuery> & {
     appId?: string | RegExp;
     taskId?: string | RegExp;

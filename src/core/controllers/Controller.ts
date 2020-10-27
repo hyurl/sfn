@@ -31,12 +31,6 @@ export abstract class Controller extends Service {
     /** @override */
     async init(): Promise<void> { }
 
-    /** @deprecated Use `init()` instead. */
-    async before?(): Promise<void>;
-
-    /** @deprecated Use `destroy()` instead. */
-    async after?(): Promise<void>;
-
     /** @override */
     async throttle<T>(key: string, handle: () => T | Promise<T>, interval = 1000) {
         return Controller.flow.throttle(key, handle, interval);

@@ -18,6 +18,7 @@ export class Service extends EventEmitter implements Service {
     private queues = new Map<any, Queue>();
     private gcTimer: NodeJS.Timer = null;
 
+    /** This method will be called once the garbage collector ticks. */
     protected async gc(): Promise<void> {
         this.queues.forEach((queue, key) => {
             if (queue.length === 0) {
