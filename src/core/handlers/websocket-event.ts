@@ -11,7 +11,7 @@ import isOwnMethod from "@hyurl/utils/isOwnMethod";
 import typeAs from "@hyurl/utils/typeAs";
 import { tryLogError } from "../tools/internal/error";
 import { eventMap } from '../tools/RouteMap';
-import { ThenableAsyncGenerator } from "thenable-generator";
+import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
 import last = require("lodash/last");
 import { applyInit, applyDestroy } from './http-route';
 
@@ -81,24 +81,23 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
 
             let options = { passCallback: false };
             let args = getArguments(ctrl, method, data, options);
-            let generator = new ThenableAsyncGenerator(ctrl[method](...args));
-            let value: any, done: boolean;
+            let result = await ctrl[method](...args);
 
-            // Fetch any data produced by the method, whether they are returned 
-            // or yielded.
-            while ({ value, done } = await generator.next()) {
-                // Send data to the client.
-                if (!options.passCallback) {
-                    if (callback) {
-                        callback(value);
-                    } else {
-                        (value === undefined) || socket.emit(event, value);
+            if (isIterableIterator(result) || isAsyncIterableIterator(result)) {
+                while (true) {
+                    let segment = await (<AsyncGenerator>result).next();
+                    socket.emit(event, segment);
+
+                    if (segment.done) {
+                        break;
                     }
                 }
-
-                if (done) {
-                    break;
+            } else if (callback) {
+                if (!options.passCallback) {
+                    callback(result);
                 }
+            } else {
+                socket.emit(event, result);
             }
         }
 

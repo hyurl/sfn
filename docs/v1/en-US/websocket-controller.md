@@ -35,7 +35,14 @@ export default class extends WebSocketController {
 When a method is decorated with `@event`, this method is bound to a certain 
 socket.io event. When a client emits data to this event, the method will be
 automatically called, and the returning value will be sent back to the client
-with proper forms.
+in proper forms.
+
+1. If the client specified a callback when sending the message, e.g.
+    `emit(event, message, callback)`, then the return value will be sent to the
+    callback.
+2. If the client didn't specify the callback, the return value will be sent to
+    the client with the same event name, the client can add a listener to
+    receive the data returned by the server.
 
 ### Set Up Namespace
 
@@ -104,7 +111,7 @@ export default class extends WebSocketController {
 }
 ```
 
-### Throw Status Exception In the Controller
+### Throw HttpException In the Controller
 
 Like in an HttpController, you can throw a `HttpException`, the framework will
 handle it properly, and sending error response automatically.
@@ -141,7 +148,8 @@ once, `init()` and `destroy()` methods will also be called only once. However,
 if an event is bound to multiple controllers, they will all be instantiated
 accordingly, and their `init()` and `destroy()` methods will be called as
 expected. And, if the method is a generator, any values `yield`ed by it will be
-sent as well. that means you can use a generator to send data continuously.
+sent as well (with the same event). that means you can use a generator to send
+data continuously.
 
 ```typescript
 import { WebSocketController, WebSocket, event } from "sfn";
@@ -152,15 +160,27 @@ export default class extends WebSocketController {
         let i = 0;
 
         while (true) {
-            yield i++; // the client will receive 1, 2, 3...10 continuously.
+            yield i++;
 
             if (i === 10) {
                 break;
             }
         }
+
+        // the client will receive these data continuously.
+        // { done: false, value: 1 }
+        // { done: false, value: 2 }
+        // ...
+        // { done: false, value: 10 }
+        // { done: true, value: value }
     }
 }
 ```
+
+**NOTE: Since v1.0, the data yielded by a generator in a WebSocketController**
+**will be sent to the client in the form of `{done: bool, value: any}`,**
+**the client can check the `done` property so that to know whether the data**
+**has be fully delivered.**
 
 ## Customize Adapter
 

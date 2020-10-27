@@ -34,6 +34,11 @@ export default class extends WebSocketController {
 当一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被自动
 地以合适的形式返回给客户端。
 
+1. 如果客户端在发送消息时指定了回调函数，如 `emit(event, message, callback)`, 那么返回值
+    将会被发送到回调函数中。
+2. 如果客户端没有指定回调函数，那么返回值将会被发送到与相同的事件中，客户端可以通过绑定事件
+    回调函数来接收服务端返回的数据。
+
 
 ### 设置命名空间
 
@@ -135,8 +140,8 @@ export default class extends WebSocketController {
 顺序被依次调用，其返回值也会被依次发送给客户端。即使绑定了多个方法，一个控制器也只会被
 实例化一次，`init()` and `destroy()` 方法也只会被调用一次，但如果事件绑定在了多个控制器
 内，那么这些控制器都会被依次实例化，并且调用其 `init()` 和 `destroy()` 方法。并且，如果
-方法是一个生成器，那么该方法所 `yield` 的值也会被依次发送。因此，你也可以使用生成器来持续地
-向客户端返回数据。
+方法是一个生成器，那么该方法所 `yield` 的值也会被依次发送（通过同名事件）。因此，你也可以使用
+生成器来持续地向客户端返回数据。
 
 ```typescript
 import { WebSocketController, WebSocket, event } from "sfn";
@@ -147,15 +152,26 @@ export default class extends WebSocketController {
         let i = 0;
 
         while (true) {
-            yield i++; // the client will receive 1, 2, 3...10 continuously.
+            yield i++;
 
             if (i === 10) {
                 break;
             }
         }
+
+        // the client will receive these data continuously.
+        // { done: false, value: 1 }
+        // { done: false, value: 2 }
+        // ...
+        // { done: false, value: 10 }
+        // { done: true, value: value }
     }
 }
 ```
+
+**注意：自 v1.0 起，从 WebSocket 控制器的生成器方法中产出的数据将会以**
+**`{done: bool, value: any}` 的形式发送给客户端，客户端可以检查 `done` 属性，进而判断**
+**是否已经传输完所有数据。**
 
 ## 自定义 Adapter
 
