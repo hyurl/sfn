@@ -57,12 +57,17 @@ export abstract class Controller extends Service {
     }
 
     /** Returns a result indicates the operation is failed. */
-    error(msg: string | Error, code: number = 500): ResultMessage<void> {
+    fail(msg: string | Error, code: number = 500): ResultMessage<void> {
         msg = msg instanceof Error ? msg.message : msg;
         return {
             success: false,
             code,
             error: this.i18n(msg)
         };
+    }
+
+    /** @deprecated Use `fail` instead. */
+    error(msg: string | Error, code: number = 500): ResultMessage<void> {
+        return this.fail(msg, code);
     }
 }

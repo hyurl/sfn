@@ -162,7 +162,7 @@ async function handleError(
 
     // Send error to the client.
     if (info.event) {
-        ctrl.socket.emit(info.event, ctrl.error(_err.message, _err.code));
+        ctrl.socket.emit(info.event, ctrl.fail(_err.message, _err.code));
     }
 
     tryLogError(err, stack);

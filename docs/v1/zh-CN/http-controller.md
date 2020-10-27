@@ -1,4 +1,4 @@
-<!-- title: HTTP 控制器; order: 3 -->
+<!-- title: HTTP 控制器; order: 4 -->
 ## 基本概念
 
 `HttpController` 处理来自 HTTP 客户端的请求，它本质是一个继承自
@@ -205,7 +205,7 @@ export default class extends HttpController {
         if (await fileExists("somefile")) {
             return this.success("File exists!");
         } else {
-            return this.error("File doesn't exist!");
+            return this.fail("File doesn't exist!");
         }
     }
 }
@@ -241,7 +241,7 @@ export default class extends HttpController {
 框架会检查客户端所接受的响应类型，并用合适的方式发送错误信息。通常地，一个普通的
 HTTP 错误页面会被返回。但如果在请求头中出现了 `Accept: application/json`，一个
 状态码为 `200` 并携带 JSON 信息 `{success: false, code, error}` 的响应将会被返回，
-这个响应形式来自于控制器方法 [error()](./http-controller#通用-API-响应).。
+这个响应形式来自于控制器方法 [fail()](./http-controller#通用-API-响应).。
 
 如果这个响应头没有出现，那么框架会检查是否在 `src/views/` 目录中存在着一个名称和
 错误代码对应的模板（如 `404.html`）。如果文件存在，那它将会被发送为错误页面，否则，
@@ -271,7 +271,7 @@ HttpController.httpErrorView = function (err, instance) {
 ## 通用 API 响应
 
 无论是在一个 HttpController 中，或 WebSocketController 中，你都总是可以使用方法 
-`success()` 和方法 `error()` 来发送一个结构化的响应，来表示一个成功或者失败的操作。
+`success()` 和方法 `fail()` 来发送一个结构化的响应，来表示一个成功或者失败的操作。
 
 ```typescript
 import { HttpController, route } from "sfn";
@@ -291,7 +291,7 @@ export default class extends HttpController {
             return this.success(user);
             // { success: true, code: 200, data: user }
         } catch (err) {
-            return this.error(err, err instanceof NotFoundError ? 404 : 500);
+            return this.fail(err, err instanceof NotFoundError ? 404 : 500);
             // { success: false, code: 404 | 500, error: err.message }
         }
     }

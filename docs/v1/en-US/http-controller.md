@@ -220,7 +220,7 @@ export default class extends HttpController {
         if (await fileExists("somefile")) {
             return this.success("File exists!");
         } else {
-            return this.error("File doesn't exist!");
+            return this.fail("File doesn't exist!");
         }
     }
 }
@@ -259,7 +259,7 @@ error properly. More often, a common HTTP error will be responded to. But if an
 `Accept: application/json` is present in the request headers, a `200` status 
 will be responded with a JSON that contains `{success: false, code, error}`, 
 according to the specification of the controller method
-[error()](#Common-API-Response).
+[fail()](#Common-API-Response).
 
 If this header isn't present, then the framework will check if there is a 
 template in the `src/views/` named just the same as the error code 
@@ -292,7 +292,7 @@ HttpController.httpErrorView = function (err, instance) {
 ## Common API Response
 
 Either in an HttpController or in a WebSocketController, you can always use 
-method `success()` and method `error()` to send a structured response that 
+method `success()` and method `fail()` to send a structured response that 
 indicates a successful or failed operation.
 
 ```typescript
@@ -313,7 +313,7 @@ export default class extends HttpController {
             return this.success(user);
             // { success: true, code: 200, data: user }
         } catch (err) {
-            return this.error(err, err instanceof NotFoundError ? 404 : 500);
+            return this.fail(err, err instanceof NotFoundError ? 404 : 500);
             // { success: false, code: 404 | 500, error: err.message }
         }
     }

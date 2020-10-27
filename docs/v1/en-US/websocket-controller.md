@@ -130,7 +130,7 @@ export default class extends WebSocketController {
 
 When a HttpException is thrown, the framework will always send a message that 
 contains `{success: false, code, error}` to the client according to the 
-specification of the controller method [error()](./http-controller#Common-API-Response).
+specification of the controller method [fail()](./http-controller#Common-API-Response).
 
 ## Bind Multiple Methods and Returns Many Values.
 
@@ -179,3 +179,10 @@ import * as RedisAdapter from "socket.io-redis";
 
 ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 ```
+
+#### Notice
+
+After using `socket.io-redis` module, when calling
+[app.message.ws](./message-channel#Push-WebSocket-Messages) to push messages,
+you must use `via()` method to specify a front-end web server, otherwise the
+message could be sent duplicated.

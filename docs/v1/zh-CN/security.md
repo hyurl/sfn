@@ -290,7 +290,7 @@ export default class extends HttpController {
 
             return this.success(user);
         } catch (err) {
-            return this.error(err, err instanceof NotFoundError ? 404 : 400);
+            return this.fail(err, err instanceof NotFoundError ? 404 : 400);
         }
     }
 }

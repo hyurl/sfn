@@ -127,7 +127,7 @@ export default class extends WebSocketController {
 
 当一个 HttpException 被抛出时，框架总是会发送一个包含着 
 `{success: false, code, error}` 的消息到客户端，这个响应形式来自于控制器方法
-[error()](./http-controller#通用-API-响应)。
+[fail()](./http-controller#通用-API-响应)。
 
 ## 绑定多个方法与返回多个值
 
@@ -172,3 +172,9 @@ import * as RedisAdapter from "socket.io-redis";
 
 ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 ```
+
+#### 注意
+
+在使用 `socket.io-redis` 模块后，当调用
+[app.message.ws](./message-channel#推送-WebSocket-消息) 来推送消息时，需要使用 `via()`
+方法指定用来发送消息的前端 Web 服务器，否则消息可能会被重复发送。

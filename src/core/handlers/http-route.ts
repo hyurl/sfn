@@ -142,7 +142,7 @@ async function handleError(err: any, ctrl: HttpController, stack?: string) {
 
     if (req.accept == "application/json" || res.jsonp) {
         // Send JSON response.
-        res.send(ctrl.error(_err.message, _err.code));
+        res.send(ctrl.fail(_err.message, _err.code));
     } else {
         res.status = _err.code;
 
