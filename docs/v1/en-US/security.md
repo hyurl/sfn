@@ -1,5 +1,5 @@
 <!-- title: Security; order: 10 -->
-# Authorization
+## Authorization
 
 Both `HttpController` and `WebSocketController` provide a simple approach to 
 control user authorization.
@@ -54,7 +54,7 @@ export default class extends HttpController {
 }
 ```
 
-# CSRF Protection
+## CSRF Protection
 
 CSRF security issue is a very old topic actually, in my experience, modern
 browsers have done a lot of work to protect it for you. But just in case, you

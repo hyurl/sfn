@@ -4,12 +4,12 @@
 `HttpController` 和 `WebSocketController` 都提供了一个简单地方式来控制用户的权限。
 
 在控制器中，存在着一个属性 `authorized`，如果它的值是 `true`，那就意味着操作是被
-允许的，`false` 则相反。自 v0.6 版本起，框架不再自动检查和设置该值，他默认为 `false`
+允许的，`false` 则相反。自 v0.6 版本起，框架不再自动检查和设置该值，它默认为 `false`
 你需要设置检测条件以便其适合你的需要。
 
 如果操作是未授权的，框架将会自动抛出一个 HttpException `401 Unauthorized` 并返回到客户端。
 
-## 使用示例
+### 使用示例
 
 要唤起授权检查，你只需要使用装饰器 `@requireAuth` 来修饰控制器方法即可，当这个
 方法被通过 URL（或 WebSocket 事件）调用时，检测过程就会被自动的执行。
@@ -39,7 +39,7 @@ export default class extends HttpController {
     }
 
     @route("/auth")
-    async auth(req: Request, res: Responce) {
+    async auth(req: Request, res: Response) {
         if (!req.auth) {
             // res.auth() will lead you to HTTP basic authentication.
             return res.auth();
