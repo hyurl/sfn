@@ -226,7 +226,7 @@ export default class extends HttpController {
 }
 ```
 
-## Throw Status Exception In the Controller
+## Throw HttpException In the Controller
 
 `HttpException` is a customized error class that safe to use when you're going
 to 
@@ -353,4 +353,25 @@ export default class extends HttpController {
         }
     }
 }
+```
+
+### Receive Data Continuously via EventSource
+
+```ts
+var es = new EventSource("/generator-example");
+
+es.onmessage = ({ data }) => {
+    if (es.readyState === EventSource.CLOSED) {
+        console.log("All data has been delivered");
+    } else {
+        console.log(data); // will print 1, 2, 3...10 continuously.
+    }
+};
+es.onerror = () => {
+    if (es.readyState === EventSource.CLOSED) {
+        console.log("All data has been delivered");
+    } else {
+        console.log("Something went wrong");
+    }
+};
 ```

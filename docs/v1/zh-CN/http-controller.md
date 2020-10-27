@@ -328,3 +328,24 @@ export default class extends HttpController {
     }
 }
 ```
+
+### 通过 EventSource 持续接收数据
+
+```ts
+var es = new EventSource("/generator-example");
+
+es.onmessage = ({ data }) => {
+    if (es.readyState === EventSource.CLOSED) {
+        console.log("All data has been delivered");
+    } else {
+        console.log(data); // will print 1, 2, 3...10 continuously.
+    }
+};
+es.onerror = () => {
+    if (es.readyState === EventSource.CLOSED) {
+        console.log("All data has been delivered");
+    } else {
+        console.log("Something went wrong");
+    }
+};
+```
