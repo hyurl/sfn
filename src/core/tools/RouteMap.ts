@@ -3,7 +3,7 @@ import { ModuleProxy } from "microse";
 import { HttpController } from '../controllers/HttpController';
 import { WebSocketController } from '../controllers/WebSocketController';
 
-export type RouteMapData = {
+type RouteMapData = {
     prefix: string,
     route: string,
     name?: string;

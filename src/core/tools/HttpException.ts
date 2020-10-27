@@ -2,6 +2,10 @@ import { STATUS_CODES } from "http";
 import { isDevMode } from "../../init";
 import define from "@hyurl/utils/define";
 
+/**
+ * An exception indicates that the web server encounters an error, either
+ * from the client-side or the server-side.
+ */
 export class HttpException extends Error {
     constructor(readonly code: number, message?: string) {
         super(message || STATUS_CODES[code] || "Unknown error");
@@ -16,6 +20,7 @@ export class HttpException extends Error {
         return this.name + ": " + this.code + " " + this.message;
     }
 
+    /** Constructs an HttpException from the given error. */
     static from(err: any): HttpException {
         if (err instanceof this) {
             return err;

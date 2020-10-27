@@ -6,16 +6,31 @@ import { createImport, traceModulePath } from './internal/module';
 
 const tryImport = createImport(require);
 
+/**
+ * The base class used to create hook instance when accessing hook chains.
+ * 
+ * This class is considered abstract and the user shall not try to manually
+ * create new hook instance via this class, instead, use it as an interface to
+ * annotate variables and accessing the `app.hooks` module to get instance
+ * instead.
+ */
 @applyMagic
 export class Hook<I = void, O = void> {
     protected path: string;
     protected children: { [name: string]: Hook } = {};
 
-    constructor(readonly name: string, path: string) {
+    constructor(
+        /**
+         * The name of the hook, when accessing a hook via `app.hooks`, this
+         * property will be set automatically.
+         */
+        readonly name: string,
+        path: string
+    ) {
         this.path = normalize(path);
     }
 
-    /** Binds a handler to the hook. */
+    /** Binds a handler function to the current hook. */
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
         let path = traceModulePath(this.path) || "<internal>";
         let container = Hook.Container.get(path);
@@ -27,7 +42,7 @@ export class Hook<I = void, O = void> {
         return this;
     }
 
-    /** Invokes all handlers in the hook. */
+    /** Invokes all handler functions bound to the hook. */
     async invoke(input?: I, output?: O): Promise<O> {
         let result: O;
 
@@ -53,6 +68,7 @@ export class Hook<I = void, O = void> {
         });
     }
 
+    /** Returns all handlers bound to the current hook. */
     getHandlers() {
         let handlers: Function[] = [];
 
