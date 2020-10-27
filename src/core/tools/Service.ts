@@ -9,6 +9,9 @@ import useThrottle from "@hyurl/utils/useThrottle";
  * The `Service` class provides some useful functions like `i18n`, `logger`, 
  * `cache` that you can use to do real jobs, and since it is inherited from 
  * EventEmitter, you can bind customized events if needed.
+ * 
+ * This class is not intended to be used directly, to use its functions, a new
+ * class must be defined and inherited from this one.
  */
 @HideProtectedProperties
 export class Service extends EventEmitter {
