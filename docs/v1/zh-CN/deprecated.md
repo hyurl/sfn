@@ -1,7 +1,5 @@
 <!-- title: 已废弃; order: 17 -->
 
-# 废弃和建议
-
 ## ORM
 
 历史版本中，SFN 曾使用 [Modelar](https://github.com/hyurl/modelar) 作为它的默认

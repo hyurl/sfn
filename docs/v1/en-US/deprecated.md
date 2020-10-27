@@ -1,7 +1,5 @@
 <!-- title: Deprecated; order: 17 -->
 
-# Deprecations and Recommendations
-
 ## ORM
 
 History versions of SFN used [Modelar](https://github.com/hyurl/modelar) as its

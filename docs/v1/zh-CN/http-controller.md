@@ -147,9 +147,6 @@ export default class extends HttpController {
 和服务中一样，你可以重载 `init()` 和 `destroy()` 方法，来对控制器进行初始化和销毁
 操作。
 
-(**注意:** 在 v0.6 之前，这些方法被命名为 `before()` 和 `after()`，他们现在已经
-被废弃，因为新的 方法名和服务更加一致。)
-
 ```typescript
 import * as fs from "fs";
 import { HttpController, Request, Response, route } from "sfn";

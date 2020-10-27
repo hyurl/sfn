@@ -1,5 +1,5 @@
 <!-- title: Session; order: 9 -->
-# Concept
+## Concept
 
 The session in **SFN** framework and shared between HTTP and WebSocket. the
 framework uses 
@@ -46,7 +46,7 @@ you changing the state in one end and affecting the other without doing
 repeated work, it guarantees that once you logged in from an HTTP request, 
 and your WebSocket will be logged in as well (and vice versa).
 
-## How To Use?
+## Example
 
 The `session` property is bound to the `req` and `socket` object in a 
 controller (and in the middleware of [webium](https://github.com/hyurl/webium) 

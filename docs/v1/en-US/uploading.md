@@ -1,10 +1,10 @@
 <!-- title: Uploading; order: 12 -->
-# Concept
+## Concept
 
 The `HttpController` provides a simple uploading method that let you upload 
 files via a POST request.
 
-## How To Use?
+## Example
 
 Uploading a file is just easy as you doing other stuffs in an **SFN** 
 application, you just need to configure some options, and the rest work will 
@@ -12,8 +12,6 @@ be handled by the framework automatically.
 
 In an HttpController, use the decorator `@upload` to set accept fields that may
 contain files.
-
-### Example
 
 ```typescript
 import { HttpController, Request, route, upload } from "sfn";
@@ -31,7 +29,7 @@ export default class extends HttpController {
 }
 ```
 
-### Configure Uploading Options
+## Configure Uploading Options
 
 ```typescript
 import { HttpController, Request, Response, route, upload } from "sfn";
@@ -62,7 +60,7 @@ The `uploadOptions` is an `UploadOptions`, which contains these properties:
     returns the filename. `auto-increment` indicates when the filename exists,
     it will be suffixed with a number, e.g. `example.txt` => `example (1).txt`.
 
-### The File State
+## The File State
 
 The file state in the constructor and the route-binding method is different, in 
 the constructor (also in the 

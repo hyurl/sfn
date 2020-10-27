@@ -1,5 +1,5 @@
 <!-- title: WebSocket Controller; order: 5 -->
-# Concept
+## Concept
 
 `WebSocketController` manages messages come from a 
 [socket.io](https://socket.io/) client.
@@ -7,7 +7,7 @@
 Since this module uses socket.io, you need to learn it before you can fully 
 handle your work.
 
-# How To Use?
+## Example
 
 Like **HttpController**, you create a file in `src/controllers`, this file 
 should export a default class that extends `WebSocketController`, and it will 
@@ -16,8 +16,6 @@ be auto-loaded when the server starts.
 Many features in **HttpController** can be used in **WebSocketController** as 
 well, or a similar version can be found, please pay attention to the document of
 [HttpController](./http-controller).
-
-## Example
 
 ```typescript
 import { WebSocketController, event } from "sfn";
@@ -111,7 +109,7 @@ export default class extends WebSocketController {
 }
 ```
 
-### Throw HttpException In the Controller
+## Throw HttpException In the Controller
 
 Like in an HttpController, you can throw a `HttpException`, the framework will
 handle it properly, and sending error response automatically.

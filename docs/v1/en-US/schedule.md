@@ -1,16 +1,9 @@
 <!-- title: Schedule; order: 6 -->
-# Concept
+## Concept
 
 Since version 0.5.x, SFN introduced a new distributed schedule system, and run
 as a micro-service. To use this system, you have to create one or more
 schedule server process, but don't worry, it's just easy as usual.
-
-v0.6 changed three details of the `app.schedule` interface:
-
-1. Using an MD5 string as task ID.
-2. The time unit changed from milliseconds to seconds.
-3. `data` property changed to an array in order to pass multiple arguments into
-    the handler function.
 
 ## Create Service
 
@@ -88,7 +81,7 @@ the later task to erase the former task, so it's recommended to provide a unique
 `salt` to prevent conflicts. NOTE: `salt` must be unique, and will not be
 changed after a system restart or reload.
 
-### Bind Service To The Schedule
+## Bind Service To The Schedule
 
 Other than provide a callback function, you can bind a module and method to the
 schedule as the handler function, and take extra benefits like after the service 
@@ -121,7 +114,7 @@ export default class MyService {
 }
 ```
 
-### Pass Data To The Handler
+## Pass Data To The Handler
 
 When creating the schedule, you can provide the `data` option, the data will be
 passed to the handler function as arguments when invoking the function.

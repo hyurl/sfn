@@ -1,16 +1,14 @@
 <!-- title: View; order: 8 -->
-# Concept
+## Concept
 
 Since version 0.5.x, SFN introduces a new view system to resolve templates as
 dynamic  modules in order to auto-load and hot-reload them.
 
-# How To Use?
+## Example
 
 In an HttpController, you can use `view()` method to display a template. (By 
 default, the framework will not use any template engine, just import the HTML 
 file directly.)
-
-## Example
 
 ```typescript
 import { HttpController, route } from "sfn";
@@ -54,7 +52,7 @@ const { EjsLoader } = require("alar-ejs-loader"); // use require instead of impo
 app.views.setLoader(new EjsLoader());
 ```
 
-### Adapt Your Own Engines
+## Adapt Your Own Engines
 
 If you have your own template engine, or you wish to use another template engine,
 you can implement a new loader yourself, it's very easy, for example, an Ejs

@@ -12,7 +12,7 @@ customize your checking condition to suit your needs.
 If an operation is unauthorized, the framework will throw a HttpException
 `401 Unauthorized` to the client.
 
-## Usage Example
+### Example
 
 To wake up the authentication check, you just need to use the decorator
 `@requireAuth` to decorate the controller method, when this method is invoked

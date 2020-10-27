@@ -1,5 +1,5 @@
 <!-- title: Mixins & AOP; order: 14 -->
-# Concept
+## Concept
 
 The design of **Mixins** and **AOP** is meant to write highly re-useful code 
 that suits many scenarios and you don't have to expand your class.
@@ -224,7 +224,6 @@ interface, to open or close some resources during startup and shutdown. The
 following example comes from the SFN website itself.
 
 ```typescript
-// src/logger-server.ts
 // Try to safely close the logger service.
 app.hooks.lifeCycle.shutdown.bind(async () => {
     await app.services.logger.close();

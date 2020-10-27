@@ -1,5 +1,5 @@
 <!-- title: HTTP Controller; order: 4 -->
-# Concept
+## Concept
 
 `HttpController` manages requests come from an HTTP client. Essentially, it is a
 class inherited from [Service](./service), but unlike the singleton model of the
@@ -9,13 +9,11 @@ Controller overrides some methods from the base class to allow it fitting this
 special running model, in the meantime to keep the same development experience
 as ordinary services. 
 
-# Usage Example
+## Usage Example
 
 You just create a file in `src/controllers`, this file should export a
 default class that extends `HttpController`, and it will be auto-loaded when the 
 server starts.
-
-## Example
 
 ```typescript
 import { HttpController, route } from "sfn";
@@ -159,9 +157,6 @@ export default class extends HttpController {
 
 Just like in a service, you can override `init()` and `destroy()` methods, to
 allow the controller performing initiation and destruction operations.
-
-(**NOTE:** Before v0.6, these methods are named `before()` and `after()`, 
-they're now abandoned, since the new methods are more consistent with services.)
 
 ```typescript
 import * as fs from "fs";

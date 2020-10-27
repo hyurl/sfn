@@ -214,7 +214,6 @@ SFN 框架内置使用了一个名为 `lifeCycle` 的钩子接口，用以控制
 示例来自 SFN 网站自己的逻辑：
 
 ```typescript
-// src/logger-server.ts
 // Try to safely close the logger service.
 app.hooks.lifeCycle.shutdown.bind(async () => {
     await app.services.logger.close();

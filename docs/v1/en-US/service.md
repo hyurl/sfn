@@ -1,5 +1,5 @@
 <!-- title: Service; order: 3 -->
-# Concept
+## Concept
 
 In a distributed system, **Service** is the most basic and most important 
 concept. Since v1.0, SFN now included a new RPC engine that is called
