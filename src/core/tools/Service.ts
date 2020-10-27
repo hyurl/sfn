@@ -12,13 +12,19 @@ import useThrottle from "@hyurl/utils/useThrottle";
  */
 @HideProtectedProperties
 export class Service extends EventEmitter implements Service {
-    /** The language of the current service. */
+    /**
+     * The language of the current service, the default value is
+     * `app.config.lang`, but for controllers, this property is set
+     * automatically according to the client supported language.
+     */
     lang: string = app.config.lang;
 
     private queues = new Map<any, Queue>();
     private gcTimer: NodeJS.Timer = null;
 
-    /** This method will be called once the garbage collector ticks. */
+    /**
+     * This method will be called automatically once the garbage collector ticks.
+     */
     protected async gc(): Promise<void> {
         this.queues.forEach((queue, key) => {
             if (queue.length === 0) {
@@ -28,13 +34,14 @@ export class Service extends EventEmitter implements Service {
         });
     }
 
-    /** This method will be called to initiate the service. */
+    /** This method will be called automatically to initiate the service. */
     async init(): Promise<void> {
         this.gcTimer = setInterval(() => this.gc(), 1000 * 30);
     }
 
     /**
-     * This method will be called when the service is about to be destroyed.
+     * This method will be called automatically when the service is about to be
+     * destroyed.
      */
     async destroy(): Promise<void> {
         this.gcTimer && clearInterval(this.gcTimer);
@@ -44,13 +51,13 @@ export class Service extends EventEmitter implements Service {
     /**
      * Gets a locale text according to i18n. 
      * 
-     * If is a HTTP request, check `req.query.lang` or `req.cookies.lang`, if 
-     * is socket message, check `socket.cookies.lang`, if any appears, then 
+     * If it's an HTTP request, check `req.query.lang` or `req.cookies.lang`, if 
+     * it's a socket message, check `socket.cookies.lang`, if any appears, then 
      * always use the setting language, otherwise, check header 
      * `Accept-Language` instead. Language files are stored in `src/locales/`.
      * 
      * @param text The original text, accept format with %s, %i, etc.
-     * @param replacements Values that replaces %s, %i, etc. in the `text`.
+     * @param replacements Values that replace %s, %i, etc. in the `text`.
      */
     i18n(text: string, ...replacements: string[]): string {
         let trans = get(app.locales.translations, this.lang) ||
@@ -65,7 +72,7 @@ export class Service extends EventEmitter implements Service {
      * happens within the `interval` time, the previous result will be returned
      * and the current `handle` function will not be invoked.
      * 
-     * NOTE: this function only uses `internal` once for creating the internal
+     * NOTE: this function only uses `interval` once for creating the internal
      * throttle function.
      * @param interval default `1000`.
      */
@@ -75,7 +82,7 @@ export class Service extends EventEmitter implements Service {
 
     /**
      * Uses queue strategy on the given resource, any subsequent call will be
-     * queued and needs to wait the previous call finishes.
+     * queued until the previous one finishes.
      */
     async queue<T>(resource: any, handle: () => T | Promise<T>) {
         return new Promise<T>((resolve, reject) => {

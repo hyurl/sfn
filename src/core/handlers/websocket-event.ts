@@ -13,7 +13,6 @@ import { tryLogError } from "../tools/internal/error";
 import { eventMap } from '../tools/RouteMap';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
 import last = require("lodash/last");
-import { applyInit, applyDestroy } from './http-route';
 
 let importedNamespaces: string[] = [];
 type SocketEventInfo = {
@@ -74,8 +73,8 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 if (socket.disconnected)
                     return;
 
-                await applyInit(ctrl);
-
+                // Initiate the controller.
+                await ctrl.init?.();
                 initiated = true;
             }
 
@@ -102,7 +101,7 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
         }
 
         if (initiated) {
-            await applyDestroy(ctrl);
+            await ctrl.destroy?.();
             finish(ctrl, info);
         }
     } catch (err) {

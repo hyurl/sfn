@@ -13,7 +13,6 @@ import { realCsrfToken } from "../tools/symbols";
 import { routeMap } from '../tools/RouteMap';
 import { number } from 'literal-toolkit';
 import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
-import { Controller } from '../controllers/Controller';
 import randStr from "@hyurl/utils/randStr";
 import isVoid from "@hyurl/utils/isVoid";
 
@@ -64,8 +63,8 @@ export function getRouteHandler(key: string): RouteHandler {
                     // Handle CSRF token.
                     handleCsrfToken(ctrl);
 
-                    await applyInit(ctrl);
-
+                    // Initiate the controller.
+                    await ctrl.init?.();
                     initiated = true;
 
                     // Handle GZip.
@@ -95,8 +94,7 @@ export function getRouteHandler(key: string): RouteHandler {
                     }
                 }
 
-                await applyDestroy(ctrl);
-
+                await ctrl.destroy?.();
                 finish(ctrl);
             }
         } catch (err) {
@@ -105,22 +103,6 @@ export function getRouteHandler(key: string): RouteHandler {
             handleError(err, ctrl);
         }
     };
-}
-
-export async function applyInit(ctrl: Controller) {
-    if (typeof ctrl.init === "function") {
-        await ctrl.init();
-    } else if (typeof ctrl.before === "function") {
-        await ctrl.before();
-    }
-}
-
-export async function applyDestroy(ctrl: Controller) {
-    if (typeof ctrl.destroy === "function") {
-        await ctrl.destroy();
-    } else if (typeof ctrl.after === "function") {
-        await ctrl.after();
-    }
 }
 
 function handleFinish(err: Error, ctrl: HttpController, stack: string) {
