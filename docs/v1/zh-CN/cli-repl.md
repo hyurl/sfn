@@ -10,9 +10,9 @@
 
 ## 命令
 
-### `node dist [server-id]`
+### `node dist [appId]`
 
-用来启动服务器，`server-id` 为 `web-server`（默认）或者设置在 `app.config.server.rpc`
+用来启动服务器，`appId` 为 `web-server`（默认）或者设置在 `app.config.server.rpc`
 中的 ID。
 
 ### `sfn init`

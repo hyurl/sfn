@@ -12,9 +12,9 @@ They're few and easy to learn.
 
 ## Commands
 
-### `node dist [server-id]`
+### `node dist [appId]`
 
-Used to start a server, the `server-id` is `web-server` (by default) or the ID
+Used to start a server, the `appId` is `web-server` (by default) or the ID
 set in `app.config.server.rpc`.
 
 ### `sfn init`
