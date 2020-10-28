@@ -24,8 +24,8 @@ Table of Contents
 
 ## Available Entry List
 
-This list includes the symbols (modules) that is attached on `app` namespace by
-default:
+This list includes the symbols (modules/sub-namespaces) that is attached on
+`app` namespace by default:
 
 - `app.services`
 - `app.hooks`
@@ -38,4 +38,4 @@ default:
 - `app.utils`
 - `app.config`
 
-More properties can be found in [app section](./app).
+More items can be found in [app section](./app).

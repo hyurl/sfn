@@ -183,10 +183,10 @@ Adapter，例如 [socket.io-redis](https://www.npmjs.com/package/socket.io-redis
 
 ```typescript
 // <SRC_PATH>/bootstrap/websocket.ts
-import { ws } from "sfn";
+import "sfn";
 import * as RedisAdapter from "socket.io-redis";
 
-ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
+app.ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 ```
 
 #### 注意

@@ -51,7 +51,7 @@ achieve. To use this feature, you just need to install another package named
 [function-intercepter](https://github.com/hyurl/function-intercepter).
 
 ```typescript
-import { HttpController, before, after } from "sfn";
+import { HttpController } from "sfn";
 import { interceptAsync } from "function-intercepter";
 
 export default class MyController extends HttpController {

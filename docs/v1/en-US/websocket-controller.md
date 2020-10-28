@@ -192,10 +192,10 @@ of using Redis I won't cover here, you can check it out yourself.
 
 ```typescript
 // <SRC_PATH>/bootstrap/websocket.ts
-import { ws } from "sfn";
+import "sfn";
 import * as RedisAdapter from "socket.io-redis";
 
-ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
+app.ws.adapter(RedisAdapter({ host: "localhost", port: 6379 }));
 ```
 
 #### Notice

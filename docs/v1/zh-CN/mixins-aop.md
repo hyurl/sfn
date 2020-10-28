@@ -50,7 +50,7 @@ export default class extends Mixed(HttpController, CheckUserState) {
 的模块，你应该查看它的文档以便了解更多特性。
 
 ```typescript
-import { HttpController, before, after } from "sfn";
+import { HttpController } from "sfn";
 import { interceptAsync } from "function-intercepter";
 
 export default class MyController extends HttpController {
