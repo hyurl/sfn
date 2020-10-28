@@ -11,6 +11,8 @@ create instance for them.
 abstract class Controller extends Service { }
 ```
 
+- [\<Service\>](./Service)
+
 ## 属性
 
 - `authorized` \<boolean\> Indicates whether the operation is authorized.
