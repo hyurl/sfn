@@ -47,7 +47,7 @@ export default class extends HttpController {
     @route.get("/api/")
     async api(req: Request, res: Response) {
         let ver = await this.getLatestVersion();
-        let url = `/api/${ver}/Service`;
+        let url = `/api/${ver}/README`;
 
         if (req.query.lang)
             url += `?lang=${req.query.lang}`;
