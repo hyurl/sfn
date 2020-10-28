@@ -1,6 +1,7 @@
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
-import { activeEvent } from "../tools/symbols";
+
+export const activeEvent = Symbol("activeEvent");
 
 /**
  * WebSocketController manages messages come from a socket.io client.

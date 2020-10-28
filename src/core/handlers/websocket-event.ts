@@ -1,8 +1,7 @@
 import { ws } from "../bootstrap/index";
 import { HttpException } from "../tools/HttpException";
 import { WebSocket, Session } from "../tools/interfaces";
-import { activeEvent } from "../tools/symbols";
-import { WebSocketController } from "../controllers/WebSocketController";
+import { WebSocketController, activeEvent } from "../controllers/WebSocketController";
 import { logRequest } from "./http-init";
 import initHandler from "./websocket-init";
 import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
