@@ -27,12 +27,18 @@ import "./hot-reload";
 
 declare global {
     namespace app {
-        const router: App;
-        const http: HttpServer | HttpsServer | Http2SecureServer;
         /**
-         * This property is reserved by the framework, use `app.message.ws` 
-         * instead.
-         * @inner
+         * /** (Web server only) The basic HTTP router created by **webium**
+         * framework.
+         */
+        const router: App;
+
+        /** (Web server only) The HTTP server. */
+        const http: HttpServer | HttpsServer | Http2SecureServer;
+
+        /**
+         * (Web server only) The WebSocket server created by **socket.io**
+         * framework.
          */
         const ws: SocketIO.Server;
 
@@ -51,11 +57,8 @@ declare global {
     }
 }
 
-/** (Web server only) The basic HTTP router created by **webium** framework. */
 export var router: App = null;
-/** (Web server only) The HTTP server. */
 export var http: HttpServer | HttpsServer | Http2SecureServer = null;
-/** (Web server only) The WebSocket server created by **SocketIO** framework. */
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);

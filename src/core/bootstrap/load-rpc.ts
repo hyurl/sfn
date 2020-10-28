@@ -21,8 +21,8 @@ declare global {
         namespace rpc {
             /**
              * The RPC server instance, only available when the current process 
-             * is an RPC server (and the server started), if it's a web server,
-             * the variable will be `null`.
+             * is an RPC server (and the server is running), if it's a web
+             * server, the variable will be `null`.
              */
             var server: RpcServer;
 

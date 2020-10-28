@@ -37,15 +37,9 @@ declare global {
             server: {
                 /** Host name(s), used for calculating the sub-domain. */
                 hostname?: string | string[];
-                /**
-                 * Since SFN 0.2.0, when HTTPS or HTTP2 is enabled, will always 
-                 * force HTTP request to redirect to the new protocol, and 
-                 * setting port for HTTP server is no longer allowed, the 
-                 * framework will automatically start a server that listens port
-                 * `80` to accept HTTP request and redirect them to HTTPS.
-                 */
+                /** Includes the settings of the HTTP(s/2) server. */
                 http?: {
-                    /** Server type, AKA protocol type, default value: `http`. */
+                    /** Server type, default value: `http`. */
                     type?: "http" | "https" | "http2";
                     /** Default value is `80`. */
                     port?: number;
@@ -59,8 +53,9 @@ declare global {
                      */
                     options?: https.ServerOptions & http2.ServerOptions;
                 };
-                /** Configurations of WebSocket server. */
+                /** Includes the settings of WebSocket server. */
                 websocket?: {
+                    /** Whether or not to turn on the WebSocket server. */
                     enabled?: boolean;
                     /**
                      * By default, this `port` is `0` or `undefined`, that means
@@ -75,11 +70,11 @@ declare global {
                     options?: ServerOptions;
                 };
                 /**
-                 * Configurations for RPC services.
+                 * Includes the settings of the RPC servers.
                  * @see https://github.com/microse-rpc/microse-node
                  */
                 rpc?: {
-                    [id: string]: ChannelOptions & ClientOptions & {
+                    [appId: string]: ChannelOptions & ClientOptions & {
                         [x: string]: any;
                         /** The services that should be hosted by this server. */
                         services: ModuleProxy<any>[];
