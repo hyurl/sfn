@@ -1,4 +1,4 @@
-import { WebSocketController, event, queue, requireAuth } from "sfn";
+import { WebSocketController, event, requireAuth } from "sfn";
 import sleep from "@hyurl/utils/sleep";
 
 export default class iWebSocketController extends WebSocketController {
@@ -21,11 +21,12 @@ export default class iWebSocketController extends WebSocketController {
      *  socket.emit('repeat-what-I-said', 'Hello, World!')
      */
     @event("repeat-what-I-said")
-    @queue("repeat-what-I-said")
     @requireAuth
     async repeatWhatISaid(data: string) {
-        await sleep(1000);
-        return data;
+        return this.queue("repeat-what-I-said", async () => {
+            await sleep(1000);
+            return data;
+        });
     }
 
     @event("iterator-test")

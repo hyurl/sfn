@@ -160,7 +160,7 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(
     }
 );
 
-/** Throttles the calling rate of the method. */
+/** @deprecated Throttles the calling rate of the method. */
 export function throttle(key: string, interval = 1000): MethodDecorator {
     return (proto: Service, prop: string, desc: PropertyDescriptor) => {
         desc.value = proto[prop] = wrap(
@@ -176,7 +176,7 @@ export function throttle(key: string, interval = 1000): MethodDecorator {
     };
 }
 
-/** Queues the method call. */
+/** @deprecated Queues the method call. */
 export function queue(key: string): MethodDecorator {
     return (proto: Service, prop: string, desc: PropertyDescriptor) => {
         desc.value = proto[prop] = wrap(

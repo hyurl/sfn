@@ -11,10 +11,16 @@ import get = require('lodash/get');
 const Module: new (...args: any[]) => NodeJS.Module = <any>module.constructor;
 const tryImport = createImport(require);
 
-export function moduleExists(name: string): boolean {
-    return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
+export function moduleExists(path: string): boolean {
+    return fs.existsSync(path + (isTsNode ? ".ts" : ".js"));
 }
 
+/**
+ * Used to create a `require`-like function, unlike the regular require function,
+ * the created function will not throw error if the module doesn't exist,
+ * instead if returns an empty object `{}`, and the function supports JSONC
+ * (JSON with Comments) files by default.
+ */
 export function createImport(require: NodeRequire): (id: string) => {
     [x: string]: any;
     default?: any;
