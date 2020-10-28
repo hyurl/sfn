@@ -19,8 +19,6 @@ class HttpException extends Error { }
 
 ### constructor
 
-Create an instance.
-
 ```ts
 constructor(code: number, message?: string);
 ```

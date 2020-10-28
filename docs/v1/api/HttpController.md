@@ -43,6 +43,15 @@ abstract class HttpController extends Controller { }
 
 ## 方法
 
+### constructor
+
+```ts
+constructor(req: Request, res: Response);
+```
+
+- [\<Request\>](./Request)
+- [\<Response\>](./Response)
+
 ### view
 
 Renders the template file to a string.
