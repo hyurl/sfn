@@ -9,7 +9,7 @@ abstract class WebSocket { }
 
 - [\<SocketIO.Socket\>](https://socket.io/docs/server-api/#Socket)
 
-## 属性
+## Properties
 
 - `domainName` \<string\> The domain name of the handshake request.
 - `subdomain` \<string\> The subdomain name of the handshake request.

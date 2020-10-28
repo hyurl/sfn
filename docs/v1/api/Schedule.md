@@ -5,11 +5,11 @@
 The very class used to create `app.schedule`, this class is not intended to be
 called in user code, use `app.schedule` instead.
 
-## 属性
+## Properties
 
 - `name` \<string\> will always be `app.schedule`.
 
-## 方法
+## Methods
 
 ### create
 

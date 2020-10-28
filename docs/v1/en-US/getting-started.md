@@ -1,6 +1,6 @@
 <!-- title: Getting Started; order: 1 -->
 
->This documentation is for SFN 1.0.x, for old version SFN documentation, please 
+>This documentation is for SFN 1.x, for old version SFN documentation, please 
 > [click here](/docs/v0.6.x/getting-started).
 
 ## Initiate Project

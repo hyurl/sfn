@@ -13,12 +13,12 @@ abstract class Controller extends Service { }
 
 - [\<Service\>](./Service)
 
-## 属性
+## Properties
 
 - `authorized` \<boolean\> Indicates whether the operation is authorized.
 - `session` [\<Session\>](./Session) The session of the current request/websocket context.
 
-## 方法
+## Methods
 
 ### success
 

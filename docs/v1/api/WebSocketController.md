@@ -14,7 +14,7 @@ abstract class WebSocketController extends Controller { }
 
 - [\<Controller\>](./Controller)
 
-## 属性
+## Properties
 
 - `socket` [\<WebSocket\>](./WebSocket) The current websocket context.
 - `event` \<string\> The current active event (namespace included).
@@ -22,7 +22,7 @@ abstract class WebSocketController extends Controller { }
 - static `nsp` \<string\> Sets a specified namespace for WebSocket channel (used by
     SocketIO).
 
-## 方法
+## Methods
 
 ### constructor
 

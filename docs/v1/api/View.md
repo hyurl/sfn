@@ -6,7 +6,7 @@
 interface View { }
 ```
 
-## 方法
+## Methods
 
 ### render
 

@@ -86,6 +86,22 @@ function requireAuth(proto: Controller, prop: string) => void;
 
 - [\<Controller\>](./Controller)
 
+## upload
+
+Allows the method accept file uploading with specified options.
+
+```ts
+function upload(options: { [field: string]: UploadOptions }): HttpDecorator;
+```
+
+- [\<UploadOptions\>](./HttpController#UploadOptions)
+
+Allows the method accept file uploading with specified fields.
+
+```ts
+function upload(...fields: string[]): HttpDecorator;
+```
+
 ## Sting Tags
 
 ### grey

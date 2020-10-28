@@ -14,13 +14,13 @@ singletons and shall be accessed via `app.services` namespace.
 abstract class Service extends EventEmitter { }
 ```
 
-## 属性
+## Properties
 
 - `lang` \<string\> The language of the current service, the default value is
     `app.config.lang`, but in controllers, this property is set automatically
     according to the client supported language.
 
-## 方法
+## Methods
 
 ### gc
 

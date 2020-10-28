@@ -9,7 +9,7 @@ abstract class Request { }
 
 - [\<webium.Request\>](https://github.com/hyurl/webium#request)
 
-## 属性
+## Properties
 
 - `isEventSource` \<boolean\> Whether the request comes from an EventSource
     client.
@@ -22,5 +22,5 @@ abstract class Request { }
 - `files` \<object\> When in the controller constructor, the files are in
     uploading state, when in the method bound to the route, the files are
     uploaded and stored in disk.
-    - [UploadedFile](./UploadedFile)
-    - [UploadingFile](./UploadedFile#UploadingFile)
+    - [UploadingFile](./HttpController#UploadingFile)
+    - [UploadedFile](./HttpController#UploadedFile)

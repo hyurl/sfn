@@ -5,18 +5,18 @@
 The base class used to create hook instance when accessing hook chains.
 
 This class is not intended to be used directly, instead, use it as an interface
-to annotate variables and use the `app.hooks` module to get instance instead.
+to annotate variables and use the `app.hooks` namespace to get instance instead.
 
 ```ts
 abstract class Hook<I = void, O = void> { }
 ```
 
-## 属性
+## Properties
 
 - `name` \<string\> The name of the hook, when accessing a hook via `app.hooks`,
     this property will be set automatically.
 
-## 方法
+## Methods
 
 ### bind
 

@@ -7,7 +7,7 @@ between distributed services.
 
 This class is not intended to be called in user code, use [app.message](#app_message) instead.
 
-## 方法
+## Methods
 
 ### publish
 

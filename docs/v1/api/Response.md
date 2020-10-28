@@ -9,7 +9,7 @@ abstract class Response { }
 
 - [\<webium.Response\>](https://github.com/hyurl/webium#response)
 
-## 属性
+## Properties
 
 - `gzip` \<boolean\> Whether the response data should be compressed to GZIP.
 - `sent` \<boolean\> Whether the response has been sent. Because the framework
@@ -20,7 +20,7 @@ abstract class Response { }
 - `sse` [\<SSE\>](https://github.com/hyurl/sfn-sse/blob/master/src/index.ts#L14)
     The Sever-Sent Events channel of the response.
 
-## 方法
+## Methods
 
 ### xml
 

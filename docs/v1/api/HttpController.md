@@ -13,7 +13,7 @@ abstract class HttpController extends Controller { }
 
 - [\<Controller\>](./Controller)
 
-## 属性
+## Properties
 
 - `req` [\<Request\>](./Request) The current request context.
 - `res` [\<Response\>](./Response) The current response context.
@@ -29,6 +29,7 @@ abstract class HttpController extends Controller { }
     the server either via request header, URL query string or request body. You
     can call `req.csrfToken` to get the auto-generated token in a `GET` action
     and pass it to a view.
+- `uploadOptions` [\<UploadOptions\>](#UploadOptions) Configurations for uploading files.
 - `url` \<string\> alias of `req.url`.
 - `session` [\<Session\>](./Session) alias of `req.session`.
 - `sse` [\<SSE\>](https://github.com/hyurl/sfn-sse/blob/master/src/index.ts#L14)
@@ -41,7 +42,7 @@ abstract class HttpController extends Controller { }
     Enables Cross-Origin Resource Sharing, set an array to accept multiple
     origins, an `*` to accept all, or an object for more complicated needs.
 
-## 方法
+## Methods
 
 ### constructor
 
@@ -83,4 +84,50 @@ static httpErrorView(
     err: HttpException,
     instance: HttpController
 ): string | Promise<string>;
+```
+
+## UploadOptions
+
+```ts
+type UploadOptions = {
+    /** Maximum number of files that each form field can carry. */
+    maxCount?: number;
+    /** A path in the disk that stores the uploaded files. */
+    savePath?: string;
+    /** Returns `true` to accept, `false` to reject. */
+    filter?: (file: UploadingFile) => boolean;
+    /** `auto-increment`, `random` or a function returns the filename. */
+    filename?: "auto-increment" | "random" | ((file: UploadingFile) => string);
+};
+const UploadOptions: UploadOptions;
+```
+
+## UploadingFile
+
+```ts
+interface UploadingFile {
+    /** Field name specified in the form. */
+    fieldname: string;
+    /** Name of the file on the user's computer. */
+    originalname: string;
+    /** Encoding type of the file. */
+    encoding: string;
+    /** Mime type of the file. */
+    mimetype: string;
+}
+```
+
+## UploadedFile
+
+```ts
+interface UploadedFile extends UploadingFile {
+    /** The folder to which the file has been saved. */
+    destination: string;
+    /** The name of the file within the destination. */
+    filename: string;
+    /** Location of the uploaded file. */
+    path: string;
+    /** Size of the file in bytes. */
+    size: number;
+}
 ```

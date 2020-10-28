@@ -7,7 +7,7 @@ A distributed schedule service, runs as a micro-service.
 This class is not intended to be called in user code, use `app.services.schedule`
 instead.
 
-## 方法
+## Methods
 
 ### find
 
