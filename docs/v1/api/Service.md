@@ -16,8 +16,8 @@ abstract class Service extends EventEmitter { }
 
 ## 属性
 
-- `lang: string` The language of the current service, the default value is
-    `app.config.lang`, but for controllers, this property is set automatically
+- `lang` \<string\> The language of the current service, the default value is
+    `app.config.lang`, but in controllers, this property is set automatically
     according to the client supported language.
 
 ## 方法

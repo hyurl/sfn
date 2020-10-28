@@ -39,7 +39,12 @@ export default class DocumentationService extends Service {
         try {
             let name = app.docs.resolve(filename);
             let view = <ModuleProxy<View>>get(global, name);
-            return view.render();
+            let contents = await view.render();
+
+            return contents.replace(
+                /&lt;([a-zA-Z0-9_]+?(\[\])?)&gt;/g,
+                "<var>&lt;$1&gt;</var>"
+            );
         } catch (e) {
             let code = (<Error>e).message.includes("no such file") ? 404 : 500;
             throw new HttpException(code, app.isDevMode ? e.message : null);

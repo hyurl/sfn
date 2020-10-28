@@ -13,7 +13,7 @@ abstract class Hook<I = void, O = void> { }
 
 ## 属性
 
-- `name: string` The name of the hook, when accessing a hook via `app.hooks`,
+- `name` \<string\> The name of the hook, when accessing a hook via `app.hooks`,
     this property will be set automatically.
 
 ## 方法

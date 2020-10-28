@@ -7,7 +7,7 @@ called in user code, use `app.schedule` instead.
 
 ## 属性
 
-- `name: string` will always be `app.schedule`.
+- `name` \<string\> will always be `app.schedule`.
 
 ## 方法
 

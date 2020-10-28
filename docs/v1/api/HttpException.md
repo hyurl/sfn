@@ -9,9 +9,11 @@ client-side or the server-side.
 class HttpException extends Error { }
 ```
 
+- [\<Error\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+
 ## 属性
 
-- `code: number` The HTTP status code.
+- `code` \<number\> The HTTP status code.
 
 ## 方法
 

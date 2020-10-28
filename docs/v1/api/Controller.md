@@ -13,8 +13,8 @@ abstract class Controller extends Service { }
 
 ## 属性
 
-- `authorized: boolean` Indicates whether the operation is authorized.
-- `session: Session` The session of the current request/websocket context.
+- `authorized` \<boolean\> Indicates whether the operation is authorized.
+- `session` [\<Session\>](./Session) The session of the current request/websocket context.
 
 ## 方法
 
@@ -26,7 +26,7 @@ Returns a result indicates the operation is succeeded.
 success<T = any>(data: T, code: number = 200): ResultMessage<T>;
 ```
 
-where `ResultMessage` is:
+where <code id="ResultMessage">ResultMessage</code> is:
 
 ```ts
 interface ResultMessage<T = any> {
