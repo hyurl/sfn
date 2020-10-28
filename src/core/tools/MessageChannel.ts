@@ -1,5 +1,12 @@
 import values = require("lodash/values");
 
+/**
+ * A decentralized message channel implements pub-sub model used to communicate
+ * between distributed services.
+ * 
+ * This class is not intended to be called in user code, use `app.message`
+ * instead.
+ */
 export class MessageChannel {
     private topics = new Map<string, Set<(data: any) => void>>();
 
@@ -28,8 +35,8 @@ export class MessageChannel {
         }
     }
 
-    /** Subscribes a `listener` to the given `topic` of the channel. */
-    subscribe(topic: string, listener: (data: any) => void) {
+    /** Subscribes a `listener` function to the given `topic` of the channel. */
+    subscribe(topic: string, listener: (data: any) => void): this {
         topic = this.name + "#" + topic;
         let listeners = this.topics.get(topic);
 
@@ -45,8 +52,11 @@ export class MessageChannel {
         return this;
     }
 
-    /** Unsubscribes a `listener` or all listeners of the `topic`. */
-    unsubscribe(topic: string, listener?: (data: any) => void) {
+    /**
+     * Unsubscribes the `listener` function or all listeners bound to the
+     * `topic`.
+     */
+    unsubscribe(topic: string, listener?: (data: any) => void): boolean {
         topic = this.name + "#" + topic;
         let listeners = this.topics.get(topic);
 
@@ -66,12 +76,12 @@ export class MessageChannel {
     }
 }
 
-export abstract class Message {
+abstract class Message {
     readonly abstract name: string;
 
     constructor(protected data: any = {}) { }
 
-    /** Sends the message via a front end server. */
+    /** Sends the message via a front-end web server. */
     via(appId: string): InstanceType<new (...args: any[]) => this> {
         return new (<any>this.constructor)({ ...this.data, appId });
     }
@@ -130,6 +140,10 @@ export class WebSocketMessage extends Message {
             event,
             data
         }, this.getWebServers());
+    }
+
+    send(...data: any[]) {
+        return this.send("message", ...data);
     }
 }
 

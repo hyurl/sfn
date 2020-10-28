@@ -29,7 +29,7 @@ export default class CacheService {
             handler: "syncToFile",
             startIn: 30,
             repeat: 30,
-        }, true);
+        });
     }
 
     async destroy() {

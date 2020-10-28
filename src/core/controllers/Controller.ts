@@ -9,18 +9,22 @@ export interface ResultMessage<T = any> {
 }
 
 /**
- * The Controller give you a common API to return data to the underlying 
- * response context, all controllers will be automatically handled by the 
- * framework.
+ * The is the base class of `HttpController` and `WebSocketController`, it gives
+ * you a common API to return data to the underlying response context, all
+ * controllers will be automatically handled by the framework, you don't have to
+ * create instance for them.
  */
 export abstract class Controller extends Service {
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
 
+    /** The session of the current request/websocket context. */
     abstract readonly session: Session;
+
+    /** @inner */
     static flow: Service = null;
 
-    /** A reference to the class constructor. */
+    /** @inner A reference to the class constructor. */
     get ctor(): new (...args: any[]) => this {
         return <any>this.constructor;
     };

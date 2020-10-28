@@ -51,3 +51,15 @@ Returns all handler functions bound to the current hook.
 ```ts
 getHandlers(): Function[];
 ```
+
+## app.hooks.lifeCycle
+
+### app.hooks.lifeCycle.startup
+
+This internal hooks is used in the system startup procedure, you can bind
+functions for extra initiation of your program.
+
+### app.hooks.likeCycle.shutdown
+
+This internal hooks is used in the system shutdown procedure, you can bind
+functions for extra destruction of your program.

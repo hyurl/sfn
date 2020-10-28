@@ -1,4 +1,4 @@
-<!-- title: HttpException; order: 3 -->
+<!-- title: HttpException; order: 10 -->
 
 ## HttpException
 

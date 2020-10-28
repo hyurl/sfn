@@ -7,7 +7,8 @@ The `Service` class provides some useful functions like `i18n`, `logger`,
 EventEmitter, you can bind customized events if needed.
 
 This class is not intended to be used directly, to use its functions, a new
-class must be defined and inherited from this one.
+class must be defined and inherited from this one, all services run as
+singletons and shall be accessed via `app.services` namespace.
 
 ```ts
 abstract class Service extends EventEmitter { }

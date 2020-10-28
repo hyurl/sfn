@@ -11,7 +11,8 @@ import useThrottle from "@hyurl/utils/useThrottle";
  * EventEmitter, you can bind customized events if needed.
  * 
  * This class is not intended to be used directly, to use its functions, a new
- * class must be defined and inherited from this one.
+ * class must be defined and inherited from this one, all services run as
+ * singletons and shall be accessed via `app.services` namespace.
  */
 @HideProtectedProperties
 export abstract class Service extends EventEmitter {
