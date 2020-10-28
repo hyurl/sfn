@@ -28,7 +28,7 @@ import "./hot-reload";
 declare global {
     namespace app {
         /**
-         * /** (Web server only) The basic HTTP router created by **webium**
+         * (Web server only) The basic HTTP router created by **webium**
          * framework.
          */
         const router: App;

@@ -31,14 +31,14 @@ declare global {
 
             /**
              * Starts an RPC server according to the given `id`, which is 
-             * set in `config.server.rpc`.
+             * set in `app.config.server.rpc`.
              */
             function serve(id: string): Promise<void>;
             /**
-             * Connects to an RPC server according to the given `id`, 
-             * which is set in `config.server.rpc`. If `defer` is `true`, when 
-             * the server is not online, the function will hang in the
-             * background until it becomes available and finishes the connection.
+             * Connects to an RPC server according to the given `id`, which is
+             * set in `app.config.server.rpc`. If `defer` is `true`, when the
+             * server is not online, the function will hang in the background
+             * until it becomes available and finishes the connection.
              */
             function connect(id: string, defer?: boolean): Promise<void>;
             /** Connects to all RPC servers. */
@@ -51,7 +51,7 @@ declare global {
              */
             function connectDependencies(id?: string): Promise<void>;
             /** Checks if the target server is connected. */
-            function hasConnect(id: string): boolean;
+            function isConnectedTo(id: string): boolean;
         }
     }
 }
@@ -198,7 +198,7 @@ app.rpc = {
             await Promise.all(connections);
         }
     },
-    hasConnect(id: string) {
+    isConnectedTo(id: string) {
         return !!app.rpc.connections[id];
     }
 };

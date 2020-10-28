@@ -49,7 +49,7 @@ async function reload(file: string) {
     let lang = parts[1];
 
     if (startsWith(app.id, "doc-server")
-        || !app.rpc.hasConnect("doc-server")
+        || !app.rpc.isConnectedTo("doc-server")
     ) {
         let path = `app.docs.sideMenu.${parts[0]}.${lang}`;
 

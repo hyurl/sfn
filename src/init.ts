@@ -34,7 +34,8 @@ declare global {
          * In the web server, the app ID would be either `web-server`, or 
          * `web-server-<n>` when started with PM2, where `<n>` is the 
          * `process.env.NODE_APP_INSTANCE`; in an RPC server, the app ID is the
-         * ID passed to `app.serve()`.
+         * ID passed to `app.serve()`, which is also the ID set in
+         * `app.config.server.rpc`.
          * 
          * NOTE: the ID will only be available until the server has started.
          * 
