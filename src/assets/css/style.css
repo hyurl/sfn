@@ -5,6 +5,11 @@ body {
   font-weight: 500;
 }
 
+html h5,
+body h5 {
+  font-size: 1em;
+}
+
 pre,
 code {
   font-family: consolas, monospace;
