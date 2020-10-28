@@ -1,6 +1,6 @@
 <!-- title: Session; order: 14 -->
 
-# Session
+## Session
 
 ```ts
 interface Session extends Express.Session { }

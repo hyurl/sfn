@@ -1,6 +1,6 @@
 <!-- title: View; order: 15 -->
 
-# View
+## View
 
 ```ts
 interface View { }

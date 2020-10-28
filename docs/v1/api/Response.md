@@ -1,6 +1,6 @@
 <!-- title: Response; order: 12 -->
 
-# Response
+## Response
 
 ```ts
 interface Response extends webium.Response { }

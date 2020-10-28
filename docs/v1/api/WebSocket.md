@@ -1,6 +1,6 @@
 <!-- title: WebSocket; order: 13 -->
 
-# WebSocket
+## WebSocket
 
 ```ts
 interface WebSocket extends SocketIO.Socket { }
