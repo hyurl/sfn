@@ -20,7 +20,7 @@ const XMLType = /(text|application)\/xml\b/;
 
 router.onerror = function onerror(err: any, req: Request, res: Response) {
     res.keepAlive = false;
-    let ctrl = new HttpController(req, res);
+    let ctrl = new (class extends HttpController { })(req, res);
 
     if (res.statusCode === 404)
         err = new HttpException(404);
@@ -98,7 +98,7 @@ export function getRouteHandler(key: string): RouteHandler {
                 finish(ctrl);
             }
         } catch (err) {
-            ctrl = ctrl || new HttpController(req, res);
+            ctrl = ctrl || new (class extends HttpController { })(req, res);
 
             handleError(err, ctrl);
         }
@@ -140,7 +140,7 @@ async function handleError(err: any, ctrl: HttpController, stack?: string) {
         // Try to load the error page, if not present, then show the 
         // error message.
         try {
-            let { httpErrorView } = <typeof HttpController>ctrl.ctor;
+            let { httpErrorView } = <typeof HttpController><any>ctrl.ctor;
             let content = await httpErrorView(_err, ctrl);
 
             res.type = "text/html";

@@ -18,7 +18,7 @@ import useThrottle from "@hyurl/utils/useThrottle";
 export abstract class Service extends EventEmitter {
     /**
      * The language of the current service, the default value is
-     * `app.config.lang`, but for controllers, this property is set
+     * `app.config.lang`, but in controllers, this property is set
      * automatically according to the client supported language.
      */
     lang: string = app.config.lang;

@@ -34,7 +34,7 @@ export class HttpException extends Error {
     }
 }
 
-define(global, "StatusException", HttpException);
+define(global, "HttpException", HttpException);
 
 /** @deprecated Use `HttpException` instead. */
 export const StatusException = HttpException;

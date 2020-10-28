@@ -39,7 +39,7 @@ export function tryImport(nsp: string) {
             }
 
             socket.on("error", (err: Error) => {
-                let ctrl = new WebSocketController(socket);
+                let ctrl = new (class extends WebSocketController { })(socket);
                 handleError(err, {
                     time: Date.now(),
                     event: "",
@@ -105,7 +105,7 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
             finish(ctrl, info);
         }
     } catch (err) {
-        ctrl = ctrl || new WebSocketController(socket);
+        ctrl = ctrl || new (class extends WebSocketController { })(socket);
 
         await handleError(err, info, ctrl);
     }
