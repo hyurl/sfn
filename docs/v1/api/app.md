@@ -100,6 +100,8 @@ function serve(id?: string): Promise<void>;
 
 ### app.rpc.server
 
+- [\<microse.RpcServer\>](https://github.com/microse-rpc/microse-node/blob/master/docs/api.md#rpcserver)
+
 The RPC server instance, only available when the current process is an RPC
 server (and the server is running), if it's a web server, the variable will be
 `null`.
@@ -110,6 +112,10 @@ Starts an RPC server according to the given `id`, which is set in
 `app.config.server.rpc`.
 
 This function is similar to `app.serve()`.
+
+```ts
+function serve(id: string): Promise<void>;
+```
 
 ### app.rpc.connect
 
