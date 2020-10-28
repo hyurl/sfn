@@ -3,7 +3,6 @@ import { watch } from "chokidar";
 import { applyMagic } from 'js-magic';
 import { interceptAsync } from 'function-intercepter';
 import { createImport, traceModulePath } from './internal/module';
-import { Watchable } from "./interfaces";
 
 const tryImport = createImport(require);
 
@@ -99,7 +98,7 @@ export namespace Hook {
     export const Container = new Map<string, Map<string, Set<Function>>>();
 }
 
-export class HookProxy extends Hook implements Watchable {
+export class HookProxy extends Hook {
     readonly name: string;
     protected path: string;
     protected children = {};
