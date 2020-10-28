@@ -26,6 +26,10 @@ img {
   max-height: 100%;
 }
 
+article li, article p {
+  line-height: 1.5;
+}
+
 li code,
 p code {
   background-color: rgba(155, 157, 159, 0.31);
