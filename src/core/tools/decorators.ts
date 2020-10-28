@@ -7,11 +7,6 @@ import { routeMap, eventMap } from './RouteMap';
 import { traceModulePath } from './internal/module';
 import { EFFECT_METHODS } from './internal';
 import { Service } from './Service';
-import {
-    ControllerDecorator,
-    WebSocketDecorator,
-    HttpDecorator
-} from './interfaces';
 import { Controller } from '../controllers/Controller';
 import * as cors from "sfn-cors";
 import trimEnd = require('lodash/trimEnd');
@@ -22,6 +17,10 @@ import wrap from "@hyurl/utils/wrap";
 let router: App;
 let handle: (route: string) => RouteHandler;
 let wsTryImport: (nsp: string) => void;
+
+type ControllerDecorator = (proto: Controller, prop: string) => void;
+export type HttpDecorator = (proto: HttpController, prop: string) => void;
+type WebSocketDecorator = (proto: WebSocketController, prop: string) => void;
 
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketDecorator {
@@ -118,7 +117,7 @@ route.delete = function (path: string) {
 
 route.get = function (path: string) {
     return route("GET", path);
-}
+};
 
 route.head = function (path: string) {
     return route("HEAD", path);

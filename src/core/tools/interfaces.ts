@@ -2,10 +2,7 @@ import * as webium from "webium";
 import * as SocketIO from "socket.io";
 import * as ExpressSession from "express-session";
 import { SSE } from "sfn-sse";
-import { Controller } from "../controllers/Controller";
-import { HttpController } from "../controllers/HttpController";
-import { WebSocketController } from "../controllers/WebSocketController";
-import { UploadedFile } from "./upload";
+import { UploadedFile, UploadingFile } from "./upload";
 
 export interface Locale {
     $alias: string;
@@ -13,11 +10,16 @@ export interface Locale {
 }
 
 export interface View {
-    render(data?: { [name: string]: any }): string | Promise<string>;
+    /** Renders the view file with the `data` passed to the template. */
+    render(data?: { [name: string]: any; }): string | Promise<string>;
 }
 
 export interface Session extends Express.Session {
-    csrfTokens?: object;
+    /**
+     * This property stores all CSRF tokens of the current session, tokens will
+     * be deleted automatically after the validation is finished.
+     */
+    csrfTokens?: { [url: string]: string; };
 }
 
 export abstract class Session {
@@ -31,12 +33,12 @@ export interface Request extends webium.Request {
     isEventSource: boolean;
     /** Gets the CSRF token if available. */
     csrfToken?: string;
-    /** In an sfn app, the session is shared between HTTP and WebSocket. */
+    /** The session object of the current request. */
     session?: Session;
     /** An MD5 string representing the identical signature of the request. */
     readonly sign: string;
     /** 
-     * A short-version url, when the url contains more than 64 characters,
+     * A short-version URL, when the URL contains more than 64 characters,
      * the rest part will be cut off and replaced with `...`.
      */
     shortUrl: string;
@@ -45,7 +47,7 @@ export interface Request extends webium.Request {
      * when in the method bound to the route, the files are uploaded and 
      * stored in disk.
      */
-    files?: { [field: string]: UploadedFile[] };
+    files?: { [field: string]: UploadedFile[] | UploadingFile[]; };
 }
 
 export abstract class Request {
@@ -56,8 +58,8 @@ export abstract class Request {
 }
 
 export interface Response extends webium.Response {
-    /** Sends data to the client via XML document. */
-    xml(data: { [key: string]: any }, rootTag?: string, headless?: boolean): void;
+    /** Sends data to the client as an XML document. */
+    xml(data: { [key: string]: any; }, rootTag?: string, headless?: boolean): void;
     /** Whether the response data should be compressed to GZIP. */
     gzip: boolean;
     /**
@@ -81,23 +83,23 @@ export abstract class Response {
 }
 
 export interface WebSocket extends SocketIO.Socket {
-    /** The domain name of the handshake. */
+    /** The domain name of the handshake request. */
     domainName?: string;
-    /** The subdomain name of the handshake. */
+    /** The subdomain name of the handshake request. */
     subdomain?: string;
-    /** In an sfn app, the session is shared between HTTP and WebSocket. */
+    /** The cookies of the handshake request. */
+    cookies: { [name: string]: any; };
+    /** The session object of the current socket. */
     session?: Session;
-    /** * The cookies of handshake. */
-    cookies: { [name: string]: any };
-    /** The proxy information of handshake. */
+    /** The proxy information of handshake request. */
     proxy?: {
         protocol: string,
         host: string,
         ips: string[],
-        ip: string
+        ip: string;
     };
     /** The protocol of the socket, either `ws` or `wss`. */
-    protocol: string;
+    protocol: "ws" | "wss";
     host: string;
     hostname: string;
     port?: number;
@@ -108,7 +110,7 @@ export interface WebSocket extends SocketIO.Socket {
     lang: string;
     /** All languages that the client accepts. */
     langs: string[];
-    /** `true` if the protocol is `wss`, `false` otherwise. */
+    /** Whether the connection uses SSL/TSL. */
     secure: boolean;
 }
 
@@ -116,16 +118,4 @@ export abstract class WebSocket {
     static [Symbol.hasInstance](ins: SocketIO.Socket) {
         return app.ws && ins.server === app.ws;
     }
-}
-
-export interface ControllerDecorator extends Function {
-    (proto: Controller, prop: string): void;
-}
-
-export interface HttpDecorator extends Function {
-    (proto: HttpController, prop: string): void;
-}
-
-export interface WebSocketDecorator extends Function {
-    (proto: WebSocketController, prop: string): void;
 }

@@ -42,7 +42,7 @@ export default class DocumentationService extends Service {
             let contents = await view.render();
 
             return contents.replace(
-                /&lt;([a-zA-Z0-9_]+?(\[\])?)&gt;/g,
+                /&lt;([a-zA-Z0-9_\.]+?(\[\])?)&gt;/g,
                 "<var>&lt;$1&gt;</var>"
             );
         } catch (e) {

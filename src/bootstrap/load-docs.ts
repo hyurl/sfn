@@ -68,7 +68,7 @@ async function reload(file: string) {
             lang = "";
 
         data = data.replace(
-            /&lt;([a-zA-Z0-9_]+?(\[\])?)&gt;/g,
+            /&lt;([a-zA-Z0-9_\.]+?(\[\])?)&gt;/g,
             "<var>&lt;$1&gt;</var>"
         );
         app.message.ws.local.emit("renew-doc-contents", pathname, lang, data);

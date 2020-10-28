@@ -17,11 +17,23 @@ import "./core/bootstrap/load-views";
 import "./core/bootstrap/load-locales";
 import "./core/bootstrap/load-hooks";
 
-export * from "./core/tools/interfaces";
 export * from "./core/tools/HttpException";
-export * from "./core/tools/decorators";
-export * from "./core/tools/functions";
+export {
+    Request,
+    Response,
+    WebSocket,
+    Session,
+    View
+} from "./core/tools/interfaces";
+export {
+    event,
+    route,
+    requireAuth,
+    throttle,
+    queue
+} from "./core/tools/decorators";
 export * from "./core/tools/upload";
+export * from "./core/tools/functions";
 export * from "./core/tools/Schedule";
 export { Hook } from "./core/tools/Hook";
 export { Service } from "./core/tools/Service";
