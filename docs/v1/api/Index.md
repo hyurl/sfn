@@ -19,6 +19,7 @@ Table of Contents
 - [View](./View)
 - [HttpException](./HttpException)
 - [Config](./Config)
+- [app](./app)
 - [decorators](./decorators)
 - [utilities](./utilities)
 
