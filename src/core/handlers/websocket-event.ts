@@ -1,8 +1,7 @@
 import { ws } from "../bootstrap/index";
-import { StatusException } from "../tools/StatusException";
+import { HttpException } from "../tools/HttpException";
 import { WebSocket, Session } from "../tools/interfaces";
-import { activeEvent } from "../tools/symbols";
-import { WebSocketController } from "../controllers/WebSocketController";
+import { WebSocketController, activeEvent } from "../controllers/WebSocketController";
 import { logRequest } from "./http-init";
 import initHandler from "./websocket-init";
 import cookieHandler, { handler2 as cookieHandler2 } from "./websocket-cookie";
@@ -11,9 +10,8 @@ import isOwnMethod from "@hyurl/utils/isOwnMethod";
 import typeAs from "@hyurl/utils/typeAs";
 import { tryLogError } from "../tools/internal/error";
 import { eventMap } from '../tools/RouteMap';
-import { ThenableAsyncGenerator } from "thenable-generator";
+import { isIterableIterator, isAsyncIterableIterator } from "check-iterable";
 import last = require("lodash/last");
-import { applyInit, applyDestroy } from './http-route';
 
 let importedNamespaces: string[] = [];
 type SocketEventInfo = {
@@ -40,7 +38,7 @@ export function tryImport(nsp: string) {
             }
 
             socket.on("error", (err: Error) => {
-                let ctrl = new WebSocketController(socket);
+                let ctrl = new (class extends WebSocketController { })(socket);
                 handleError(err, {
                     time: Date.now(),
                     event: "",
@@ -74,40 +72,39 @@ async function handleEvent(key: string, socket: WebSocket, data: any[]) {
                 if (socket.disconnected)
                     return;
 
-                await applyInit(ctrl);
-
+                // Initiate the controller.
+                await ctrl.init?.();
                 initiated = true;
             }
 
             let options = { passCallback: false };
             let args = getArguments(ctrl, method, data, options);
-            let generator = new ThenableAsyncGenerator(ctrl[method](...args));
-            let value: any, done: boolean;
+            let result = await ctrl[method](...args);
 
-            // Fetch any data produced by the method, whether they are returned 
-            // or yielded.
-            while ({ value, done } = await generator.next()) {
-                // Send data to the client.
-                if (!options.passCallback) {
-                    if (callback) {
-                        callback(value);
-                    } else {
-                        (value === undefined) || socket.emit(event, value);
+            if (isIterableIterator(result) || isAsyncIterableIterator(result)) {
+                while (true) {
+                    let segment = await (<AsyncGenerator>result).next();
+                    socket.emit(event, segment);
+
+                    if (segment.done) {
+                        break;
                     }
                 }
-
-                if (done) {
-                    break;
+            } else if (callback) {
+                if (!options.passCallback) {
+                    callback(result);
                 }
+            } else {
+                socket.emit(event, result);
             }
         }
 
         if (initiated) {
-            await applyDestroy(ctrl);
+            await ctrl.destroy?.();
             finish(ctrl, info);
         }
     } catch (err) {
-        ctrl = ctrl || new WebSocketController(socket);
+        ctrl = ctrl || new (class extends WebSocketController { })(socket);
 
         await handleError(err, info, ctrl);
     }
@@ -156,13 +153,13 @@ async function handleError(
     ctrl: WebSocketController,
     stack?: string
 ) {
-    let _err = StatusException.from(err);
+    let _err = HttpException.from(err);
 
     info.code = _err.code;
 
     // Send error to the client.
     if (info.event) {
-        ctrl.socket.emit(info.event, ctrl.error(_err.message, _err.code));
+        ctrl.socket.emit(info.event, ctrl.fail(_err.message, _err.code));
     }
 
     tryLogError(err, stack);

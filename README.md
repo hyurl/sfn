@@ -1,14 +1,13 @@
 # Service Framework for NodeJS
 
-**An easy and elegant web-based service framework for Node.js**
+**An easy and elegant distributed service framework for Node.js**
 
 * [Node.js v10.0+](http://nodejs.org/)
 * [ES 2018](https://babeljs.io/learn-es2015/)
 * [TypeScript](https://typescriptlang.org "SFN always ships with the latest features, make sure your TypeScript compiler is the newest version")
 * [MIT License](https://opensource.org/licenses/MIT "SFN is licensed under the MIT license, you're free to use")
 
-For documentation, please visit [sfnjs.com](https://sfnjs.com) or the
-[Wiki](https://github.com/hyurl/sfn/wiki).
+For documentation, please visit [sfnjs.com](https://sfnjs.com).
 
 ## Easy and Elegant
 

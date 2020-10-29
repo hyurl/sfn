@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import * as FRON from "fron";
+import { ModuleProxy } from "microse";
 import { isTsNode } from "../../../init";
 import { tryLogError, resolveErrorStack } from './error';
 import merge = require('lodash/merge');
@@ -10,13 +11,19 @@ import get = require('lodash/get');
 const Module: new (...args: any[]) => NodeJS.Module = <any>module.constructor;
 const tryImport = createImport(require);
 
-export function moduleExists(name: string): boolean {
-    return fs.existsSync(name + (isTsNode ? ".ts" : ".js"));
+export function moduleExists(path: string): boolean {
+    return fs.existsSync(path + (isTsNode ? ".ts" : ".js"));
 }
 
+/**
+ * Used to create a `require`-like function, unlike the regular require function,
+ * the created function will not throw error if the module doesn't exist,
+ * instead if returns an empty object `{}`, and the function supports JSONC
+ * (JSON with Comments) files by default.
+ */
 export function createImport(require: NodeRequire): (id: string) => {
     [x: string]: any;
-    default?: any
+    default?: any;
 } {
     return (id: string) => {
         try {
@@ -87,17 +94,17 @@ export async function importDirectory(dir: string) {
 
 export function loadLanguagePack(filename: string) {
     let name = app.locales.resolve(filename);
-    let ins = name ? (<ModuleProxy<Locale>>get(global, name))() : null;
+    let mod = name ? (<ModuleProxy<Locale>>get(global, name)) : null;
 
-    if (ins) {
+    if (mod?.exports) {
         let lang = path.basename(filename, path.extname(filename));
-        app.locales.translations[lang] = ins;
+        app.locales.translations[lang] = mod.exports;
 
-        if (ins.$alias) {
-            let aliases = ins.$alias.split(/\s*,\s*/);
+        if (mod.exports.$alias) {
+            let aliases = mod.exports.$alias.split(/\s*,\s*/);
 
             for (let alias of aliases) {
-                app.locales.translations[alias] = ins;
+                app.locales.translations[alias] = mod.exports;
             }
         }
     }

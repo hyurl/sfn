@@ -1,10 +1,11 @@
-import * as path from "path";
 import get = require('lodash/get');
+import { isAbsolute, resolve } from "path";
+import { ModuleProxy } from "microse";
 import { CorsOption as CorsOptions } from "sfn-cors";
 import { SRC_PATH } from "../../init";
 import { Controller, ResultMessage } from "./Controller";
 import { Request, Response, Session, View } from "../tools/interfaces";
-import { StatusException } from "../tools/StatusException";
+import { HttpException } from "../tools/HttpException";
 import { UploadOptions } from "../tools/upload";
 
 export { CorsOptions };
@@ -13,26 +14,9 @@ export { CorsOptions };
  * HttpController manages requests come from an HTTP client.
  * 
  * When a request fires, the controller will be automatically instantiated and
- * calling the binding method according to the route.
- * 
- * The parameters of the URL route will be stored in `req.params`, and they 
- * will be auto-injected into the method (as method parameters) accordingly. 
- * Apart from them, you can set `req: Request` and `res: Response` as 
- * parameters as well, they will be auto-injected too, and the sequence and 
- * position of them is arbitrary. Or you can call them from `this`:
- * 
- * `let { req, res } = this;`
- * 
- * You may `return` some data inside a method that bound to a certain route, 
- * when the method is called by a HTTP request, they will be automatically 
- * sent to the client. Actions will be handled in a Promise constructor, so 
- * you can do what ever you want inside the method. Using `async` methods to 
- * do asynchronous operations is recommended.
- * 
- * If you want to send a response manually, you can just call the `res.send()`
- * or `res.end()` to do so, no more data will be sent after sending one.
+ * calling the bound method according to the route.
  */
-export class HttpController extends Controller {
+export abstract class HttpController extends Controller {
     /** Sets a specified base URI for route paths. */
     static baseURI: string = "/";
 
@@ -47,14 +31,16 @@ export class HttpController extends Controller {
      * error message.
      */
     fallbackTo: string | ResultMessage;
-    /** Whether the response data should be compressed to GZip. */
+    /**
+     * Whether the response data should be compressed to GZip, default `true`.
+     */
     gzip: boolean = true;
     /**
-     * Sets a query name for jsonp callback, `false` (by default) to disable.
+     * Sets a query name for jsonp callback, or `false` (by default) to disable.
      */
     jsonp: string | false = false;
     /**
-     * If `true`, when request method is `DELETE`, `PATCH`, `POST` or `PUT`, 
+     * If `true`, when the request method is `DELETE`, `PATCH`, `POST` or `PUT`, 
      * the client must send an `x-csrf-token` field to the server either via 
      * request header, URL query string or request body. You can call 
      * `req.csrfToken` to get the auto-generated token in a `GET` action and 
@@ -63,36 +49,29 @@ export class HttpController extends Controller {
     csrfProtection: boolean = false;
     /** Configurations for uploading files. */
     uploadOptions: UploadOptions = Object.assign({}, UploadOptions);
-    /** Reference to the corresponding request context. */
-    readonly req: Request;
-    /** Reference to the corresponding response context. */
-    readonly res: Response;
 
-    constructor(req: Request, res: Response) {
+    constructor(
+        /** The current request context. */
+        readonly req: Request,
+        /** The current response context. */
+        readonly res: Response
+    ) {
         super();
-        this.req = req;
-        this.res = res;
         this.lang = (req.query && req.query.lang)
             || (req.cookies && req.cookies.lang)
             || req.lang
             || app.config.lang;
     }
 
-    /** Gets the absolute view filename if the given one is relative. */
-    protected getAbsFilename(filename: string): string {
-        if (!path.isAbsolute(filename))
-            filename = path.resolve(SRC_PATH, "views", filename);
-        return filename;
-    }
-
     /**
-     * Sends view contents to the response context.
+     * Renders the template file to a string.
      * 
      * @param path The template path (without extension) related to `src/views`.
-     * @param vars Local variables passed to the template.
+     * @param vars Local variables passed into the template.
      */
-    view(path: string, vars: { [name: string]: any } = {}) {
-        path = this.getAbsFilename(path);
+    view(path: string, vars: { [name: string]: any; } = {}) {
+        if (!isAbsolute(path))
+            path = resolve(SRC_PATH, "views", path);
 
         // i18n support for the template.
         if (!("i18n" in vars)) {
@@ -104,10 +83,10 @@ export class HttpController extends Controller {
         try {
             this.res.type = "text/html";
             let view: ModuleProxy<View> = get(global, app.views.resolve(path));
-            return view().render(vars);
+            return view?.render(vars);
         } catch (err) {
             if (err instanceof TypeError)
-                throw new StatusException(404);
+                throw new HttpException(404);
             else
                 throw err;
         }
@@ -149,12 +128,12 @@ export class HttpController extends Controller {
 
     /**
      * By default, the framework will send a view file according to the error 
-     * code, and only pass the `err: StatusException` object to the template, it
+     * code, and only pass the `err: HttpException` object into the template, it
      * may not be suitable for complicated needs. For such a reason, the 
      * framework allows you to customize the error view handler by rewriting 
      * this method.
      */
-    static httpErrorView(err: StatusException, instance: HttpController) {
+    static httpErrorView(err: HttpException, instance: HttpController) {
         return instance.view(String(err.code), { err });
     }
 }

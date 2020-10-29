@@ -1,17 +1,9 @@
 // Expose some internal functions as utilities to the public API.
 export { green, grey, red, yellow } from "./internal/color";
 export { tryLogError } from "./internal/error";
-export { moduleExists, createImport } from "./internal/module";
-export { serve as serveRepl, connect as connectRepl } from "./internal/repl";
+export { createImport } from "./internal/module";
 
-export const EFFECT_METHODS: string[] = [
-    "DELETE",
-    "PATCH",
-    "POST",
-    "PUT"
-];
-
-/** Injects CSRF Token into forms. */
+/** Injects CSRF Token into HTML forms. */
 export function injectCsrfToken(html: string, token: string): string {
     let ele = `<input type="hidden" name="x-csrf-token" value="${token}">`;
     let matches = html.match(/<form\s+.*?>/g);

@@ -2,26 +2,25 @@ import { App, RouteHandler, HttpMethods } from "webium";
 import { interceptAsync, intercept } from 'function-intercepter';
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
-import { StatusException } from './StatusException';
+import { HttpException } from './HttpException';
 import { routeMap, eventMap } from './RouteMap';
 import { traceModulePath } from './internal/module';
+import { EFFECT_METHODS } from './internal';
 import { Service } from './Service';
-import {
-    ControllerDecorator,
-    WebSocketDecorator,
-    HttpDecorator
-} from './interfaces';
 import { Controller } from '../controllers/Controller';
 import * as cors from "sfn-cors";
 import trimEnd = require('lodash/trimEnd');
 import isEmpty from '@hyurl/utils/isEmpty';
 import wrap from "@hyurl/utils/wrap";
-import { EFFECT_METHODS } from './functions';
 
 
 let router: App;
 let handle: (route: string) => RouteHandler;
 let wsTryImport: (nsp: string) => void;
+
+type ControllerDecorator = (proto: Controller, prop: string) => void;
+export type HttpDecorator = (proto: HttpController, prop: string) => void;
+type WebSocketDecorator = (proto: WebSocketController, prop: string) => void;
 
 /** Binds the method to a specified socket event. */
 export function event(name: string): WebSocketDecorator {
@@ -118,7 +117,7 @@ route.delete = function (path: string) {
 
 route.get = function (path: string) {
     return route("GET", path);
-}
+};
 
 route.head = function (path: string) {
     return route("HEAD", path);
@@ -150,18 +149,18 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(
                 } else if (this.fallbackTo) {
                     this.res.send(this.fallbackTo);
                 } else {
-                    throw new StatusException(401);
+                    throw new HttpException(401);
                 }
 
                 return intercept.BREAK;
             } else {
-                throw new StatusException(401);
+                throw new HttpException(401);
             }
         }
     }
 );
 
-/** Throttles the calling rate of the method. */
+/** @deprecated Throttles the calling rate of the method. */
 export function throttle(key: string, interval = 1000): MethodDecorator {
     return (proto: Service, prop: string, desc: PropertyDescriptor) => {
         desc.value = proto[prop] = wrap(
@@ -177,7 +176,7 @@ export function throttle(key: string, interval = 1000): MethodDecorator {
     };
 }
 
-/** Queues the method call. */
+/** @deprecated Queues the method call. */
 export function queue(key: string): MethodDecorator {
     return (proto: Service, prop: string, desc: PropertyDescriptor) => {
         desc.value = proto[prop] = wrap(

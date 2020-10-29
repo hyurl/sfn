@@ -1,16 +1,17 @@
-import { HttpController, route, throttle } from "sfn";
+import { HttpController, route } from "sfn";
 
 export default class extends HttpController {
     @route.get("/")
-    @throttle("index", 1000)
     async index() {
-        await app.hooks.web.onView.invoke(this.req);
-        return this.view("index");
+        return this.throttle("index", async () => {
+            await app.hooks.web.onView.invoke(this.req);
+            return this.view("index");
+        });
     }
 
     @route.sse("/sse-test")
     async *sseTest() {
-        for await (let result of app.services.test().asyncIterator()) {
+        for await (let result of app.services.test.asyncIterator()) {
             yield result;
         }
 
@@ -19,7 +20,7 @@ export default class extends HttpController {
 
     @route.get("/iterator-test")
     async *test() {
-        for await (let result of app.services.test().asyncIterator()) {
+        for await (let result of app.services.test.asyncIterator()) {
             yield result;
         }
     }

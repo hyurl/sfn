@@ -1,7 +1,7 @@
 {
     "name": "sfn",
-    "version": "0.6.121",
-    "description": "An easy and elegant web-based service framework for Node.js",
+    "version": "1.0.0-alpha.0",
+    "description": "An easy and elegant distributed service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",
     "bin": "dist/cli/sfn.js",
@@ -9,7 +9,7 @@
         "compile": "tsc --incremental",
         "start": "node dist",
         "postinstall": "tsc --build tsconfig-postinstall.json",
-        "test": "echo No Test"
+        "test": "echo No test available"
     },
     "keywords": [
         "http",
@@ -58,7 +58,6 @@
         "@types/pluralize": "^0.0.29",
         "@types/socket.io": "^2.1.11",
         "@types/xml2js": "^0.4.5",
-        "alar": "^6.13.3",
         "body-parser": "^1.19.0",
         "callsite-record": "^4.1.3",
         "chalk": "^3.0.0",
@@ -76,6 +75,7 @@
         "js-magic": "^1.1.1",
         "lodash": "^4.17.20",
         "md5": "^2.3.0",
+        "microse": "^1.0.0",
         "minimist": "^1.2.5",
         "moment": "^2.29.1",
         "multer": "^1.4.2",

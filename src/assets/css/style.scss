@@ -2,11 +2,17 @@ $navbarHeight: 58px;
 $fontWeight: 500;
 $articlePaddingLeft: 280px;
 $activeColor: #F35C2A;
+
 html,
 body {
     margin: 0;
     padding: 0;
     font-weight: $fontWeight;
+    font-family: PingFangSC-Light, sans-serif, arial;
+
+    h5 {
+        font-size: 1em;
+    }
 }
 
 pre,
@@ -28,6 +34,12 @@ blockquote {
 img {
     max-width: 100%;
     max-height: 100%;
+}
+
+article {
+    li, p {
+        line-height: 1.5;
+    }
 }
 
 li code,
@@ -68,6 +80,7 @@ h6 {
     padding-top: 15px;
     padding-bottom: 15px;
     font-weight: $fontWeight;
+
     a {
         text-decoration: none;
         outline: none;
@@ -75,10 +88,12 @@ h6 {
         float: left;
         margin-left: -20px;
     }
+
     svg[aria-hidden="true"] {
         visibility: hidden;
         vertical-align: middle;
     }
+
     &:hover svg {
         visibility: visible;
     }
@@ -92,6 +107,7 @@ h6 {
     width: 100%;
     background-color: #fff;
     z-index: 10;
+
     a,
     a:visited,
     a:focus,
@@ -100,71 +116,84 @@ h6 {
         text-decoration: none;
         color: #777;
     }
+
     .navbar {
         li.active a,
         li:hover a {
             color: #333;
         }
     }
+
     .navbar-toggle {
         position: fixed;
         right: 10px;
         top: 15px;
         width: 40px;
         outline: none;
+
         @media (min-width: 641px) {
             display: none;
         }
+
         button {
             width: 100%;
             background-color: transparent;
             border: none;
         }
+
         span {
             display: block;
             margin: 5px 0;
             border-bottom: 2px solid #333;
-            ;
             width: 100%; // background-color: #333;
             &:first-child {
                 margin-bottom: 0;
             }
+
             &:last-child {
                 margin-top: 0;
             }
         }
     }
+
     .logo,
     .change-lang {
         height: $navbarHeight;
         line-height: $navbarHeight;
         display: inline-block;
         padding: 0 20px;
+
         a:hover {
             color: #333;
         }
     }
+
     .logo {
         font-size: 28px;
         float: left;
+
         a {
             color: #A2A2A2;
             outline: none;
         }
+
         @media (max-width: 640px) {
             font-size: 24px;
             display: block;
             float: none;
         }
     }
+
     .change-lang {
         float: right;
         font-size: 14px;
-        @media(max-width: 640px) {
+
+        @media (max-width: 640px) {
             margin-right: 50px;
             margin-top: -58px;
         }
     }
+
     .user-dropdown,
     .login-panel {
         display: none;
@@ -174,19 +203,23 @@ h6 {
         box-shadow: 1px 1px 5px #888888;
         right: 12px;
     }
+
     .user-dropdown {
         ul {
             list-style: none;
             padding: 5px 0;
             margin: 0;
             overflow: hidden;
+
             li {
                 float: left;
                 padding: 0;
                 margin: 0;
+
                 a {
                     display: block;
                     padding: 5px 20px;
+
                     &:hover {
                         background-color: #e8e8e8;
                     }
@@ -194,17 +227,22 @@ h6 {
             }
         }
     }
+
     .login-panel {
         padding: 40px 20px;
+
         form {
-            >div {
+            > div {
                 margin-bottom: 20px;
                 overflow: hidden;
+
                 &:last-child {
                     margin-bottom: 0;
+
                     label {
                         padding: 6px 0;
                     }
+
                     button[type="submit"] {
                         float: right;
                         background-color: #fff;
@@ -213,13 +251,16 @@ h6 {
                         padding: 6px 10px;
                     }
                 }
+
                 label {
                     width: 150px;
                     display: inline-block;
+
                     &[for="user-password"] {
                         margin-top: -4px;
                     }
                 }
+
                 input[type="text"],
                 input[type="password"] {
                     outline: none;
@@ -230,6 +271,7 @@ h6 {
                 }
             }
         }
+
         .close {
             display: inline-block;
             width: 32px;
@@ -239,8 +281,9 @@ h6 {
             top: 0;
             right: 0;
             cursor: default;
+
             &:hover {
-                background-color: rgba(236, 36, 36, 0.90);
+                background-color: rgba(236, 36, 36, 0.9);
             }
         }
     }
@@ -257,39 +300,48 @@ h6 {
         z-index: 10;
         background-color: rgba(50, 49, 49, 0.94); // margin-top: 2px;
         display: none;
+
         a {
             color: #fff !important;
         }
     }
+
     ul {
         list-style: none;
         overflow: hidden;
         padding: 0;
+
         @media (max-width: 640px) {
             margin-top: 0;
             margin-bottom: 0;
         }
-        >li {
+
+        > li {
             float: left;
             cursor: default;
             padding: 10px 20px;
+
             &:hover,
             &.active {
                 border-top: 2px solid $activeColor;
                 padding-top: 8px;
             }
+
             @media (max-width: 640px) {
                 float: none;
                 padding: 0 !important;
+
                 &:hover,
                 &.active {
                     border-top: none;
                     padding-top: 10px;
                 }
-                >a {
+
+                > a {
                     padding: 10px 20px;
                     display: block;
                 }
+
                 &.active {
                     border-top: none;
                     padding-top: 10px;
@@ -304,8 +356,10 @@ h6 {
     margin-top: $navbarHeight + 20px;
     overflow: hidden;
     padding: 0 40px;
+
     @media (max-width: 640px) {
         padding: 0 0 40px;
+
         .content {
             margin: 0;
         }
@@ -325,12 +379,15 @@ h6 {
         float: left;
         z-index: 1000;
     }
+
     ul {
         list-style: none;
         padding: 0 25px 0 0;
         margin-top: 0;
+
         li {
             border-top: 1px solid #eee;
+
             .section-title {
                 a {
                     padding: 10px;
@@ -342,6 +399,7 @@ h6 {
                     white-space: nowrap;
                     margin-right: 40px;
                 }
+
                 i {
                     // margin-top: -27px;
                     float: right;
@@ -351,12 +409,14 @@ h6 {
                     line-height: 40px;
                     margin-top: -40px;
                     cursor: pointer;
+
                     &:hover,
                     &.active {
                         text-decoration: none;
                         color: #f4645f;
                     }
                 }
+
                 &:hover a,
                 a.active {
                     text-decoration: none;
@@ -364,10 +424,12 @@ h6 {
                 }
             }
         }
-        li>ul {
+
+        li > ul {
             // margin-left: 25px;
             padding-right: 0;
         }
+
         &.section-children {
             display: none;
         }
@@ -375,7 +437,7 @@ h6 {
 }
 
 @media (max-width: 640px) {
-    .sidebar>ul{
+    .sidebar > ul {
         padding-left: 25px;
     }
 }
@@ -402,20 +464,25 @@ h6 {
 .jumbotron {
     margin-top: 20px;
     margin-bottom: 20px;
+
     h1 {
         font-size: 60px;
     }
+
     .desc {
         font-size: 32px;
         color: #777;
         line-height: 1.5;
         margin-top: 0;
     }
+
     @media (max-width: 640px) {
         margin-top: 0;
+
         h1 {
             font-size: 32px;
         }
+
         .desc {
             margin-top: 10px;
             font-size: 24px;
@@ -428,6 +495,7 @@ h6 {
     margin: 0;
     overflow: hidden;
     display: inline-block;
+
     pre {
         padding: 10px 80px 10px 20px;
         margin: 0;
@@ -437,15 +505,19 @@ h6 {
         background-color: #eee;
         color: #777;
         width: 350px;
+
         &:hover {
             color: #333;
         }
+
         &:before {
             content: "$ ";
         }
     }
+
     @media (max-width: 640px) {
         width: 100%;
+
         pre {
             width: auto;
             padding-left: 10px;
@@ -455,12 +527,15 @@ h6 {
 
 .pre-requisit {
     margin: 20px 0;
-    >div {
+
+    > div {
         display: inline-block;
     }
+
     a:hover {
         text-decoration: none;
     }
+
     @media (max-width: 640px) {
         text-align: center;
     }
@@ -474,16 +549,20 @@ h6 {
     right: -50px;
     top: 105px;
     z-index: 5;
+
     a {
         color: #777;
     }
+
     &:hover {
         background-color: rgba(248, 222, 29, 0.78);
+
         a {
             text-decoration: none;
             color: #333;
         }
     }
+
     @media (max-width: 640px) {
         display: none;
     }
@@ -491,41 +570,51 @@ h6 {
 
 .box {
     display: flex;
+
     /* Safari */
     display: -webkit-flex;
     flex-direction: row;
     align-items: stretch;
     margin: 40px 0;
-    >div {
+
+    > div {
         padding: 20px; // border: 1px solid #ddd;
         flex-grow: 1;
         flex-shrink: 1;
         flex-basis: 1px;
+
         &:hover {
             h1,
             p {
                 color: #333;
             }
         }
+
         &:first-child {
             padding-left: 0;
         }
+
         &:last-child {
             padding-right: 0;
         }
+
         h1 {
             color: #555;
         }
+
         p {
             color: #777;
         }
     }
+
     @media (max-width: 640px) {
         flex-direction: column;
         margin: 0;
-        >div {
+
+        > div {
             padding: 0;
-            >p {
+
+            > p {
                 margin-top: 0;
             }
         }
@@ -540,12 +629,15 @@ footer {
     font-size: 14px;
     padding: 20px 10px;
     background-color: #333;
+
     a:hover {
         text-decoration: none;
     }
+
     #icp {
         display: none;
     }
+
     p {
         color: #777;
     }
@@ -555,6 +647,7 @@ article.content {
     margin-bottom: 40px;
     max-width: 720px;
     margin: 0 auto;
+
     h1,
     h2,
     h3,
@@ -563,10 +656,12 @@ article.content {
     h6 {
         margin-top: 40px;
         border-bottom: 1px solid #eee;
+
         &:first-child {
             margin-top: 0;
         }
     }
+
     @media (min-width: 860px) {
         padding-left: $articlePaddingLeft;
     }

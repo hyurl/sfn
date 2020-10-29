@@ -1,8 +1,10 @@
+import * as path from "path";
 import * as fs from "fs-extra";
 import get = require("lodash/get");
 import has = require("lodash/has");
 import set = require("lodash/set");
 import unset = require("lodash/unset");
+import { ModuleProxy } from "microse";
 
 declare global {
     namespace app {
@@ -13,7 +15,7 @@ declare global {
 }
 
 export default class CacheService {
-    protected cache: { [path: string]: any } = {};
+    protected cache: { [path: string]: any; } = {};
     protected filename = app.ROOT_PATH + "/cache/cache-service.json";
 
     async init() {
@@ -21,10 +23,23 @@ export default class CacheService {
             let data = await fs.readFile(this.filename, "utf8");
             this.cache = JSON.parse(data);
         } catch (e) { }
+
+        await app.schedule.create({
+            module: app.services.cache,
+            handler: "syncToFile",
+            startIn: 30,
+            repeat: 30,
+        });
     }
 
     async destroy() {
+        await this.syncToFile();
+        this.cache = {};
+    }
+
+    async syncToFile() {
         let data = JSON.stringify(this.cache);
+        await fs.ensureDir(path.dirname(this.filename));
         await fs.writeFile(this.filename, data, "utf8");
     }
 

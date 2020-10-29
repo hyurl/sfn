@@ -1,7 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as FRON from "fron";
-import * as alar from "alar";
 import parseArgv = require("minimist");
 import ensureType from "@hyurl/utils/ensureType";
 import trimEnd = require("lodash/trimEnd");
@@ -11,7 +10,7 @@ import isVoid from "@hyurl/utils/isVoid";
 declare global {
     namespace NodeJS {
         interface Global {
-            app: { [name: string]: any };
+            app: { [name: string]: any; };
         }
     }
 
@@ -25,17 +24,24 @@ declare global {
         const isCli: boolean;
         const argv: parseArgv.ParsedArgs;
 
+        /** The version number set in the project's package.json. */
+        const version: string;
+
+        /** @alias `app.APP_PATH` */
+        const path: string;
+
         /**
          * In the web server, the app ID would be either `web-server`, or 
          * `web-server-<n>` when started with PM2, where `<n>` is the 
          * `process.env.NODE_APP_INSTANCE`; in an RPC server, the app ID is the
-         * ID passed to `app.serve()`.
+         * ID passed to `app.serve()`, which is also the ID set in
+         * `app.config.server.rpc`.
          * 
          * NOTE: the ID will only be available until the server has started.
          * 
          * @see http://pm2.keymetrics.io/docs/usage/environment/#node-app-instance-pm2-25-minimum
          */
-        var id: string;
+        const id: string;
 
         /**
          * @deprecated
@@ -43,21 +49,20 @@ declare global {
          * Since v0.6, this variable is a getter/setter of `app.id`, should use
          * the later instead for more convenience.
          */
-        var serverId: string;
+        const serverId: string;
 
         /**
          * Whether the current process runs as a web server, it's `false` by
          * default, and become `true` once `app.serve()` is called to ship the
          * web server.
          */
-        var isWebServer: boolean;
+        const isWebServer: boolean;
 
         /**
-         * Pass this symbol to `ModuleProxy<any>.instance()` method so that it
-         * can always resolve the local instance of the module.
-         * @deprecated Alar v6.0 by default uses the local singleton already.
+         * Whether the current process runs as a script, scripts is run via the
+         * command `npx sfn <filename>`.
          */
-        const local: typeof alar.local;
+        const isScript: boolean;
     }
 }
 
@@ -127,11 +132,10 @@ define(global, "app", {
     isTsNode,
     isCli,
     argv: ensureType(parseArgv(process.argv)),
-    local: alar.local,
-    isWebServer: false
+    isWebServer: false,
+    isScript: false,
+    version: require(ROOT_PATH + "/package.json").version,
+    path: APP_PATH
 });
 
-define(app, "serverId", {
-    get: () => app.id,
-    set: (id: string) => void (app.id = id)
-});
+define(app, "serverId", { get: () => app.id });

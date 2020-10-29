@@ -49,8 +49,9 @@ export default async function (socket: WebSocket, next: (err?: Error) => void) {
                 break;
             }
         }
-        await next();
+
+        next();
     } catch (err) {
-        await next(err);
+        next(err);
     }
 }

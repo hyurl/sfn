@@ -14,7 +14,7 @@ const sign = Symbol("sign");
 
 router.use(async (req: Request, res: Response, next) => {
     req["originalUrl"] = req.url; // compatible with Express framework.
-    req.shortUrl = truncate(req.url, { length: 32 });
+    req.shortUrl = truncate(req.url, { length: 64 });
     req.isEventSource = SSE.isEventSource(req);
     res.headers["server"] = `NodeJS/${process.version}`;
     res.headers["x-powered-by"] = `sfn/${version}`;

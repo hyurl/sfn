@@ -6,16 +6,20 @@ import { createImport, traceModulePath } from './internal/module';
 
 const tryImport = createImport(require);
 
+/**
+ * The base class used to create hook instance when accessing hook chains.
+ */
 @applyMagic
-export class Hook<I = void, O = void> {
-    protected path: string;
-    protected children: { [name: string]: Hook } = {};
+export abstract class Hook<I = void, O = void> {
+    /**
+     * The name of the hook, when accessing a hook via `app.hooks`, this
+     * property will be set automatically.
+     */
+    abstract readonly name: string;
+    protected abstract path: string;
+    protected abstract children: { [name: string]: Hook; };
 
-    constructor(readonly name: string, path: string) {
-        this.path = normalize(path);
-    }
-
-    /** Binds a handler to the hook. */
+    /** Binds a handler function to the current hook. */
     bind(handler: (input?: I, output?: O) => void | O | Promise<void | O>) {
         let path = traceModulePath(this.path) || "<internal>";
         let container = Hook.Container.get(path);
@@ -27,7 +31,7 @@ export class Hook<I = void, O = void> {
         return this;
     }
 
-    /** Invokes all handlers in the hook. */
+    /** Invokes all handler functions bound to the hook. */
     async invoke(input?: I, output?: O): Promise<O> {
         let result: O;
 
@@ -53,6 +57,7 @@ export class Hook<I = void, O = void> {
         });
     }
 
+    /** Returns all handlers bound to the current hook. */
     getHandlers() {
         let handlers: Function[] = [];
 
@@ -73,10 +78,14 @@ export class Hook<I = void, O = void> {
         } else if (prop in this.children) {
             return this.children[prop];
         } else if (typeof prop != "symbol") {
-            return this.children[prop] = new Hook(
-                this.name + "." + String(prop),
-                this.path
-            );
+            // Create the Hook instance from prototype and patch properties
+            // since this is an abstract class.
+            return this.children[prop] = applyMagic(Object.assign(
+                Object.create(Hook.prototype), {
+                name: this.name + "." + String(prop),
+                path: this.path,
+                children: {}
+            }), true);
         }
     }
 
@@ -90,6 +99,16 @@ export namespace Hook {
 }
 
 export class HookProxy extends Hook {
+    readonly name: string;
+    protected path: string;
+    protected children = {};
+
+    constructor(name: string, path: string) {
+        super();
+        this.name = name;
+        this.path = normalize(path);
+    }
+
     watch() {
         return watch(this.path, {
             followSymlinks: false,

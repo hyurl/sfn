@@ -1,4 +1,4 @@
-import * as alar from "alar";
+import { ModuleProxyApp, ModuleProxy, FSWatcher } from "microse";
 import { APP_PATH } from "../../init";
 import { Controller } from '../controllers/Controller';
 import { createImport } from '../tools/internal/module';
@@ -6,7 +6,7 @@ import define from '@hyurl/utils/define';
 
 declare global {
     namespace app {
-        const controllers: alar.ModuleProxy & {
+        const controllers: ModuleProxyApp & {
             [x: string]: ModuleProxy<Controller>
         };
     }
@@ -14,11 +14,12 @@ declare global {
 
 define(app,
     "controllers",
-    new alar.ModuleProxy("app.controllers", APP_PATH + "/controllers"));
+    new ModuleProxyApp("app.controllers", APP_PATH + "/controllers"));
 
 // Rewrite watch method for more advanced functions.
 const tryImport = createImport(require);
-const _watch: () => alar.FSWatcher = app.controllers.watch.bind(app.controllers);
+const _watch: () => FSWatcher = app.controllers.watch.bind(app.controllers);
+
 app.controllers.watch = () => {
     if (app.isWebServer) {
         return _watch().on("add", autoLoad).on("change", autoLoad);

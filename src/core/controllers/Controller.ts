@@ -9,18 +9,22 @@ export interface ResultMessage<T = any> {
 }
 
 /**
- * The Controller give you a common API to return data to the underlying 
- * response context, all controllers will be automatically handled by the 
- * framework.
+ * The is the base class of `HttpController` and `WebSocketController`, it gives
+ * you a common API to return data to the underlying response context, all
+ * controllers will be automatically handled by the framework, you don't have to
+ * create instance for them.
  */
 export abstract class Controller extends Service {
     /** Indicates whether the operation is authorized. */
     authorized: boolean = false;
 
+    /** The session of the current request/websocket context. */
     abstract readonly session: Session;
+
+    /** @inner */
     static flow: Service = null;
 
-    /** A reference to the class constructor. */
+    /** @inner A reference to the class constructor. */
     get ctor(): new (...args: any[]) => this {
         return <any>this.constructor;
     };
@@ -30,12 +34,6 @@ export abstract class Controller extends Service {
 
     /** @override */
     async init(): Promise<void> { }
-
-    /** @deprecated Use `init()` instead. */
-    async before?(): Promise<void>;
-
-    /** @deprecated Use `destroy()` instead. */
-    async after?(): Promise<void>;
 
     /** @override */
     async throttle<T>(key: string, handle: () => T | Promise<T>, interval = 1000) {
@@ -57,12 +55,17 @@ export abstract class Controller extends Service {
     }
 
     /** Returns a result indicates the operation is failed. */
-    error(msg: string | Error, code: number = 500): ResultMessage<void> {
+    fail(msg: string | Error, code: number = 500): ResultMessage<void> {
         msg = msg instanceof Error ? msg.message : msg;
         return {
             success: false,
             code,
             error: this.i18n(msg)
         };
+    }
+
+    /** @deprecated Use `fail` instead. */
+    error(msg: string | Error, code: number = 500): ResultMessage<void> {
+        return this.fail(msg, code);
     }
 }

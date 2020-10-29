@@ -27,12 +27,18 @@ import "./hot-reload";
 
 declare global {
     namespace app {
-        const router: App;
-        const http: HttpServer | HttpsServer | Http2SecureServer;
         /**
-         * This property is reserved by the framework, use `app.message.ws` 
-         * instead.
-         * @inner
+         * (Web server only) The basic HTTP router created by **webium**
+         * framework.
+         */
+        const router: App;
+
+        /** (Web server only) The HTTP server. */
+        const http: HttpServer | HttpsServer | Http2SecureServer;
+
+        /**
+         * (Web server only) The WebSocket server created by **socket.io**
+         * framework.
          */
         const ws: SocketIO.Server;
 
@@ -51,11 +57,8 @@ declare global {
     }
 }
 
-/** (Web server only) The basic HTTP router created by **webium** framework. */
 export var router: App = null;
-/** (Web server only) The HTTP server. */
 export var http: HttpServer | HttpsServer | Http2SecureServer = null;
-/** (Web server only) The WebSocket server created by **SocketIO** framework. */
 export var ws: SocketIO.Server = null;
 
 const tryImport = createImport(require);
@@ -73,20 +76,18 @@ app.serve = async function serve(id?: string) {
 
     // set the server ID
     if (process.env.NODE_APP_INSTANCE && require("cluster").isWorker) {
-        app.id = "web-server-" + process.env.NODE_APP_INSTANCE;
+        define(app, "id", "web-server-" + process.env.NODE_APP_INSTANCE, true);
     } else {
-        app.id = "web-server";
+        define(app, "id", "web-server", true);
     }
 
     let { type, port, timeout, options } = app.config.server.http;
     let WS = app.config.server.websocket;
 
-    global.app.isWebServer = true;
+    define(app, "isWebServer", true, true);
     sse = new Map();
     router = new App({
-        cookieSecret: app.config.session
-            ? <string>app.config.session.secret
-            : void 0,
+        cookieSecret: String(app.config.session?.secret) || void 0,
         domain: app.config.server.hostname
     });
 
@@ -159,4 +160,4 @@ app.serve = async function serve(id?: string) {
     if (!app.isDevMode) { // notify PM2 that the service is available.
         process.send("ready");
     }
-}
+};

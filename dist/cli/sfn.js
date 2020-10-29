@@ -111,7 +111,8 @@ async function runScript(filename) {
         else {
             filename = require.resolve(filename);
         }
-        app.id = filename;
+        define_1.default(app, "id", filename, true);
+        define_1.default(app, "isScript", true, true);
         let bootstrap = init_1.APP_PATH + "/bootstrap/index";
         if (app.ROOT_PATH !== sfnd) {
             module_1.moduleExists(bootstrap) && tryImport(bootstrap);

@@ -11,5 +11,5 @@ declare global {
 }
 
 app.hooks.web.onView.bind(async (req) => {
-    app.services.logger().log(`Client IP: ${req.ip}, URL: ${req.url}`);
+    app.services.logger.log(`Client IP: ${req.ip}, URL: ${req.url}`);
 });

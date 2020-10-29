@@ -1,45 +1,26 @@
 import { Controller } from "./Controller";
 import { WebSocket, Session } from "../tools/interfaces";
-import { activeEvent } from "../tools/symbols";
+
+export const activeEvent = Symbol("activeEvent");
 
 /**
  * WebSocketController manages messages come from a socket.io client.
  * 
  * When you define a method in a WebSocketController and bind it to a certain 
- * socket.io event, it will be called automatically when the event fires. All 
- * methods in a WebSocketController accept at least one parameter: 
- * 
- * - `...data: any[]` sent by the client.
- * 
- * The corresponding `socket: WebSocket` object can be auto-injected into the 
- * controller as well, and its position is arbitrary. Or you can call it from 
- * `this`:
- * 
- * `let { socket } = this;`
- * 
- * You may `return` some data inside a method that bound to an event, when the
- * method is called, they will be automatically sent to the client. Actions 
- * will be handled in a Promise constructor, so you can do what ever you want 
- * inside the method. Using `async` methods to do asynchronous operations is 
- * recommended.
- * 
- * If you want to send a response manually, you can just call the 
- * `socket.emit()` to do so, the WebSocket support continuous message 
- * transmissions.
+ * socket.io event, it will be called automatically when the event fires.
  */
-export class WebSocketController extends Controller {
+export abstract class WebSocketController extends Controller {
     /** Sets a specified namespace for WebSocket channel (used by SocketIO). */
     static nsp: string = "/";
-
-    /** Reference to the corresponding socket context. */
-    readonly socket: WebSocket;
 
     /** The current active event (namespace included). */
     readonly event: string;
 
-    constructor(socket: WebSocket) {
+    constructor(
+        /** The current websocket context. */
+        readonly socket: WebSocket
+    ) {
         super();
-        this.socket = socket;
         this.event = this.socket[activeEvent];
         this.lang = (socket.cookies && socket.cookies.lang)
             || socket.lang

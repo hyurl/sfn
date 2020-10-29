@@ -6,7 +6,7 @@ import idealFilename from "ideal-filename";
 import randStr from "@hyurl/utils/randStr";
 import { interceptAsync } from "function-intercepter";
 import { ROOT_PATH } from "../../init";
-import { HttpDecorator } from "./interfaces";
+import { HttpDecorator } from "./decorators";
 import { HttpController } from "../controllers/HttpController";
 
 export type UploadOptions = {

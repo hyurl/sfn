@@ -1,8 +1,12 @@
 import { STATUS_CODES } from "http";
-import { RpcChannel } from "alar";
 import { isDevMode } from "../../init";
+import define from "@hyurl/utils/define";
 
-export class StatusException extends Error {
+/**
+ * An exception indicates that the web server encounters an error, either
+ * from the client-side or the server-side.
+ */
+export class HttpException extends Error {
     constructor(readonly code: number, message?: string) {
         super(message || STATUS_CODES[code] || "Unknown error");
         Error.captureStackTrace(this, this.constructor);
@@ -16,10 +20,11 @@ export class StatusException extends Error {
         return this.name + ": " + this.code + " " + this.message;
     }
 
-    static from(err: any): StatusException {
+    /** Constructs an HttpException from the given error. */
+    static from(err: any): HttpException {
         if (err instanceof this) {
             return err;
-        } else if (err instanceof StatusException) {
+        } else if (err instanceof HttpException) {
             return Object.setPrototypeOf(err, this.prototype);
         } else if (err instanceof Error) {
             return new this(500, isDevMode ? err.message : null);
@@ -29,4 +34,8 @@ export class StatusException extends Error {
     }
 }
 
-RpcChannel.registerError(StatusException);
+define(global, "HttpException", HttpException);
+
+/** @deprecated Use `HttpException` instead. */
+export const StatusException = HttpException;
+export type StatusException = HttpException;

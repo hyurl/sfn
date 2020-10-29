@@ -1,6 +1,13 @@
 import * as util from "util";
 import { green } from './color';
 
+export const EFFECT_METHODS: string[] = [
+    "DELETE",
+    "PATCH",
+    "POST",
+    "PUT"
+];
+
 export function serveTip(type: string, id: string, url: string) {
     return green`${type} server [${id}](${url}) started.`;
 }

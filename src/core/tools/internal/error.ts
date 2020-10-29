@@ -2,7 +2,7 @@ import * as path from "path";
 import * as callSiteRecord from "callsite-record";
 import startsWith = require('lodash/startsWith');
 import { isDevMode, APP_PATH, SRC_PATH } from "../../../init";
-import { StatusException } from "../StatusException";
+import { HttpException } from "../HttpException";
 import { red } from './color';
 import * as util from "util";
 import pick = require('lodash/pick');
@@ -27,7 +27,7 @@ function findAbsoluteFilename(stack: string, baseDir?: string) {
 
 export function resolveErrorStack(stack: string, baseDir?: string, offset = 0): {
     filename: string,
-    stack: string
+    stack: string;
 } {
     let lines = stack.split("\n");
     let header = lines.splice(0, 1);
@@ -57,9 +57,13 @@ export function resolveErrorStack(stack: string, baseDir?: string, offset = 0): 
     };
 }
 
+/**
+ * Logs the error in a friendly way, if it detects the current process runs in
+ * dev mode, it will print out the error with call-site records.
+ */
 export async function tryLogError(err: any, stack?: string) {
     // Do not log http errors except they are server-side errors. 
-    if (err instanceof StatusException && err.code < 500) {
+    if (err instanceof HttpException && err.code < 500) {
         return;
     } else if (err instanceof Error) {
         err.stack = err.stack.replace(/default_\d\./g, "default.");
@@ -92,11 +96,9 @@ export async function tryLogError(err: any, stack?: string) {
 
         console.error(err);
     } else {
-        if (!(err instanceof Error)) {
-            stack = err;
-        }
-
-        if (stack) {
+        if (err instanceof Error) {
+            console.error(red`${String(err)}`);
+        } else if (stack) {
             console.error(red`${String(err)} ${stack}`);
         } else {
             console.error(red`${util.format(err)}`);

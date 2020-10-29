@@ -1,9 +1,10 @@
 import * as Logger from "sfn-logger";
+import { ModuleProxy } from "microse";
 
 declare global {
     namespace app {
         interface Config {
-            logger?: Logger.Options
+            logger?: Logger.Options;
         }
         namespace services {
             const logger: ModuleProxy<LoggerService>;

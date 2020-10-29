@@ -4,12 +4,11 @@ import md5 = require("md5");
 import omit = require("lodash/omit");
 import timestamp from "@hyurl/utils/timestamp";
 import sift, { Query as SiftQuery } from "sift";
+import { ModuleProxy } from "microse";
 
-type Methods<T> = FunctionPropertyNames<T>;
+type MethodNameOf<T> = FunctionPropertyNames<T>;
+type TaskHandler = (...data: any[]) => void | Promise<void>;
 
-/** @deprecated */
-export type TaskOptions = FunctionTaskOptions<any> | ModuleTaskOptions<any, string>;
-export type TaskHandler = (...data: any[]) => void | Promise<void>;
 export type ScheduleQuery<T> = Partial<SiftQuery> & {
     appId?: string | RegExp;
     taskId?: string | RegExp;
@@ -17,8 +16,8 @@ export type ScheduleQuery<T> = Partial<SiftQuery> & {
     end?: string | number | Date;
     repeat?: number;
     module?: ModuleProxy<T> | string | RegExp;
-    handler?: Methods<T> | RegExp;
-    onEnd?: Methods<T> | RegExp;
+    handler?: MethodNameOf<T> | RegExp;
+    onEnd?: MethodNameOf<T> | RegExp;
 };
 
 export interface ScheduleOptions {
@@ -78,12 +77,16 @@ export interface FunctionTaskOptions<F extends TaskHandler> extends BaseTaskOpti
     onEnd?: (...data: Parameters<F>) => void | Promise<void>;
 }
 
-export interface ModuleTaskOptions<T, M extends Methods<T>> extends BaseTaskOptions<T[M]> {
+export interface ModuleTaskOptions<T, M extends MethodNameOf<T>> extends BaseTaskOptions<T[M]> {
     module?: ModuleProxy<T>;
     handler?: M;
-    onEnd?: Methods<T>;
+    onEnd?: MethodNameOf<T>;
 }
 
+/**
+ * The very class used to create `app.schedule`, this class is not intended to
+ * be called in user code, use `app.schedule` instead.
+ */
 export class Schedule {
     constructor(readonly name: string) { }
 
@@ -93,28 +96,18 @@ export class Schedule {
      */
     create<F extends TaskHandler>(
         options: BaseTaskOptions<F>,
-        handler: F,
-    ): string;
+        handler: F
+    ): Promise<string>;
     create<F extends TaskHandler>(
-        options: BaseTaskOptions<F>,
-        handler: F,
-        ensure: true
+        options: FunctionTaskOptions<F>
     ): Promise<string>;
-    create<F extends TaskHandler>(options: FunctionTaskOptions<F>): string;
-    create<F extends TaskHandler>(
-        options: FunctionTaskOptions<F>,
-        ensure: true
+    create<T, M extends MethodNameOf<T>>(
+        options: ModuleTaskOptions<T, M>
     ): Promise<string>;
-    create<T, M extends Methods<T>>(options: ModuleTaskOptions<T, M>): string;
-    create<T, M extends Methods<T>>(
-        options: ModuleTaskOptions<T, M>,
-        ensure: true
-    ): Promise<string>;
-    create(
+    async create(
         options: FunctionTaskOptions<TaskHandler> & ModuleTaskOptions<any, string>,
-        handler: Function | string | boolean = null,
-        ensure = false
-    ): string | Promise<string> {
+        handler: Function = null
+    ): Promise<string> {
         let {
             salt,
             start,
@@ -128,11 +121,6 @@ export class Schedule {
             onEnd
         } = options;
         let params: string[] = [app.id];
-
-        if (typeof handler === "boolean") {
-            ensure = handler;
-            handler = null;
-        }
 
         salt && params.push(salt);
         module && params.push(module.name);
@@ -209,28 +197,23 @@ export class Schedule {
             });
         }
 
-        if (ensure) {
-            return app.services.schedule(taskId).add(task).then(() => taskId);
-        } else {
-            app.services.schedule(taskId).add(task);
-            return taskId;
-        }
+        await app.services.schedule.add(task);
+        return taskId;
     }
 
     /** Cancels a task according to the given task ID. */
-    cancel(taskId: string): void;
-    cancel(taskId: string, ensure: true): Promise<boolean>;
-    cancel(taskId: string, ensure = false) {
+    cancel(taskId: string): Promise<boolean> {
         app.message.unsubscribe(taskId);
-
-        if (ensure) {
-            return app.services.schedule(taskId).delete(taskId);
-        } else {
-            app.services.schedule(taskId).delete(taskId);
-        }
+        return app.services.schedule.delete(taskId);
     }
 }
 
+/**
+ * A distributed schedule service, runs as a micro-service.
+ * 
+ * This class is not intended to be called in user code, use
+ * `app.services.schedule` instead.
+ */
 export class ScheduleService {
     private timer: NodeJS.Timer = null;
     private state: "uninitiated" | "running" | "stopped" = "uninitiated";
@@ -335,9 +318,12 @@ export class ScheduleService {
         }
     }
 
-    /** Deletes the specified task. */
+    /** Deletes the specified task according to the taskId. */
     delete(taskId: string): Promise<boolean>;
-    /** Deletes tasks that matched the queries (using mongodb syntax).  */
+    /**
+     * Deletes tasks that matched the queries (using mongodb syntax).
+     * @returns The number of tasks that has been deleted.
+     */
     delete<T>(query: ScheduleQuery<T>): Promise<number>;
     async delete(query: string | object) {
         if (typeof query === "string") {
@@ -369,13 +355,6 @@ export class ScheduleService {
         } else {
             return (await this.find(query)).length;
         }
-    }
-
-    /** @deprecated use `find()` instead. */
-    query(taskId: string): Promise<ScheduleTask>;
-    query<T>(query?: ScheduleQuery<T>): Promise<ScheduleTask[]>;
-    async query(query: any): Promise<any> {
-        return this.find(query);
     }
 
     private isScheduleServer() {
@@ -486,7 +465,7 @@ export class ScheduleService {
         this.tasks.forEach((task, taskId) => {
             if (transferTasks && !isScheduleServer) {
                 this.tasks.delete(taskId);
-                jobs.push(app.services.schedule(taskId).add(task));
+                jobs.push(app.services.schedule.add(task));
             }
         });
 
