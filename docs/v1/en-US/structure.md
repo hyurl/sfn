@@ -44,9 +44,10 @@ modules without reboot the program, however, there are things needed to be
 considered since your program will automatically reload the modules, which means
 any state, memory cache, variables, etc., will be wiped out once reloaded, you
 have to change your development habit and design your program to be stateless,
-or implement a way to save the state during service pause (in `destroy()` method)
-and resume them after reload (in `init()` method). If doing so is hard for you,
-just turn off hot-reloading, and it's fine.
+or implement a way to save the state during service pause (in
+[destroy()](/api/v1/Service#destroy) method) and resume them after reload (in
+[init()](/api/v1/Service#init) method). If doing so is hard for you, just turn
+off hot-reloading, and it's fine.
 
 ### Configure Hot-reloading
 
