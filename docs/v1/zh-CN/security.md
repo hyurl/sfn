@@ -1,7 +1,9 @@
 <!-- title: 安全; order: 10 -->
 ## 授权
 
-`HttpController` 和 `WebSocketController` 都提供了一个简单地方式来控制用户的权限。
+[HttpController](/api/v1/HttpController) 和
+[WebSocketController](/api/v1/WebSocketController) 都提供了一个简单地方式来控制用户的
+权限。
 
 在控制器中，存在着一个属性 `authorized`，如果它的值是 `true`，那就意味着操作是被
 允许的，`false` 则相反。自 v0.6 版本起，框架不再自动检查和设置该值，它默认为 `false`
@@ -11,8 +13,8 @@
 
 ### 使用示例
 
-要唤起授权检查，你只需要使用装饰器 `@requireAuth` 来修饰控制器方法即可，当这个
-方法被通过 URL（或 WebSocket 事件）调用时，检测过程就会被自动的执行。
+要唤起授权检查，你只需要使用装饰器 [@requireAuth](/api/v1/decorators#requireAuth) 来
+修饰控制器方法即可，当这个方法被通过 URL（或 WebSocket 事件）调用时，检测过程就会被自动的执行。
 
 
 ```typescript
@@ -85,8 +87,9 @@ export default class extends HttpController {
 
 ### 自动插入 CSRF Token
 
-你可以使用函数 `injectCsrfToken()` 来帮助你将 CSRF Token 插入到 HTML 表单中，但是
-你需要保证你的视图文件的书写是格式化的，并且仅支持 HTML 文件（或 **ejs** 模板）。
+你可以使用函数 [injectCsrfToken()](/api/v1/utilities#injectCsrfToken) 来帮助你将
+CSRF Token 插入到 HTML 表单中，但是你需要保证你的视图文件的书写是格式化的，并且仅支持 HTML
+文件（或 **ejs** 模板）。
 
 ```typescript
 import { HttpController, route, injectCsrfToken } from "sfn";
@@ -129,9 +132,6 @@ export default class extends HttpController {
 然而在 **SFN** 框架中，CORS 检查是非常严格的，如果检查不通过，那么调用的方法永远
 不会执行。同时框架赋予你完全控制 CORS 地能力，并且它很容易配置。如平时一样，你
 需要在控制器中开启它。
-
-（**注**：自 v0.6 版本起，控制器的 `cors` 属性被更换成了 `static cors` 属性，并且
-框架将会自动设置 OPTIONS 路由。）
 
 ### CORS 示例
 

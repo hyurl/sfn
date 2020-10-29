@@ -41,23 +41,23 @@ You can use the method `app.schedule.create()` to create schedule tasks anywhere
 you want.
 
 ```typescript
-var taskId = app.schedule.create({
+var taskId = await app.schedule.create({
     salt: "my-schedule-1",
     start: moment().unix() + 5,
 }, async () => {
     // do every thing in here after 5 seconds.
 });
 
-var taskId2 = app.schedule.create({
+var taskId2 = await app.schedule.create({
     salt: "my-schedule-2",
     start: moment().add(5, "minutes").unix() // using moment library
     repeat: 5, // running repeatedly every 5 seconds
-    end: momen().add(1, "hour").unix() // stops after 1 hour
+    end: moment().add(1, "hour").unix() // stops after 1 hour
 }, async () => {
     // ...
 });
 
-var taskId3 = app.schedule.create({
+var taskId3 = await app.schedule.create({
     salt: "my-schedule-3",
     timetable: ["18:00", "19:00", "20:00"], // using timetable
     repeat: 24 * 60 * 60 // runs every day
@@ -70,7 +70,7 @@ If you want to cancel a task, just call the method `app.schedule.cancel()` to do
 so.
 
 ```typescript
-app.schedule.cancel(taskId);
+await app.schedule.cancel(taskId);
 ```
 
 ### About Salt
@@ -100,7 +100,7 @@ declare global {
 export default class MyService {
     async init() {
         // Should create schedule in the init() method.
-        var taskId = app.schedule.create({
+        var taskId = await app.schedule.create({
             start: moment().unix(),
             repeat: 3600 * 24,
             module: app.services.myService,
@@ -124,7 +124,7 @@ serialized will be lost, and once set, the data cannot be modified.
 ```typescript
 export default class MyService {
     async init() {
-        var taskId = app.schedule.create({
+        var taskId = await app.schedule.create({
             start: moment().unix(),
             repeat: 3600 * 24,
             module: app.services.myService,
@@ -142,34 +142,13 @@ export default class MyService {
 ## About ScheduleService
 
 When calling `app.schedule.create()` or `app.schedule.cancel()`, it actually
-calls the corresponding methods of ScheduleService. However, these two methods
-have some internal logics, especially for `app.schedule.create()`, that means
-you cannot directly use ScheduleService to create tasks. That being said,
-ScheduleService provided some useful methods, to help you find or delete tasks.
+calls the corresponding methods of [ScheduleService](/api/v1/ScheduleService).
+However, these two methods have some internal logics, especially for
+`app.schedule.create()`, that means you cannot directly use ScheduleService to
+create tasks. That being said, ScheduleService provided some useful methods, to
+help you find or delete tasks.
 
-```ts
-declare class ScheduleService {
-    /** Retrieves a specific task according to the taskId. */
-    find(taskId: string): Promise<ScheduleTask>;
-    /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
-    find<T>(query?: ScheduleQuery<T>): Promise<ScheduleTask[]>;
-
-    /** Deletes the specified task. */
-    delete(taskId: string): Promise<boolean>;
-    /** Deletes tasks that matched the queries (using mongodb syntax).  */
-    delete<T>(query?: ScheduleQuery<T>): Promise<number>;
-
-    /**
-     * Counts the size of the task pool, or specific tasks matched the queries
-     * (using mongodb syntax).
-     */
-    count<T>(query?: ScheduleQuery<T>): Promise<number>;
-}
-```
-
-Other than the above methods, all other ones are reserved by the framework,
-developers should never use them. To call these methods, use 
-`app.services.schedule` to access the service, for example:
+For example, you can use `find()` method to search the running tasks:
 
 ```ts
 (async () => {

@@ -103,7 +103,8 @@ export class AnotherController extends HttpController {
 ```
 
 除了直接调用 `before` 和 `after` 外，你可以定义任何你想要的函数并作为装饰器来使用，只需要把它
-包裹在 `interceptAsync().before()` 中。实际上，`@requireAuth` 就是通过这种技巧实现的。
+包裹在 `interceptAsync().before()` 中。实际上，
+[@requireAuth](/api/v1/decorators#requireAuth) 就是通过这种技巧实现的。
 
 ```ts
 import { interceptAsync, intercept } from 'function-intercepter';
@@ -137,11 +138,6 @@ export const requireAuth: ControllerDecorator = interceptAsync().before(
 
 自 0.5.x 版本起，SFN 引入了新的内置钩子支持，并实现了热重载和动态加载支持。钩子无须创建实例，
 并且会在软件启动时将现有钩子全部加载到系统中。所有的钩子都应存放在 `src/hooks/` 文件夹中。
-
-> 在历史版本中，钩子曾经被叫做插件 (Plugin)，但从 v0.6 版本起，为了使含义更加清晰，
-> 它已经被重命名为钩子 (Hook)。如果你此前有使用~~插件~~，要迁移其实也很简单，只需要
-> 选中命名空间 `app.plugins`，按下 `F2` 并将其重命名为 `app.hooks` ，然后修改
-> 将文件夹名称从 `src/plugins/` 修改为 `src/hooks/` 即可。
 
 ```typescript
 // src/hooks/user.ts
@@ -209,9 +205,9 @@ export default class extends HttpController {
 
 ### 内置的钩子接口
 
-SFN 框架内置使用了一个名为 `lifeCycle` 的钩子接口，用以控制服务启动和关闭有关的活动，
-你也可以将自己的一些逻辑绑定到该接口上，来在系统启动或关闭时打开或关闭一些资源。下面的
-示例来自 SFN 网站自己的逻辑：
+SFN 框架内置使用了一个名为 [lifeCycle](/api/v1/Hook#app_hooks_lifeCycle) 的钩子接口，
+用以控制服务启动和关闭有关的活动，你也可以将自己的一些逻辑绑定到该接口上，来在系统启动或关闭时
+打开或关闭一些资源。下面的示例来自 SFN 网站自己的逻辑：
 
 ```typescript
 // Try to safely close the logger service.

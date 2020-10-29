@@ -1,11 +1,8 @@
 <!-- title: WebSocket 控制器; order: 5 -->
 ## 基本概念
 
-`WebSocketController` 处理来自 [socket.io](https://socket.io/) 客户端的消息，它
-本质是一个继承自 [Service](./service) 的扩展类，但和服务的单例模式不同，控制器
-属于一次性用品，一个实例会在客户端请求到达时被创建，请求完成后被销毁。因此，
-控制器也重载了一些基类的方法来使它适应这种独特的运行模式，而又能够保持与普通服务
-相似的开发体验。
+[WebSocketController](/api/v1/WebSocketController) 处理来自
+[socket.io](https://socket.io/) 客户端的消息。
 
 由于这个模块使用 socket.io，你需要提前学习它，从而能够完全处理你的工作。
 
@@ -30,9 +27,9 @@ export default class extends WebSocketController {
 
 ## 事件和方法的关系
 
-当一个方法被 `@event` 修饰时，这个方法将会被绑定到一个确定的 socket.io 事件上。
-当一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被自动
-地以合适的形式返回给客户端。
+当一个方法被 [@event](/api/v1/decorators#event) 修饰时，这个方法将会被绑定到一个确定的
+socket.io 事件上。当一个客户端发送数据到这个事件上时，这个方法就会被自动地调用，其返回值将会被
+自动地以合适的形式返回给客户端。
 
 1. 如果客户端在发送消息时指定了回调函数，如 `emit(event, message, callback)`, 那么返回值
     将会被发送到回调函数中。
@@ -93,7 +90,8 @@ export default class extends WebSocketController {
 
 ### 构造函数签名
 
-所有的 WebSocketController 构造函数都支持一个参数，即 `socket: WebSocket`。
+所有的 WebSocketController 构造函数都支持一个参数，即 `socket`
+[\<WebSocket\>](/api/v1/WebSocket)。
 
 ```typescript
 import { WebSocketController, WebSocket } from "sfn";
@@ -108,8 +106,8 @@ export default class extends WebSocketController {
 
 ## 抛出状态异常
 
-和在 HttpController 中一样，你可以使用 `HttpException` 来抛出状态异常，框架将
-会对其进行合适的处理，并自动地发送错误响应内容。
+和在 HttpController 中一样，你可以使用 [HttpException](/api/v1/HttpException) 来抛出
+异常，框架将会对其进行合适的处理，并自动地发送错误响应内容。
 
 ```typescript
 import { WebSocketController, HttpException, event } from "sfn";

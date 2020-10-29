@@ -1,13 +1,14 @@
 <!-- title: Security; order: 10 -->
 ## Authorization
 
-Both `HttpController` and `WebSocketController` provide a simple approach to 
+Both [HttpController](/api/v1/HttpController) and
+[WebSocketController](/api/v1/WebSocketController) provided a simple approach to 
 control user authorization.
 
-In a controller, there is a property `authorized`, if it's `true`, that means
-the operation is permitted, `false` the otherwise. Since v0.6, the framework
-no longer checks and sets this property, it's `false` by default, you have to
-customize your checking condition to suit your needs.
+In a controller, there is a property [authorized](/api/v1/Controller#authorized),
+if it's `true`, that means the operation is permitted, `false` the otherwise.
+Since v0.6, the framework no longer checks and sets this property, it's `false`
+by default, you have to customize your checking condition to suit your needs.
 
 If an operation is unauthorized, the framework will throw a HttpException
 `401 Unauthorized` to the client.
@@ -15,9 +16,9 @@ If an operation is unauthorized, the framework will throw a HttpException
 ### Example
 
 To wake up the authentication check, you just need to use the decorator
-`@requireAuth` to decorate the controller method, when this method is invoked
-via URL (or WebSocket event), the checking process will be automatically
-executed.
+[@requireAuth](/api/v1/decorators#requireAuth) to decorate the controller method,
+when this method is invoked via URL (or WebSocket event), the checking process
+will be automatically executed.
 
 ```typescript
 import { HttpController, Request, Response, route, requireAuth } from "sfn";
@@ -43,7 +44,7 @@ export default class extends HttpController {
     }
 
     @route("/auth")
-    async auth(req: Request, res: Responce) {
+    async auth(req: Request, res: Response) {
         if (!req.auth) {
             // res.auth() will lead you to HTTP basic authentication.
             return res.auth();
@@ -91,9 +92,10 @@ export default class extends HttpController {
 
 ### Auto-Inject CSRF Token
 
-You can use the function `injectCsrfToken()` to inject the CSRF token into 
-HTML forms for you, but you need to make sure that your view file is written 
-well-formatted, and it only support HTML files (or **ejs** templates).
+You can use the function [injectCsrfToken()](/api/v1/utilities#injectCsrfToken)
+to inject the CSRF token into HTML forms for you, but you need to make sure that
+your view file is written well-formatted, and it only support HTML files
+(or **ejs** templates).
 
 ```typescript
 import { HttpController, route, injectCsrfToken } from "sfn";
@@ -139,9 +141,6 @@ However, in the **SFN** framework, the CORS check is very severe, if not pass,
 then the target function will never be called. Whist the framework gives you
 full control of CORS, and it is, as usual, very easy to be configured, you just
 need to turn on it in the controller.
-
-(**NOTE:** Since v0.6, the property `cors` has been changed to `static cors`,
-and the framework will set the OPTIONS route automatically.)
 
 ### Example of CORS
 

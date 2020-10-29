@@ -106,8 +106,9 @@ export class AnotherController extends HttpController {
 
 Other than directly calling `before` and `after`, you can define any functions 
 to be used as decorators as you want by wrapping it inside of
-`interceptAsync().before()`. Actually, `@requireAuth` also uses this technique
-under the hood.
+`interceptAsync().before()`. Actually,
+[@requireAuth](/api/v1/decorators#requireAuth) also uses this technique under
+the hood.
 
 ```ts
 import { interceptAsync, intercept } from 'function-intercepter';
@@ -144,13 +145,6 @@ Since version 0.5.x, SFN introduced new internal hook support and implemented
 hot-reloading and auto-loading. Hooks do not need to create the instance, and
 all hooks will be loaded into the system when startup. All hooks should be
 located in path `src/hooks/`.
-
-> Hook was once called `Plugin` in history versions of SFN, but since v0.6, for
-> clarity, it has been renamed to `Hook`, if you have ~~plugins~~ before, it's 
-> easy to migrate to the new vernacular, just select the namespace `app.plugins`,
-> and press `F2` and rename it to `app.hooks`, then change the folder name from
-> `src/plugins/` to `src/hooks/`.
-
 
 ```typescript
 // src/hooks/user.ts
@@ -218,10 +212,10 @@ export default class extends HttpController {
 
 ### Internal Hook Interface
 
-SFN reserved a hook interface `lifeCycle`, used to control all activities
-related to server startup and shutdown, also you can add your own logic to this
-interface, to open or close some resources during startup and shutdown. The
-following example comes from the SFN website itself.
+SFN reserved a hook interface [lifeCycle](/api/v1/Hook#app_hooks_lifeCycle),
+used to control all activities related to server startup and shutdown, also you
+can add your own logic to this interface, to open or close some resources during
+startup and shutdown. The following example comes from the SFN website itself.
 
 ```typescript
 // Try to safely close the logger service.

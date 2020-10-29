@@ -5,8 +5,8 @@
 
 ## 使用示例
 
-在一个 HttpController 中，你可以使用 `view()` 方法来展示模板。（默认地，框架不
-使用模板引擎，仅将搜寻到的 HTML 文件直接导入。）
+在一个 HttpController 中，你可以使用 [view()](/api/v1/HttpController#view) 方法来
+展示模板。（默认地，框架不使用模板引擎，仅将搜寻到的 HTML 文件直接导入。）
 
 ```typescript
 import { HttpController, route } from "sfn";

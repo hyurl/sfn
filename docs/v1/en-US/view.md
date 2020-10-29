@@ -6,9 +6,9 @@ dynamic  modules in order to auto-load and hot-reload them.
 
 ## Example
 
-In an HttpController, you can use `view()` method to display a template. (By 
-default, the framework will not use any template engine, just import the HTML 
-file directly.)
+In an HttpController, you can use [view()](/api/v1/HttpController#view) method
+to display a template. (By default, the framework will not use any template
+engine, just import the HTML file directly.)
 
 ```typescript
 import { HttpController, route } from "sfn";

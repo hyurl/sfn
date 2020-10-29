@@ -8,8 +8,9 @@ the given data sent by the client.
 
 ### Injection in HttpController
 
-In HttpController, this feature supports the interfaces `Request`, `Response`
-and `Session`.
+In HttpController, this feature supports the interfaces
+[Request](/api/v1/Request), [Response](/api/v1/Response) and
+[Session](/api/v1/Session).
 
 In the meantime, you can directly set the URL parameters as the parameters 
 of the method, and they will be injected as well.
@@ -44,8 +45,9 @@ export default class extends HttpController {
 ### Injection in WebSocketController
 
 While in a WebSocketController, since the WebSocket sending and receiving data 
-in a different way, so it only supports the interfaces `WebSocket` and
-`Session`, and other arguments can be directly sent from the client.
+in a different way, so it only supports the interfaces
+[WebSocket](/api/v1/WebSocket) and [Session](/api/v1/Session), and other
+arguments can be directly sent from the client.
 
 ```typescript
 import { WebSocketController, WebSocket, event } from "sfn"

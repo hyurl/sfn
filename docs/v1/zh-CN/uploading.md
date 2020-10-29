@@ -1,13 +1,13 @@
 <!-- title: 文件上传; order: 12 -->
 ## 基本概念
 
-`HttpController` 提供了一个简单的文件上传方式，让你可以通过 POST 请求来上传
-文件。上传文件就如同你做其他事情一样容易，只需要一些简单的配置，其余的工作就能够
+[HttpController](/api/v1/HttpController) 提供了一个简单的文件上传方式，让你可以通过
+POST 请求来上传文件。上传文件就如同你做其他事情一样容易，只需要一些简单的配置，其余的工作就能够
 被框架自动处理。
 
 ## 使用示例
 
-在一个 HttpController 中，使用装饰器 `@upload` 来设置接受携带文件的字段。
+在一个 HttpController 中，使用装饰器 [@upload](/api/v1/decorators#upload) 来设置接受携带文件的字段。
 
 ```typescript
 import { HttpController, Request, route, upload } from "sfn";
@@ -45,7 +45,8 @@ export default class extends HttpController {
 }
 ```
 
-`uploadOptions` 是一个 `UploadOptions` 类型，它包含着这些属性：
+`uploadOptions` 是一个 [UploadOptions](/api/v1/HttpController#UploadOptions) 类型，
+它包含着这些属性：
 
 - `maxCount` 每一个表单字段允许携带文件的最大数量（默认 `1`）。
 - `savePath` 硬盘中用来存储已上传文件的路径(默认 `uploads/`)，在目录中，文件被按

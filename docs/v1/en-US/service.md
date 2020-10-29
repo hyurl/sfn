@@ -116,9 +116,7 @@ node dist cache-server # cache-server is the id set as a key in app.config.serve
 
 After starting the cache service via the above command, the web server
 (including HTTP and WebSocket) will be able to redirect all traffics to this
-service to the new server, basically you don't have to alter any code (BUT
-remember not all properties are supported, and the methods will all become
-asynchronous).
+service to the new server, basically you don't have to alter any code.
 
 However, if you want another service running in another RPC server to be able to
 access this service, then you need to config service dependencies for that RPC
@@ -153,22 +151,22 @@ order to connect all RPC services.
 
 ## Basic Service
 
-For convenience, the framework integrated with a basic `Service` class, which
-contains some useful methods, e.g. `i18n`, `throttle`, `queue`. The developer
-can use them to achieve relevant functions, just inherit this service when
-creating a new service.
+For convenience, the framework integrated with a basic [Service](/api/v1/Service)
+class, which contains some useful methods, e.g. `i18n`, `throttle`, `queue`. The
+developer can use them to achieve relevant functions, just inherit this service
+when creating a new service.
 
 ```ts
 import { Service } from "sfn";
 
 export default class MyService extends Service {
-    throttledOps(...args: any[]) {
+    async throttledOps(...args: any[]) {
         return this.throttle("a unique key", async () => {
             return this.i18n("This method can only be called once for every second");
         }, 1000);
     }
 
-    queuedOps(...args: any[]) {
+    async queuedOps(...args: any[]) {
         return this.queue("a unique key", async () => {
             return this.i18n("All calls to this method will be queued up");
         });
@@ -214,7 +212,7 @@ export default class MyService extends Service {
 
 ## Customize Garbage Collection
 
-As pointed out above, the basic `Service` class contains an internal garbage
+As mentioned above, the basic `Service` class contains an internal garbage
 collector, and of course an extended class can use and extend this method to
 clean custom data periodically. To do so, just override the `gc()` method like
 this:

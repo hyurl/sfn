@@ -1,8 +1,8 @@
 <!-- title: HTTP 控制器; order: 4 -->
 ## 基本概念
 
-`HttpController` 处理来自 HTTP 客户端的请求，它本质是一个继承自
-[Service](./service) 的扩展类，但和服务的单例模式不同，控制器属于一次性用品，一个
+[HttpController](/api/v1/HttpController) 处理来自 HTTP 客户端的请求，它本质是一个继承自
+[Service](/api/v1/service) 的扩展类，但和服务的单例模式不同，控制器属于一次性用品，一个
 实例会在客户端请求到达时被创建，请求完成后被销毁。因此，控制器也重载了一些基类的
 方法来使它适应这种独特的运行模式，而又能够保持与普通服务相似的开发体验。
 
@@ -25,9 +25,9 @@ export default class extends HttpController {
 
 ## 路由和方法之间的关系
 
-当一个方法被 `@route` 修饰时，这个方法就会被绑定到一个确定的 URL 路由上。当访问
-一个匹配路由的URL 地址时，这个方法就会被自动地调用，其返回值将会以合适的形式返回
-给发起请求的客户端。
+当一个方法被 [@route](/api/v1/decorators#route) 修饰时，这个方法就会被绑定到一个确定的
+URL 路由上。当访问一个匹配路由的URL 地址时，这个方法就会被自动地调用，其返回值将会以合适的形式
+返回给发起请求的客户端。
 
 装饰器 `route` 是一个函数及命名空间。当作为函数调用时，它支持这些形式：
 
@@ -129,7 +129,8 @@ export default class extends HttpController {
 
 ### 构造函数签名
 
-所有 HttpController 的构造函数都接受两个参：`req: Request` 和 `res: Response`。
+所有 HttpController 的构造函数都接受两个参：`req` [\<Request\>](/api/v1/Request) 和
+`res` [\<Response\>](/api/v1/Response)。
 
 ```typescript
 import { HttpController, Request, Response } from "sfn";
@@ -208,11 +209,11 @@ export default class extends HttpController {
 }
 ```
 
-## 抛出状态异常
+## 抛出 HTTP 异常
 
-`HttpException` 是一个由框架定义的异常类，你可以在想要响应一个 HTTP 错误到客户端
-时使用它。当一个 HttpException 被抛出时，框架将会对其进行合适的处理并自动地发送
-错误响应内容。
+[HttpException](/api/v1/HttpException) 是一个由框架定义的异常类，你可以在想要响应一个
+HTTP 错误到客户端时使用它。当一个 HttpException 被抛出时，框架将会对其进行合适的处理并自动地
+发送错误响应内容。
 
 ```typescript
 import { HttpController, HttpException, route } from "sfn";
@@ -268,7 +269,8 @@ HttpController.httpErrorView = function (err, instance) {
 ## 通用 API 响应
 
 无论是在一个 HttpController 中，或 WebSocketController 中，你都总是可以使用方法 
-`success()` 和方法 `fail()` 来发送一个结构化的响应，来表示一个成功或者失败的操作。
+[success()](/api/v1/Controller#success) 和方法 [fail()](/api/v1/Controller#fail)
+来发送一个结构化的响应，来表示一个成功或者失败的操作。
 
 ```typescript
 import { HttpController, route } from "sfn";

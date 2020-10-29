@@ -38,23 +38,23 @@ node dist schedule-server
 你可以在任何地方，使用 `app.schedule.create()` 方法来创建定时任务。
 
 ```typescript
-var taskId = app.schedule.create({
+var taskId = await app.schedule.create({
     salt: "my-schedule-1",
     start: moment().unix() + 5,
 }, async () => {
     // do every thing in here after 5 seconds.
 });
 
-var taskId2 = app.schedule.create({
+var taskId2 = await app.schedule.create({
     salt: "my-schedule-2",
     start: moment().add(5, "minutes").unix() // using moment library
     repeat: 5, // running repeatedly every 5 seconds
-    end: momen().add(1, "hour").unix() // stops after 1 hour
+    end: moment().add(1, "hour").unix() // stops after 1 hour
 }, async () => {
     // ...
 });
 
-var taskId3 = app.schedule.create({
+var taskId3 = await app.schedule.create({
     salt: "my-schedule-3",
     timetable: ["18:00", "19:00", "20:00"], // using timetable
     repeat: 24 * 60 * 60 // runs every day
@@ -66,7 +66,7 @@ var taskId3 = app.schedule.create({
 如果你想要取消一个定时任务，只需要调用 `app.schedule.cancel()` 方法即可。
 
 ```typescript
-app.schedule.cancel(taskId);
+await app.schedule.cancel(taskId);
 ```
 
 ### 关于 salt
@@ -94,7 +94,7 @@ declare global {
 export default class MyService {
     async init() {
         // Should create schedule in the init() method.
-        var taskId = app.schedule.create({
+        var taskId = await app.schedule.create({
             start: moment().unix(),
             repeat: 3600 * 24,
             module: app.services.myService,
@@ -117,7 +117,7 @@ export default class MyService {
 ```typescript
 export default class MyService {
     async init() {
-        var taskId = app.schedule.create({
+        var taskId = await app.schedule.create({
             start: moment().unix(),
             repeat: 3600 * 24,
             module: app.services.myService,
@@ -135,32 +135,11 @@ export default class MyService {
 ## 关于 ScheduleService
 
 当调用 `app.schedule.create()` 或 `app.schedule.cancel()` 时，实际上是在调用
-ScheduleService 的相关方法。然而，这两个函数内部存在一些逻辑，特别是
-`app.schedule.create()`，因此是不能通过调用 ScheduleService 的相关方法来直接创建任务的。
-虽说如此，ScheduleService 依旧提供了一些有用的方法，来供你进行查询或删除任务。
+[ScheduleService](/api/v1/ScheduleService) 的相关方法。然而，这两个函数内部存在一些逻辑，
+特别是 `app.schedule.create()`，因此是不能通过调用 ScheduleService 的相关方法来直接创建
+任务的。虽说如此，ScheduleService 依旧提供了一些有用的方法，来供你进行查询或删除任务。
 
-```ts
-declare class ScheduleService {
-    /** Retrieves a specific task according to the taskId. */
-    find(taskId: string): Promise<ScheduleTask>;
-    /** Retrieves a list of tasks matched the queries (using mongodb syntax). */
-    find<T>(query?: ScheduleQuery<T>): Promise<ScheduleTask[]>;
-
-    /** Deletes the specified task. */
-    delete(taskId: string): Promise<boolean>;
-    /** Deletes tasks that matched the queries (using mongodb syntax).  */
-    delete<T>(query?: ScheduleQuery<T>): Promise<number>;
-
-    /**
-     * Counts the size of the task pool, or specific tasks matched the queries
-     * (using mongodb syntax).
-     */
-    count<T>(query?: ScheduleQuery<T>): Promise<number>;
-}
-```
-
-除了上面的方法，其它方法都是系统内部使用的，开发者不要调用它们。要调用这些方法，使用
-`app.services.schedule` 来访问服务，例如：
+例如，可以通过 `find()` 方法来查询正在运行的任务：
 
 ```ts
 (async () => {

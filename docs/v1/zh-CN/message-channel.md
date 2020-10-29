@@ -8,12 +8,12 @@
 可以与浏览器客户端通过 WebSocket 进行消息推送，而工作在后端的 RPC 服务器却无法直接和
 客户端进行对话。
 
-为了解决各个服务之间的通信问题，SFN 框架集成了消息通道机制，由一个名为 `MessageChannel`
-的消息队列通过**发布-订阅**模型向系统中的各个服务广播消息，而在订阅了消息主题的服务进程
-中，消息能够被监听器所接收。
+为了解决各个服务之间的通信问题，SFN 框架集成了消息通道机制，由一个名为
+[MessageChannel](/api/v1/MessageChannel) 的消息队列通过**发布-订阅**模型向系统中的各个
+服务广播消息，而在订阅了消息主题的服务进程中，消息能够被监听器所接收。
 
 默认地，你不需要自己创建 MessageChannel 的实例，SFN 导出它只是用于类型注解，要访问集成
-的消息队列，只需要通过调用 `app.message` 接口即可。
+的消息队列，只需要通过调用 [app.message](/api/v1/MessageChannel#app_message) 接口即可。
 
 ### 发布消息
 
@@ -39,8 +39,9 @@ app.message.subscribe("greeting", msg => {
 
 ## 推送 WebSocket 消息
 
-同时，SFN 提供了基于 MessageChannel 的 WebSocket 消息机制（`app.message.ws`），并
-将其封装成和 Socket.io 相同的方法，因此在使用上，基本上没有任何差异。
+同时，SFN 提供了基于 MessageChannel 的 WebSocket 消息机制
+（[app.message.ws](/api/v1/MessageChannel#app_message_ws)），并将其封装成和
+Socket.io 相同的方法，因此在使用上，基本上没有任何差异。
 
 ```typescript
 // Push WebSocket message through all front end web server
@@ -63,7 +64,8 @@ app.message.ws.via("web-server-1")
 
 ## 推送 SSE (Server-Sent Events) 消息
 
-除了 `app.message.ws`，SFN 还提供了 `app.message.sse` 来进行跨服务推送 SSE 消息，
+除了 `app.message.ws`，SFN 还提供了
+[app.message.sse](/api/v1/MessageChannel#app_message_sse) 来进行跨服务推送 SSE 消息，
 其用法和前者类似，它提供了 `send(data: any)`、`emit(event: string, data?: any)` 和
 `close()` 方法来推送消息和事件。
 

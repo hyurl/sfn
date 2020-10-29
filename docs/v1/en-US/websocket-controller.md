@@ -1,7 +1,7 @@
 <!-- title: WebSocket Controller; order: 5 -->
 ## Concept
 
-`WebSocketController` manages messages come from a 
+[WebSocketController](/api/v1/WebSocketController) manages messages come from a 
 [socket.io](https://socket.io/) client.
 
 Since this module uses socket.io, you need to learn it before you can fully 
@@ -30,10 +30,10 @@ export default class extends WebSocketController {
 
 ## Relations Between Event and Method
 
-When a method is decorated with `@event`, this method is bound to a certain 
-socket.io event. When a client emits data to this event, the method will be
-automatically called, and the returning value will be sent back to the client
-in proper forms.
+When a method is decorated with [@event](/api/v1/decorators#event), this method
+will be bound to a certain socket.io event. When a client emits data to this
+event, the method will be automatically called, and the returning value will be
+sent back to the client in proper forms.
 
 1. If the client specified a callback when sending the message, e.g.
     `emit(event, message, callback)`, then the return value will be sent to the
@@ -95,7 +95,8 @@ For more details, please check [Dependency Injection](./di3)
 
 ### Signature of the Constructor
 
-All WebSocketController constructors accept one argument: `socket: WebSocket`.
+All WebSocketController constructors accept one argument: `socket`
+[\<WebSocket\>](/api/v1/WebSocket).
 
 ```typescript
 import { WebSocketController, WebSocket } from "sfn";
@@ -111,8 +112,9 @@ export default class extends WebSocketController {
 
 ## Throw HttpException In the Controller
 
-Like in an HttpController, you can throw a `HttpException`, the framework will
-handle it properly, and sending error response automatically.
+Like in an HttpController, you can throw an
+[HttpException](/api/v1/HttpException), the framework will handle it properly,
+and sending error response automatically.
 
 ```typescript
 import { WebSocketController, HttpException, event } from "sfn";

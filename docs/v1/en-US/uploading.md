@@ -1,17 +1,13 @@
 <!-- title: Uploading; order: 12 -->
 ## Concept
 
-The `HttpController` provides a simple uploading method that let you upload 
-files via a POST request.
+The [HttpController](/api/v1/HttpController) provides a simple uploading method
+that let you upload files via a POST request.
 
 ## Example
 
-Uploading a file is just easy as you doing other stuffs in an **SFN** 
-application, you just need to configure some options, and the rest work will 
-be handled by the framework automatically.
-
-In an HttpController, use the decorator `@upload` to set accept fields that may
-contain files.
+In an HttpController, use the decorator [@upload](/api/v1/decorators#upload) to
+set accept fields that may contain files.
 
 ```typescript
 import { HttpController, Request, route, upload } from "sfn";
@@ -49,7 +45,8 @@ export default class extends HttpController {
 }
 ```
 
-The `uploadOptions` is an `UploadOptions`, which contains these properties:
+The `uploadOptions` is an [UploadOptions](/api/v1/HttpController#UploadOptions),
+which contains these properties:
 
 - `maxCount` Maximum number of files that each form field can carry (default:
      `1`).

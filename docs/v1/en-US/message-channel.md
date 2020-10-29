@@ -11,13 +11,15 @@ messages to browser clients via WebSocket, but the RPC server works in the
 background cannot communicate with clients directly.
 
 To solve the problem of inner-service communication, SFN integrated a
-massage channel, via a message queue named `MessageChannel`, the system can
-broadcast messages using a **pub-sub** model, and any service process subscribes
-the topic, the message can be received by its listeners.
+massage channel, via a message queue named
+[MessageChannel](/api/v1/MessageChannel), the system can broadcast messages
+using a **pub-sub** model, and any service process subscribes the topic, the
+message can be received by its listeners.
 
 By default, you don't have to create the instance of MessageChannel, SFN 
 exporting it is just for typing usage, to access the integrated message queue,
-you just need to use the `app.message` interface.
+you just need to use the [app.message](/api/v1/MessageChannel#app_message)
+interface.
 
 ### Publish Messages
 
@@ -44,9 +46,10 @@ must connect to rpc-server-1 in order to receive the `greeting` topic.
 
 # Push WebSocket Messages
 
-At the same time, SFN provides a WebSocket message mechanism (`app.message.ws`)
-based on MessageChannel, and packs it to the same methods as Socket.io provides,
-so the usage is pretty much about the same.
+At the same time, SFN provides a WebSocket message mechanism
+([app.message.ws](/api/v1/MessageChannel#app_message_ws)) based on
+MessageChannel, and packs it to the same methods as Socket.io provides, so the
+usage is pretty much about the same.
 
 ```typescript
 // Push WebSocket message through all front end web server
@@ -69,8 +72,9 @@ WebSocketController, please always push messages via `app.message.ws`.
 
 # Push SSE (Server-Sent Events) Messages
 
-Other than `app.message.ws`, SFN also provides `app.message.sse` to push SSE 
-messages across services, which has a similar usage, it provides methods
+Other than `app.message.ws`, SFN also provides
+[app.message.ws](/api/v1/MessageChannel#app_message_ws) to push SSE messages
+across services, which has a similar usage, it provides methods
 `send(data: any)`、`emit(event: string, data?: any)` and `close()` to push 
 messages and events.
 

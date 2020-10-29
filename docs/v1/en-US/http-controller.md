@@ -1,19 +1,18 @@
 <!-- title: HTTP Controller; order: 4 -->
 ## Concept
 
-`HttpController` manages requests come from an HTTP client. Essentially, it is a
-class inherited from [Service](./service), but unlike the singleton model of the
-service, Controllers are one-time products. An instance will be created when a
-request comes and will be destroyed after the request has gone. Therefore, the
-Controller overrides some methods from the base class to allow it fitting this
-special running model, in the meantime to keep the same development experience
-as ordinary services. 
+[HttpController](/api/v1/HttpController) manages requests come from an HTTP
+client. Essentially, it is a class inherited from [Service](/api/v1/service), but
+unlike the singleton model of the service, Controllers are one-time products.
+An instance will be created when a request comes and will be destroyed after the
+request has gone. Therefore, the Controller overrides some methods from the base
+class to allow it fitting this special running model, in the meantime to keep
+the same development experience as regular services. 
 
-## Usage Example
+## Example
 
-You just create a file in `src/controllers`, this file should export a
-default class that extends `HttpController`, and it will be auto-loaded when the 
-server starts.
+Just create a file in `src/controllers`, which should export a default class
+that extends `HttpController`, and it will be auto-loaded when the server starts.
 
 ```typescript
 import { HttpController, route } from "sfn";
@@ -28,10 +27,10 @@ export default class extends HttpController {
 
 ## Relations Between the Route and Method
 
-When a method is decorated with `@route`, this method is bound to a certain 
-URL route. When visiting a URL that matches the route, the method will be
-automatically called, and the returning value will be sent back to the client
-with proper forms.
+When a method is decorated with [@route](/api/v1/decorators#route), this method
+is bound to a certain URL route. When visiting a URL that matches the route, the
+method will be automatically called, and the returning value will be sent back
+to the client with proper forms.
 
 The decorator `route`, is a function, and an namespace. When calling as a 
 function, it accepts these forms:
@@ -139,8 +138,8 @@ bound to routes. Actually, you can do more, please have a look at
 
 ### Signature of the Constructor
 
-All HttpController constructors accept two arguments: `req: Request` and
-`res: Response`.
+All HttpController constructors accept two arguments: `req`
+[\<Request\>](/api/v1/Request) and `res` [\<Response\>](/api/v1/Response).
 
 ```typescript
 import { HttpController, Request, Response } from "sfn";
@@ -223,10 +222,10 @@ export default class extends HttpController {
 
 ## Throw HttpException In the Controller
 
-`HttpException` is a customized error class that safe to use when you're going
-to 
-response an HTTP error to the client. when a HttpException is thrown, the
-framework will handle it properly, and sending error response automatically.
+[HttpException](/api/v1/HttpException) is a customized error class that safe to
+use when you're going to response an HTTP error to the client. when an
+HttpException is thrown, the framework will handle it properly, and sending
+error response automatically.
 
 ```typescript
 import { HttpController, HttpException, route } from "sfn";
@@ -287,8 +286,9 @@ HttpController.httpErrorView = function (err, instance) {
 ## Common API Response
 
 Either in an HttpController or in a WebSocketController, you can always use 
-method `success()` and method `fail()` to send a structured response that 
-indicates a successful or failed operation.
+method [success()](/api/v1/Controller#success) and method
+[fail()](/api/v1/Controller#fail) to send a structured response that indicates
+a successful or failed operation.
 
 ```typescript
 import { HttpController, route } from "sfn";
