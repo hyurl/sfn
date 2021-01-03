@@ -1,10 +1,12 @@
 {
     "name": "sfn",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.1",
     "description": "An easy and elegant distributed service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",
-    "bin": "dist/cli/sfn.js",
+    "bin": {
+        "sfn": "dist/cli/sfn.js"
+    },
     "scripts": {
         "compile": "tsc --incremental",
         "start": "node dist",

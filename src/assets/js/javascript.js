@@ -91,6 +91,7 @@ $.fn.typeIn = function (speed, placeholder, callback) {
 };
 
 $(function () {
+    /** @type {string} */
     var lang = QueryString.parse(location.search).lang || navigator.language,
         navbar = $(".navbar>ul"),
         sidebar = $(".sidebar"),
@@ -149,7 +150,7 @@ $(function () {
 
                     $(this).attr("href", href);
                 }
-            })
+            });
         }
     };
 
@@ -178,8 +179,8 @@ $(function () {
     });
 
     //Show ICP in china area.
-    if (lang == 'zh-CN') {
-        $("#icp").show();
+    if (!lang.startsWith("zh")) {
+        $("#icp").hide();
     }
 
     var command = $(".command>pre"),

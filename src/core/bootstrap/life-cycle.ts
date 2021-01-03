@@ -36,7 +36,7 @@ app.hooks.lifeCycle.shutdown.bind(async () => {
     let closures: Promise<any>[] = [];
 
     if (app.http) { // close HTTP server
-        closures.push(new Promise(resolve => {
+        closures.push(new Promise<void>(resolve => {
             let timeout = setTimeout(resolve, 2000);
             app.http.close(() => {
                 clearTimeout(timeout);
@@ -46,12 +46,12 @@ app.hooks.lifeCycle.shutdown.bind(async () => {
 
         // close SSE connections.
         app.sse.forEach(sse => {
-            closures.push(new Promise(resolve => sse.close(resolve)));
+            closures.push(new Promise<void>(resolve => sse.close(resolve)));
         });
     }
 
     if (app.ws) { // close WebSocket server
-        closures.push(new Promise(resolve => {
+        closures.push(new Promise<void>(resolve => {
             let timeout = setTimeout(resolve, 2000);
             app.ws.close(() => {
                 clearTimeout(timeout);

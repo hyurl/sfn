@@ -137,7 +137,7 @@ app.serve = async function serve(id?: string) {
     await app.hooks.lifeCycle.startup.invoke(); // invoke start-up hooks.
 
     // serve HTTP server
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
         http.on("error", (err: Error) => {
             console.error(red`${err.toString()}`);
 
