@@ -86,12 +86,10 @@ export function getRouteHandler(key: string): RouteHandler {
             }
 
             if (initiated) {
-                if (!res.sent) {
-                    if (req.isEventSource) {
-                        res.sse.close();
-                    } else {
-                        res.end();
-                    }
+                if (req.isEventSource && !res.headersSent) {
+                    res.sse.close();
+                } else if (!res.sent) {
+                    res.end();
                 }
 
                 await ctrl.destroy?.();
@@ -234,7 +232,7 @@ async function handleIteratorResponse(
 
         if (done) {
             break;
-        } else if (!isVoid(value)) {
+        } else if (isVoid(value)) {
             continue;
         } else if (req.isEventSource) {
             sse.send(value);

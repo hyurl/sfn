@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "description": "An easy and elegant distributed service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",
@@ -85,7 +85,7 @@
         "reflect-metadata": "^0.1.13",
         "serve-static": "^1.14.1",
         "sfn-cors": "^0.1.6",
-        "sfn-sse": "^0.3.5",
+        "sfn-sse": "^0.3.6",
         "sfn-xss": "^0.1.1",
         "sift": "^12.0.1",
         "socket.io": "^2.3.0",
@@ -109,7 +109,7 @@
         "comment-meta": "^0.1.1",
         "highlight.js": "^9.18.3",
         "marked": "^0.8.2",
-        "outlining": "^0.1.2",
+        "outlining": "^0.1.1",
         "session-file-store": "^1.5.0",
         "sfn-logger": "^0.5.3",
         "sfn-mail": "^0.2.1"
