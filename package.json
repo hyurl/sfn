@@ -1,6 +1,6 @@
 {
     "name": "sfn",
-    "version": "1.0.0-alpha.2",
+    "version": "1.0.0-alpha.3",
     "description": "An easy and elegant distributed service framework for Node.js",
     "main": "index.js",
     "types": "src/index.ts",
@@ -92,7 +92,7 @@
         "source-map-support": "^0.5.19",
         "thenable-generator": "^0.4.0",
         "tslib": "^2.0.3",
-        "webium": "^0.6.2",
+        "webium": "^0.6.4",
         "xml2js": "^0.4.23"
     },
     "devDependencies": {
