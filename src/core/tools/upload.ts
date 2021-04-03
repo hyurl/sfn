@@ -4,7 +4,7 @@ import * as multer from "multer";
 import * as moment from "moment";
 import idealFilename from "ideal-filename";
 import randStr from "@hyurl/utils/randStr";
-import { interceptAsync } from "function-intercepter";
+import { interceptAsync } from "function-intercept";
 import { ROOT_PATH } from "../../init";
 import { HttpDecorator } from "./decorators";
 import { HttpController } from "../controllers/HttpController";

@@ -46,12 +46,12 @@ export default class extends Mixed(HttpController, CheckUserState) {
 ## 面向切面编程
 
 **AOP** 是一个 SFN 应用中非常重要的部分，并且它非常易于实现。要使用这个特性，你只需要
-安装另一个名为 [function-intercepter](https://github.com/hyurl/function-intercepter)
+安装另一个名为 [function-intercept](https://github.com/hyurl/function-intercept)
 的模块，你应该查看它的文档以便了解更多特性。
 
 ```typescript
 import { HttpController, before, after } from "sfn";
-import { interceptAsync } from "function-intercepter";
+import { interceptAsync } from "function-intercept";
 
 export default class MyController extends HttpController {
     private loggedIn: boolean;
@@ -78,7 +78,7 @@ export default class MyController extends HttpController {
 
 ```typescript
 import { HttpController } from "sfn";
-import { interceptAsync } from "function-intercepter";
+import { interceptAsync } from "function-intercept";
 
 export function checkLogin(this: HttpController) {
     // ...

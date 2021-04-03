@@ -8,11 +8,11 @@ that suits for many scenarios and you don't have to expand your class.
 
 **AOP** is an important part in an SFN application, an it is very easy to 
 achieve. To use this feature, you just need to install another package named 
-[function-intercepter](https://github.com/hyurl/function-intercepter).
+[function-intercept](https://github.com/hyurl/function-intercept).
 
 ```typescript
 import { HttpController, before, after } from "sfn";
-import { interceptAsync } from "function-intercepter";
+import { interceptAsync } from "function-intercept";
 
 export default class MyController extends HttpController {
     private loggedIn: boolean;
@@ -40,7 +40,7 @@ function that can be reused in many scenarios.
 
 ```typescript
 import { HttpController } from "sfn";
-import { interceptAsync } from "function-intercepter";
+import { interceptAsync } from "function-intercept";
 
 export function checkLogin(this: HttpController) {
     // ...

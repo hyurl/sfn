@@ -9,7 +9,7 @@ export const activeEvent = Symbol("activeEvent");
  * When you define a method in a WebSocketController and bind it to a certain 
  * socket.io event, it will be called automatically when the event fires.
  */
-export abstract class WebSocketController extends Controller {
+export class WebSocketController extends Controller {
     /** Sets a specified namespace for WebSocket channel (used by SocketIO). */
     static nsp: string = "/";
 

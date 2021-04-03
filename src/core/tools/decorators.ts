@@ -1,5 +1,5 @@
 import { App, RouteHandler, HttpMethods } from "webium";
-import { interceptAsync, intercept } from 'function-intercepter';
+import { interceptAsync, intercept } from 'function-intercept';
 import { HttpController } from "../controllers/HttpController";
 import { WebSocketController } from "../controllers/WebSocketController";
 import { HttpException } from './HttpException';

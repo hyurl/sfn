@@ -1,5 +1,5 @@
 import * as ExpressSession from "express-session";
-import { intercept } from "function-intercepter";
+import { intercept } from "function-intercept";
 import { router } from "../bootstrap/index";
 import { Response } from "../tools/interfaces";
 

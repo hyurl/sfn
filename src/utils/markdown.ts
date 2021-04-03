@@ -41,7 +41,10 @@ export default class MarkdownUtil {
         // Render markdown codes to be highlighted.
         this.renderer.code = (code, lang) => {
             try {
-                code = hljs.highlight(lang, code, true).value;
+                code = hljs.highlight(code, {
+                    language: lang,
+                    ignoreIllegals: true,
+                }).value;
             } catch (e) { }
             return `<pre><code class="lang-${lang} hljs">${code}</code></pre>\n`;
         };

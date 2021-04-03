@@ -16,7 +16,7 @@ export { CorsOptions };
  * When a request fires, the controller will be automatically instantiated and
  * calling the bound method according to the route.
  */
-export abstract class HttpController extends Controller {
+export class HttpController extends Controller {
     /** Sets a specified base URI for route paths. */
     static baseURI: string = "/";
 

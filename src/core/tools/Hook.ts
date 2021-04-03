@@ -1,7 +1,7 @@
 import { normalize, extname } from 'path';
 import { watch } from "chokidar";
 import { applyMagic } from 'js-magic';
-import { interceptAsync } from 'function-intercepter';
+import { interceptAsync } from 'function-intercept';
 import { createImport, traceModulePath } from './internal/module';
 
 const tryImport = createImport(require);
