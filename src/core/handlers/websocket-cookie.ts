@@ -4,7 +4,7 @@ import { WebSocket } from "../tools/interfaces";
 const parse = cookieParser(app.config.session?.secret || void 0);
 
 export default function (socket: WebSocket, next: (err?: Error) => void) {
-    parse(<any>socket.handshake, <any>{}, next);
+    parse(<any>socket.handshake, <any>{}, next as any);
 }
 
 export function handler2(socket: WebSocket, next: (err?: Error) => void) {

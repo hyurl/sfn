@@ -14,7 +14,7 @@ export interface View {
     render(data?: { [name: string]: any; }): string | Promise<string>;
 }
 
-export interface Session extends ExpressSession.Session {
+export interface Session extends Express.Session {
     /**
      * This property stores all CSRF tokens of the current session, tokens will
      * be deleted automatically after the validation is finished.

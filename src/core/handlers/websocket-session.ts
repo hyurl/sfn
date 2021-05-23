@@ -26,7 +26,9 @@ export function handler2(socket: WebSocket, next: (err?: Error) => void) {
 
     // save session to store when the socket is closed.
     socket.on("disconnected", () => {
-        socket.session.save(() => { });
+        if (typeof socket.session?.["save"] === "function") {
+            socket.session["save"](() => { });
+        }
     });
 
     next();
