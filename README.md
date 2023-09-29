@@ -7,7 +7,7 @@
 * [TypeScript](https://typescriptlang.org "SFN always ships with the latest features, make sure your TypeScript compiler is the newest version")
 * [MIT License](https://opensource.org/licenses/MIT "SFN is licensed under the MIT license, you're free to use")
 
-For documentation, please visit [sfnjs.com](https://sfnjs.com).
+For documentation, please go to the [Wiki](https://github.com/hyurl/sfn/wiki).
 
 ## Easy and Elegant
 
